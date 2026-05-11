@@ -1,0 +1,227 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  full_name             String
+  email                 String    @unique
+  phone_number          String?   @unique
+  password_hash         String
+  profile_image         String?
+  role_id               String
+  role                  Role      @relation(fields: [role_id], references: [id])
+  email_verified        Boolean   @default(false)
+  phone_verified        Boolean   @default(false)
+  account_status        String    @default("ACTIVE") // ACTIVE, INACTIVE, LOCKED, DELETED
+  last_login_at         DateTime?
+  failed_login_attempts Int       @default(0)
+  locked_until          DateTime?
+  
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  deleted_at            DateTime?
+  created_by            String?
+  updated_by            String?
+
+  sessions              UserSession[]
+  refresh_tokens        RefreshToken[]
+  otps                  OtpVerification[]
+  password_resets       PasswordReset[]
+  activity_logs         ActivityLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  permissions RolePermission[]
+  users       User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  role_id       String
+  permission_id String
+  role          Role       @relation(fields: [role_id], references: [id])
+  permission    Permission @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  token_hash  String
+  expires_at  DateTime
+  created_at  DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model UserSession {
+  id                String    @id @default(uuid())
+  user_id           String
+  user              User      @relation(fields: [user_id], references: [id])
+  refresh_token_hash String
+  ip_address        String?
+  device_name       String?
+  browser           String?
+  operating_system  String?
+  location          String?
+  expires_at        DateTime
+  revoked_at        DateTime?
+  created_at        DateTime  @default(now())
+
+  @@map("user_sessions")
+}
+
+model OtpVerification {
+  id          String    @id @default(uuid())
+  user_id     String
+  user        User      @relation(fields: [user_id], references: [id])
+  otp_code    String
+  type        String    // EMAIL_VERIFICATION, PHONE_VERIFICATION, LOGIN_OTP, PASSWORD_RESET
+  expires_at  DateTime
+  verified_at DateTime?
+  created_at  DateTime  @default(now())
+
+  @@map("otp_verifications")
+}
+
+model PasswordReset {
+  id          String    @id @default(uuid())
+  user_id     String
+  user        User      @relation(fields: [user_id], references: [id])
+  token_hash  String
+  expires_at  DateTime
+  used_at     DateTime?
+  created_at  DateTime  @default(now())
+
+  @@map("password_resets")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  action      String
+  description String?
+  ip_address  String?
+  device_name String?
+  created_at  DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+// Business Models
+
+model Mill {
+  id          String    @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  status      String    @default("ACTIVE")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("mills")
+}
+
+model ProductService {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  category    String?
+  price       Decimal   @default(0)
+  status      String    @default("ACTIVE")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("product_services")
+}
+
+model Technician {
+  id          String    @id @default(uuid())
+  full_name   String
+  email       String?   @unique
+  phone       String?   @unique
+  status      String    @default("AVAILABLE") // AVAILABLE, ON_LEAVE, BUSY, INACTIVE
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("technicians")
+}
+
+model ServiceRecord {
+  id            String    @id @default(uuid())
+  mill_id       String
+  technician_id String
+  service_id    String
+  visit_date    DateTime
+  notes         String?
+  status        String    @default("COMPLETED")
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  @@map("service_records")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  title       String
+  message     String
+  type        String    // PUSH, EMAIL, SMS, ANNOUNCEMENT
+  status      String    @default("PENDING")
+  created_at  DateTime  @default(now())
+
+  @@map("notifications")
+}
+
+model SupportTicket {
+  id          String    @id @default(uuid())
+  user_id     String
+  subject     String
+  description String
+  status      String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, ESCALATED
+  priority    String    @default("MEDIUM")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@map("support_tickets")
+}
+
+model Setting {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  value       String
+  group       String    // GENERAL, APP, PAYMENT, NOTIFICATION, SECURITY
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@map("settings")
+}
