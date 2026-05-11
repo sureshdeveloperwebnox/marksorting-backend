@@ -10,6 +10,11 @@ export class RedisService extends Redis implements OnModuleDestroy {
       port: configService.get<number>('redis.port') || 6379,
       password: configService.get<string>('redis.password'),
     });
+
+    this.on('error', (err) => {
+      // Log the error but don't crash
+      console.error('Redis Connection Error:', err.message);
+    });
   }
 
   onModuleDestroy() {
