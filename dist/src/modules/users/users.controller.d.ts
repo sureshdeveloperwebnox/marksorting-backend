@@ -1,22 +1,12 @@
-import { PrismaService } from '../../prisma/prisma.service';
-import { RedisService } from '../../redis/redis.service';
-import { Prisma } from '@prisma/client';
+import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-export declare class UsersService {
-    private prisma;
-    private redis;
-    private readonly CACHE_PREFIX;
-    private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService);
-    findAll(params: {
-        skip?: number;
-        take?: number;
-        where?: Prisma.UserWhereInput;
-        orderBy?: Prisma.UserOrderByWithRelationInput;
-    }): Promise<any>;
-    findByEmail(email: string): Promise<any>;
-    findById(id: string): Promise<any>;
+export declare class UsersController {
+    private readonly usersService;
+    constructor(usersService: UsersService);
+    getRoles(): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
+    findOne(id: string): Promise<any>;
     create(dto: CreateUserDto): Promise<{
         role: {
             id: string;
@@ -89,6 +79,4 @@ export declare class UsersService {
         created_by: string | null;
         updated_by: string | null;
     }>;
-    getRoles(): Promise<any>;
-    private invalidateCache;
 }

@@ -23,9 +23,31 @@ let RedisService = class RedisService extends ioredis_1.default {
             port: configService.get('redis.port') || 6379,
             password: configService.get('redis.password'),
         });
+        this.on('error', (err) => {
+            console.error('Redis Connection Error:', err.message);
+        });
     }
     onModuleDestroy() {
         this.disconnect();
+    }
+    async getJson(key) {
+        const data = await this.get(key);
+        return data ? JSON.parse(data) : null;
+    }
+    async setJson(key, value, ttl) {
+        const data = JSON.stringify(value);
+        if (ttl) {
+            await this.set(key, data, 'EX', ttl);
+        }
+        else {
+            await this.set(key, data);
+        }
+    }
+    async delByPrefix(prefix) {
+        const keys = await this.keys(`${prefix}*`);
+        if (keys.length > 0) {
+            await this.del(...keys);
+        }
     }
 };
 exports.RedisService = RedisService;

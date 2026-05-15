@@ -1,7 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -71,9 +74,22 @@ export class UsersService {
     return user;
   }
 
-  async create(data: Prisma.UserCreateInput) {
+  async create(dto: CreateUserDto) {
+    const { password, ...data } = dto;
+    
+    // Check if email already exists
+    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const password_hash = await bcrypt.hash(password, 10);
+    
     const user = await this.prisma.user.create({
-      data,
+      data: {
+        ...data,
+        password_hash,
+      },
       include: { role: true },
     });
     
@@ -81,10 +97,17 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput) {
+  async update(id: string, dto: UpdateUserDto) {
+    const { password, ...data } = dto;
+    
+    const updateData: any = { ...data };
+    if (password) {
+      updateData.password_hash = await bcrypt.hash(password, 10);
+    }
+
     const user = await this.prisma.user.update({
       where: { id },
-      data,
+      data: updateData,
       include: { role: true },
     });
 
@@ -102,10 +125,21 @@ export class UsersService {
     return user;
   }
 
+  async getRoles() {
+    const cacheKey = 'users:roles';
+    const cached = await this.redis.getJson<any>(cacheKey);
+    if (cached) return cached;
+
+    const roles = await this.prisma.role.findMany();
+    await this.redis.setJson(cacheKey, roles, 3600);
+    return roles;
+  }
+
   private async invalidateCache(id?: string, email?: string) {
     const promises: Promise<any>[] = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
     if (id) promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
     if (email) promises.push(this.redis.del(`${this.CACHE_PREFIX}email:${email}`));
+    promises.push(this.redis.del('users:roles'));
     await Promise.all(promises);
   }
 }

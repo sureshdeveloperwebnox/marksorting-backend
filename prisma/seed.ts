@@ -39,7 +39,16 @@ async function main() {
     },
   });
 
-  // Assign Permissions to Role
+  const userRole = await prisma.role.upsert({
+    where: { name: 'USER' },
+    update: {},
+    create: {
+      name: 'USER',
+      description: 'Standard user with limited access',
+    },
+  });
+
+  // Assign All Permissions to Admin Role
   for (const p of permissions) {
     await prisma.rolePermission.upsert({
       where: {
@@ -51,6 +60,24 @@ async function main() {
       update: {},
       create: {
         role_id: adminRole.id,
+        permission_id: p.id,
+      },
+    });
+  }
+
+  // Assign Limited Permissions to User Role (e.g., viewing reports only)
+  const userPermissions = permissions.filter(p => p.name === 'reports.view');
+  for (const p of userPermissions) {
+    await prisma.rolePermission.upsert({
+      where: {
+        role_id_permission_id: {
+          role_id: userRole.id,
+          permission_id: p.id,
+        },
+      },
+      update: {},
+      create: {
+        role_id: userRole.id,
         permission_id: p.id,
       },
     });

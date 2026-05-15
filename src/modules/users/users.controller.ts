@@ -9,14 +9,25 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { Prisma } from '@prisma/client';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
+  @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get('meta/roles')
+  @ApiOperation({ summary: 'Get all user roles' })
+  getRoles() {
+    return this.usersService.getRoles();
+  }
+
   @Get()
+  @ApiOperation({ summary: 'Get all users with pagination and filtering' })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -45,21 +56,25 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get user by ID' })
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);
   }
 
   @Post()
-  create(@Body() data: Prisma.UserCreateInput) {
-    return this.usersService.create(data);
+  @ApiOperation({ summary: 'Create new user' })
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() data: Prisma.UserUpdateInput) {
-    return this.usersService.update(id, data);
+  @ApiOperation({ summary: 'Update existing user' })
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Soft delete user' })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

@@ -37,7 +37,7 @@ const client_1 = require("@prisma/client");
 const adapter_pg_1 = require("@prisma/adapter-pg");
 const pg_1 = require("pg");
 const bcrypt = __importStar(require("bcrypt"));
-const pool = new pg_1.Pool({ connectionString: process.env.DIRECT_URL });
+const pool = new pg_1.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
@@ -67,6 +67,14 @@ async function main() {
             description: 'Super administrator with all permissions',
         },
     });
+    const userRole = await prisma.role.upsert({
+        where: { name: 'USER' },
+        update: {},
+        create: {
+            name: 'USER',
+            description: 'Standard user with limited access',
+        },
+    });
     for (const p of permissions) {
         await prisma.rolePermission.upsert({
             where: {
@@ -78,6 +86,22 @@ async function main() {
             update: {},
             create: {
                 role_id: adminRole.id,
+                permission_id: p.id,
+            },
+        });
+    }
+    const userPermissions = permissions.filter(p => p.name === 'reports.view');
+    for (const p of userPermissions) {
+        await prisma.rolePermission.upsert({
+            where: {
+                role_id_permission_id: {
+                    role_id: userRole.id,
+                    permission_id: p.id,
+                },
+            },
+            update: {},
+            create: {
+                role_id: userRole.id,
                 permission_id: p.id,
             },
         });
