@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
+import { S3Service } from '../../shared/services/s3.service';
 
 @Injectable()
 export class UsersService {
@@ -14,6 +15,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private s3Service: S3Service,
   ) {}
 
   async findAll(params: {
@@ -41,7 +43,10 @@ export class UsersService {
       this.prisma.user.count({ where: { ...where, deleted_at: null } }),
     ]);
 
-    const result = { users, total };
+    const result = { 
+      users: users.map(u => this.formatUser(u)), 
+      total 
+    };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
   }
@@ -55,9 +60,10 @@ export class UsersService {
       where: { email },
       include: { role: { include: { permissions: { include: { permission: true } } } } },
     });
-
-    if (user) await this.redis.setJson(cacheKey, user, 3600);
-    return user;
+    
+    const formattedUser = user ? this.formatUser(user) : null;
+    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
+    return formattedUser;
   }
 
   async findById(id: string) {
@@ -69,13 +75,19 @@ export class UsersService {
       where: { id },
       include: { role: { include: { permissions: { include: { permission: true } } } } },
     });
-
-    if (user) await this.redis.setJson(cacheKey, user, 3600);
-    return user;
+ 
+    const formattedUser = user ? this.formatUser(user) : null;
+    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
+    return formattedUser;
   }
 
   async create(dto: CreateUserDto) {
     const { password, ...data } = dto;
+    
+    // Handle empty phone number
+    if (data.phone_number === '') {
+      (data as any).phone_number = null;
+    }
     
     // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
@@ -94,13 +106,16 @@ export class UsersService {
     });
     
     await this.invalidateCache();
-    return user;
+    return this.formatUser(user);
   }
 
   async update(id: string, dto: UpdateUserDto) {
     const { password, ...data } = dto;
     
     const updateData: any = { ...data };
+    if (updateData.phone_number === '') {
+      updateData.phone_number = null;
+    }
     if (password) {
       updateData.password_hash = await bcrypt.hash(password, 10);
     }
@@ -112,7 +127,7 @@ export class UsersService {
     });
 
     await this.invalidateCache(id, user.email);
-    return user;
+    return this.formatUser(user);
   }
 
   async remove(id: string) {
@@ -141,5 +156,13 @@ export class UsersService {
     if (email) promises.push(this.redis.del(`${this.CACHE_PREFIX}email:${email}`));
     promises.push(this.redis.del('users:roles'));
     await Promise.all(promises);
+  }
+
+  private formatUser(user: any) {
+    if (!user) return null;
+    return {
+      ...user,
+      profile_image_url: user.profile_image ? this.s3Service.getFileUrl(user.profile_image) : null,
+    };
   }
 }

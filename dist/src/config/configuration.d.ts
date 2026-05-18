@@ -14,5 +14,13 @@ declare const _default: () => {
         port: number;
         password: string | undefined;
     };
+    s3: {
+        folderName: string | undefined;
+        bucketName: string | undefined;
+        region: string | undefined;
+        accessKey: string | undefined;
+        secretAccessKey: string | undefined;
+        baseUrl: string | undefined;
+    };
 };
 export default _default;

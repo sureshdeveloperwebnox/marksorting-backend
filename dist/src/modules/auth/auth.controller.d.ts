@@ -11,6 +11,8 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
     register(registerDto: RegisterDto, res: express.Response): Promise<{
@@ -19,6 +21,8 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
     logout(req: any, res: express.Response): Promise<{
@@ -30,7 +34,9 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
-    getProfile(req: any): any;
+    getProfile(req: any): Promise<any>;
 }

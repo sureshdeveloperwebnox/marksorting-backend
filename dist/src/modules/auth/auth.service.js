@@ -92,9 +92,18 @@ let AuthService = class AuthService {
                 id: user.id,
                 email: user.email,
                 full_name: user.full_name,
-                role: user.role.name
+                role: user.role.name,
+                profile_image: user.profile_image,
+                profile_image_url: user.profile_image_url
             }
         };
+    }
+    async getProfile(userId) {
+        const user = await this.usersService.findById(userId);
+        if (!user) {
+            throw new common_1.UnauthorizedException('User not found');
+        }
+        return user;
     }
     async logout(userId) {
         await this.redisService.del(`refresh_token:${userId}`);
@@ -131,7 +140,9 @@ let AuthService = class AuthService {
                     id: user.id,
                     email: user.email,
                     full_name: user.full_name,
-                    role: user.role.name
+                    role: user.role.name,
+                    profile_image: user.profile_image,
+                    profile_image_url: user.profile_image_url
                 }
             };
         }

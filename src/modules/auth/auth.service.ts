@@ -52,9 +52,19 @@ export class AuthService {
         id: user.id,
         email: user.email,
         full_name: user.full_name,
-        role: user.role.name
+        role: user.role.name,
+        profile_image: user.profile_image,
+        profile_image_url: user.profile_image_url
       }
     };
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    return user;
   }
 
   async logout(userId: string) {
@@ -110,7 +120,9 @@ export class AuthService {
           id: user.id,
           email: user.email,
           full_name: user.full_name,
-          role: user.role.name
+          role: user.role.name,
+          profile_image: user.profile_image,
+          profile_image_url: user.profile_image_url
         }
       };
     } catch (e) {

@@ -17,6 +17,8 @@ export declare class AuthService {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
     login(user: any): Promise<{
@@ -27,8 +29,11 @@ export declare class AuthService {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
+    getProfile(userId: string): Promise<any>;
     logout(userId: string): Promise<void>;
     decodeToken(token: string): any;
     generateRefreshToken(userId: string): Promise<string>;
@@ -39,6 +44,8 @@ export declare class AuthService {
             email: any;
             full_name: any;
             role: any;
+            profile_image: any;
+            profile_image_url: any;
         };
     }>;
 }

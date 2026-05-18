@@ -47,14 +47,17 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const bcrypt = __importStar(require("bcrypt"));
+const s3_service_1 = require("../../shared/services/s3.service");
 let UsersService = class UsersService {
     prisma;
     redis;
+    s3Service;
     CACHE_PREFIX = 'user:';
     LIST_CACHE_KEY = 'users:list:';
-    constructor(prisma, redis) {
+    constructor(prisma, redis, s3Service) {
         this.prisma = prisma;
         this.redis = redis;
+        this.s3Service = s3Service;
     }
     async findAll(params) {
         const { skip, take, where, orderBy } = params;
@@ -72,7 +75,10 @@ let UsersService = class UsersService {
             }),
             this.prisma.user.count({ where: { ...where, deleted_at: null } }),
         ]);
-        const result = { users, total };
+        const result = {
+            users: users.map(u => this.formatUser(u)),
+            total
+        };
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
@@ -85,9 +91,10 @@ let UsersService = class UsersService {
             where: { email },
             include: { role: { include: { permissions: { include: { permission: true } } } } },
         });
-        if (user)
-            await this.redis.setJson(cacheKey, user, 3600);
-        return user;
+        const formattedUser = user ? this.formatUser(user) : null;
+        if (formattedUser)
+            await this.redis.setJson(cacheKey, formattedUser, 3600);
+        return formattedUser;
     }
     async findById(id) {
         const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
@@ -98,12 +105,16 @@ let UsersService = class UsersService {
             where: { id },
             include: { role: { include: { permissions: { include: { permission: true } } } } },
         });
-        if (user)
-            await this.redis.setJson(cacheKey, user, 3600);
-        return user;
+        const formattedUser = user ? this.formatUser(user) : null;
+        if (formattedUser)
+            await this.redis.setJson(cacheKey, formattedUser, 3600);
+        return formattedUser;
     }
     async create(dto) {
         const { password, ...data } = dto;
+        if (data.phone_number === '') {
+            data.phone_number = null;
+        }
         const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
         if (existingUser) {
             throw new common_1.ConflictException('User with this email already exists');
@@ -117,11 +128,14 @@ let UsersService = class UsersService {
             include: { role: true },
         });
         await this.invalidateCache();
-        return user;
+        return this.formatUser(user);
     }
     async update(id, dto) {
         const { password, ...data } = dto;
         const updateData = { ...data };
+        if (updateData.phone_number === '') {
+            updateData.phone_number = null;
+        }
         if (password) {
             updateData.password_hash = await bcrypt.hash(password, 10);
         }
@@ -131,7 +145,7 @@ let UsersService = class UsersService {
             include: { role: true },
         });
         await this.invalidateCache(id, user.email);
-        return user;
+        return this.formatUser(user);
     }
     async remove(id) {
         const user = await this.prisma.user.update({
@@ -159,11 +173,20 @@ let UsersService = class UsersService {
         promises.push(this.redis.del('users:roles'));
         await Promise.all(promises);
     }
+    formatUser(user) {
+        if (!user)
+            return null;
+        return {
+            ...user,
+            profile_image_url: user.profile_image ? this.s3Service.getFileUrl(user.profile_image) : null,
+        };
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        s3_service_1.S3Service])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map

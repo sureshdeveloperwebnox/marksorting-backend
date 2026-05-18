@@ -60,18 +60,23 @@ let AuthController = class AuthController {
         this.authService = authService;
     }
     setTokens(res, result) {
+        const isProduction = process.env.NODE_ENV === 'production';
         res.cookie('access_token', result.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: isProduction,
+            sameSite: 'lax',
             maxAge: 15 * 60 * 1000,
+            path: '/',
         });
-        res.cookie('refresh_token', result.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        if (result.refresh_token) {
+            res.cookie('refresh_token', result.refresh_token, {
+                httpOnly: true,
+                secure: isProduction,
+                sameSite: 'lax',
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+                path: '/',
+            });
+        }
     }
     async login(req, res) {
         const result = await this.authService.login(req.user);
@@ -96,8 +101,8 @@ let AuthController = class AuthController {
         }
         catch (e) {
         }
-        res.clearCookie('access_token');
-        res.clearCookie('refresh_token');
+        res.clearCookie('access_token', { path: '/' });
+        res.clearCookie('refresh_token', { path: '/' });
         return { message: 'Logged out successfully' };
     }
     async refresh(req, res) {
@@ -106,16 +111,11 @@ let AuthController = class AuthController {
             throw new common_1.UnauthorizedException('Refresh token not found');
         }
         const result = await this.authService.refresh(refreshToken);
-        res.cookie('access_token', result.access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            maxAge: 15 * 60 * 1000,
-        });
+        this.setTokens(res, result);
         return { user: result.user };
     }
-    getProfile(req) {
-        return req.user;
+    async getProfile(req) {
+        return this.authService.getProfile(req.user.userId);
     }
 };
 exports.AuthController = AuthController;
@@ -165,7 +165,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
