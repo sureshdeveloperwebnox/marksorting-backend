@@ -11,12 +11,12 @@ export declare class UsersController {
     update(id: string, dto: UpdateUserDto): Promise<any>;
     remove(id: string): Promise<{
         id: string;
-        full_name: string;
+        role_id: string;
         email: string;
         phone_number: string | null;
+        full_name: string;
         password_hash: string;
         profile_image: string | null;
-        role_id: string;
         email_verified: boolean;
         phone_verified: boolean;
         account_status: string;

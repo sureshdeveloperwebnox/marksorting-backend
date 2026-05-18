@@ -37,10 +37,21 @@ export class UsersController {
     const where: Prisma.UserWhereInput = {};
     
     if (search) {
-      where.OR = [
+      const orConditions: Prisma.UserWhereInput[] = [
         { full_name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
+        { role: { name: { contains: search, mode: 'insensitive' } } },
       ];
+
+      // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
+      const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
+      if (cleanedPhoneSearch && cleanedPhoneSearch !== '+') {
+        orConditions.push({
+          phone_number: { contains: cleanedPhoneSearch, mode: 'insensitive' },
+        });
+      }
+
+      where.OR = orConditions;
     }
     
     if (status) {
