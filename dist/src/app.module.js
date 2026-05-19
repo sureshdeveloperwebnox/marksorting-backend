@@ -20,6 +20,7 @@ const prisma_module_1 = require("./prisma/prisma.module");
 const redis_module_1 = require("./redis/redis.module");
 const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
+const mills_module_1 = require("./modules/mills/mills.module");
 const shared_module_1 = require("./shared/shared.module");
 const upload_module_1 = require("./modules/upload/upload.module");
 let AppModule = class AppModule {
@@ -54,6 +55,7 @@ exports.AppModule = AppModule = __decorate([
             redis_module_1.RedisModule,
             auth_module_1.AuthModule,
             users_module_1.UsersModule,
+            mills_module_1.MillsModule,
             shared_module_1.SharedModule,
             upload_module_1.UploadModule,
         ],
