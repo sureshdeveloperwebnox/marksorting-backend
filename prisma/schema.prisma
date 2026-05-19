@@ -14,6 +14,7 @@ model User {
   phone_number          String?   @unique
   password_hash         String
   profile_image         String?
+  background_image      String?
   role_id               String
   role                  Role      @relation(fields: [role_id], references: [id])
   email_verified        Boolean   @default(false)

@@ -6,4 +6,5 @@ export declare class CreateUserDto {
     role_id: string;
     account_status?: string;
     profile_image?: string;
+    background_image?: string;
 }

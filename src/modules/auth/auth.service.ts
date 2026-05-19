@@ -54,7 +54,9 @@ export class AuthService {
         full_name: user.full_name,
         role: user.role.name,
         profile_image: user.profile_image,
-        profile_image_url: user.profile_image_url
+        profile_image_url: user.profile_image_url,
+        background_image: user.background_image,
+        background_image_url: user.background_image_url
       }
     };
   }
@@ -122,7 +124,9 @@ export class AuthService {
           full_name: user.full_name,
           role: user.role.name,
           profile_image: user.profile_image,
-          profile_image_url: user.profile_image_url
+          profile_image_url: user.profile_image_url,
+          background_image: user.background_image,
+          background_image_url: user.background_image_url
         }
       };
     } catch (e) {

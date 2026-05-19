@@ -37,4 +37,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   profile_image?: string;
+
+  @ApiProperty({ example: 'https://example.com/bg.jpg', required: false })
+  @IsString()
+  @IsOptional()
+  background_image?: string;
 }

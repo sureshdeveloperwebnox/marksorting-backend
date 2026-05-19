@@ -19,6 +19,8 @@ export declare class AuthService {
             role: any;
             profile_image: any;
             profile_image_url: any;
+            background_image: any;
+            background_image_url: any;
         };
     }>;
     login(user: any): Promise<{
@@ -31,6 +33,8 @@ export declare class AuthService {
             role: any;
             profile_image: any;
             profile_image_url: any;
+            background_image: any;
+            background_image_url: any;
         };
     }>;
     getProfile(userId: string): Promise<any>;
@@ -46,6 +50,8 @@ export declare class AuthService {
             role: any;
             profile_image: any;
             profile_image_url: any;
+            background_image: any;
+            background_image_url: any;
         };
     }>;
 }

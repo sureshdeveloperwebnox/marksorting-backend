@@ -163,6 +163,7 @@ export class UsersService {
     return {
       ...user,
       profile_image_url: user.profile_image ? this.s3Service.getFileUrl(user.profile_image) : null,
+      background_image_url: user.background_image ? this.s3Service.getFileUrl(user.background_image) : null,
     };
   }
 }

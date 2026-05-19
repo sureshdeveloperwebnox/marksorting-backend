@@ -20,6 +20,7 @@ class CreateUserDto {
     role_id;
     account_status;
     profile_image;
+    background_image;
 }
 exports.CreateUserDto = CreateUserDto;
 __decorate([
@@ -65,4 +66,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "profile_image", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'https://example.com/bg.jpg', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateUserDto.prototype, "background_image", void 0);
 //# sourceMappingURL=create-user.dto.js.map
