@@ -20,34 +20,34 @@ export declare class MillsService {
         id: string;
         name: string;
         email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        phone: string | null;
+        address: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
         id: string;
         name: string;
         email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        phone: string | null;
+        address: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
         name: string;
         email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        phone: string | null;
+        address: string | null;
     }>;
     private invalidateCache;
 }
