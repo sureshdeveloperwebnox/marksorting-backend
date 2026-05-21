@@ -153,6 +153,18 @@ model Mill {
   @@map("mills")
 }
 
+model ServiceCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  status      String    @default("ACTIVE")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  @@map("service_categories")
+}
+
 model Customer {
   id          String    @id @default(uuid())
   name        String

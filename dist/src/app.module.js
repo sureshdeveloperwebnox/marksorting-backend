@@ -22,6 +22,7 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
 const roles_module_1 = require("./modules/roles/roles.module");
 const mills_module_1 = require("./modules/mills/mills.module");
+const service_categories_module_1 = require("./modules/service-categories/service-categories.module");
 const customers_module_1 = require("./modules/customers/customers.module");
 const shared_module_1 = require("./shared/shared.module");
 const upload_module_1 = require("./modules/upload/upload.module");
@@ -59,6 +60,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             roles_module_1.RolesModule,
             mills_module_1.MillsModule,
+            service_categories_module_1.ServiceCategoriesModule,
             customers_module_1.CustomersModule,
             shared_module_1.SharedModule,
             upload_module_1.UploadModule,

@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { MillsModule } from './modules/mills/mills.module';
+import { ServiceCategoriesModule } from './modules/service-categories/service-categories.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { SharedModule } from './shared/shared.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -44,6 +45,7 @@ import { UploadModule } from './modules/upload/upload.module';
     UsersModule,
     RolesModule,
     MillsModule,
+    ServiceCategoriesModule,
     CustomersModule,
     SharedModule,
     UploadModule,
