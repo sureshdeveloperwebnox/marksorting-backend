@@ -140,17 +140,31 @@ model ActivityLog {
 // Business Models
 
 model Mill {
+  id          String     @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  address     String?
+  status      String     @default("ACTIVE")
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+  deleted_at  DateTime?
+
+  @@map("mills")
+}
+
+model Customer {
   id          String    @id @default(uuid())
   name        String
   email       String?
   phone       String?
   address     String?
-  status      String    @default("ACTIVE")
+  status      String    @default("ACTIVE") // ACTIVE, INACTIVE
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
 
-  @@map("mills")
+  @@map("customers")
 }
 
 model ProductService {
