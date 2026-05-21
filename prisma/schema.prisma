@@ -46,6 +46,9 @@ model Role {
   permissions RolePermission[]
   users       User[]
 
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
   @@map("roles")
 }
 

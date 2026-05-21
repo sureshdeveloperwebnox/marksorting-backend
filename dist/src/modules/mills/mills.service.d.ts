@@ -19,9 +19,9 @@ export declare class MillsService {
     create(dto: CreateMillDto): Promise<{
         id: string;
         name: string;
-        email: string | null;
         created_at: Date;
         updated_at: Date;
+        email: string | null;
         deleted_at: Date | null;
         status: string;
         phone: string | null;
@@ -30,9 +30,9 @@ export declare class MillsService {
     update(id: string, dto: UpdateMillDto): Promise<{
         id: string;
         name: string;
-        email: string | null;
         created_at: Date;
         updated_at: Date;
+        email: string | null;
         deleted_at: Date | null;
         status: string;
         phone: string | null;
@@ -41,9 +41,9 @@ export declare class MillsService {
     remove(id: string): Promise<{
         id: string;
         name: string;
-        email: string | null;
         created_at: Date;
         updated_at: Date;
+        email: string | null;
         deleted_at: Date | null;
         status: string;
         phone: string | null;

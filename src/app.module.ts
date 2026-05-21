@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { RolesModule } from './modules/roles/roles.module';
 import { MillsModule } from './modules/mills/mills.module';
 import { SharedModule } from './shared/shared.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -40,6 +41,7 @@ import { UploadModule } from './modules/upload/upload.module';
     RedisModule,
     AuthModule,
     UsersModule,
+    RolesModule,
     MillsModule,
     SharedModule,
     UploadModule,
