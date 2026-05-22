@@ -23,9 +23,11 @@ const users_module_1 = require("./modules/users/users.module");
 const roles_module_1 = require("./modules/roles/roles.module");
 const mills_module_1 = require("./modules/mills/mills.module");
 const service_categories_module_1 = require("./modules/service-categories/service-categories.module");
+const service_reports_module_1 = require("./modules/service-reports/service-reports.module");
 const customers_module_1 = require("./modules/customers/customers.module");
 const shared_module_1 = require("./shared/shared.module");
 const upload_module_1 = require("./modules/upload/upload.module");
+const technicians_module_1 = require("./modules/technicians/technicians.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -61,9 +63,11 @@ exports.AppModule = AppModule = __decorate([
             roles_module_1.RolesModule,
             mills_module_1.MillsModule,
             service_categories_module_1.ServiceCategoriesModule,
+            service_reports_module_1.ServiceReportsModule,
             customers_module_1.CustomersModule,
             shared_module_1.SharedModule,
             upload_module_1.UploadModule,
+            technicians_module_1.TechniciansModule,
         ],
     })
 ], AppModule);

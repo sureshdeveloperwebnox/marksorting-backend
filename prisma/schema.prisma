@@ -150,6 +150,8 @@ model Mill {
   updated_at  DateTime   @updatedAt
   deleted_at  DateTime?
 
+  serviceReports ServiceReport[]
+
   @@map("mills")
 }
 
@@ -161,6 +163,8 @@ model ServiceCategory {
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
+
+  serviceReports ServiceReport[]
 
   @@map("service_categories")
 }
@@ -202,6 +206,8 @@ model Technician {
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
+
+  serviceReports ServiceReportTechnician[]
 
   @@map("technicians")
 }
@@ -254,4 +260,62 @@ model Setting {
   updated_at  DateTime  @updatedAt
 
   @@map("settings")
+}
+
+model ServiceReport {
+  id                        String    @id @default(uuid())
+  report_number             String    @unique
+  service_category_id       String
+  mill_id                   String
+  place                     String
+  mill_whatsapp_number      String
+  mill_email                String?
+  visit_date                DateTime
+  visit_time                String
+  call_registered_date      DateTime
+  machine_model             String
+  machine_mfg_date          DateTime?
+  machine_installation_date DateTime?
+  serial_or_frame_no        String
+  authorized_person         String
+  previous_visit_engineer   String?
+  nature_of_complaint       String
+  problem_observed          String?
+  action_taken              String
+  commodity                 String?
+  contamination             String?
+  output_capacity_per_hour  String?
+  rejection_ratio           String?
+  purity                    String?
+  no_of_programs_set        Int?
+  ac_provided               Boolean   @default(false)
+  compressor_details        String?
+  air_drier_details         String?
+  line_filter_condition     String?
+  machine_filter_condition  String?
+  auto_drain_valve_working  Boolean   @default(false)
+  engineer_remarks          String
+  engineer_signature        String
+  customer_remarks          String?
+  customer_signature        String
+  status                    String    @default("PENDING")
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
+  deleted_at                DateTime?
+
+  serviceCategory ServiceCategory @relation(fields: [service_category_id], references: [id])
+  mill            Mill            @relation(fields: [mill_id], references: [id])
+  technicians     ServiceReportTechnician[]
+
+  @@map("service_reports")
+}
+
+model ServiceReportTechnician {
+  service_report_id String
+  technician_id     String
+  serviceReport     ServiceReport @relation(fields: [service_report_id], references: [id])
+  technician        Technician    @relation(fields: [technician_id], references: [id])
+
+  @@id([service_report_id, technician_id])
+  @@map("service_report_technicians")
 }

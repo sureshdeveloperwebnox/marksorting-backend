@@ -8,35 +8,35 @@ export declare class MillsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
         id: string;
-        name: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
-        email: string | null;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
         id: string;
-        name: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
-        email: string | null;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
-        email: string | null;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
 }
