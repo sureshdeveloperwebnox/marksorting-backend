@@ -112,6 +112,13 @@ export class UsersService {
   async update(id: string, dto: UpdateUserDto) {
     const { password, ...data } = dto;
     
+    if (data.email) {
+      const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+      if (existingUser && existingUser.id !== id) {
+        throw new ConflictException('User with this email already exists');
+      }
+    }
+
     const updateData: any = { ...data };
     if (updateData.phone_number === '') {
       updateData.phone_number = null;
