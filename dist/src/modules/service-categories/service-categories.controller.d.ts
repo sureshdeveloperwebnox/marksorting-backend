@@ -10,27 +10,27 @@ export declare class ServiceCategoriesController {
         id: string;
         name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
     }>;
     update(id: string, dto: UpdateServiceCategoryDto): Promise<{
         id: string;
         name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
     }>;
     remove(id: string): Promise<{
         id: string;
         name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
     }>;
 }
