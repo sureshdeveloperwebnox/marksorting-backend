@@ -12,6 +12,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { MillsModule } from './modules/mills/mills.module';
 import { ServiceCategoriesModule } from './modules/service-categories/service-categories.module';
 import { ServiceReportsModule } from './modules/service-reports/service-reports.module';
+import { InstallationReportsModule } from './modules/installation-reports/installation-reports.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { SharedModule } from './shared/shared.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -49,6 +50,7 @@ import { TechniciansModule } from './modules/technicians/technicians.module';
     MillsModule,
     ServiceCategoriesModule,
     ServiceReportsModule,
+    InstallationReportsModule,
     CustomersModule,
     SharedModule,
     UploadModule,

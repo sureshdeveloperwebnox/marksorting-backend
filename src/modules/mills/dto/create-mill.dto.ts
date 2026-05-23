@@ -1,7 +1,12 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMillDto {
+  @ApiProperty({ example: 'uuid-of-customer', required: false })
+  @IsUUID()
+  @IsOptional()
+  customer_id?: string;
+
   @ApiProperty({ example: 'Golden Valley Mill' })
   @IsString()
   @IsNotEmpty()

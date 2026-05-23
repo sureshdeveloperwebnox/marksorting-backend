@@ -13,7 +13,7 @@ export class MillsService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
-  ) {}
+  ) { }
 
   async findAll(params: {
     skip?: number;
@@ -34,6 +34,7 @@ export class MillsService {
         skip,
         take,
         where: { ...where, deleted_at: null },
+        include: { customer: { select: { id: true, name: true } } },
         orderBy,
       }),
       this.prisma.mill.count({ where: { ...where, deleted_at: null } }),
@@ -51,6 +52,7 @@ export class MillsService {
 
     const mill = await this.prisma.mill.findFirst({
       where: { id, deleted_at: null },
+      include: { customer: { select: { id: true, name: true } } },
     });
 
     if (mill) await this.redis.setJson(cacheKey, mill, 3600);

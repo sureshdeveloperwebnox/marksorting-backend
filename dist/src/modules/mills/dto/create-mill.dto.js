@@ -13,6 +13,7 @@ exports.CreateMillDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 class CreateMillDto {
+    customer_id;
     name;
     email;
     phone;
@@ -20,6 +21,12 @@ class CreateMillDto {
     status;
 }
 exports.CreateMillDto = CreateMillDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMillDto.prototype, "customer_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Golden Valley Mill' }),
     (0, class_validator_1.IsString)(),

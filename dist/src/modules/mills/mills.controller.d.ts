@@ -16,6 +16,7 @@ export declare class MillsController {
         phone: string | null;
         status: string;
         address: string | null;
+        customer_id: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
         id: string;
@@ -27,6 +28,7 @@ export declare class MillsController {
         phone: string | null;
         status: string;
         address: string | null;
+        customer_id: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -38,5 +40,6 @@ export declare class MillsController {
         phone: string | null;
         status: string;
         address: string | null;
+        customer_id: string | null;
     }>;
 }

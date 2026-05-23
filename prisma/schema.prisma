@@ -149,8 +149,10 @@ model Mill {
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
   deleted_at  DateTime?
-
+  customer_id String?
+  customer    Customer?  @relation(fields: [customer_id], references: [id])
   serviceReports ServiceReport[]
+  installationReports InstallationReport[]
 
   @@map("mills")
 }
@@ -179,6 +181,7 @@ model Customer {
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
+  mills       Mill[]
 
   @@map("customers")
 }
@@ -208,6 +211,7 @@ model Technician {
   deleted_at  DateTime?
 
   serviceReports ServiceReportTechnician[]
+  installationReports InstallationReportTechnician[]
 
   @@map("technicians")
 }
@@ -319,3 +323,61 @@ model ServiceReportTechnician {
   @@id([service_report_id, technician_id])
   @@map("service_report_technicians")
 }
+
+model InstallationReport {
+  id                        String    @id @default(uuid())
+  report_number             String    @unique
+  mill_id                   String
+  place                     String
+  mill_whatsapp_number      String
+  mill_email                String?
+  visit_date                DateTime
+  visit_time                String
+  call_registered_date      DateTime
+  machine_model             String
+  serial_or_frame_no        String
+  authorized_person         String
+  invoice_number            String?
+  invoice_date              DateTime?
+  warranty_start_date       DateTime?
+  warranty_end_date         DateTime?
+  commodity                 String?
+  contamination             String?
+  output_capacity_per_hour  String?
+  rejection_ratio           String?
+  purity                    String?
+  no_of_programs_set        Int?
+  ac_provided               Boolean   @default(false)
+  compressor_details        String?
+  air_drier_details         String?
+  ground_earth_provided     Boolean   @default(false)
+  ground_earth_value        Int?
+  no_of_filters_installed   Int?
+  oil_filter_condition      String?
+  line_filter_condition     String?
+  auto_drain_valve_working  Boolean   @default(false)
+  engineer_remarks          String
+  engineer_signature        String
+  customer_remarks          String?
+  customer_signature        String
+  status                    String    @default("PENDING")
+  created_at                DateTime  @default(now())
+  updated_at                DateTime  @updatedAt
+  deleted_at                DateTime?
+
+  mill                      Mill            @relation(fields: [mill_id], references: [id])
+  technicians               InstallationReportTechnician[]
+
+  @@map("installation_reports")
+}
+
+model InstallationReportTechnician {
+  installation_report_id String
+  technician_id         String
+  installationReport    InstallationReport @relation(fields: [installation_report_id], references: [id], onDelete: Cascade)
+  technician            Technician         @relation(fields: [technician_id], references: [id])
+
+  @@id([installation_report_id, technician_id])
+  @@map("installation_report_technicians")
+}
+
