@@ -25,6 +25,7 @@ const mills_module_1 = require("./modules/mills/mills.module");
 const service_categories_module_1 = require("./modules/service-categories/service-categories.module");
 const service_reports_module_1 = require("./modules/service-reports/service-reports.module");
 const installation_reports_module_1 = require("./modules/installation-reports/installation-reports.module");
+const expenses_module_1 = require("./modules/expenses/expenses.module");
 const customers_module_1 = require("./modules/customers/customers.module");
 const shared_module_1 = require("./shared/shared.module");
 const upload_module_1 = require("./modules/upload/upload.module");
@@ -66,6 +67,7 @@ exports.AppModule = AppModule = __decorate([
             service_categories_module_1.ServiceCategoriesModule,
             service_reports_module_1.ServiceReportsModule,
             installation_reports_module_1.InstallationReportsModule,
+            expenses_module_1.ExpensesModule,
             customers_module_1.CustomersModule,
             shared_module_1.SharedModule,
             upload_module_1.UploadModule,
