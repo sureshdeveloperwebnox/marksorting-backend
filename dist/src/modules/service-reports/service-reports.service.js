@@ -99,7 +99,7 @@ let ServiceReportsService = class ServiceReportsService {
                 where: { created_at: { gte: todayStart, lte: todayEnd } },
             });
             const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
-            const seq = String(count + 1).padStart(4, '0');
+            const seq = String(count + 1);
             const report_number = `SR-${dateStr}-${seq}`;
             const created = await tx.serviceReport.create({
                 data: {
