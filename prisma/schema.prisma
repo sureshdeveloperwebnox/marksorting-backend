@@ -384,23 +384,24 @@ model InstallationReportTechnician {
 }
 
 model Expense {
-  id             String              @id @default(uuid())
-  expense_number String              @unique
-  mill_id        String?
-  place          String?
-  visit_date     DateTime
-  visit_time     String
-  expense_type   String              // e.g. FOOD, TRAVEL, LODGING, OTHERS
-  others         String?
-  amount         Decimal             @default(0)
-  expense_images String[]            @default([])
-  status         String              @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
-  created_at     DateTime            @default(now())
-  updated_at     DateTime            @updatedAt
-  deleted_at     DateTime?
+  id                  String              @id @default(uuid())
+  expense_number      String              @unique
+  mill_id             String?
+  place               String?
+  visit_date          DateTime
+  visit_time          String
+  expense_category_id String
+  others              String?
+  amount              Decimal             @default(0)
+  expense_images      String[]            @default([])
+  status              String              @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  deleted_at          DateTime?
 
-  mill           Mill?               @relation(fields: [mill_id], references: [id])
-  technicians    ExpenseTechnician[]
+  mill                Mill?               @relation(fields: [mill_id], references: [id])
+  expenseCategory     ExpenseCategory     @relation(fields: [expense_category_id], references: [id])
+  technicians         ExpenseTechnician[]
 
   @@map("expenses")
 }
@@ -413,6 +414,20 @@ model ExpenseTechnician {
 
   @@id([expense_id, technician_id])
   @@map("expense_technicians")
+}
+
+model ExpenseCategory {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  description String?
+  status      String    @default("ACTIVE") // ACTIVE, INACTIVE
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  expenses    Expense[]
+
+  @@map("expense_categories")
 }
 
 

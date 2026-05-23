@@ -31,6 +31,10 @@ export declare class ExpensesService {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -41,7 +45,7 @@ export declare class ExpensesService {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_type: string;
+        expense_category_id: string;
         others: string | null;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expense_images: string[];
@@ -61,6 +65,10 @@ export declare class ExpensesService {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -71,7 +79,7 @@ export declare class ExpensesService {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_type: string;
+        expense_category_id: string;
         others: string | null;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expense_images: string[];
@@ -91,6 +99,10 @@ export declare class ExpensesService {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -101,7 +113,7 @@ export declare class ExpensesService {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_type: string;
+        expense_category_id: string;
         others: string | null;
         amount: import("@prisma/client-runtime-utils").Decimal;
         expense_images: string[];

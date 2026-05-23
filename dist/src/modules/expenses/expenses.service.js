@@ -15,6 +15,7 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
+    expenseCategory: { select: { id: true, name: true } },
     technicians: { include: { technician: { select: { id: true, full_name: true } } } },
 };
 let ExpensesService = class ExpensesService {
@@ -37,9 +38,9 @@ let ExpensesService = class ExpensesService {
             where.OR = [
                 { expense_number: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
-                { expense_type: { contains: search, mode: 'insensitive' } },
                 { others: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                { expenseCategory: { name: { contains: search, mode: 'insensitive' } } },
             ];
         }
         if (status) {
@@ -98,10 +99,16 @@ let ExpensesService = class ExpensesService {
             const expense_number = `EXP-${dateStr}-${seq}`;
             const created = await tx.expense.create({
                 data: {
-                    ...expenseData,
                     expense_number,
                     visit_date: new Date(expenseData.visit_date),
+                    visit_time: expenseData.visit_time,
+                    expense_category_id: expenseData.expense_category_id,
+                    place: expenseData.place || null,
+                    others: expenseData.others || null,
                     amount: expenseData.amount ? String(expenseData.amount) : '0',
+                    status: expenseData.status || 'PENDING',
+                    expense_images: expenseData.expense_images || [],
+                    mill_id: expenseData.mill_id || null,
                 },
                 include: INCLUDE_SHAPE,
             });
@@ -122,12 +129,33 @@ let ExpensesService = class ExpensesService {
     async update(id, dto) {
         await this.findById(id);
         const { technician_ids, ...expenseData } = dto;
-        const updateData = { ...expenseData };
+        const updateData = {};
         if (expenseData.visit_date !== undefined) {
             updateData.visit_date = new Date(expenseData.visit_date);
         }
+        if (expenseData.visit_time !== undefined) {
+            updateData.visit_time = expenseData.visit_time;
+        }
+        if (expenseData.expense_category_id !== undefined) {
+            updateData.expense_category_id = expenseData.expense_category_id;
+        }
+        if (expenseData.place !== undefined) {
+            updateData.place = expenseData.place || null;
+        }
+        if (expenseData.others !== undefined) {
+            updateData.others = expenseData.others || null;
+        }
         if (expenseData.amount !== undefined) {
             updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';
+        }
+        if (expenseData.status !== undefined) {
+            updateData.status = expenseData.status;
+        }
+        if (expenseData.expense_images !== undefined) {
+            updateData.expense_images = expenseData.expense_images;
+        }
+        if (expenseData.mill_id !== undefined) {
+            updateData.mill_id = expenseData.mill_id || null;
         }
         const expense = await this.prisma.expense.update({
             where: { id },

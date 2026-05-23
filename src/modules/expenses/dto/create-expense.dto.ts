@@ -41,10 +41,10 @@ export class CreateExpenseDto {
     @IsNotEmpty()
     visit_time: string;
 
-    @ApiProperty({ example: 'TRAVEL' })
-    @IsString()
+    @ApiProperty({ example: 'uuid-of-expense-category' })
+    @IsUUID()
     @IsNotEmpty()
-    expense_type: string;
+    expense_category_id: string;
 
     @ApiProperty({ example: 'Taxi to mill', required: false })
     @IsString()

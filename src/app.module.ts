@@ -14,6 +14,7 @@ import { ServiceCategoriesModule } from './modules/service-categories/service-ca
 import { ServiceReportsModule } from './modules/service-reports/service-reports.module';
 import { InstallationReportsModule } from './modules/installation-reports/installation-reports.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
+import { ExpenseCategoriesModule } from './modules/expense-categories/expense-categories.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { SharedModule } from './shared/shared.module';
 import { UploadModule } from './modules/upload/upload.module';
@@ -53,6 +54,7 @@ import { TechniciansModule } from './modules/technicians/technicians.module';
     ServiceReportsModule,
     InstallationReportsModule,
     ExpensesModule,
+    ExpenseCategoriesModule,
     CustomersModule,
     SharedModule,
     UploadModule,

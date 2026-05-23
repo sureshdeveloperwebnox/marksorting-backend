@@ -18,7 +18,7 @@ class CreateExpenseDto {
     place;
     visit_date;
     visit_time;
-    expense_type;
+    expense_category_id;
     others;
     amount;
     expense_images;
@@ -59,11 +59,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "visit_time", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'TRAVEL' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-expense-category' }),
+    (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateExpenseDto.prototype, "expense_type", void 0);
+], CreateExpenseDto.prototype, "expense_category_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Taxi to mill', required: false }),
     (0, class_validator_1.IsString)(),
