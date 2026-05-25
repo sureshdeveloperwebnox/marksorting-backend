@@ -18,8 +18,8 @@ export class CreateSettingDto {
 
     @ApiProperty({
         example: 'GENERAL',
-        enum: ['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY'],
+        enum: ['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY', 'COMPANY'],
     })
-    @IsIn(['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY'])
+    @IsIn(['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY', 'COMPANY'])
     group: string;
 }

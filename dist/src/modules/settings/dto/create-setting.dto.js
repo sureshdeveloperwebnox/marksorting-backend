@@ -33,9 +33,9 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'GENERAL',
-        enum: ['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY'],
+        enum: ['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY', 'COMPANY'],
     }),
-    (0, class_validator_1.IsIn)(['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY']),
+    (0, class_validator_1.IsIn)(['GENERAL', 'APP', 'PAYMENT', 'NOTIFICATION', 'SECURITY', 'COMPANY']),
     __metadata("design:type", String)
 ], CreateSettingDto.prototype, "group", void 0);
 //# sourceMappingURL=create-setting.dto.js.map
