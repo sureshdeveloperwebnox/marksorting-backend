@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -57,6 +58,7 @@ export class TicketsService {
 
         if (search) {
             where.OR = [
+                { ticket_number: { contains: search, mode: 'insensitive' } },
                 { subject: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
                 { service_engineer: { full_name: { contains: search, mode: 'insensitive' } } },
@@ -116,10 +118,7 @@ export class TicketsService {
             mill_id: dto.mill_id,
         });
 
-        const ticket = await this.prisma.supportTicket.create({
-            data: this.normalizePayload(dto),
-            include: INCLUDE_SHAPE,
-        });
+        const ticket = await this.createWithUniqueTicketNumber(dto);
 
         await this.invalidateCache();
         return ticket;
@@ -177,6 +176,45 @@ export class TicketsService {
 
     private normalizeNullableId(value?: string | null) {
         return value === '' ? null : value;
+    }
+
+    private async createWithUniqueTicketNumber(dto: CreateTicketDto) {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            try {
+                return await this.prisma.supportTicket.create({
+                    data: {
+                        ...this.normalizePayload(dto),
+                        ticket_number: this.generateTicketNumber(),
+                    },
+                    include: INCLUDE_SHAPE,
+                });
+            } catch (error) {
+                if (
+                    error instanceof Prisma.PrismaClientKnownRequestError &&
+                    error.code === 'P2002' &&
+                    this.isTicketNumberConflict(error)
+                ) {
+                    continue;
+                }
+                throw error;
+            }
+        }
+
+        throw new BadRequestException('Could not generate a unique ticket ID');
+    }
+
+    private isTicketNumberConflict(error: Prisma.PrismaClientKnownRequestError) {
+        const target = error.meta?.target;
+        return Array.isArray(target)
+            ? target.includes('ticket_number')
+            : target === 'ticket_number' || target === 'support_tickets_ticket_number_key';
+    }
+
+    private generateTicketNumber() {
+        const now = new Date();
+        const yyyymmdd = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+        return `TKT-${yyyymmdd}-${random}`;
     }
 
     private async validateTicketRelations(params: {

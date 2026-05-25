@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketsService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const INCLUDE_SHAPE = {
@@ -56,6 +57,7 @@ let TicketsService = class TicketsService {
         const where = {};
         if (search) {
             where.OR = [
+                { ticket_number: { contains: search, mode: 'insensitive' } },
                 { subject: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
                 { service_engineer: { full_name: { contains: search, mode: 'insensitive' } } },
@@ -106,10 +108,7 @@ let TicketsService = class TicketsService {
             customer_id: dto.customer_id,
             mill_id: dto.mill_id,
         });
-        const ticket = await this.prisma.supportTicket.create({
-            data: this.normalizePayload(dto),
-            include: INCLUDE_SHAPE,
-        });
+        const ticket = await this.createWithUniqueTicketNumber(dto);
         await this.invalidateCache();
         return ticket;
     }
@@ -156,6 +155,40 @@ let TicketsService = class TicketsService {
     }
     normalizeNullableId(value) {
         return value === '' ? null : value;
+    }
+    async createWithUniqueTicketNumber(dto) {
+        for (let attempt = 0; attempt < 5; attempt += 1) {
+            try {
+                return await this.prisma.supportTicket.create({
+                    data: {
+                        ...this.normalizePayload(dto),
+                        ticket_number: this.generateTicketNumber(),
+                    },
+                    include: INCLUDE_SHAPE,
+                });
+            }
+            catch (error) {
+                if (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+                    error.code === 'P2002' &&
+                    this.isTicketNumberConflict(error)) {
+                    continue;
+                }
+                throw error;
+            }
+        }
+        throw new common_1.BadRequestException('Could not generate a unique ticket ID');
+    }
+    isTicketNumberConflict(error) {
+        const target = error.meta?.target;
+        return Array.isArray(target)
+            ? target.includes('ticket_number')
+            : target === 'ticket_number' || target === 'support_tickets_ticket_number_key';
+    }
+    generateTicketNumber() {
+        const now = new Date();
+        const yyyymmdd = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+        return `TKT-${yyyymmdd}-${random}`;
     }
     async validateTicketRelations(params) {
         const { service_engineer_id, customer_id, mill_id } = params;

@@ -35,6 +35,7 @@ export declare class TicketsController {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
     update(id: string, dto: UpdateTicketDto): Promise<{
@@ -66,6 +67,7 @@ export declare class TicketsController {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
     remove(id: string): Promise<{
@@ -97,6 +99,7 @@ export declare class TicketsController {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
 }

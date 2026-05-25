@@ -250,6 +250,7 @@ model Notification {
 
 model SupportTicket {
   id                  String      @id @default(uuid())
+  ticket_number       String?     @unique
   user_id             String?
   user                User?       @relation(fields: [user_id], references: [id])
   service_engineer_id String?
@@ -265,6 +266,7 @@ model SupportTicket {
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
 
+  @@index([ticket_number])
   @@index([service_engineer_id])
   @@index([customer_id])
   @@index([mill_id])
@@ -443,4 +445,3 @@ model ExpenseCategory {
 
   @@map("expense_categories")
 }
-

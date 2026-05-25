@@ -45,6 +45,7 @@ export declare class TicketsService {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
     update(id: string, dto: UpdateTicketDto): Promise<{
@@ -76,6 +77,7 @@ export declare class TicketsService {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
     remove(id: string): Promise<{
@@ -107,10 +109,14 @@ export declare class TicketsService {
         service_engineer_id: string | null;
         subject: string;
         priority: string;
+        ticket_number: string | null;
         user_id: string | null;
     }>;
     private invalidateCache;
     private normalizePayload;
     private normalizeNullableId;
+    private createWithUniqueTicketNumber;
+    private isTicketNumberConflict;
+    private generateTicketNumber;
     private validateTicketRelations;
 }
