@@ -57,7 +57,7 @@ const documentHeader = (company, template, reportNumber) => {
   `;
 };
 const documentFooter = (company, template) => `
-  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:9px;">
+  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:10px;">
     <div style="border-top:1px solid #777; padding-top:7mm; text-align:center; font-weight:800; letter-spacing:0.3px;">
       ${company.gstNo ? `GSTIN : ${template.escape(company.gstNo)}` : '&nbsp;'}
     </div>
@@ -94,7 +94,7 @@ function renderServiceReportTemplate(data, template) {
       margin: 0;
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 10px;
+      font-size: 11px;
       line-height: 1.2;
       background: #fff;
     }
@@ -136,7 +136,7 @@ function renderServiceReportTemplate(data, template) {
       text-align: right;
       font-weight: 700;
       line-height: 1.15;
-      font-size: 8px;
+      font-size: 9px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -144,14 +144,14 @@ function renderServiceReportTemplate(data, template) {
     }
     .header-company-name {
       color: #00664d;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 800;
       line-height: 1;
       margin-bottom: 0.6mm;
     }
     .header-partner {
       color: #f05a00;
-      font-size: 8px;
+      font-size: 9px;
       line-height: 1.15;
     }
     .header-address,
@@ -161,7 +161,7 @@ function renderServiceReportTemplate(data, template) {
     .header-serial {
       grid-column: 1 / -1;
       font-weight: 700;
-      font-size: 10px;
+      font-size: 11px;
       margin-top: 0;
     }
     .document {
@@ -262,7 +262,7 @@ function renderServiceReportTemplate(data, template) {
       border: 1px solid #111;
       border-top: 0;
       padding: 5px 6px;
-      font-size: 10px;
+      font-size: 11px;
       text-transform: uppercase;
     }
     .maintenance-title {
@@ -273,7 +273,7 @@ function renderServiceReportTemplate(data, template) {
     }
     .maintenance td {
       color: #f05a00;
-      font-size: 10px;
+      font-size: 11px;
       height: 9mm;
     }
     .signature-cell {
