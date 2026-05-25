@@ -23,7 +23,7 @@ let MillsController = class MillsController {
     constructor(millsService) {
         this.millsService = millsService;
     }
-    findAll(skip, take, search, status) {
+    findAll(skip, take, search, status, customerId) {
         const where = {};
         if (search) {
             const orConditions = [
@@ -41,6 +41,9 @@ let MillsController = class MillsController {
         }
         if (status) {
             where.status = status;
+        }
+        if (customerId) {
+            where.customer_id = customerId;
         }
         return this.millsService.findAll({
             skip: skip ? parseInt(skip) : undefined,
@@ -70,8 +73,9 @@ __decorate([
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('status')),
+    __param(4, (0, common_1.Query)('customer_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MillsController.prototype, "findAll", null);
 __decorate([

@@ -31,6 +31,8 @@ const customers_module_1 = require("./modules/customers/customers.module");
 const shared_module_1 = require("./shared/shared.module");
 const upload_module_1 = require("./modules/upload/upload.module");
 const technicians_module_1 = require("./modules/technicians/technicians.module");
+const tickets_module_1 = require("./modules/tickets/tickets.module");
+const settings_module_1 = require("./modules/settings/settings.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -74,6 +76,8 @@ exports.AppModule = AppModule = __decorate([
             shared_module_1.SharedModule,
             upload_module_1.UploadModule,
             technicians_module_1.TechniciansModule,
+            tickets_module_1.TicketsModule,
+            settings_module_1.SettingsModule,
         ],
     })
 ], AppModule);

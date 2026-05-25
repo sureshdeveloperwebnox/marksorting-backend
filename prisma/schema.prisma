@@ -35,6 +35,7 @@ model User {
   otps                  OtpVerification[]
   password_resets       PasswordReset[]
   activity_logs         ActivityLog[]
+  support_tickets       SupportTicket[]
 
   @@map("users")
 }
@@ -154,6 +155,7 @@ model Mill {
   serviceReports ServiceReport[]
   installationReports InstallationReport[]
   expenses    Expense[]
+  supportTickets SupportTicket[]
 
   @@map("mills")
 }
@@ -183,6 +185,7 @@ model Customer {
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
   mills       Mill[]
+  supportTickets SupportTicket[]
 
   @@map("customers")
 }
@@ -214,6 +217,7 @@ model Technician {
   serviceReports ServiceReportTechnician[]
   installationReports InstallationReportTechnician[]
   expenses    ExpenseTechnician[]
+  supportTickets SupportTicket[]
 
   @@map("technicians")
 }
@@ -245,15 +249,25 @@ model Notification {
 }
 
 model SupportTicket {
-  id          String    @id @default(uuid())
-  user_id     String
-  subject     String
-  description String
-  status      String    @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, ESCALATED
-  priority    String    @default("MEDIUM")
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id                  String      @id @default(uuid())
+  user_id             String?
+  user                User?       @relation(fields: [user_id], references: [id])
+  service_engineer_id String?
+  service_engineer    Technician? @relation(fields: [service_engineer_id], references: [id])
+  customer_id         String?
+  customer            Customer?   @relation(fields: [customer_id], references: [id])
+  mill_id             String?
+  mill                Mill?       @relation(fields: [mill_id], references: [id])
+  subject             String
+  description         String
+  status              String      @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, ESCALATED
+  priority            String      @default("MEDIUM")
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
 
+  @@index([service_engineer_id])
+  @@index([customer_id])
+  @@index([mill_id])
   @@map("support_tickets")
 }
 
@@ -429,5 +443,4 @@ model ExpenseCategory {
 
   @@map("expense_categories")
 }
-
 

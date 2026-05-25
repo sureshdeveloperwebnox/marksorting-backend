@@ -4,7 +4,7 @@ import { UpdateMillDto } from './dto/update-mill.dto';
 export declare class MillsController {
     private readonly millsService;
     constructor(millsService: MillsService);
-    findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, status?: string, customerId?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
         id: string;

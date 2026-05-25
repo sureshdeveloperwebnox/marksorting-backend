@@ -26,6 +26,7 @@ export class MillsController {
     @Query('take') take?: string,
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('customer_id') customerId?: string,
   ) {
     const where: Prisma.MillWhereInput = {};
     
@@ -49,6 +50,10 @@ export class MillsController {
     
     if (status) {
       where.status = status;
+    }
+
+    if (customerId) {
+      where.customer_id = customerId;
     }
 
     return this.millsService.findAll({

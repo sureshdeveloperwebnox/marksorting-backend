@@ -19,6 +19,8 @@ import { CustomersModule } from './modules/customers/customers.module';
 import { SharedModule } from './shared/shared.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { TechniciansModule } from './modules/technicians/technicians.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -59,6 +61,8 @@ import { TechniciansModule } from './modules/technicians/technicians.module';
     SharedModule,
     UploadModule,
     TechniciansModule,
+    TicketsModule,
+    SettingsModule,
   ],
 })
 export class AppModule { }
