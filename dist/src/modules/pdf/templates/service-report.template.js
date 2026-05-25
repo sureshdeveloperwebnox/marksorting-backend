@@ -20,6 +20,12 @@ const pairRow = (leftLabel, leftValue, rightLabel, rightValue) => `
     ${valueCell(rightValue, 'nowrap')}
   </tr>
 `;
+const twoColumnRow = (label, value) => `
+  <tr>
+    <td colspan="2" class="label-cell">${label}</td>
+    <td colspan="2" class="value-cell">${value}</td>
+  </tr>
+`;
 const fullRow = (label, value, minHeight = 34) => `
   <tr>
     <td colspan="4" class="full-row" style="height: ${minHeight}px;">
@@ -241,9 +247,9 @@ function renderServiceReportTemplate(data, template) {
     }
     .full-row-content {
       display: grid;
-      grid-template-columns: 54mm 1fr;
+      grid-template-columns: max-content 1fr;
       align-items: start;
-      column-gap: 2mm;
+      column-gap: 4mm;
     }
     .full-row-content .label {
       white-space: nowrap;
@@ -341,11 +347,11 @@ function renderServiceReportTemplate(data, template) {
         ${fullRow('Problem Observed :', template.text(report.problem_observed), 28)}
         ${fullRow('Action taken to rectify the problem :', template.text(report.action_taken), 28)}
         <tr><td colspan="4" class="section-title">Machine Performance</td></tr>
-        ${pairRow('Commodity', template.text(report.commodity), '', '')}
-        ${pairRow('Contamination', template.text(report.contamination), '', '')}
-        ${pairRow('Output capacity / hour', template.text(report.output_capacity_per_hour), '', '')}
-        ${pairRow('Rejection Ratio', template.text(report.rejection_ratio), '', '')}
-        ${pairRow('Purity', template.text(report.purity), '', '')}
+        ${twoColumnRow('Commodity', template.text(report.commodity))}
+        ${twoColumnRow('Contamination', template.text(report.contamination))}
+        ${twoColumnRow('Output capacity / hour', template.text(report.output_capacity_per_hour))}
+        ${twoColumnRow('Rejection Ratio', template.text(report.rejection_ratio))}
+        ${twoColumnRow('Purity', template.text(report.purity))}
       </table>
 
       <div class="second-section">
