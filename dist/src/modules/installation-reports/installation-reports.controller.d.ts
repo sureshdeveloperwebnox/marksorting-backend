@@ -58,6 +58,7 @@ export declare class InstallationReportsController {
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         ground_earth_value: number | null;
+        ground_earth_field: string | null;
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }) | null>;
@@ -113,6 +114,7 @@ export declare class InstallationReportsController {
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         ground_earth_value: number | null;
+        ground_earth_field: string | null;
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }>;
@@ -168,6 +170,7 @@ export declare class InstallationReportsController {
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         ground_earth_value: number | null;
+        ground_earth_field: string | null;
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }>;

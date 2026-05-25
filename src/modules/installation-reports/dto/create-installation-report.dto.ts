@@ -144,6 +144,15 @@ export class CreateInstallationReportDto {
     @IsOptional()
     ground_earth_value?: number;
 
+    @ApiProperty({
+        example: 'PRIMARY',
+        enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
+        required: false,
+    })
+    @IsIn(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'])
+    @IsOptional()
+    ground_earth_field?: string;
+
     @ApiProperty({ example: 3, required: false })
     @IsInt()
     @Min(0)

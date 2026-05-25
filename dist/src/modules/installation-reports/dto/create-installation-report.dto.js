@@ -38,6 +38,7 @@ class CreateInstallationReportDto {
     air_drier_details;
     ground_earth_provided;
     ground_earth_value;
+    ground_earth_field;
     no_of_filters_installed;
     oil_filter_condition;
     line_filter_condition;
@@ -204,6 +205,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateInstallationReportDto.prototype, "ground_earth_value", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'PRIMARY',
+        enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
+        required: false,
+    }),
+    (0, class_validator_1.IsIn)(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT']),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInstallationReportDto.prototype, "ground_earth_field", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 3, required: false }),
     (0, class_validator_1.IsInt)(),
