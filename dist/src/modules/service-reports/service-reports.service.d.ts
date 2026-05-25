@@ -2,12 +2,18 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
+import { SettingsService } from '../settings/settings.service';
+import { PdfService } from '../pdf/pdf.service';
+import { DocumentTemplateService } from '../pdf/templates/document-template.service';
 export declare class ServiceReportsService {
     private prisma;
     private redis;
+    private settingsService;
+    private pdfService;
+    private documentTemplateService;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService);
+    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService);
     findAll(params: {
         skip?: number;
         take?: number;
@@ -195,5 +201,10 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
     }>;
+    generatePdf(id: string): Promise<{
+        buffer: Buffer;
+        fileName: string;
+    }>;
+    private getCompanyPdfSettings;
     private invalidateCache;
 }

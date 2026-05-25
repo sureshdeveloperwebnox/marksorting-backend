@@ -3,6 +3,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
+import { SettingsService } from '../settings/settings.service';
+import { PdfService } from '../pdf/pdf.service';
+import { DocumentTemplateService } from '../pdf/templates/document-template.service';
+import {
+    CompanyPdfSettings,
+    renderServiceReportPdfOptions,
+    renderServiceReportTemplate,
+} from '../pdf/templates/service-report.template';
 
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
@@ -18,6 +26,9 @@ export class ServiceReportsService {
     constructor(
         private prisma: PrismaService,
         private redis: RedisService,
+        private settingsService: SettingsService,
+        private pdfService: PdfService,
+        private documentTemplateService: DocumentTemplateService,
     ) { }
 
     async findAll(params: {
@@ -214,6 +225,49 @@ export class ServiceReportsService {
 
         await this.invalidateCache(id);
         return serviceReport;
+    }
+
+    async generatePdf(id: string): Promise<{ buffer: Buffer; fileName: string }> {
+        const report = await this.findById(id);
+        const company = await this.getCompanyPdfSettings();
+        company.logoUrl = await this.pdfService.embedImageAsDataUrl(company.logoUrl);
+        const html = renderServiceReportTemplate(
+            { report, company },
+            this.documentTemplateService,
+        );
+        const buffer = await this.pdfService.renderHtmlToPdf(
+            html,
+            renderServiceReportPdfOptions(company, this.documentTemplateService),
+        );
+
+        return {
+            buffer,
+            fileName: `service-report-${report.report_number}.pdf`,
+        };
+    }
+
+    private async getCompanyPdfSettings(): Promise<CompanyPdfSettings> {
+        const data = await this.settingsService.findAll({
+            skip: 0,
+            take: 200,
+            group: 'COMPANY',
+        });
+        const settings = new Map<string, string>(
+            data.settings.map((setting: { key: string; value: string }) => [setting.key, setting.value]),
+        );
+
+        return {
+            logoUrl: settings.get('COMPANY_HEADER_LOGO_URL') || '',
+            name: settings.get('COMPANY_NAME') || 'Mendo controls',
+            partnerDescription: settings.get('COMPANY_PARTNER_DESCRIPTION') || '',
+            addressLine1: settings.get('COMPANY_ADDRESS_LINE_1') || '',
+            addressLine2: settings.get('COMPANY_ADDRESS_LINE_2') || '',
+            region: settings.get('COMPANY_REGION') || '',
+            email: settings.get('COMPANY_EMAIL') || '',
+            tollFree: settings.get('COMPANY_TOLL_FREE') || '',
+            cellNumbers: settings.get('COMPANY_CELL_NUMBERS') || '',
+            gstNo: settings.get('COMPANY_GST_NO') || '',
+        };
     }
 
     private async invalidateCache(id?: string) {

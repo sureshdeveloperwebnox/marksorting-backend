@@ -7,8 +7,10 @@ import {
     Param,
     Delete,
     Query,
+    Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { ServiceReportsService } from './service-reports.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
@@ -38,6 +40,16 @@ export class ServiceReportsController {
             dateFrom,
             dateTo,
         });
+    }
+
+    @Get(':id/pdf')
+    @ApiOperation({ summary: 'Download service report PDF' })
+    async downloadPdf(@Param('id') id: string, @Res() res: Response) {
+        const { buffer, fileName } = await this.serviceReportsService.generatePdf(id);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Length', buffer.length);
+        res.end(buffer);
     }
 
     @Get(':id')

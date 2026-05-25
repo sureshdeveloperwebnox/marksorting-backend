@@ -34,6 +34,13 @@ let ServiceReportsController = class ServiceReportsController {
             dateTo,
         });
     }
+    async downloadPdf(id, res) {
+        const { buffer, fileName } = await this.serviceReportsService.generatePdf(id);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Content-Length', buffer.length);
+        res.end(buffer);
+    }
     findOne(id) {
         return this.serviceReportsService.findById(id);
     }
@@ -62,6 +69,15 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ServiceReportsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id/pdf'),
+    (0, swagger_1.ApiOperation)({ summary: 'Download service report PDF' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ServiceReportsController.prototype, "downloadPdf", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get service report by ID' }),

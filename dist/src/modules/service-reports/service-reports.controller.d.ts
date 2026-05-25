@@ -1,3 +1,4 @@
+import type { Response } from 'express';
 import { ServiceReportsService } from './service-reports.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
@@ -5,6 +6,7 @@ export declare class ServiceReportsController {
     private readonly serviceReportsService;
     constructor(serviceReportsService: ServiceReportsService);
     findAll(skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    downloadPdf(id: string, res: Response): Promise<void>;
     findOne(id: string): Promise<any>;
     create(dto: CreateServiceReportDto): Promise<({
         serviceCategory: {
