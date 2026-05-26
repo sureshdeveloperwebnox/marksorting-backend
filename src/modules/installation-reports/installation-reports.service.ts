@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
@@ -32,21 +36,32 @@ export class InstallationReportsService {
     private documentTemplateService: DocumentTemplateService,
   ) {}
 
-  async findAll(params: {
-    skip?: number;
-    take?: number;
-    search?: string;
-    status?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }) {
-    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+  async findAll(
+    params: {
+      skip?: number;
+      take?: number;
+      search?: string;
+      status?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    },
+    user?: { userId: string; role: string },
+  ) {
+    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
     const { skip, take, search, status, dateFrom, dateTo } = params;
 
     const where: any = { deleted_at: null };
+
+    if (user && user.role === 'Service Engineer') {
+      where.technicians = {
+        some: {
+          technician_id: user.userId,
+        },
+      };
+    }
 
     if (search) {
       where.OR = [
@@ -89,8 +104,8 @@ export class InstallationReportsService {
     return result;
   }
 
-  async findById(id: string) {
-    const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+  async findById(id: string, user?: { userId: string; role: string }) {
+    const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
     const cached = await this.redis.getJson<any>(cacheKey);
     if (cached) return cached;
 
@@ -105,12 +120,36 @@ export class InstallationReportsService {
       );
     }
 
+    if (user && user.role === 'Service Engineer') {
+      const isAssigned = installationReport.technicians.some(
+        (t) => t.technician_id === user.userId,
+      );
+      if (!isAssigned) {
+        throw new ForbiddenException(
+          'You do not have permission to access this installation report',
+        );
+      }
+    }
+
     await this.redis.setJson(cacheKey, installationReport, 3600); // Cache for 1 hour
     return installationReport;
   }
 
-  async create(dto: CreateInstallationReportDto) {
+  async create(
+    dto: CreateInstallationReportDto,
+    user?: { userId: string; role: string },
+  ) {
     const { technician_ids, ...reportData } = dto;
+    delete reportData.customer_id;
+
+    const finalTechnicianIds = [...(technician_ids || [])];
+    if (
+      user &&
+      user.role === 'Service Engineer' &&
+      !finalTechnicianIds.includes(user.userId)
+    ) {
+      finalTechnicianIds.push(user.userId);
+    }
 
     const installationReport = await this.prisma.$transaction(async (tx) => {
       // Compute today's UTC date boundaries
@@ -151,7 +190,7 @@ export class InstallationReportsService {
 
       // Create InstallationReportTechnician join rows
       await tx.installationReportTechnician.createMany({
-        data: technician_ids.map((tid) => ({
+        data: finalTechnicianIds.map((tid) => ({
           installation_report_id: created.id,
           technician_id: tid,
         })),
@@ -168,10 +207,15 @@ export class InstallationReportsService {
     return installationReport;
   }
 
-  async update(id: string, dto: UpdateInstallationReportDto) {
-    await this.findById(id);
+  async update(
+    id: string,
+    dto: UpdateInstallationReportDto,
+    user?: { userId: string; role: string },
+  ) {
+    await this.findById(id, user);
 
     const { technician_ids, ...reportData } = dto;
+    delete reportData.customer_id;
 
     const updateData: any = { ...reportData };
 
@@ -222,8 +266,8 @@ export class InstallationReportsService {
     return installationReport;
   }
 
-  async remove(id: string) {
-    await this.findById(id);
+  async remove(id: string, user?: { userId: string; role: string }) {
+    await this.findById(id, user);
 
     const installationReport = await this.prisma.installationReport.update({
       where: { id },
@@ -245,8 +289,11 @@ export class InstallationReportsService {
     await Promise.all(promises);
   }
 
-  async generatePdf(id: string): Promise<{ buffer: Buffer; fileName: string }> {
-    const report = await this.findById(id);
+  async generatePdf(
+    id: string,
+    user?: { userId: string; role: string },
+  ): Promise<{ buffer: Buffer; fileName: string }> {
+    const report = await this.findById(id, user);
     const company = await this.getCompanyPdfSettings();
     company.logoUrl = await this.pdfService.embedImageAsDataUrl(
       company.logoUrl,

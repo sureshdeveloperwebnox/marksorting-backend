@@ -15,6 +15,7 @@ const swagger_1 = require("@nestjs/swagger");
 class CreateServiceReportDto {
     service_category_id;
     technician_ids;
+    customer_id;
     mill_id;
     place;
     mill_whatsapp_number;
@@ -65,6 +66,12 @@ __decorate([
     (0, class_validator_1.ArrayMinSize)(1),
     __metadata("design:type", Array)
 ], CreateServiceReportDto.prototype, "technician_ids", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateServiceReportDto.prototype, "customer_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'uuid-of-mill' }),
     (0, class_validator_1.IsUUID)(),

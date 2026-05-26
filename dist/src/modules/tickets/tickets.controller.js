@@ -51,6 +51,36 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Get all support tickets with pagination and filtering',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'skip',
+        required: false,
+        type: String,
+        description: 'Number of records to skip',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'take',
+        required: false,
+        type: String,
+        description: 'Number of records to take',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        required: false,
+        type: String,
+        description: 'Search query term',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'status',
+        required: false,
+        type: String,
+        description: 'Filter by ticket status',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'priority',
+        required: false,
+        type: String,
+        description: 'Filter by ticket priority',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),

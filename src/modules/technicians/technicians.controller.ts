@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Query, Put, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TechniciansService } from './technicians.service';
 import { Prisma } from '@prisma/client';
 
@@ -11,6 +11,30 @@ export class TechniciansController {
   @Get()
   @ApiOperation({
     summary: 'Get all technicians with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: String,
+    description: 'Number of records to skip',
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: String,
+    description: 'Number of records to take',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search query',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Filter by status',
   })
   findAll(
     @Query('skip') skip?: string,

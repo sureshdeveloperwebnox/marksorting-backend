@@ -12,13 +12,14 @@ const prisma_module_1 = require("../../prisma/prisma.module");
 const redis_module_1 = require("../../redis/redis.module");
 const service_categories_service_1 = require("./service-categories.service");
 const service_categories_controller_1 = require("./service-categories.controller");
+const mobile_service_categories_controller_1 = require("./mobile-service-categories.controller");
 let ServiceCategoriesModule = class ServiceCategoriesModule {
 };
 exports.ServiceCategoriesModule = ServiceCategoriesModule;
 exports.ServiceCategoriesModule = ServiceCategoriesModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule],
-        controllers: [service_categories_controller_1.ServiceCategoriesController],
+        controllers: [service_categories_controller_1.ServiceCategoriesController, mobile_service_categories_controller_1.MobileServiceCategoriesController],
         providers: [service_categories_service_1.ServiceCategoriesService],
         exports: [service_categories_service_1.ServiceCategoriesService],
     })

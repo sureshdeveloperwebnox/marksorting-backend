@@ -24,6 +24,11 @@ export class CreateInstallationReportDto {
   @ArrayMinSize(1)
   technician_ids: string[];
 
+  @ApiProperty({ example: 'uuid-of-customer', required: false })
+  @IsUUID()
+  @IsOptional()
+  customer_id?: string;
+
   @ApiProperty({ example: 'uuid-of-mill' })
   @IsUUID()
   mill_id: string;

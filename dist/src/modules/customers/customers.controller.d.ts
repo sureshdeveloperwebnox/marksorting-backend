@@ -7,36 +7,36 @@ export declare class CustomersController {
     findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateCustomerDto): Promise<{
-        email: string | null;
-        name: string;
         id: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
-        email: string | null;
-        name: string;
         id: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
     remove(id: string): Promise<{
-        email: string | null;
-        name: string;
         id: string;
+        email: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        name: string;
         phone: string | null;
+        status: string;
         address: string | null;
     }>;
 }

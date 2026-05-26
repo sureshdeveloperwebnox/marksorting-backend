@@ -10,12 +10,13 @@ exports.TechniciansModule = void 0;
 const common_1 = require("@nestjs/common");
 const technicians_service_1 = require("./technicians.service");
 const technicians_controller_1 = require("./technicians.controller");
+const mobile_technicians_controller_1 = require("./mobile-technicians.controller");
 let TechniciansModule = class TechniciansModule {
 };
 exports.TechniciansModule = TechniciansModule;
 exports.TechniciansModule = TechniciansModule = __decorate([
     (0, common_1.Module)({
-        controllers: [technicians_controller_1.TechniciansController],
+        controllers: [technicians_controller_1.TechniciansController, mobile_technicians_controller_1.MobileTechniciansController],
         providers: [technicians_service_1.TechniciansService],
         exports: [technicians_service_1.TechniciansService],
     })

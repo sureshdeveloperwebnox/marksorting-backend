@@ -55,6 +55,24 @@ exports.RolesController = RolesController;
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all roles with pagination and filtering' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'skip',
+        required: false,
+        type: String,
+        description: 'Number of records to skip',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'take',
+        required: false,
+        type: String,
+        description: 'Number of records to take',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'search',
+        required: false,
+        type: String,
+        description: 'Search query',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),

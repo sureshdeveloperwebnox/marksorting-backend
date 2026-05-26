@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
@@ -33,16 +37,19 @@ export class ServiceReportsService {
     private documentTemplateService: DocumentTemplateService,
   ) {}
 
-  async findAll(params: {
-    skip?: number;
-    take?: number;
-    search?: string;
-    status?: string;
-    serviceCategoryId?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }) {
-    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+  async findAll(
+    params: {
+      skip?: number;
+      take?: number;
+      search?: string;
+      status?: string;
+      serviceCategoryId?: string;
+      dateFrom?: string;
+      dateTo?: string;
+    },
+    user?: { userId: string; role: string },
+  ) {
+    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
@@ -50,6 +57,14 @@ export class ServiceReportsService {
       params;
 
     const where: any = { deleted_at: null };
+
+    if (user && user.role === 'Service Engineer') {
+      where.technicians = {
+        some: {
+          technician_id: user.userId,
+        },
+      };
+    }
 
     if (search) {
       where.OR = [
@@ -96,8 +111,8 @@ export class ServiceReportsService {
     return result;
   }
 
-  async findById(id: string) {
-    const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+  async findById(id: string, user?: { userId: string; role: string }) {
+    const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
     const cached = await this.redis.getJson<any>(cacheKey);
     if (cached) return cached;
 
@@ -110,12 +125,36 @@ export class ServiceReportsService {
       throw new NotFoundException(`Service report with ID "${id}" not found`);
     }
 
+    if (user && user.role === 'Service Engineer') {
+      const isAssigned = serviceReport.technicians.some(
+        (t) => t.technician_id === user.userId,
+      );
+      if (!isAssigned) {
+        throw new ForbiddenException(
+          'You do not have permission to access this service report',
+        );
+      }
+    }
+
     await this.redis.setJson(cacheKey, serviceReport, 3600); // Cache for 1 hour
     return serviceReport;
   }
 
-  async create(dto: CreateServiceReportDto) {
+  async create(
+    dto: CreateServiceReportDto,
+    user?: { userId: string; role: string },
+  ) {
     const { technician_ids, ...reportData } = dto;
+    delete reportData.customer_id;
+
+    const finalTechnicianIds = [...(technician_ids || [])];
+    if (
+      user &&
+      user.role === 'Service Engineer' &&
+      !finalTechnicianIds.includes(user.userId)
+    ) {
+      finalTechnicianIds.push(user.userId);
+    }
 
     const serviceReport = await this.prisma.$transaction(async (tx) => {
       // Compute today's UTC date boundaries
@@ -153,7 +192,7 @@ export class ServiceReportsService {
 
       // Create ServiceReportTechnician join rows
       await tx.serviceReportTechnician.createMany({
-        data: technician_ids.map((tid) => ({
+        data: finalTechnicianIds.map((tid) => ({
           service_report_id: created.id,
           technician_id: tid,
         })),
@@ -170,10 +209,15 @@ export class ServiceReportsService {
     return serviceReport;
   }
 
-  async update(id: string, dto: UpdateServiceReportDto) {
-    await this.findById(id);
+  async update(
+    id: string,
+    dto: UpdateServiceReportDto,
+    user?: { userId: string; role: string },
+  ) {
+    await this.findById(id, user);
 
     const { technician_ids, ...reportData } = dto;
+    delete reportData.customer_id;
 
     const updateData: any = { ...reportData };
 
@@ -220,8 +264,8 @@ export class ServiceReportsService {
     return serviceReport;
   }
 
-  async remove(id: string) {
-    await this.findById(id);
+  async remove(id: string, user?: { userId: string; role: string }) {
+    await this.findById(id, user);
 
     const serviceReport = await this.prisma.serviceReport.update({
       where: { id },
@@ -233,8 +277,11 @@ export class ServiceReportsService {
     return serviceReport;
   }
 
-  async generatePdf(id: string): Promise<{ buffer: Buffer; fileName: string }> {
-    const report = await this.findById(id);
+  async generatePdf(
+    id: string,
+    user?: { userId: string; role: string },
+  ): Promise<{ buffer: Buffer; fileName: string }> {
+    const report = await this.findById(id, user);
     const company = await this.getCompanyPdfSettings();
     company.logoUrl = await this.pdfService.embedImageAsDataUrl(
       company.logoUrl,

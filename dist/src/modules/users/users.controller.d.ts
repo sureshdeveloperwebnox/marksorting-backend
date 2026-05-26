@@ -10,17 +10,17 @@ export declare class UsersController {
     create(dto: CreateUserDto): Promise<any>;
     update(id: string, dto: UpdateUserDto): Promise<any>;
     remove(id: string): Promise<{
+        id: string;
         full_name: string;
         email: string;
         phone_number: string | null;
-        role_id: string;
-        account_status: string;
+        password_hash: string;
         profile_image: string | null;
         background_image: string | null;
-        id: string;
-        password_hash: string;
+        role_id: string;
         email_verified: boolean;
         phone_verified: boolean;
+        account_status: string;
         last_login_at: Date | null;
         failed_login_attempts: number;
         locked_until: Date | null;

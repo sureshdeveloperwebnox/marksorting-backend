@@ -8,22 +8,22 @@ export declare class ExpensesController {
     findOne(id: string): Promise<any>;
     create(dto: CreateExpenseDto): Promise<({
         mill: {
-            name: string;
             id: string;
+            name: string;
         } | null;
-        expenseCategory: {
-            name: string;
-            id: string;
-        };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -42,22 +42,22 @@ export declare class ExpensesController {
     }) | null>;
     update(id: string, dto: UpdateExpenseDto): Promise<{
         mill: {
-            name: string;
             id: string;
+            name: string;
         } | null;
-        expenseCategory: {
-            name: string;
-            id: string;
-        };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -76,22 +76,22 @@ export declare class ExpensesController {
     }>;
     remove(id: string): Promise<{
         mill: {
-            name: string;
             id: string;
+            name: string;
         } | null;
-        expenseCategory: {
-            name: string;
-            id: string;
-        };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
             expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
         created_at: Date;

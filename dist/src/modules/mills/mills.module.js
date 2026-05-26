@@ -10,12 +10,13 @@ exports.MillsModule = void 0;
 const common_1 = require("@nestjs/common");
 const mills_service_1 = require("./mills.service");
 const mills_controller_1 = require("./mills.controller");
+const mobile_mills_controller_1 = require("./mobile-mills.controller");
 let MillsModule = class MillsModule {
 };
 exports.MillsModule = MillsModule;
 exports.MillsModule = MillsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [mills_controller_1.MillsController],
+        controllers: [mills_controller_1.MillsController, mobile_mills_controller_1.MobileMillsController],
         providers: [mills_service_1.MillsService],
         exports: [mills_service_1.MillsService],
     })

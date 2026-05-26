@@ -39,13 +39,20 @@ let ServiceReportsService = class ServiceReportsService {
         this.pdfService = pdfService;
         this.documentTemplateService = documentTemplateService;
     }
-    async findAll(params) {
-        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+    async findAll(params, user) {
+        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
         const { skip, take, search, status, serviceCategoryId, dateFrom, dateTo } = params;
         const where = { deleted_at: null };
+        if (user && user.role === 'Service Engineer') {
+            where.technicians = {
+                some: {
+                    technician_id: user.userId,
+                },
+            };
+        }
         if (search) {
             where.OR = [
                 { report_number: { contains: search, mode: 'insensitive' } },
@@ -85,8 +92,8 @@ let ServiceReportsService = class ServiceReportsService {
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
-    async findById(id) {
-        const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+    async findById(id, user) {
+        const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
         const cached = await this.redis.getJson(cacheKey);
         if (cached)
             return cached;
@@ -97,11 +104,24 @@ let ServiceReportsService = class ServiceReportsService {
         if (!serviceReport) {
             throw new common_1.NotFoundException(`Service report with ID "${id}" not found`);
         }
+        if (user && user.role === 'Service Engineer') {
+            const isAssigned = serviceReport.technicians.some((t) => t.technician_id === user.userId);
+            if (!isAssigned) {
+                throw new common_1.ForbiddenException('You do not have permission to access this service report');
+            }
+        }
         await this.redis.setJson(cacheKey, serviceReport, 3600);
         return serviceReport;
     }
-    async create(dto) {
+    async create(dto, user) {
         const { technician_ids, ...reportData } = dto;
+        delete reportData.customer_id;
+        const finalTechnicianIds = [...(technician_ids || [])];
+        if (user &&
+            user.role === 'Service Engineer' &&
+            !finalTechnicianIds.includes(user.userId)) {
+            finalTechnicianIds.push(user.userId);
+        }
         const serviceReport = await this.prisma.$transaction(async (tx) => {
             const todayStart = new Date();
             todayStart.setUTCHours(0, 0, 0, 0);
@@ -129,7 +149,7 @@ let ServiceReportsService = class ServiceReportsService {
                 include: INCLUDE_SHAPE,
             });
             await tx.serviceReportTechnician.createMany({
-                data: technician_ids.map((tid) => ({
+                data: finalTechnicianIds.map((tid) => ({
                     service_report_id: created.id,
                     technician_id: tid,
                 })),
@@ -142,9 +162,10 @@ let ServiceReportsService = class ServiceReportsService {
         await this.invalidateCache();
         return serviceReport;
     }
-    async update(id, dto) {
-        await this.findById(id);
+    async update(id, dto, user) {
+        await this.findById(id, user);
         const { technician_ids, ...reportData } = dto;
+        delete reportData.customer_id;
         const updateData = { ...reportData };
         if (reportData.visit_date !== undefined) {
             updateData.visit_date = new Date(reportData.visit_date);
@@ -182,8 +203,8 @@ let ServiceReportsService = class ServiceReportsService {
         await this.invalidateCache(id);
         return serviceReport;
     }
-    async remove(id) {
-        await this.findById(id);
+    async remove(id, user) {
+        await this.findById(id, user);
         const serviceReport = await this.prisma.serviceReport.update({
             where: { id },
             data: { deleted_at: new Date() },
@@ -192,8 +213,8 @@ let ServiceReportsService = class ServiceReportsService {
         await this.invalidateCache(id);
         return serviceReport;
     }
-    async generatePdf(id) {
-        const report = await this.findById(id);
+    async generatePdf(id, user) {
+        const report = await this.findById(id, user);
         const company = await this.getCompanyPdfSettings();
         company.logoUrl = await this.pdfService.embedImageAsDataUrl(company.logoUrl);
         const html = (0, service_report_template_1.renderServiceReportTemplate)({ report, company }, this.documentTemplateService);

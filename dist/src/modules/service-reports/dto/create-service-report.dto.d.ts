@@ -1,6 +1,7 @@
 export declare class CreateServiceReportDto {
     service_category_id: string;
     technician_ids: string[];
+    customer_id?: string;
     mill_id: string;
     place: string;
     mill_whatsapp_number: string;

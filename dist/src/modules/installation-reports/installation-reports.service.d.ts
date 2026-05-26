@@ -21,17 +21,26 @@ export declare class InstallationReportsService {
         status?: string;
         dateFrom?: string;
         dateTo?: string;
+    }, user?: {
+        userId: string;
+        role: string;
     }): Promise<any>;
-    findById(id: string): Promise<any>;
-    create(dto: CreateInstallationReportDto): Promise<({
+    findById(id: string, user?: {
+        userId: string;
+        role: string;
+    }): Promise<any>;
+    create(dto: CreateInstallationReportDto, user?: {
+        userId: string;
+        role: string;
+    }): Promise<({
         mill: {
-            name: string;
             id: string;
+            name: string;
         };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
@@ -43,19 +52,17 @@ export declare class InstallationReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
+        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
+        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        engineer_remarks: string;
-        engineer_signature: string;
-        customer_signature: string;
-        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -67,8 +74,10 @@ export declare class InstallationReportsService {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
+        engineer_remarks: string;
+        engineer_signature: string;
         customer_remarks: string | null;
-        report_number: string;
+        customer_signature: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -79,15 +88,18 @@ export declare class InstallationReportsService {
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }) | null>;
-    update(id: string, dto: UpdateInstallationReportDto): Promise<{
+    update(id: string, dto: UpdateInstallationReportDto, user?: {
+        userId: string;
+        role: string;
+    }): Promise<{
         mill: {
-            name: string;
             id: string;
+            name: string;
         };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
@@ -99,19 +111,17 @@ export declare class InstallationReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
+        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
+        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        engineer_remarks: string;
-        engineer_signature: string;
-        customer_signature: string;
-        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -123,8 +133,10 @@ export declare class InstallationReportsService {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
+        engineer_remarks: string;
+        engineer_signature: string;
         customer_remarks: string | null;
-        report_number: string;
+        customer_signature: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -135,15 +147,18 @@ export declare class InstallationReportsService {
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }>;
-    remove(id: string): Promise<{
+    remove(id: string, user?: {
+        userId: string;
+        role: string;
+    }): Promise<{
         mill: {
-            name: string;
             id: string;
+            name: string;
         };
         technicians: ({
             technician: {
-                full_name: string;
                 id: string;
+                full_name: string;
             };
         } & {
             technician_id: string;
@@ -155,19 +170,17 @@ export declare class InstallationReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
+        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
+        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        engineer_remarks: string;
-        engineer_signature: string;
-        customer_signature: string;
-        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -179,8 +192,10 @@ export declare class InstallationReportsService {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
+        engineer_remarks: string;
+        engineer_signature: string;
         customer_remarks: string | null;
-        report_number: string;
+        customer_signature: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -192,7 +207,10 @@ export declare class InstallationReportsService {
         oil_filter_condition: string | null;
     }>;
     private invalidateCache;
-    generatePdf(id: string): Promise<{
+    generatePdf(id: string, user?: {
+        userId: string;
+        role: string;
+    }): Promise<{
         buffer: Buffer;
         fileName: string;
     }>;

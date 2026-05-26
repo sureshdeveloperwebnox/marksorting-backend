@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
@@ -21,6 +21,36 @@ export class TicketsController {
   @Get()
   @ApiOperation({
     summary: 'Get all support tickets with pagination and filtering',
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: String,
+    description: 'Number of records to skip',
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: String,
+    description: 'Number of records to take',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search query term',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    type: String,
+    description: 'Filter by ticket status',
+  })
+  @ApiQuery({
+    name: 'priority',
+    required: false,
+    type: String,
+    description: 'Filter by ticket priority',
   })
   findAll(
     @Query('skip') skip?: string,

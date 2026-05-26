@@ -10,12 +10,13 @@ exports.CustomersModule = void 0;
 const common_1 = require("@nestjs/common");
 const customers_service_1 = require("./customers.service");
 const customers_controller_1 = require("./customers.controller");
+const mobile_customers_controller_1 = require("./mobile-customers.controller");
 let CustomersModule = class CustomersModule {
 };
 exports.CustomersModule = CustomersModule;
 exports.CustomersModule = CustomersModule = __decorate([
     (0, common_1.Module)({
-        controllers: [customers_controller_1.CustomersController],
+        controllers: [customers_controller_1.CustomersController, mobile_customers_controller_1.MobileCustomersController],
         providers: [customers_service_1.CustomersService],
         exports: [customers_service_1.CustomersService],
     })
