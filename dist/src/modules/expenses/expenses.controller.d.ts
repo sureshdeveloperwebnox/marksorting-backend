@@ -36,7 +36,7 @@ export declare class ExpensesController {
         visit_time: string;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client-runtime-utils").Decimal;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
         expense_number: string;
     }) | null>;
@@ -70,7 +70,7 @@ export declare class ExpensesController {
         visit_time: string;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client-runtime-utils").Decimal;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
         expense_number: string;
     }>;
@@ -104,7 +104,7 @@ export declare class ExpensesController {
         visit_time: string;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client-runtime-utils").Decimal;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
         expense_number: string;
     }>;
