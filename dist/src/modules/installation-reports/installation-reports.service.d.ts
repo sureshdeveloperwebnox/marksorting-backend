@@ -2,12 +2,18 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { SettingsService } from '../settings/settings.service';
+import { PdfService } from '../pdf/pdf.service';
+import { DocumentTemplateService } from '../pdf/templates/document-template.service';
 export declare class InstallationReportsService {
     private prisma;
     private redis;
+    private settingsService;
+    private pdfService;
+    private documentTemplateService;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService);
+    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService);
     findAll(params: {
         skip?: number;
         take?: number;
@@ -186,4 +192,9 @@ export declare class InstallationReportsService {
         oil_filter_condition: string | null;
     }>;
     private invalidateCache;
+    generatePdf(id: string): Promise<{
+        buffer: Buffer;
+        fileName: string;
+    }>;
+    private getCompanyPdfSettings;
 }

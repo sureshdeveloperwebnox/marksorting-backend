@@ -14,7 +14,7 @@ export interface CompanyPdfSettings {
   gstNo?: string;
 }
 
-export interface ServiceReportPdfData {
+export interface InstallationReportPdfData {
   report: any;
   company: CompanyPdfSettings;
 }
@@ -31,25 +31,16 @@ const maintenanceItems = [
 const labelCell = (label: string, extraClass = '') => `<td class="label-cell ${extraClass}">${label}</td>`;
 const valueCell = (value: string, extraClass = '') => `<td class="value-cell ${extraClass}">${value}</td>`;
 
-const pairRow = (leftLabel: string, leftValue: string, rightLabel: string, rightValue: string) => `
+const row = (label: string, value: string, extraValueClass = '') => `
   <tr>
-    ${labelCell(leftLabel)}
-    ${valueCell(leftValue)}
-    ${labelCell(rightLabel)}
-    ${valueCell(rightValue, 'nowrap')}
-  </tr>
-`;
-
-const twoColumnRow = (label: string, value: string) => `
-  <tr>
-    <td colspan="2" class="label-cell">${label}</td>
-    <td colspan="2" class="value-cell">${value}</td>
+    ${labelCell(label)}
+    ${valueCell(value, extraValueClass)}
   </tr>
 `;
 
 const fullRow = (label: string, value: string, minHeight = 34) => `
   <tr>
-    <td colspan="4" class="full-row" style="height: ${minHeight}px;">
+    <td colspan="2" class="full-row" style="height: ${minHeight}px;">
       <div class="full-row-content">
         <span class="label">${label}</span>
         <span class="block-value">${value}</span>
@@ -101,7 +92,7 @@ const documentFooter = (
   </div>
 `;
 
-export function renderServiceReportPdfOptions(
+export function renderInstallationReportPdfOptions(
   company: CompanyPdfSettings,
   template: DocumentTemplateService,
 ): PDFOptions {
@@ -118,8 +109,8 @@ export function renderServiceReportPdfOptions(
   };
 }
 
-export function renderServiceReportTemplate(
-  data: ServiceReportPdfData,
+export function renderInstallationReportTemplate(
+  data: InstallationReportPdfData,
   template: DocumentTemplateService,
 ): string {
   const { report, company } = data;
@@ -127,7 +118,19 @@ export function renderServiceReportTemplate(
     ?.map((entry: any) => entry.technician?.full_name)
     .filter(Boolean)
     .join(', ');
-  const category = report.serviceCategory?.name || 'Service Report';
+
+  // Normalizer for Ground Earth Field option label
+  const formatGroundEarthField = (val: string) => {
+    if (!val) return '-';
+    const mapping: Record<string, string> = {
+      'PRIMARY': 'Primary',
+      'SECONDARY': 'Secondary',
+      'REJECTION_1': 'Rejection 1',
+      'REJECTION_2': 'Rejection 2',
+      'SPLIT': 'Split'
+    };
+    return mapping[val] || val;
+  };
 
   return `<!doctype html>
 <html>
@@ -141,7 +144,7 @@ export function renderServiceReportTemplate(
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 11px;
-      line-height: 1.2;
+      line-height: 1.25;
       background: #fff;
     }
     .print-frame {
@@ -214,10 +217,6 @@ export function renderServiceReportTemplate(
       width: 100%;
       padding-top: 0;
     }
-    .serial {
-      font-weight: 700;
-      margin: 0 0 5mm;
-    }
     table.report {
       width: 100%;
       border-collapse: collapse;
@@ -225,19 +224,15 @@ export function renderServiceReportTemplate(
       break-inside: auto;
       page-break-inside: auto;
     }
-    table.report + table.report,
-    .notice + table.report {
-      margin-top: 0;
-    }
     tr {
-      break-inside: auto;
-      page-break-inside: auto;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     .report th,
     .report td {
       border: 1px solid #111;
       vertical-align: top;
-      padding: 2px 4px;
+      padding: 3.5px 6px;
       word-break: break-word;
       overflow-wrap: anywhere;
     }
@@ -253,37 +248,29 @@ export function renderServiceReportTemplate(
     .label-cell {
       font-weight: 800;
       white-space: nowrap;
+      width: 40%;
     }
     .value-cell {
       font-weight: 400;
+      width: 60%;
     }
     .nowrap {
       white-space: nowrap;
       word-break: normal;
       overflow-wrap: normal;
     }
-    .value {
-      font-weight: 400;
+    .company-details-value {
+      padding: 4px 6px !important;
     }
-    .company-details-cell {
-      height: 31mm;
-      position: relative;
-    }
-    .company-field-label {
-      position: absolute;
-      top: 2px;
-      left: 4px;
+    .company-name {
       font-weight: 800;
+      font-size: 11.5px;
+      margin-bottom: 2px;
     }
-    .company-field-values {
-      height: 100%;
-      padding: 6mm 8mm 2mm;
-      text-align: center;
+    .company-sub {
+      color: #374151;
       font-weight: 400;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      margin-bottom: 1.5px;
     }
     .full-row-content {
       display: grid;
@@ -299,28 +286,31 @@ export function renderServiceReportTemplate(
       font-weight: 400;
       min-width: 0;
     }
-    .section-title {
-      text-align: center;
-      font-weight: 800;
-      background: #fff;
-    }
     .notice {
       border: 1px solid #111;
       border-top: 0;
-      padding: 5px 6px;
-      font-size: 11px;
+      padding: 7px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
       text-transform: uppercase;
+      color: #1e3a8a;
+      background: #eff6ff;
+      line-height: 1.35;
     }
     .maintenance-title {
       color: #d97706;
       text-decoration: underline;
       font-weight: 800;
       text-align: center;
+      font-size: 11.5px;
+      padding: 6px 0 !important;
     }
     .maintenance td {
       color: #f05a00;
-      font-size: 11px;
-      height: 9mm;
+      font-size: 10.5px;
+      height: 9.5mm;
+      vertical-align: middle;
     }
     .signature-cell {
       height: 28mm;
@@ -328,21 +318,22 @@ export function renderServiceReportTemplate(
     }
     .signature-top-spacer td,
     .signature-spacer td {
-      height: 8mm;
+      height: 6mm;
       border: 0;
       padding: 0;
     }
     .signature-image {
       max-width: 52mm;
-      max-height: 22mm;
+      max-height: 20mm;
       object-fit: contain;
-      margin-top: 4mm;
-      opacity: 0.75;
+      margin-top: 2.5mm;
+      opacity: 0.85;
     }
     .second-section {
       margin-top: 0;
+      page-break-before: always;
+      break-before: page;
     }
-    .avoid-break { break-inside: avoid; page-break-inside: avoid; }
   </style>
 </head>
 <body>
@@ -353,94 +344,97 @@ export function renderServiceReportTemplate(
     <tbody>
       <tr>
         <td>
-  <main class="document">
-      <table class="report">
-        <colgroup>
-          <col style="width: 28%;" />
-          <col style="width: 22%;" />
-          <col style="width: 30%;" />
-          <col style="width: 20%;" />
-        </colgroup>
-        <tr><th colspan="4">SERVICE REPORT</th></tr>
-        <tr><th colspan="4">${template.text(category)}</th></tr>
-        ${pairRow('Service Engineer Name :', template.text(technicians), 'Date :', template.date(report.visit_date))}
-        <tr>
-          <td rowspan="6" colspan="2" class="company-details-cell">
-            <span class="company-field-label">Company Name :</span>
-            <div class="company-field-values">
-              ${template.text(report.mill?.name)}<br />
-              ${template.text(report.place)}<br />
-              ${template.text(report.mill_whatsapp_number)}
-            </div>
-          </td>
-          ${labelCell('Time :')}
-          ${valueCell(template.time(report.visit_time), 'nowrap')}
-        </tr>
-        <tr>${labelCell('Call Registered Date :')}${valueCell(template.date(report.call_registered_date), 'nowrap')}</tr>
-        <tr>${labelCell('Model :')}${valueCell(template.text(report.machine_model))}</tr>
-        <tr>${labelCell('Mfg Date :')}${valueCell(template.date(report.machine_mfg_date), 'nowrap')}</tr>
-        <tr>${labelCell('Installation Date :')}${valueCell(template.date(report.machine_installation_date), 'nowrap')}</tr>
-        <tr>${labelCell('Sl.No/Frame No :')}${valueCell(template.text(report.serial_or_frame_no))}</tr>
-        ${fullRow('Authorized Person :', template.text(report.authorized_person), 20)}
-        ${fullRow('Previous Visited Engineer Name :', template.text(report.previous_visit_engineer), 20)}
-        ${fullRow('Nature Of Complaint :', template.text(report.nature_of_complaint), 28)}
-        ${fullRow('Problem Observed :', template.text(report.problem_observed), 28)}
-        ${fullRow('Action taken to rectify the problem :', template.text(report.action_taken), 28)}
-        <tr><td colspan="4" class="section-title">Machine Performance</td></tr>
-        ${twoColumnRow('Commodity', template.text(report.commodity))}
-        ${twoColumnRow('Contamination', template.text(report.contamination))}
-        ${twoColumnRow('Output capacity / hour', template.text(report.output_capacity_per_hour))}
-        ${twoColumnRow('Rejection Ratio', template.text(report.rejection_ratio))}
-        ${twoColumnRow('Purity', template.text(report.purity))}
-      </table>
+          <main class="document">
+            <!-- PAGE 1: Installation Specs -->
+            <table class="report">
+              <colgroup>
+                <col style="width: 40%;" />
+                <col style="width: 60%;" />
+              </colgroup>
+              <tr><th colspan="2">INSTALLATION REPORT</th></tr>
+              ${row('Service Engineer Name', template.text(technicians))}
+              <tr>
+                ${labelCell('Company Name')}
+                <td class="value-cell company-details-value">
+                  <div class="company-name">${template.text(report.mill?.name)}</div>
+                  <div class="company-sub">${template.text(report.place)}</div>
+                  <div class="company-sub">${template.text(report.mill_whatsapp_number)}</div>
+                </td>
+              </tr>
+              ${row('Date', template.date(report.visit_date))}
+              ${row('Time', template.time(report.visit_time))}
+              ${row('Call Registered Date', template.date(report.call_registered_date))}
+              ${row('Sl.No/Frame No', template.text(report.serial_or_frame_no))}
+              ${row('Model', template.text(report.machine_model))}
+              ${row('Authorized Person', template.text(report.authorized_person))}
+              ${row('Invoice Number', template.text(report.invoice_number))}
+              ${row('Invoice Date', template.date(report.invoice_date))}
+              ${row('Warranty Start Date', template.date(report.warranty_start_date))}
+              ${row('Warranty End Date', template.date(report.warranty_end_date))}
+              ${row('Commodity', template.text(report.commodity))}
+              ${row('Contamination', template.text(report.contamination))}
+              ${row('Output Capacity / hour', template.text(report.output_capacity_per_hour))}
+              ${row('Rejection Ratio', template.text(report.rejection_ratio))}
+              ${row('Purity', template.text(report.purity))}
+              ${row('No.of Program Set', template.text(report.no_of_programs_set))}
+              ${row('Air Conditioner Provided', template.yesNo(report.ac_provided))}
+              ${row('Compressor Details', template.text(report.compressor_details))}
+              ${row('Air Drier Details', template.text(report.air_drier_details))}
+              ${row('Ground Earth Provided', template.yesNo(report.ground_earth_provided))}
+              ${row('Running Channel Combination Type', formatGroundEarthField(report.ground_earth_field))}
+              ${row('No.of Filters Installed', template.text(report.no_of_filters_installed))}
+              ${row('Oil Filter Condition', template.text(report.oil_filter_condition))}
+              ${row('Line Filter Condition', template.text(report.line_filter_condition))}
+              ${row('Auto Drain Valve Working', template.yesNo(report.auto_drain_valve_working))}
+            </table>
 
-      <div class="second-section">
-      <table class="report">
-        <colgroup>
-          <col style="width: 31%;" />
-          <col style="width: 18%;" />
-          <col style="width: 32%;" />
-          <col style="width: 19%;" />
-        </colgroup>
-        ${pairRow('No. Of Program Set', template.text(report.no_of_programs_set), 'Air Conditioner Provided', template.yesNo(report.ac_provided))}
-        ${pairRow('Compressor Details', template.text(report.compressor_details), 'Air Drier Details', template.text(report.air_drier_details))}
-        ${pairRow('Line Filter Condition', template.text(report.line_filter_condition), 'Machine Filter Condition', template.text(report.machine_filter_condition))}
-        <tr>
-          ${labelCell('')}
-          ${valueCell('')}
-          ${labelCell('Auto Drain Valve Working')}
-          ${valueCell(template.yesNo(report.auto_drain_valve_working), 'nowrap')}
-        </tr>
-        ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 28)}
-      </table>
-      <div class="notice">
-        We are not responsible for any damage to the mark color sorter machine ejector valves and pneumatic parts due to oil or water particles that comes from the compressor and air drier
-      </div>
-      <table class="report maintenance">
-        <tr><td colspan="2" class="maintenance-title">Routine Maintenance</td></tr>
-        <tr><td>1. ${template.escape(maintenanceItems[0])}</td><td>2. ${template.escape(maintenanceItems[1])}</td></tr>
-        <tr><td>3. ${template.escape(maintenanceItems[2])}</td><td>4. ${template.escape(maintenanceItems[3])}</td></tr>
-        <tr><td colspan="2">5. ${template.escape(maintenanceItems[4])}</td></tr>
-        <tr><td colspan="2">6. ${template.escape(maintenanceItems[5])}</td></tr>
-      </table>
-      <table class="report">
-        <tr class="signature-top-spacer"><td colspan="4"></td></tr>
-        ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
-        ${fullRow('Work Status Remarks :', template.text(report.status), 24)}
-        <tr class="signature-spacer"><td colspan="4"></td></tr>
-        <tr>
-          <td colspan="2" class="signature-cell">
-            <span class="label">Customer Signature:</span><br />
-            ${template.imageSrc(report.customer_signature) ? `<img class="signature-image" src="${template.imageSrc(report.customer_signature)}" />` : ''}
-          </td>
-          <td colspan="2" class="signature-cell">
-            <span class="label">Service Engineer Signature :</span><br />
-            ${template.imageSrc(report.engineer_signature) ? `<img class="signature-image" src="${template.imageSrc(report.engineer_signature)}" />` : ''}
-          </td>
-        </tr>
-      </table>
-      </div>
-  </main>
+            <!-- PAGE 2: Remarks & Routine Maintenance -->
+            <div class="second-section">
+              <table class="report">
+                ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 28)}
+              </table>
+              <div class="notice">
+                We are not responsible for any damage to the mark color sorter machine ejector valves and pneumatic parts due to oil or water particles that comes from the compressor and air drier
+              </div>
+              <table class="report maintenance">
+                <colgroup>
+                  <col style="width: 50%;" />
+                  <col style="width: 50%;" />
+                </colgroup>
+                <tr><td colspan="2" class="maintenance-title">Routine Maintenance</td></tr>
+                <tr>
+                  <td>1. ${template.escape(maintenanceItems[0])}</td>
+                  <td>2. ${template.escape(maintenanceItems[1])}</td>
+                </tr>
+                <tr>
+                  <td>3. ${template.escape(maintenanceItems[2])}</td>
+                  <td>4. ${template.escape(maintenanceItems[3])}</td>
+                </tr>
+                <tr>
+                  <td colspan="2">5. ${template.escape(maintenanceItems[4])}</td>
+                </tr>
+                <tr>
+                  <td colspan="2">6. ${template.escape(maintenanceItems[5])}</td>
+                </tr>
+              </table>
+              <table class="report">
+                <tr class="signature-top-spacer"><td colspan="2"></td></tr>
+                ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
+                ${fullRow('Work Status Remarks :', template.text(report.status), 24)}
+                <tr class="signature-spacer"><td colspan="2"></td></tr>
+                <tr>
+                  <td class="signature-cell" style="width: 50%;">
+                    <span class="label">Customer Signature:</span><br />
+                    ${template.imageSrc(report.customer_signature) ? `<img class="signature-image" src="${template.imageSrc(report.customer_signature)}" />` : ''}
+                  </td>
+                  <td class="signature-cell" style="width: 50%;">
+                    <span class="label">Service Engineer Signature :</span><br />
+                    ${template.imageSrc(report.engineer_signature) ? `<img class="signature-image" src="${template.imageSrc(report.engineer_signature)}" />` : ''}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </main>
         </td>
       </tr>
     </tbody>

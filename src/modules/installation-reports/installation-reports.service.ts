@@ -3,6 +3,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { SettingsService } from '../settings/settings.service';
+import { PdfService } from '../pdf/pdf.service';
+import { DocumentTemplateService } from '../pdf/templates/document-template.service';
+import {
+    CompanyPdfSettings,
+    renderInstallationReportPdfOptions,
+    renderInstallationReportTemplate,
+} from '../pdf/templates/installation-report.template';
 
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
@@ -17,6 +25,9 @@ export class InstallationReportsService {
     constructor(
         private prisma: PrismaService,
         private redis: RedisService,
+        private settingsService: SettingsService,
+        private pdfService: PdfService,
+        private documentTemplateService: DocumentTemplateService,
     ) { }
 
     async findAll(params: {
@@ -224,5 +235,48 @@ export class InstallationReportsService {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }
         await Promise.all(promises);
+    }
+
+    async generatePdf(id: string): Promise<{ buffer: Buffer; fileName: string }> {
+        const report = await this.findById(id);
+        const company = await this.getCompanyPdfSettings();
+        company.logoUrl = await this.pdfService.embedImageAsDataUrl(company.logoUrl);
+        const html = renderInstallationReportTemplate(
+            { report, company },
+            this.documentTemplateService,
+        );
+        const buffer = await this.pdfService.renderHtmlToPdf(
+            html,
+            renderInstallationReportPdfOptions(company, this.documentTemplateService),
+        );
+
+        return {
+            buffer,
+            fileName: `installation-report-${report.report_number}.pdf`,
+        };
+    }
+
+    private async getCompanyPdfSettings(): Promise<CompanyPdfSettings> {
+        const data = await this.settingsService.findAll({
+            skip: 0,
+            take: 200,
+            group: 'COMPANY',
+        });
+        const settings = new Map<string, string>(
+            data.settings.map((setting: { key: string; value: string }) => [setting.key, setting.value]),
+        );
+
+        return {
+            logoUrl: settings.get('COMPANY_HEADER_LOGO_URL') || '',
+            name: settings.get('COMPANY_NAME') || 'Mendo controls',
+            partnerDescription: settings.get('COMPANY_PARTNER_DESCRIPTION') || '',
+            addressLine1: settings.get('COMPANY_ADDRESS_LINE_1') || '',
+            addressLine2: settings.get('COMPANY_ADDRESS_LINE_2') || '',
+            region: settings.get('COMPANY_REGION') || '',
+            email: settings.get('COMPANY_EMAIL') || '',
+            tollFree: settings.get('COMPANY_TOLL_FREE') || '',
+            cellNumbers: settings.get('COMPANY_CELL_NUMBERS') || '',
+            gstNo: settings.get('COMPANY_GST_NO') || '',
+        };
     }
 }

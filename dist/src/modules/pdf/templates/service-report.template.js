@@ -334,7 +334,7 @@ function renderServiceReportTemplate(data, template) {
             </div>
           </td>
           ${labelCell('Time :')}
-          ${valueCell(template.text(report.visit_time), 'nowrap')}
+          ${valueCell(template.time(report.visit_time), 'nowrap')}
         </tr>
         <tr>${labelCell('Call Registered Date :')}${valueCell(template.date(report.call_registered_date), 'nowrap')}</tr>
         <tr>${labelCell('Model :')}${valueCell(template.text(report.machine_model))}</tr>

@@ -13,6 +13,10 @@ exports.InstallationReportsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
+const settings_service_1 = require("../settings/settings.service");
+const pdf_service_1 = require("../pdf/pdf.service");
+const document_template_service_1 = require("../pdf/templates/document-template.service");
+const installation_report_template_1 = require("../pdf/templates/installation-report.template");
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
     technicians: { include: { technician: { select: { id: true, full_name: true } } } },
@@ -20,11 +24,17 @@ const INCLUDE_SHAPE = {
 let InstallationReportsService = class InstallationReportsService {
     prisma;
     redis;
+    settingsService;
+    pdfService;
+    documentTemplateService;
     CACHE_PREFIX = 'installation-report:';
     LIST_CACHE_KEY = 'installation-reports:list:';
-    constructor(prisma, redis) {
+    constructor(prisma, redis, settingsService, pdfService, documentTemplateService) {
         this.prisma = prisma;
         this.redis = redis;
+        this.settingsService = settingsService;
+        this.pdfService = pdfService;
+        this.documentTemplateService = documentTemplateService;
     }
     async findAll(params) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
@@ -190,11 +200,45 @@ let InstallationReportsService = class InstallationReportsService {
         }
         await Promise.all(promises);
     }
+    async generatePdf(id) {
+        const report = await this.findById(id);
+        const company = await this.getCompanyPdfSettings();
+        company.logoUrl = await this.pdfService.embedImageAsDataUrl(company.logoUrl);
+        const html = (0, installation_report_template_1.renderInstallationReportTemplate)({ report, company }, this.documentTemplateService);
+        const buffer = await this.pdfService.renderHtmlToPdf(html, (0, installation_report_template_1.renderInstallationReportPdfOptions)(company, this.documentTemplateService));
+        return {
+            buffer,
+            fileName: `installation-report-${report.report_number}.pdf`,
+        };
+    }
+    async getCompanyPdfSettings() {
+        const data = await this.settingsService.findAll({
+            skip: 0,
+            take: 200,
+            group: 'COMPANY',
+        });
+        const settings = new Map(data.settings.map((setting) => [setting.key, setting.value]));
+        return {
+            logoUrl: settings.get('COMPANY_HEADER_LOGO_URL') || '',
+            name: settings.get('COMPANY_NAME') || 'Mendo controls',
+            partnerDescription: settings.get('COMPANY_PARTNER_DESCRIPTION') || '',
+            addressLine1: settings.get('COMPANY_ADDRESS_LINE_1') || '',
+            addressLine2: settings.get('COMPANY_ADDRESS_LINE_2') || '',
+            region: settings.get('COMPANY_REGION') || '',
+            email: settings.get('COMPANY_EMAIL') || '',
+            tollFree: settings.get('COMPANY_TOLL_FREE') || '',
+            cellNumbers: settings.get('COMPANY_CELL_NUMBERS') || '',
+            gstNo: settings.get('COMPANY_GST_NO') || '',
+        };
+    }
 };
 exports.InstallationReportsService = InstallationReportsService;
 exports.InstallationReportsService = InstallationReportsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        settings_service_1.SettingsService,
+        pdf_service_1.PdfService,
+        document_template_service_1.DocumentTemplateService])
 ], InstallationReportsService);
 //# sourceMappingURL=installation-reports.service.js.map

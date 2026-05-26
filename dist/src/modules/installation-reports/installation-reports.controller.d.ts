@@ -1,3 +1,4 @@
+import type { Response } from 'express';
 import { InstallationReportsService } from './installation-reports.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
@@ -5,6 +6,7 @@ export declare class InstallationReportsController {
     private readonly installationReportsService;
     constructor(installationReportsService: InstallationReportsService);
     findAll(skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    downloadPdf(id: string, res: Response): Promise<void>;
     findOne(id: string): Promise<any>;
     create(dto: CreateInstallationReportDto): Promise<({
         mill: {

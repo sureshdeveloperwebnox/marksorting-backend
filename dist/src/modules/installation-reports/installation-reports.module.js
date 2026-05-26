@@ -8,6 +8,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstallationReportsModule = void 0;
 const common_1 = require("@nestjs/common");
+const pdf_module_1 = require("../pdf/pdf.module");
+const settings_module_1 = require("../settings/settings.module");
 const installation_reports_service_1 = require("./installation-reports.service");
 const installation_reports_controller_1 = require("./installation-reports.controller");
 let InstallationReportsModule = class InstallationReportsModule {
@@ -15,6 +17,7 @@ let InstallationReportsModule = class InstallationReportsModule {
 exports.InstallationReportsModule = InstallationReportsModule;
 exports.InstallationReportsModule = InstallationReportsModule = __decorate([
     (0, common_1.Module)({
+        imports: [pdf_module_1.PdfModule, settings_module_1.SettingsModule],
         controllers: [installation_reports_controller_1.InstallationReportsController],
         providers: [installation_reports_service_1.InstallationReportsService],
         exports: [installation_reports_service_1.InstallationReportsService],

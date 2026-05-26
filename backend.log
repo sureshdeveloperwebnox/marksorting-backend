@@ -1,0 +1,7 @@
+
+> marksorting-backend@0.0.1 start:prod D:\Office\marksorting\marksorting-backend
+> node dist/src/main
+
+ ELIFECYCLE  Command failed with exit code 1.
+
+D:\Office\marksorting\marksorting-backend>
