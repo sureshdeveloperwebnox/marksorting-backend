@@ -33,6 +33,7 @@ const upload_module_1 = require("./modules/upload/upload.module");
 const technicians_module_1 = require("./modules/technicians/technicians.module");
 const tickets_module_1 = require("./modules/tickets/tickets.module");
 const settings_module_1 = require("./modules/settings/settings.module");
+const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -78,6 +79,7 @@ exports.AppModule = AppModule = __decorate([
             technicians_module_1.TechniciansModule,
             tickets_module_1.TicketsModule,
             settings_module_1.SettingsModule,
+            dashboard_module_1.DashboardModule,
         ],
     })
 ], AppModule);

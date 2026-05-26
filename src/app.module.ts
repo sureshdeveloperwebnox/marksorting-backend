@@ -21,6 +21,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { TechniciansModule } from './modules/technicians/technicians.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { SettingsModule } from './modules/settings/settings.module';
     TechniciansModule,
     TicketsModule,
     SettingsModule,
+    DashboardModule,
   ],
 })
 export class AppModule { }
