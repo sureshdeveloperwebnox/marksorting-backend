@@ -5,9 +5,9 @@ import { InstallationReportsService } from './installation-reports.service';
 import { InstallationReportsController } from './installation-reports.controller';
 
 @Module({
-    imports: [PdfModule, SettingsModule],
-    controllers: [InstallationReportsController],
-    providers: [InstallationReportsService],
-    exports: [InstallationReportsService],
+  imports: [PdfModule, SettingsModule],
+  controllers: [InstallationReportsController],
+  providers: [InstallationReportsService],
+  exports: [InstallationReportsService],
 })
 export class InstallationReportsModule {}

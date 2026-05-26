@@ -123,7 +123,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "nature_of_complaint", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Cleaned sensors and recalibrated sorting thresholds' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'Cleaned sensors and recalibrated sorting thresholds',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -171,7 +173,10 @@ __decorate([
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "previous_visit_engineer", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Vibration noise from sorting chamber', required: false }),
+    (0, swagger_1.ApiProperty)({
+        example: 'Vibration noise from sorting chamber',
+        required: false,
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

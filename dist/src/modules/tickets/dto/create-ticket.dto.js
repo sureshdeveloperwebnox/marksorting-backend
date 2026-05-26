@@ -45,7 +45,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTicketDto.prototype, "subject", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'The sorting machine printer is not printing reports and displays error code E-24.' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'The sorting machine printer is not printing reports and displays error code E-24.',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

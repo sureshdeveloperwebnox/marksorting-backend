@@ -53,6 +53,8 @@ const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
+const mobile_login_dto_1 = require("./dto/mobile-login.dto");
+const mobile_login_response_dto_1 = require("./dto/mobile-login-response.dto");
 const express = __importStar(require("express"));
 let AuthController = class AuthController {
     authService;
@@ -117,6 +119,13 @@ let AuthController = class AuthController {
     async getProfile(req) {
         return this.authService.getProfile(req.user.userId);
     }
+    async mobileLogin(mobileLoginDto) {
+        const user = await this.authService.validateServiceEngineer(mobileLoginDto.email, mobileLoginDto.password);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid email/password or user is not a service engineer');
+        }
+        return this.authService.mobileLogin(user);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -167,6 +176,24 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Post)('mobile/login'),
+    (0, swagger_1.ApiOperation)({ summary: 'Login for service engineers (mobile clients)' }),
+    (0, swagger_1.ApiBody)({ type: mobile_login_dto_1.MobileLoginDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Successful login',
+        type: mobile_login_response_dto_1.MobileLoginResponseDto,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Invalid credentials or not a service engineer',
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mobile_login_dto_1.MobileLoginDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "mobileLogin", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),

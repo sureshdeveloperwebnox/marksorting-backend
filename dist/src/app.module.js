@@ -48,7 +48,9 @@ exports.AppModule = AppModule = __decorate([
             nestjs_pino_1.LoggerModule.forRoot({
                 pinoHttp: {
                     safe: true,
-                    transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+                    transport: process.env.NODE_ENV !== 'production'
+                        ? { target: 'pino-pretty' }
+                        : undefined,
                 },
             }),
             bullmq_1.BullModule.forRootAsync({

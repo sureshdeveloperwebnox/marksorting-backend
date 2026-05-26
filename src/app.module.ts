@@ -33,7 +33,10 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     LoggerModule.forRoot({
       pinoHttp: {
         safe: true,
-        transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' }
+            : undefined,
       },
     }),
     BullModule.forRootAsync({
@@ -67,4 +70,4 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     DashboardModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}

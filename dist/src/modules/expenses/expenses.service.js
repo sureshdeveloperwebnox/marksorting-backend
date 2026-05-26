@@ -16,7 +16,9 @@ const redis_service_1 = require("../../redis/redis.service");
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
     expenseCategory: { select: { id: true, name: true } },
-    technicians: { include: { technician: { select: { id: true, full_name: true } } } },
+    technicians: {
+        include: { technician: { select: { id: true, full_name: true } } },
+    },
 };
 let ExpensesService = class ExpensesService {
     prisma;
@@ -40,7 +42,9 @@ let ExpensesService = class ExpensesService {
                 { place: { contains: search, mode: 'insensitive' } },
                 { others: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
-                { expenseCategory: { name: { contains: search, mode: 'insensitive' } } },
+                {
+                    expenseCategory: { name: { contains: search, mode: 'insensitive' } },
+                },
             ];
         }
         if (status) {
@@ -187,7 +191,9 @@ let ExpensesService = class ExpensesService {
         return expense;
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }

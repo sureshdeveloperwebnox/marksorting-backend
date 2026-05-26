@@ -15,7 +15,7 @@ import { Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-  @ApiTags('users')
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -35,7 +35,7 @@ export class UsersController {
     @Query('status') status?: string,
   ) {
     const where: Prisma.UserWhereInput = {};
-    
+
     if (search) {
       const orConditions: Prisma.UserWhereInput[] = [
         { full_name: { contains: search, mode: 'insensitive' } },
@@ -53,7 +53,7 @@ export class UsersController {
 
       where.OR = orConditions;
     }
-    
+
     if (status) {
       where.account_status = status;
     }

@@ -76,8 +76,8 @@ let UsersService = class UsersService {
             this.prisma.user.count({ where: { ...where, deleted_at: null } }),
         ]);
         const result = {
-            users: users.map(u => this.formatUser(u)),
-            total
+            users: users.map((u) => this.formatUser(u)),
+            total,
         };
         await this.redis.setJson(cacheKey, result, 300);
         return result;
@@ -89,7 +89,9 @@ let UsersService = class UsersService {
             return cached;
         const user = await this.prisma.user.findUnique({
             where: { email },
-            include: { role: { include: { permissions: { include: { permission: true } } } } },
+            include: {
+                role: { include: { permissions: { include: { permission: true } } } },
+            },
         });
         const formattedUser = user ? this.formatUser(user) : null;
         if (formattedUser)
@@ -103,7 +105,9 @@ let UsersService = class UsersService {
             return cached;
         const user = await this.prisma.user.findUnique({
             where: { id },
-            include: { role: { include: { permissions: { include: { permission: true } } } } },
+            include: {
+                role: { include: { permissions: { include: { permission: true } } } },
+            },
         });
         const formattedUser = user ? this.formatUser(user) : null;
         if (formattedUser)
@@ -115,7 +119,9 @@ let UsersService = class UsersService {
         if (data.phone_number === '') {
             data.phone_number = null;
         }
-        const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+        const existingUser = await this.prisma.user.findUnique({
+            where: { email: data.email },
+        });
         if (existingUser) {
             throw new common_1.ConflictException('User with this email already exists');
         }
@@ -133,7 +139,9 @@ let UsersService = class UsersService {
     async update(id, dto) {
         const { password, ...data } = dto;
         if (data.email) {
-            const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+            const existingUser = await this.prisma.user.findUnique({
+                where: { email: data.email },
+            });
             if (existingUser && existingUser.id !== id) {
                 throw new common_1.ConflictException('User with this email already exists');
             }
@@ -171,7 +179,9 @@ let UsersService = class UsersService {
         return roles;
     }
     async invalidateCache(id, email) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id)
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         if (email)
@@ -184,8 +194,12 @@ let UsersService = class UsersService {
             return null;
         return {
             ...user,
-            profile_image_url: user.profile_image ? this.s3Service.getFileUrl(user.profile_image) : null,
-            background_image_url: user.background_image ? this.s3Service.getFileUrl(user.background_image) : null,
+            profile_image_url: user.profile_image
+                ? this.s3Service.getFileUrl(user.profile_image)
+                : null,
+            background_image_url: user.background_image
+                ? this.s3Service.getFileUrl(user.background_image)
+                : null,
         };
     }
 };

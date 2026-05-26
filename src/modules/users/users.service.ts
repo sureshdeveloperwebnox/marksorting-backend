@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -25,11 +29,11 @@ export class UsersService {
     orderBy?: Prisma.UserOrderByWithRelationInput;
   }) {
     const { skip, take, where, orderBy } = params;
-    
+
     // Generate a unique cache key based on params
     const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
     const cachedData = await this.redis.getJson<any>(cacheKey);
-    
+
     if (cachedData) return cachedData;
 
     const [users, total] = await Promise.all([
@@ -43,9 +47,9 @@ export class UsersService {
       this.prisma.user.count({ where: { ...where, deleted_at: null } }),
     ]);
 
-    const result = { 
-      users: users.map(u => this.formatUser(u)), 
-      total 
+    const result = {
+      users: users.map((u) => this.formatUser(u)),
+      total,
     };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
@@ -58,9 +62,11 @@ export class UsersService {
 
     const user = await this.prisma.user.findUnique({
       where: { email },
-      include: { role: { include: { permissions: { include: { permission: true } } } } },
+      include: {
+        role: { include: { permissions: { include: { permission: true } } } },
+      },
     });
-    
+
     const formattedUser = user ? this.formatUser(user) : null;
     if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
     return formattedUser;
@@ -73,9 +79,11 @@ export class UsersService {
 
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: { role: { include: { permissions: { include: { permission: true } } } } },
+      include: {
+        role: { include: { permissions: { include: { permission: true } } } },
+      },
     });
- 
+
     const formattedUser = user ? this.formatUser(user) : null;
     if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
     return formattedUser;
@@ -83,20 +91,22 @@ export class UsersService {
 
   async create(dto: CreateUserDto) {
     const { password, ...data } = dto;
-    
+
     // Handle empty phone number
     if (data.phone_number === '') {
       (data as any).phone_number = null;
     }
-    
+
     // Check if email already exists
-    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: data.email },
+    });
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
     const password_hash = await bcrypt.hash(password, 10);
-    
+
     const user = await this.prisma.user.create({
       data: {
         ...data,
@@ -104,16 +114,18 @@ export class UsersService {
       },
       include: { role: true },
     });
-    
+
     await this.invalidateCache();
     return this.formatUser(user);
   }
 
   async update(id: string, dto: UpdateUserDto) {
     const { password, ...data } = dto;
-    
+
     if (data.email) {
-      const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
       if (existingUser && existingUser.id !== id) {
         throw new ConflictException('User with this email already exists');
       }
@@ -158,9 +170,12 @@ export class UsersService {
   }
 
   private async invalidateCache(id?: string, email?: string) {
-    const promises: Promise<any>[] = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+    const promises: Promise<any>[] = [
+      this.redis.delByPrefix(this.LIST_CACHE_KEY),
+    ];
     if (id) promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
-    if (email) promises.push(this.redis.del(`${this.CACHE_PREFIX}email:${email}`));
+    if (email)
+      promises.push(this.redis.del(`${this.CACHE_PREFIX}email:${email}`));
     promises.push(this.redis.del('users:roles'));
     await Promise.all(promises);
   }
@@ -169,8 +184,12 @@ export class UsersService {
     if (!user) return null;
     return {
       ...user,
-      profile_image_url: user.profile_image ? this.s3Service.getFileUrl(user.profile_image) : null,
-      background_image_url: user.background_image ? this.s3Service.getFileUrl(user.background_image) : null,
+      profile_image_url: user.profile_image
+        ? this.s3Service.getFileUrl(user.profile_image)
+        : null,
+      background_image_url: user.background_image
+        ? this.s3Service.getFileUrl(user.background_image)
+        : null,
     };
   }
 }

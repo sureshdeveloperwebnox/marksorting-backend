@@ -69,7 +69,9 @@ let RolesService = class RolesService {
         return formattedRole;
     }
     async create(dto) {
-        const existingRole = await this.prisma.role.findUnique({ where: { name: dto.name } });
+        const existingRole = await this.prisma.role.findUnique({
+            where: { name: dto.name },
+        });
         if (existingRole) {
             throw new common_1.ConflictException('Role with this name already exists');
         }
@@ -77,7 +79,8 @@ let RolesService = class RolesService {
             data: {
                 name: dto.name,
                 description: dto.description,
-                ...(dto.permission_ids && dto.permission_ids.length > 0 && {
+                ...(dto.permission_ids &&
+                    dto.permission_ids.length > 0 && {
                     permissions: {
                         create: dto.permission_ids.map((permissionId) => ({
                             permission: { connect: { id: permissionId } },
@@ -99,7 +102,9 @@ let RolesService = class RolesService {
         if (!existingRole)
             throw new common_1.NotFoundException('Role not found');
         if (dto.name && dto.name !== existingRole.name) {
-            const duplicate = await this.prisma.role.findUnique({ where: { name: dto.name } });
+            const duplicate = await this.prisma.role.findUnique({
+                where: { name: dto.name },
+            });
             if (duplicate)
                 throw new common_1.ConflictException('Role with this name already exists');
         }
@@ -134,7 +139,9 @@ let RolesService = class RolesService {
         return { message: 'Role deleted successfully' };
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id)
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         await Promise.all(promises);

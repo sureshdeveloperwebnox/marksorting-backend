@@ -20,7 +20,9 @@ const service_report_template_1 = require("../pdf/templates/service-report.templ
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
     serviceCategory: { select: { id: true, name: true } },
-    technicians: { include: { technician: { select: { id: true, full_name: true } } } },
+    technicians: {
+        include: { technician: { select: { id: true, full_name: true } } },
+    },
 };
 let ServiceReportsService = class ServiceReportsService {
     prisma;
@@ -156,9 +158,10 @@ let ServiceReportsService = class ServiceReportsService {
                 : null;
         }
         if (reportData.machine_installation_date !== undefined) {
-            updateData.machine_installation_date = reportData.machine_installation_date
-                ? new Date(reportData.machine_installation_date)
-                : null;
+            updateData.machine_installation_date =
+                reportData.machine_installation_date
+                    ? new Date(reportData.machine_installation_date)
+                    : null;
         }
         const serviceReport = await this.prisma.serviceReport.update({
             where: { id },
@@ -206,7 +209,10 @@ let ServiceReportsService = class ServiceReportsService {
             take: 200,
             group: 'COMPANY',
         });
-        const settings = new Map(data.settings.map((setting) => [setting.key, setting.value]));
+        const settings = new Map(data.settings.map((setting) => [
+            setting.key,
+            setting.value,
+        ]));
         return {
             logoUrl: settings.get('COMPANY_HEADER_LOGO_URL') || '',
             name: settings.get('COMPANY_NAME') || 'Mendo controls',
@@ -221,7 +227,9 @@ let ServiceReportsService = class ServiceReportsService {
         };
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }

@@ -30,7 +30,10 @@ exports.UploadController = UploadController;
 __decorate([
     (0, common_1.Post)('presigned-url'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a presigned URL for file upload' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Presigned URL generated successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Presigned URL generated successfully',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [get_presigned_url_dto_1.GetPresignedUrlDto]),

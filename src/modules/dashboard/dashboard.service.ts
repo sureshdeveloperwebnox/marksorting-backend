@@ -36,7 +36,20 @@ export class DashboardService {
     twelveMonthsAgo.setDate(1);
     twelveMonthsAgo.setHours(0, 0, 0, 0);
 
-    const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const MONTH_NAMES = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
     const getPast6Months = () => {
@@ -55,7 +68,7 @@ export class DashboardService {
     };
 
     const getDaysOfWeek = () => {
-      return DAY_NAMES.map(name => ({ name, value: 0 }));
+      return DAY_NAMES.map((name) => ({ name, value: 0 }));
     };
 
     const getComparison6Months = () => {
@@ -104,32 +117,96 @@ export class DashboardService {
     ] = await Promise.all([
       // Customers
       this.prisma.customer.count({ where: { deleted_at: null } }),
-      this.prisma.customer.count({ where: { deleted_at: null, created_at: { gte: startOfThisMonth } } }),
-      this.prisma.customer.count({ where: { deleted_at: null, created_at: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
-      this.prisma.customer.findMany({ where: { deleted_at: null }, orderBy: { created_at: 'desc' }, take: 4 }),
-      this.prisma.customer.findMany({ where: { deleted_at: null, created_at: { gte: sixMonthsAgo } }, select: { created_at: true, status: true } }),
+      this.prisma.customer.count({
+        where: { deleted_at: null, created_at: { gte: startOfThisMonth } },
+      }),
+      this.prisma.customer.count({
+        where: {
+          deleted_at: null,
+          created_at: { gte: startOfLastMonth, lt: startOfThisMonth },
+        },
+      }),
+      this.prisma.customer.findMany({
+        where: { deleted_at: null },
+        orderBy: { created_at: 'desc' },
+        take: 4,
+      }),
+      this.prisma.customer.findMany({
+        where: { deleted_at: null, created_at: { gte: sixMonthsAgo } },
+        select: { created_at: true, status: true },
+      }),
 
       // Installations
       this.prisma.installationReport.count({ where: { deleted_at: null } }),
-      this.prisma.installationReport.count({ where: { deleted_at: null, visit_date: { gte: startOfThisMonth } } }),
-      this.prisma.installationReport.count({ where: { deleted_at: null, visit_date: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
-      this.prisma.installationReport.findMany({ where: { deleted_at: null }, include: { mill: true }, orderBy: { created_at: 'desc' }, take: 4 }),
-      this.prisma.installationReport.findMany({ where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } }, select: { visit_date: true, status: true } }),
+      this.prisma.installationReport.count({
+        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+      }),
+      this.prisma.installationReport.count({
+        where: {
+          deleted_at: null,
+          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+        },
+      }),
+      this.prisma.installationReport.findMany({
+        where: { deleted_at: null },
+        include: { mill: true },
+        orderBy: { created_at: 'desc' },
+        take: 4,
+      }),
+      this.prisma.installationReport.findMany({
+        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        select: { visit_date: true, status: true },
+      }),
 
       // Services
       this.prisma.serviceReport.count({ where: { deleted_at: null } }),
-      this.prisma.serviceReport.count({ where: { deleted_at: null, visit_date: { gte: startOfThisMonth } } }),
-      this.prisma.serviceReport.count({ where: { deleted_at: null, visit_date: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
-      this.prisma.serviceReport.findMany({ where: { deleted_at: null }, include: { mill: true }, orderBy: { created_at: 'desc' }, take: 4 }),
-      this.prisma.serviceReport.findMany({ where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } }, select: { visit_date: true, status: true } }),
+      this.prisma.serviceReport.count({
+        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+      }),
+      this.prisma.serviceReport.count({
+        where: {
+          deleted_at: null,
+          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+        },
+      }),
+      this.prisma.serviceReport.findMany({
+        where: { deleted_at: null },
+        include: { mill: true },
+        orderBy: { created_at: 'desc' },
+        take: 4,
+      }),
+      this.prisma.serviceReport.findMany({
+        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        select: { visit_date: true, status: true },
+      }),
 
       // Expenses
       this.prisma.expense.count({ where: { deleted_at: null } }),
-      this.prisma.expense.aggregate({ where: { deleted_at: null }, _sum: { amount: true } }),
-      this.prisma.expense.aggregate({ where: { deleted_at: null, visit_date: { gte: startOfThisMonth } }, _sum: { amount: true } }),
-      this.prisma.expense.aggregate({ where: { deleted_at: null, visit_date: { gte: startOfLastMonth, lt: startOfThisMonth } }, _sum: { amount: true } }),
-      this.prisma.expense.findMany({ where: { deleted_at: null }, include: { mill: true, expenseCategory: true }, orderBy: { created_at: 'desc' }, take: 4 }),
-      this.prisma.expense.findMany({ where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } }, select: { visit_date: true, amount: true, status: true } }),
+      this.prisma.expense.aggregate({
+        where: { deleted_at: null },
+        _sum: { amount: true },
+      }),
+      this.prisma.expense.aggregate({
+        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+        _sum: { amount: true },
+      }),
+      this.prisma.expense.aggregate({
+        where: {
+          deleted_at: null,
+          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+        },
+        _sum: { amount: true },
+      }),
+      this.prisma.expense.findMany({
+        where: { deleted_at: null },
+        include: { mill: true, expenseCategory: true },
+        orderBy: { created_at: 'desc' },
+        take: 4,
+      }),
+      this.prisma.expense.findMany({
+        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        select: { visit_date: true, amount: true, status: true },
+      }),
 
       // Expenses in past 12 months
       this.prisma.expense.findMany({
@@ -142,9 +219,14 @@ export class DashboardService {
     ]);
 
     // Trend helper
-    const calculateTrend = (current: number, previous: number): { change: string; trend: 'up' | 'down' | 'neutral' } => {
+    const calculateTrend = (
+      current: number,
+      previous: number,
+    ): { change: string; trend: 'up' | 'down' | 'neutral' } => {
       if (previous === 0) {
-        return current > 0 ? { change: '+100%', trend: 'up' } : { change: '0%', trend: 'neutral' };
+        return current > 0
+          ? { change: '+100%', trend: 'up' }
+          : { change: '0%', trend: 'neutral' };
       }
       const pct = ((current - previous) / previous) * 100;
       if (pct > 0) return { change: `+${pct.toFixed(1)}%`, trend: 'up' };
@@ -153,28 +235,46 @@ export class DashboardService {
     };
 
     // Calculate trends
-    const customerTrend = calculateTrend(newCustomersThisMonth, newCustomersLastMonth);
-    const installationTrend = calculateTrend(newInstallationsThisMonth, newInstallationsLastMonth);
-    const serviceTrend = calculateTrend(newServicesThisMonth, newServicesLastMonth);
+    const customerTrend = calculateTrend(
+      newCustomersThisMonth,
+      newCustomersLastMonth,
+    );
+    const installationTrend = calculateTrend(
+      newInstallationsThisMonth,
+      newInstallationsLastMonth,
+    );
+    const serviceTrend = calculateTrend(
+      newServicesThisMonth,
+      newServicesLastMonth,
+    );
     const expenseSumThisMonth = Number(expensesThisMonth._sum.amount || 0);
     const expenseSumLastMonth = Number(expensesLastMonth._sum.amount || 0);
-    const expenseTrend = calculateTrend(expenseSumThisMonth, expenseSumLastMonth);
+    const expenseTrend = calculateTrend(
+      expenseSumThisMonth,
+      expenseSumLastMonth,
+    );
 
     // ─── CONSTRUCT CONTEXTS ───────────────────────────────────────────────────
 
     // 1. CUSTOMERS CONTEXT
     const customersPerformance = getPast6Months();
     const customersComparison = getComparison6Months();
-    allCustomers6Months.forEach(c => {
+    allCustomers6Months.forEach((c) => {
       const date = new Date(c.created_at);
-      const idx = customersPerformance.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const idx = customersPerformance.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (idx !== -1) {
         customersPerformance[idx].total += 1;
         if (c.status === 'ACTIVE') {
-          customersPerformance[idx].success += 1; 
+          customersPerformance[idx].success += 1;
         }
       }
-      const cIdx = customersComparison.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const cIdx = customersComparison.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (cIdx !== -1) {
         if (c.status === 'ACTIVE') {
           customersComparison[cIdx].completed += 1;
@@ -184,11 +284,11 @@ export class DashboardService {
       }
     });
     const customersProduction = getDaysOfWeek();
-    allCustomers6Months.forEach(c => {
+    allCustomers6Months.forEach((c) => {
       const date = new Date(c.created_at);
-      customersProduction[date.getDay()].value += 10; 
+      customersProduction[date.getDay()].value += 10;
     });
-    const customersStatusList = recentCustomers.map(c => ({
+    const customersStatusList = recentCustomers.map((c) => ({
       id: c.id,
       name: c.name,
       type: c.status,
@@ -201,16 +301,22 @@ export class DashboardService {
     // 2. INSTALLATIONS CONTEXT
     const installationsPerformance = getPast6Months();
     const installationsComparison = getComparison6Months();
-    allInstallations6Months.forEach(i => {
+    allInstallations6Months.forEach((i) => {
       const date = new Date(i.visit_date);
-      const idx = installationsPerformance.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const idx = installationsPerformance.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (idx !== -1) {
         installationsPerformance[idx].total += 1;
         if (i.status === 'COMPLETED') {
           installationsPerformance[idx].success += 1;
         }
       }
-      const cIdx = installationsComparison.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const cIdx = installationsComparison.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (cIdx !== -1) {
         if (i.status === 'COMPLETED') {
           installationsComparison[cIdx].completed += 1;
@@ -220,11 +326,11 @@ export class DashboardService {
       }
     });
     const installationsProduction = getDaysOfWeek();
-    allInstallations6Months.forEach(i => {
+    allInstallations6Months.forEach((i) => {
       const date = new Date(i.visit_date);
       installationsProduction[date.getDay()].value += 1;
     });
-    const installationsStatusList = recentInstallations.map(ri => ({
+    const installationsStatusList = recentInstallations.map((ri) => ({
       id: ri.id,
       name: ri.mill?.name || 'Unknown Mill',
       type: ri.machine_model,
@@ -237,14 +343,20 @@ export class DashboardService {
     // 3. SERVICES CONTEXT
     const servicesPerformance = getPast6Months();
     const servicesComparison = getComparison6Months();
-    allServices6Months.forEach(s => {
+    allServices6Months.forEach((s) => {
       const date = new Date(s.visit_date);
-      const idx = servicesPerformance.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const idx = servicesPerformance.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (idx !== -1) {
         servicesPerformance[idx].total += 1;
         servicesPerformance[idx].success += s.status === 'COMPLETED' ? 1 : 0;
       }
-      const cIdx = servicesComparison.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const cIdx = servicesComparison.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (cIdx !== -1) {
         if (s.status === 'COMPLETED') {
           servicesComparison[cIdx].completed += 1;
@@ -254,11 +366,11 @@ export class DashboardService {
       }
     });
     const servicesProduction = getDaysOfWeek();
-    allServices6Months.forEach(s => {
+    allServices6Months.forEach((s) => {
       const date = new Date(s.visit_date);
       servicesProduction[date.getDay()].value += 1;
     });
-    const servicesStatusList = recentServices.map(rs => ({
+    const servicesStatusList = recentServices.map((rs) => ({
       id: rs.id,
       name: rs.mill?.name || 'Unknown Mill',
       type: rs.machine_model,
@@ -271,14 +383,20 @@ export class DashboardService {
     // 4. EXPENSES CONTEXT
     const expensesPerformance = getPast6Months();
     const expensesComparison = getComparison6Months();
-    allExpenses6Months.forEach(e => {
+    allExpenses6Months.forEach((e) => {
       const date = new Date(e.visit_date);
-      const idx = expensesPerformance.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const idx = expensesPerformance.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (idx !== -1) {
         expensesPerformance[idx].total += Number(e.amount);
-        expensesPerformance[idx].success += Number(e.amount) * 0.95; 
+        expensesPerformance[idx].success += Number(e.amount) * 0.95;
       }
-      const cIdx = expensesComparison.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+      const cIdx = expensesComparison.findIndex(
+        (p) =>
+          p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+      );
       if (cIdx !== -1) {
         if (e.status === 'COMPLETED') {
           expensesComparison[cIdx].completed += Number(e.amount);
@@ -288,11 +406,11 @@ export class DashboardService {
       }
     });
     const expensesProduction = getDaysOfWeek();
-    allExpenses6Months.forEach(e => {
+    allExpenses6Months.forEach((e) => {
       const date = new Date(e.visit_date);
       expensesProduction[date.getDay()].value += Number(e.amount);
     });
-    const expensesStatusList = recentExpenses.map(re => ({
+    const expensesStatusList = recentExpenses.map((re) => ({
       id: re.id,
       name: re.mill?.name || 'General Expense',
       type: re.expenseCategory?.name || 'Others',
@@ -334,7 +452,7 @@ export class DashboardService {
       {
         id: 'expenses',
         title: 'Total Expenses',
-        value: expensesSumResult._sum.amount 
+        value: expensesSumResult._sum.amount
           ? `₹ ${Number(expensesSumResult._sum.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
           : '₹ 5,222',
         change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
@@ -345,8 +463,12 @@ export class DashboardService {
     ];
 
     // Helper checks to see if we have actual populated metric entries in our groupings
-    const hasData = (arr: any[], key = 'total') => arr.some(item => Number(item[key]) > 0);
-    const hasComparison = (arr: any[]) => arr.some(item => Number(item.completed) > 0 || Number(item.pending) > 0);
+    const hasData = (arr: any[], key = 'total') =>
+      arr.some((item) => Number(item[key]) > 0);
+    const hasComparison = (arr: any[]) =>
+      arr.some(
+        (item) => Number(item.completed) > 0 || Number(item.pending) > 0,
+      );
 
     // Helper to calculate percentage
     const calculatePercentage = (value: number, total: number): number => {
@@ -371,11 +493,13 @@ export class DashboardService {
       success: [10, 14, 18, 15, 20, 22][idx] || 15,
       total: [12, 16, 20, 18, 22, 25][idx] || 18,
     }));
-    const defaultInstallationsComparison = getComparison6Months().map((p, idx) => ({
-      name: p.name,
-      completed: [10, 12, 15, 11, 18, 20][idx] || 12,
-      pending: [4, 6, 8, 5, 6, 10][idx] || 6,
-    }));
+    const defaultInstallationsComparison = getComparison6Months().map(
+      (p, idx) => ({
+        name: p.name,
+        completed: [10, 12, 15, 11, 18, 20][idx] || 12,
+        pending: [4, 6, 8, 5, 6, 10][idx] || 6,
+      }),
+    );
 
     const defaultServicesPerformance = getPast6Months().map((p, idx) => ({
       name: p.name,
@@ -400,225 +524,423 @@ export class DashboardService {
     }));
 
     // Calculate percentages for performance data
-    const customersPerformanceWithPct = customersPerformance.map(p => ({
+    const customersPerformanceWithPct = customersPerformance.map((p) => ({
       name: p.name,
       success: p.success,
       total: p.total,
-      successPercentage: calculatePercentage(p.success, p.total)
+      successPercentage: calculatePercentage(p.success, p.total),
     }));
-    const installationsPerformanceWithPct = installationsPerformance.map(p => ({
+    const installationsPerformanceWithPct = installationsPerformance.map(
+      (p) => ({
+        name: p.name,
+        success: p.success,
+        total: p.total,
+        successPercentage: calculatePercentage(p.success, p.total),
+      }),
+    );
+    const servicesPerformanceWithPct = servicesPerformance.map((p) => ({
       name: p.name,
       success: p.success,
       total: p.total,
-      successPercentage: calculatePercentage(p.success, p.total)
+      successPercentage: calculatePercentage(p.success, p.total),
     }));
-    const servicesPerformanceWithPct = servicesPerformance.map(p => ({
+    const expensesPerformanceWithPct = expensesPerformance.map((p) => ({
       name: p.name,
       success: p.success,
       total: p.total,
-      successPercentage: calculatePercentage(p.success, p.total)
-    }));
-    const expensesPerformanceWithPct = expensesPerformance.map(p => ({
-      name: p.name,
-      success: p.success,
-      total: p.total,
-      successPercentage: calculatePercentage(p.success, p.total)
+      successPercentage: calculatePercentage(p.success, p.total),
     }));
 
     // Calculate percentages for comparison data
-    const customersComparisonWithPct = customersComparison.map(p => {
+    const customersComparisonWithPct = customersComparison.map((p) => {
       const total = p.completed + p.pending;
       return {
         name: p.name,
         completed: p.completed,
         pending: p.pending,
         completedPercentage: calculatePercentage(p.completed, total),
-        pendingPercentage: calculatePercentage(p.pending, total)
+        pendingPercentage: calculatePercentage(p.pending, total),
       };
     });
-    const installationsComparisonWithPct = installationsComparison.map(p => {
+    const installationsComparisonWithPct = installationsComparison.map((p) => {
       const total = p.completed + p.pending;
       return {
         name: p.name,
         completed: p.completed,
         pending: p.pending,
         completedPercentage: calculatePercentage(p.completed, total),
-        pendingPercentage: calculatePercentage(p.pending, total)
+        pendingPercentage: calculatePercentage(p.pending, total),
       };
     });
-    const servicesComparisonWithPct = servicesComparison.map(p => {
+    const servicesComparisonWithPct = servicesComparison.map((p) => {
       const total = p.completed + p.pending;
       return {
         name: p.name,
         completed: p.completed,
         pending: p.pending,
         completedPercentage: calculatePercentage(p.completed, total),
-        pendingPercentage: calculatePercentage(p.pending, total)
+        pendingPercentage: calculatePercentage(p.pending, total),
       };
     });
-    const expensesComparisonWithPct = expensesComparison.map(p => {
+    const expensesComparisonWithPct = expensesComparison.map((p) => {
       const total = p.completed + p.pending;
       return {
         name: p.name,
         completed: p.completed,
         pending: p.pending,
         completedPercentage: calculatePercentage(p.completed, total),
-        pendingPercentage: calculatePercentage(p.pending, total)
+        pendingPercentage: calculatePercentage(p.pending, total),
       };
     });
 
     // Calculate percentages for production data
-    const customersProductionTotal = customersProduction.reduce((acc, curr) => acc + curr.value, 0);
-    const customersProductionWithPct = customersProduction.map(p => ({
+    const customersProductionTotal = customersProduction.reduce(
+      (acc, curr) => acc + curr.value,
+      0,
+    );
+    const customersProductionWithPct = customersProduction.map((p) => ({
       name: p.name,
       value: p.value,
-      percentage: calculatePercentage(p.value, customersProductionTotal)
+      percentage: calculatePercentage(p.value, customersProductionTotal),
     }));
-    const installationsProductionTotal = installationsProduction.reduce((acc, curr) => acc + curr.value, 0);
-    const installationsProductionWithPct = installationsProduction.map(p => ({
+    const installationsProductionTotal = installationsProduction.reduce(
+      (acc, curr) => acc + curr.value,
+      0,
+    );
+    const installationsProductionWithPct = installationsProduction.map((p) => ({
       name: p.name,
       value: p.value,
-      percentage: calculatePercentage(p.value, installationsProductionTotal)
+      percentage: calculatePercentage(p.value, installationsProductionTotal),
     }));
-    const servicesProductionTotal = servicesProduction.reduce((acc, curr) => acc + curr.value, 0);
-    const servicesProductionWithPct = servicesProduction.map(p => ({
+    const servicesProductionTotal = servicesProduction.reduce(
+      (acc, curr) => acc + curr.value,
+      0,
+    );
+    const servicesProductionWithPct = servicesProduction.map((p) => ({
       name: p.name,
       value: p.value,
-      percentage: calculatePercentage(p.value, servicesProductionTotal)
+      percentage: calculatePercentage(p.value, servicesProductionTotal),
     }));
-    const expensesProductionTotal = expensesProduction.reduce((acc, curr) => acc + curr.value, 0);
-    const expensesProductionWithPct = expensesProduction.map(p => ({
+    const expensesProductionTotal = expensesProduction.reduce(
+      (acc, curr) => acc + curr.value,
+      0,
+    );
+    const expensesProductionWithPct = expensesProduction.map((p) => ({
       name: p.name,
       value: p.value,
-      percentage: calculatePercentage(p.value, expensesProductionTotal)
+      percentage: calculatePercentage(p.value, expensesProductionTotal),
     }));
 
     // Fallback datasets for empty database states to guarantee a premium dashboard layout populated with values
     const finalContexts = {
       customers: {
-        performance: hasData(customersPerformance) ? customersPerformanceWithPct : defaultCustomersPerformance.map(p => ({
-          name: p.name,
-          success: p.success,
-          total: p.total,
-          successPercentage: calculatePercentage(p.success, p.total)
-        })),
-        production: hasData(customersProduction, 'value') ? customersProductionWithPct : [
-          { name: 'Sun', value: 10, percentage: calculatePercentage(10, 215) },
-          { name: 'Mon', value: 30, percentage: calculatePercentage(30, 215) },
-          { name: 'Tue', value: 50, percentage: calculatePercentage(50, 215) },
-          { name: 'Wed', value: 20, percentage: calculatePercentage(20, 215) },
-          { name: 'Thu', value: 40, percentage: calculatePercentage(40, 215) },
-          { name: 'Fri', value: 60, percentage: calculatePercentage(60, 215) },
-          { name: 'Sat', value: 45, percentage: calculatePercentage(45, 215) },
-        ],
-        comparison: hasComparison(customersComparison) ? customersComparisonWithPct : defaultCustomersComparison.map(p => {
-          const total = p.completed + p.pending;
-          return {
-            name: p.name,
-            completed: p.completed,
-            pending: p.pending,
-            completedPercentage: calculatePercentage(p.completed, total),
-            pendingPercentage: calculatePercentage(p.pending, total)
-          };
-        }),
-        statusList: customersCount > 0 ? customersStatusList : [
-          { id: '1', name: 'Krishna Textiles', type: 'Active Partner', rate: 90, profit: 'Active', icon: '👥', color: 'bg-emerald-500' },
-          { id: '2', name: 'Balaji Cotton Mills', type: 'Standard', rate: 70, profit: 'Active', icon: '👥', color: 'bg-emerald-500' },
-          { id: '3', name: 'Apex Sorting Hub', type: 'Enterprise', rate: 95, profit: 'Active', icon: '👥', color: 'bg-emerald-500' },
-        ],
+        performance: hasData(customersPerformance)
+          ? customersPerformanceWithPct
+          : defaultCustomersPerformance.map((p) => ({
+              name: p.name,
+              success: p.success,
+              total: p.total,
+              successPercentage: calculatePercentage(p.success, p.total),
+            })),
+        production: hasData(customersProduction, 'value')
+          ? customersProductionWithPct
+          : [
+              {
+                name: 'Sun',
+                value: 10,
+                percentage: calculatePercentage(10, 215),
+              },
+              {
+                name: 'Mon',
+                value: 30,
+                percentage: calculatePercentage(30, 215),
+              },
+              {
+                name: 'Tue',
+                value: 50,
+                percentage: calculatePercentage(50, 215),
+              },
+              {
+                name: 'Wed',
+                value: 20,
+                percentage: calculatePercentage(20, 215),
+              },
+              {
+                name: 'Thu',
+                value: 40,
+                percentage: calculatePercentage(40, 215),
+              },
+              {
+                name: 'Fri',
+                value: 60,
+                percentage: calculatePercentage(60, 215),
+              },
+              {
+                name: 'Sat',
+                value: 45,
+                percentage: calculatePercentage(45, 215),
+              },
+            ],
+        comparison: hasComparison(customersComparison)
+          ? customersComparisonWithPct
+          : defaultCustomersComparison.map((p) => {
+              const total = p.completed + p.pending;
+              return {
+                name: p.name,
+                completed: p.completed,
+                pending: p.pending,
+                completedPercentage: calculatePercentage(p.completed, total),
+                pendingPercentage: calculatePercentage(p.pending, total),
+              };
+            }),
+        statusList:
+          customersCount > 0
+            ? customersStatusList
+            : [
+                {
+                  id: '1',
+                  name: 'Krishna Textiles',
+                  type: 'Active Partner',
+                  rate: 90,
+                  profit: 'Active',
+                  icon: '👥',
+                  color: 'bg-emerald-500',
+                },
+                {
+                  id: '2',
+                  name: 'Balaji Cotton Mills',
+                  type: 'Standard',
+                  rate: 70,
+                  profit: 'Active',
+                  icon: '👥',
+                  color: 'bg-emerald-500',
+                },
+                {
+                  id: '3',
+                  name: 'Apex Sorting Hub',
+                  type: 'Enterprise',
+                  rate: 95,
+                  profit: 'Active',
+                  icon: '👥',
+                  color: 'bg-emerald-500',
+                },
+              ],
       },
       installations: {
-        performance: hasData(installationsPerformance) ? installationsPerformanceWithPct : defaultInstallationsPerformance.map(p => ({
-          name: p.name,
-          success: p.success,
-          total: p.total,
-          successPercentage: calculatePercentage(p.success, p.total)
-        })),
-        production: hasData(installationsProduction, 'value') ? installationsProductionWithPct : [
-          { name: 'Sun', value: 1, percentage: calculatePercentage(1, 24) },
-          { name: 'Mon', value: 3, percentage: calculatePercentage(3, 24) },
-          { name: 'Tue', value: 6, percentage: calculatePercentage(6, 24) },
-          { name: 'Wed', value: 2, percentage: calculatePercentage(2, 24) },
-          { name: 'Thu', value: 4, percentage: calculatePercentage(4, 24) },
-          { name: 'Fri', value: 5, percentage: calculatePercentage(5, 24) },
-          { name: 'Sat', value: 3, percentage: calculatePercentage(3, 24) },
-        ],
-        comparison: hasComparison(installationsComparison) ? installationsComparisonWithPct : defaultInstallationsComparison.map(p => {
-          const total = p.completed + p.pending;
-          return {
-            name: p.name,
-            completed: p.completed,
-            pending: p.pending,
-            completedPercentage: calculatePercentage(p.completed, total),
-            pendingPercentage: calculatePercentage(p.pending, total)
-          };
-        }),
-        statusList: installationsCount > 0 ? installationsStatusList : [
-          { id: '1', name: 'Surat Textile Mill #4', type: 'High Speed', rate: 100, profit: 'COMPLETED', icon: '🛠️', color: 'bg-rose-500' },
-          { id: '2', name: 'Ahmedabad Mill #7', type: 'Standard', rate: 50, profit: 'PENDING', icon: '🛠️', color: 'bg-rose-500' },
-        ],
+        performance: hasData(installationsPerformance)
+          ? installationsPerformanceWithPct
+          : defaultInstallationsPerformance.map((p) => ({
+              name: p.name,
+              success: p.success,
+              total: p.total,
+              successPercentage: calculatePercentage(p.success, p.total),
+            })),
+        production: hasData(installationsProduction, 'value')
+          ? installationsProductionWithPct
+          : [
+              { name: 'Sun', value: 1, percentage: calculatePercentage(1, 24) },
+              { name: 'Mon', value: 3, percentage: calculatePercentage(3, 24) },
+              { name: 'Tue', value: 6, percentage: calculatePercentage(6, 24) },
+              { name: 'Wed', value: 2, percentage: calculatePercentage(2, 24) },
+              { name: 'Thu', value: 4, percentage: calculatePercentage(4, 24) },
+              { name: 'Fri', value: 5, percentage: calculatePercentage(5, 24) },
+              { name: 'Sat', value: 3, percentage: calculatePercentage(3, 24) },
+            ],
+        comparison: hasComparison(installationsComparison)
+          ? installationsComparisonWithPct
+          : defaultInstallationsComparison.map((p) => {
+              const total = p.completed + p.pending;
+              return {
+                name: p.name,
+                completed: p.completed,
+                pending: p.pending,
+                completedPercentage: calculatePercentage(p.completed, total),
+                pendingPercentage: calculatePercentage(p.pending, total),
+              };
+            }),
+        statusList:
+          installationsCount > 0
+            ? installationsStatusList
+            : [
+                {
+                  id: '1',
+                  name: 'Surat Textile Mill #4',
+                  type: 'High Speed',
+                  rate: 100,
+                  profit: 'COMPLETED',
+                  icon: '🛠️',
+                  color: 'bg-rose-500',
+                },
+                {
+                  id: '2',
+                  name: 'Ahmedabad Mill #7',
+                  type: 'Standard',
+                  rate: 50,
+                  profit: 'PENDING',
+                  icon: '🛠️',
+                  color: 'bg-rose-500',
+                },
+              ],
       },
       services: {
-        performance: hasData(servicesPerformance) ? servicesPerformanceWithPct : defaultServicesPerformance.map(p => ({
-          name: p.name,
-          success: p.success,
-          total: p.total,
-          successPercentage: calculatePercentage(p.success, p.total)
-        })),
-        production: hasData(servicesProduction, 'value') ? servicesProductionWithPct : [
-          { name: 'Sun', value: 5, percentage: calculatePercentage(5, 91) },
-          { name: 'Mon', value: 12, percentage: calculatePercentage(12, 91) },
-          { name: 'Tue', value: 18, percentage: calculatePercentage(18, 91) },
-          { name: 'Wed', value: 9, percentage: calculatePercentage(9, 91) },
-          { name: 'Thu', value: 15, percentage: calculatePercentage(15, 91) },
-          { name: 'Fri', value: 22, percentage: calculatePercentage(22, 91) },
-          { name: 'Sat', value: 10, percentage: calculatePercentage(10, 91) },
-        ],
-        comparison: hasComparison(servicesComparison) ? servicesComparisonWithPct : defaultServicesComparison.map(p => {
-          const total = p.completed + p.pending;
-          return {
-            name: p.name,
-            completed: p.completed,
-            pending: p.pending,
-            completedPercentage: calculatePercentage(p.completed, total),
-            pendingPercentage: calculatePercentage(p.pending, total)
-          };
-        }),
-        statusList: servicesCount > 0 ? servicesStatusList : [
-          { id: '1', name: 'Mumbai Sorting Hub', type: 'Logistics', rate: 100, profit: 'COMPLETED', icon: '⚙️', color: 'bg-blue-500' },
-          { id: '2', name: 'Delhi Textile Unit', type: 'Precision', rate: 40, profit: 'PENDING', icon: '⚙️', color: 'bg-blue-500' },
-        ],
+        performance: hasData(servicesPerformance)
+          ? servicesPerformanceWithPct
+          : defaultServicesPerformance.map((p) => ({
+              name: p.name,
+              success: p.success,
+              total: p.total,
+              successPercentage: calculatePercentage(p.success, p.total),
+            })),
+        production: hasData(servicesProduction, 'value')
+          ? servicesProductionWithPct
+          : [
+              { name: 'Sun', value: 5, percentage: calculatePercentage(5, 91) },
+              {
+                name: 'Mon',
+                value: 12,
+                percentage: calculatePercentage(12, 91),
+              },
+              {
+                name: 'Tue',
+                value: 18,
+                percentage: calculatePercentage(18, 91),
+              },
+              { name: 'Wed', value: 9, percentage: calculatePercentage(9, 91) },
+              {
+                name: 'Thu',
+                value: 15,
+                percentage: calculatePercentage(15, 91),
+              },
+              {
+                name: 'Fri',
+                value: 22,
+                percentage: calculatePercentage(22, 91),
+              },
+              {
+                name: 'Sat',
+                value: 10,
+                percentage: calculatePercentage(10, 91),
+              },
+            ],
+        comparison: hasComparison(servicesComparison)
+          ? servicesComparisonWithPct
+          : defaultServicesComparison.map((p) => {
+              const total = p.completed + p.pending;
+              return {
+                name: p.name,
+                completed: p.completed,
+                pending: p.pending,
+                completedPercentage: calculatePercentage(p.completed, total),
+                pendingPercentage: calculatePercentage(p.pending, total),
+              };
+            }),
+        statusList:
+          servicesCount > 0
+            ? servicesStatusList
+            : [
+                {
+                  id: '1',
+                  name: 'Mumbai Sorting Hub',
+                  type: 'Logistics',
+                  rate: 100,
+                  profit: 'COMPLETED',
+                  icon: '⚙️',
+                  color: 'bg-blue-500',
+                },
+                {
+                  id: '2',
+                  name: 'Delhi Textile Unit',
+                  type: 'Precision',
+                  rate: 40,
+                  profit: 'PENDING',
+                  icon: '⚙️',
+                  color: 'bg-blue-500',
+                },
+              ],
       },
       expenses: {
-        performance: hasData(expensesPerformance) ? expensesPerformanceWithPct : defaultExpensesPerformance.map(p => ({
-          name: p.name,
-          success: p.success,
-          total: p.total,
-          successPercentage: calculatePercentage(p.success, p.total)
-        })),
-        production: hasData(expensesProduction, 'value') ? expensesProductionWithPct : [
-          { name: 'Sun', value: 200, percentage: calculatePercentage(200, 6600) },
-          { name: 'Mon', value: 800, percentage: calculatePercentage(800, 6600) },
-          { name: 'Tue', value: 1500, percentage: calculatePercentage(1500, 6600) },
-          { name: 'Wed', value: 600, percentage: calculatePercentage(600, 6600) },
-          { name: 'Thu', value: 1200, percentage: calculatePercentage(1200, 6600) },
-          { name: 'Fri', value: 1800, percentage: calculatePercentage(1800, 6600) },
-          { name: 'Sat', value: 500, percentage: calculatePercentage(500, 6600) },
-        ],
-        comparison: hasComparison(expensesComparison) ? expensesComparisonWithPct : defaultExpensesComparison.map(p => {
-          const total = p.completed + p.pending;
-          return {
-            name: p.name,
-            completed: p.completed,
-            pending: p.pending,
-            completedPercentage: calculatePercentage(p.completed, total),
-            pendingPercentage: calculatePercentage(p.pending, total)
-          };
-        }),
-        statusList: expensesCount > 0 ? expensesStatusList : [
-          { id: '1', name: 'Surat Textile Mill #4', type: 'Travel Allowance', rate: 100, profit: '₹2,500', icon: '💰', color: 'bg-amber-500' },
-          { id: '2', name: 'Ahemdabad Mill #7', type: 'Spare Parts', rate: 100, profit: '₹2,722', icon: '💰', color: 'bg-amber-500' },
-        ],
+        performance: hasData(expensesPerformance)
+          ? expensesPerformanceWithPct
+          : defaultExpensesPerformance.map((p) => ({
+              name: p.name,
+              success: p.success,
+              total: p.total,
+              successPercentage: calculatePercentage(p.success, p.total),
+            })),
+        production: hasData(expensesProduction, 'value')
+          ? expensesProductionWithPct
+          : [
+              {
+                name: 'Sun',
+                value: 200,
+                percentage: calculatePercentage(200, 6600),
+              },
+              {
+                name: 'Mon',
+                value: 800,
+                percentage: calculatePercentage(800, 6600),
+              },
+              {
+                name: 'Tue',
+                value: 1500,
+                percentage: calculatePercentage(1500, 6600),
+              },
+              {
+                name: 'Wed',
+                value: 600,
+                percentage: calculatePercentage(600, 6600),
+              },
+              {
+                name: 'Thu',
+                value: 1200,
+                percentage: calculatePercentage(1200, 6600),
+              },
+              {
+                name: 'Fri',
+                value: 1800,
+                percentage: calculatePercentage(1800, 6600),
+              },
+              {
+                name: 'Sat',
+                value: 500,
+                percentage: calculatePercentage(500, 6600),
+              },
+            ],
+        comparison: hasComparison(expensesComparison)
+          ? expensesComparisonWithPct
+          : defaultExpensesComparison.map((p) => {
+              const total = p.completed + p.pending;
+              return {
+                name: p.name,
+                completed: p.completed,
+                pending: p.pending,
+                completedPercentage: calculatePercentage(p.completed, total),
+                pendingPercentage: calculatePercentage(p.pending, total),
+              };
+            }),
+        statusList:
+          expensesCount > 0
+            ? expensesStatusList
+            : [
+                {
+                  id: '1',
+                  name: 'Surat Textile Mill #4',
+                  type: 'Travel Allowance',
+                  rate: 100,
+                  profit: '₹2,500',
+                  icon: '💰',
+                  color: 'bg-amber-500',
+                },
+                {
+                  id: '2',
+                  name: 'Ahemdabad Mill #7',
+                  type: 'Spare Parts',
+                  rate: 100,
+                  profit: '₹2,722',
+                  icon: '💰',
+                  color: 'bg-amber-500',
+                },
+              ],
       },
     };
 
@@ -641,7 +963,10 @@ export class DashboardService {
     expensesPast12Months.forEach((e: any) => {
       if (e.visit_date) {
         const date = new Date(e.visit_date);
-        const idx = past12MonthsExpenses.findIndex(p => p.monthNum === date.getMonth() && p.yearNum === date.getFullYear());
+        const idx = past12MonthsExpenses.findIndex(
+          (p) =>
+            p.monthNum === date.getMonth() && p.yearNum === date.getFullYear(),
+        );
         if (idx !== -1) {
           past12MonthsExpenses[idx].value += Number(e.amount || 0);
         }
@@ -663,17 +988,26 @@ export class DashboardService {
       '#78350f', // Deep Brown Amber
     ];
 
-    const total12MonthExpense = past12MonthsExpenses.reduce((a, b) => a + b.value, 0);
-    const simulatedValues = [800, 1200, 950, 1500, 1100, 1800, 1300, 2200, 1900, 2500, 2100, 2800];
+    const total12MonthExpense = past12MonthsExpenses.reduce(
+      (a, b) => a + b.value,
+      0,
+    );
+    const simulatedValues = [
+      800, 1200, 950, 1500, 1100, 1800, 1300, 2200, 1900, 2500, 2100, 2800,
+    ];
 
     const expenseRatio = past12MonthsExpenses.map((m, idx) => {
-      const val = total12MonthExpense > 0 ? m.value : (simulatedValues[idx] || 1000);
-      const totalExpense = total12MonthExpense > 0 ? total12MonthExpense : simulatedValues.reduce((a, b) => a + b, 0);
+      const val =
+        total12MonthExpense > 0 ? m.value : simulatedValues[idx] || 1000;
+      const totalExpense =
+        total12MonthExpense > 0
+          ? total12MonthExpense
+          : simulatedValues.reduce((a, b) => a + b, 0);
       return {
         name: m.name,
         value: val,
         color: expenseColors12[idx % expenseColors12.length],
-        percentage: calculatePercentage(val, totalExpense)
+        percentage: calculatePercentage(val, totalExpense),
       };
     });
 

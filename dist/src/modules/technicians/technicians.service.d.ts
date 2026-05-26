@@ -16,14 +16,14 @@ export declare class TechniciansService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     updateStatus(id: string, status: string): Promise<{
-        id: string;
         full_name: string;
         email: string | null;
+        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        phone: string | null;
         status: string;
+        phone: string | null;
     }>;
     private invalidateCache;
 }

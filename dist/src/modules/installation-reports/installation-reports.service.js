@@ -19,7 +19,9 @@ const document_template_service_1 = require("../pdf/templates/document-template.
 const installation_report_template_1 = require("../pdf/templates/installation-report.template");
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
-    technicians: { include: { technician: { select: { id: true, full_name: true } } } },
+    technicians: {
+        include: { technician: { select: { id: true, full_name: true } } },
+    },
 };
 let InstallationReportsService = class InstallationReportsService {
     prisma;
@@ -194,7 +196,9 @@ let InstallationReportsService = class InstallationReportsService {
         return installationReport;
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }
@@ -217,7 +221,10 @@ let InstallationReportsService = class InstallationReportsService {
             take: 200,
             group: 'COMPANY',
         });
-        const settings = new Map(data.settings.map((setting) => [setting.key, setting.value]));
+        const settings = new Map(data.settings.map((setting) => [
+            setting.key,
+            setting.value,
+        ]));
         return {
             logoUrl: settings.get('COMPANY_HEADER_LOGO_URL') || '',
             name: settings.get('COMPANY_NAME') || 'Mendo controls',

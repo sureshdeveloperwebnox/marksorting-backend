@@ -33,7 +33,9 @@ let CustomersController = class CustomersController {
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+') {
-                orConditions.push({ phone: { contains: cleanedPhone, mode: 'insensitive' } });
+                orConditions.push({
+                    phone: { contains: cleanedPhone, mode: 'insensitive' },
+                });
             }
             where.OR = orConditions;
         }

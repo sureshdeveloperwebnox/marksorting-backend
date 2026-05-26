@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -73,7 +77,9 @@ export class RolesService {
   }
 
   async create(dto: CreateRoleDto) {
-    const existingRole = await this.prisma.role.findUnique({ where: { name: dto.name } });
+    const existingRole = await this.prisma.role.findUnique({
+      where: { name: dto.name },
+    });
     if (existingRole) {
       throw new ConflictException('Role with this name already exists');
     }
@@ -82,13 +88,14 @@ export class RolesService {
       data: {
         name: dto.name,
         description: dto.description,
-        ...(dto.permission_ids && dto.permission_ids.length > 0 && {
-          permissions: {
-            create: dto.permission_ids.map((permissionId) => ({
-              permission: { connect: { id: permissionId } },
-            })),
-          },
-        }),
+        ...(dto.permission_ids &&
+          dto.permission_ids.length > 0 && {
+            permissions: {
+              create: dto.permission_ids.map((permissionId) => ({
+                permission: { connect: { id: permissionId } },
+              })),
+            },
+          }),
       },
       include: {
         _count: {
@@ -106,8 +113,11 @@ export class RolesService {
     if (!existingRole) throw new NotFoundException('Role not found');
 
     if (dto.name && dto.name !== existingRole.name) {
-      const duplicate = await this.prisma.role.findUnique({ where: { name: dto.name } });
-      if (duplicate) throw new ConflictException('Role with this name already exists');
+      const duplicate = await this.prisma.role.findUnique({
+        where: { name: dto.name },
+      });
+      if (duplicate)
+        throw new ConflictException('Role with this name already exists');
     }
 
     const updateData: any = {};
@@ -145,7 +155,9 @@ export class RolesService {
   }
 
   private async invalidateCache(id?: string) {
-    const promises: Promise<any>[] = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+    const promises: Promise<any>[] = [
+      this.redis.delByPrefix(this.LIST_CACHE_KEY),
+    ];
     if (id) promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
     await Promise.all(promises);
   }

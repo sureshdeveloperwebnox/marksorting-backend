@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  Put,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, Put, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { TechniciansService } from './technicians.service';
 import { Prisma } from '@prisma/client';
@@ -16,7 +9,9 @@ export class TechniciansController {
   constructor(private readonly techniciansService: TechniciansService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all technicians with pagination and filtering' })
+  @ApiOperation({
+    summary: 'Get all technicians with pagination and filtering',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -33,7 +28,9 @@ export class TechniciansController {
 
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+') {
-        orConditions.push({ phone: { contains: cleanedPhone, mode: 'insensitive' } });
+        orConditions.push({
+          phone: { contains: cleanedPhone, mode: 'insensitive' },
+        });
       }
 
       where.OR = orConditions;
@@ -59,10 +56,7 @@ export class TechniciansController {
 
   @Put(':id/status')
   @ApiOperation({ summary: 'Update technician availability status' })
-  updateStatus(
-    @Param('id') id: string,
-    @Body('status') status: string,
-  ) {
+  updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.techniciansService.updateStatus(id, status);
   }
 }

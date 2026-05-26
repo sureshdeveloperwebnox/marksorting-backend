@@ -47,7 +47,9 @@ let ExpenseCategoriesController = class ExpenseCategoriesController {
 exports.ExpenseCategoriesController = ExpenseCategoriesController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all expense categories with pagination and filtering' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all expense categories with pagination and filtering',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),

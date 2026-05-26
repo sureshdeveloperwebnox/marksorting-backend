@@ -10,13 +10,13 @@ export declare class InstallationReportsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateInstallationReportDto): Promise<({
         mill: {
-            id: string;
             name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             technician_id: string;
@@ -28,17 +28,19 @@ export declare class InstallationReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -50,10 +52,8 @@ export declare class InstallationReportsController {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -66,13 +66,13 @@ export declare class InstallationReportsController {
     }) | null>;
     update(id: string, dto: UpdateInstallationReportDto): Promise<{
         mill: {
-            id: string;
             name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             technician_id: string;
@@ -84,17 +84,19 @@ export declare class InstallationReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -106,10 +108,8 @@ export declare class InstallationReportsController {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -122,13 +122,13 @@ export declare class InstallationReportsController {
     }>;
     remove(id: string): Promise<{
         mill: {
-            id: string;
             name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             technician_id: string;
@@ -140,17 +140,19 @@ export declare class InstallationReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -162,10 +164,8 @@ export declare class InstallationReportsController {
         air_drier_details: string | null;
         line_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;

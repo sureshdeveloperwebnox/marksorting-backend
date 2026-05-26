@@ -1,10 +1,21 @@
-import { Controller, Post, UseGuards, Request, Body, Get, Res, UnauthorizedException } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  Body,
+  Get,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { MobileLoginDto } from './dto/mobile-login.dto';
+import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
 import * as express from 'express';
 
 @ApiTags('Authentication')
@@ -14,7 +25,7 @@ export class AuthController {
 
   private setTokens(res: express.Response, result: any) {
     const isProduction = process.env.NODE_ENV === 'production';
-    
+
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
       secure: isProduction,
@@ -38,7 +49,10 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiBody({ type: LoginDto })
-  async login(@Request() req: any, @Res({ passthrough: true }) res: express.Response) {
+  async login(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
     const result = await this.authService.login(req.user);
     this.setTokens(res, result);
     return { user: result.user };
@@ -47,7 +61,10 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Register a new account' })
   @ApiBody({ type: RegisterDto })
-  async register(@Body() registerDto: RegisterDto, @Res({ passthrough: true }) res: express.Response) {
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
     const result = await this.authService.register(registerDto);
     this.setTokens(res, result);
     return { user: result.user };
@@ -55,7 +72,10 @@ export class AuthController {
 
   @Post('logout')
   @ApiOperation({ summary: 'Logout user' })
-  async logout(@Request() req: any, @Res({ passthrough: true }) res: express.Response) {
+  async logout(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
     // Try to get user ID from token even if expired for Redis cleanup
     try {
       const authHeader = req.headers.authorization;
@@ -77,7 +97,10 @@ export class AuthController {
 
   @Get('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
-  async refresh(@Request() req: any, @Res({ passthrough: true }) res: express.Response) {
+  async refresh(
+    @Request() req: any,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
     const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
@@ -92,5 +115,30 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@Request() req: any) {
     return this.authService.getProfile(req.user.userId);
+  }
+
+  @Post('mobile/login')
+  @ApiOperation({ summary: 'Login for service engineers (mobile clients)' })
+  @ApiBody({ type: MobileLoginDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Successful login',
+    type: MobileLoginResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid credentials or not a service engineer',
+  })
+  async mobileLogin(@Body() mobileLoginDto: MobileLoginDto) {
+    const user = await this.authService.validateServiceEngineer(
+      mobileLoginDto.email,
+      mobileLoginDto.password,
+    );
+    if (!user) {
+      throw new UnauthorizedException(
+        'Invalid email/password or user is not a service engineer',
+      );
+    }
+    return this.authService.mobileLogin(user);
   }
 }

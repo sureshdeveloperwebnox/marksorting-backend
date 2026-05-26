@@ -19,19 +19,28 @@ class RegisterDto {
 }
 exports.RegisterDto = RegisterDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'John Doe', description: 'The full name of the user' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'John Doe',
+        description: 'The full name of the user',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "full_name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'john@example.com', description: 'The email of the user' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'john@example.com',
+        description: 'The email of the user',
+    }),
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "email", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'password123', description: 'The password of the user' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'password123',
+        description: 'The password of the user',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(8),
     __metadata("design:type", String)

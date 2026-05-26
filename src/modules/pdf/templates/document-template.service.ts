@@ -61,7 +61,11 @@ export class DocumentTemplateService {
   imageSrc(value: unknown): string {
     const src = this.escape(value);
     if (!src) return '';
-    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:image/')) {
+    if (
+      src.startsWith('http://') ||
+      src.startsWith('https://') ||
+      src.startsWith('data:image/')
+    ) {
       return src;
     }
     return '';

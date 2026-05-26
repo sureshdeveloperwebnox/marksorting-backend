@@ -23,11 +23,26 @@ export class AuthService {
     return null;
   }
 
+  async validateServiceEngineer(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findByEmail(email);
+    if (
+      user &&
+      user.role?.name === 'Service Engineer' &&
+      user.account_status === 'ACTIVE' &&
+      !user.deleted_at &&
+      (await bcrypt.compare(pass, user.password_hash))
+    ) {
+      const { password_hash, ...result } = user;
+      return result;
+    }
+    return null;
+  }
+
   async register(registerDto: any) {
     // Find default role (USER or any existing role)
     const roles = await this.usersService.getRoles();
     const defaultRole = roles.find((r: any) => r.name === 'USER') || roles[0];
-    
+
     if (!defaultRole) {
       throw new UnauthorizedException('No default roles defined in the system');
     }
@@ -37,7 +52,7 @@ export class AuthService {
       email: registerDto.email,
       password: registerDto.password,
       role_id: defaultRole.id,
-      account_status: 'ACTIVE'
+      account_status: 'ACTIVE',
     });
 
     return this.login(user);
@@ -56,8 +71,16 @@ export class AuthService {
         profile_image: user.profile_image,
         profile_image_url: user.profile_image_url,
         background_image: user.background_image,
-        background_image_url: user.background_image_url
-      }
+        background_image_url: user.background_image_url,
+      },
+    };
+  }
+
+  async mobileLogin(user: any) {
+    const payload = { email: user.email, sub: user.id, role: user.role.name };
+    return {
+      access_token: this.jwtService.sign(payload),
+      refresh_token: await this.generateRefreshToken(user.id),
     };
   }
 
@@ -82,10 +105,12 @@ export class AuthService {
       { sub: userId },
       {
         secret: this.configService.get<string>('jwt.refreshSecret')!,
-        expiresIn: this.configService.get<string>('jwt.refreshExpiresIn') as any,
+        expiresIn: this.configService.get<string>(
+          'jwt.refreshExpiresIn',
+        ) as any,
       },
     );
-    
+
     // Store in Redis with expiry
     await this.redisService.set(
       `refresh_token:${userId}`,
@@ -104,7 +129,9 @@ export class AuthService {
       });
 
       const userId = payload.sub;
-      const storedToken = await this.redisService.get(`refresh_token:${userId}`);
+      const storedToken = await this.redisService.get(
+        `refresh_token:${userId}`,
+      );
 
       if (!storedToken || storedToken !== refreshToken) {
         throw new UnauthorizedException('Invalid refresh token');
@@ -115,7 +142,11 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
 
-      const newPayload = { email: user.email, sub: user.id, role: user.role.name };
+      const newPayload = {
+        email: user.email,
+        sub: user.id,
+        role: user.role.name,
+      };
       return {
         access_token: this.jwtService.sign(newPayload),
         user: {
@@ -126,8 +157,8 @@ export class AuthService {
           profile_image: user.profile_image,
           profile_image_url: user.profile_image_url,
           background_image: user.background_image,
-          background_image_url: user.background_image_url
-        }
+          background_image_url: user.background_image_url,
+        },
       };
     } catch (e) {
       throw new UnauthorizedException('Invalid refresh token');

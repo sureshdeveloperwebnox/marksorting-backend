@@ -145,7 +145,9 @@ export class TechniciansService {
   }
 
   private async invalidateCache(id?: string) {
-    const promises: Promise<any>[] = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+    const promises: Promise<any>[] = [
+      this.redis.delByPrefix(this.LIST_CACHE_KEY),
+    ];
     if (id) {
       promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
     }

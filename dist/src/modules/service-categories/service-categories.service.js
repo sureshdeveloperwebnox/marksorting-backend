@@ -86,7 +86,9 @@ let ServiceCategoriesService = class ServiceCategoriesService {
         return serviceCategory;
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }

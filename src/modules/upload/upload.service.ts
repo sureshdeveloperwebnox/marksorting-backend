@@ -12,7 +12,8 @@ export class UploadService {
     private readonly s3Service: S3Service,
     private readonly configService: ConfigService,
   ) {
-    this.folderName = this.configService.get<string>('s3.folderName') || 'uploads';
+    this.folderName =
+      this.configService.get<string>('s3.folderName') || 'uploads';
   }
 
   async createPresignedUrl(dto: GetPresignedUrlDto) {

@@ -28,10 +28,17 @@ const maintenanceItems = [
   'Frequently make sure that there is no oil or water spillage in the filter bowl of the sorter machine and compressor filter bowls, if there is any spillage immediately turn off the machine. Because it will entirely harm the machine performance and lead to the replacement of valves and all the pneumatic parts. You can run the machine only if the problem has been solved.',
 ];
 
-const labelCell = (label: string, extraClass = '') => `<td class="label-cell ${extraClass}">${label}</td>`;
-const valueCell = (value: string, extraClass = '') => `<td class="value-cell ${extraClass}">${value}</td>`;
+const labelCell = (label: string, extraClass = '') =>
+  `<td class="label-cell ${extraClass}">${label}</td>`;
+const valueCell = (value: string, extraClass = '') =>
+  `<td class="value-cell ${extraClass}">${value}</td>`;
 
-const pairRow = (leftLabel: string, leftValue: string, rightLabel: string, rightValue: string) => `
+const pairRow = (
+  leftLabel: string,
+  leftValue: string,
+  rightLabel: string,
+  rightValue: string,
+) => `
   <tr>
     ${labelCell(leftLabel)}
     ${valueCell(leftValue)}

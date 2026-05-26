@@ -22,7 +22,7 @@ const INCLUDE_SHAPE = {
             email: true,
             phone: true,
             status: true,
-        }
+        },
     },
     customer: {
         select: {
@@ -30,13 +30,13 @@ const INCLUDE_SHAPE = {
             name: true,
             email: true,
             phone: true,
-        }
+        },
     },
     mill: {
         select: {
             id: true,
             name: true,
-        }
+        },
     },
 };
 let TicketsService = class TicketsService {
@@ -60,8 +60,16 @@ let TicketsService = class TicketsService {
                 { ticket_number: { contains: search, mode: 'insensitive' } },
                 { subject: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } },
-                { service_engineer: { full_name: { contains: search, mode: 'insensitive' } } },
-                { service_engineer: { email: { contains: search, mode: 'insensitive' } } },
+                {
+                    service_engineer: {
+                        full_name: { contains: search, mode: 'insensitive' },
+                    },
+                },
+                {
+                    service_engineer: {
+                        email: { contains: search, mode: 'insensitive' },
+                    },
+                },
                 { customer: { name: { contains: search, mode: 'insensitive' } } },
                 { customer: { email: { contains: search, mode: 'insensitive' } } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
@@ -141,7 +149,9 @@ let TicketsService = class TicketsService {
         return ticket;
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }
@@ -182,7 +192,8 @@ let TicketsService = class TicketsService {
         const target = error.meta?.target;
         return Array.isArray(target)
             ? target.includes('ticket_number')
-            : target === 'ticket_number' || target === 'support_tickets_ticket_number_key';
+            : target === 'ticket_number' ||
+                target === 'support_tickets_ticket_number_key';
     }
     generateTicketNumber() {
         const now = new Date();

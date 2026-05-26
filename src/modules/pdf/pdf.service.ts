@@ -39,7 +39,10 @@ export class PdfService {
     }
   }
 
-  async renderHtmlToPdf(html: string, options: PDFOptions = {}): Promise<Buffer> {
+  async renderHtmlToPdf(
+    html: string,
+    options: PDFOptions = {},
+  ): Promise<Buffer> {
     const browser = await this.getBrowser();
     const page = await browser.newPage();
 
@@ -49,10 +52,17 @@ export class PdfService {
         const resourceType = request.resourceType();
         const url = request.url();
 
-        const isExternalAsset = url.startsWith('https://') || url.startsWith('http://');
-        const isAllowedExternalAsset = isExternalAsset && ['document', 'image', 'font'].includes(resourceType);
+        const isExternalAsset =
+          url.startsWith('https://') || url.startsWith('http://');
+        const isAllowedExternalAsset =
+          isExternalAsset &&
+          ['document', 'image', 'font'].includes(resourceType);
 
-        if (url.startsWith('data:') || resourceType === 'document' || isAllowedExternalAsset) {
+        if (
+          url.startsWith('data:') ||
+          resourceType === 'document' ||
+          isAllowedExternalAsset
+        ) {
           request.continue();
           return;
         }
@@ -81,11 +91,16 @@ export class PdfService {
 
       return Buffer.from(pdf);
     } catch (error) {
-      this.logger.error('Failed to render PDF', error instanceof Error ? error.stack : String(error));
+      this.logger.error(
+        'Failed to render PDF',
+        error instanceof Error ? error.stack : String(error),
+      );
       throw error;
     } finally {
       await page.close().catch((error) => {
-        this.logger.warn(`Failed to close PDF page: ${error instanceof Error ? error.message : String(error)}`);
+        this.logger.warn(
+          `Failed to close PDF page: ${error instanceof Error ? error.message : String(error)}`,
+        );
       });
     }
   }
@@ -115,10 +130,17 @@ export class PdfService {
 
       if (!response.ok) return '';
 
-      const contentType = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() || '';
+      const contentType =
+        response.headers
+          .get('content-type')
+          ?.split(';')[0]
+          ?.trim()
+          .toLowerCase() || '';
       if (!this.allowedImageContentTypes.has(contentType)) return '';
 
-      const contentLength = Number(response.headers.get('content-length') || '0');
+      const contentLength = Number(
+        response.headers.get('content-length') || '0',
+      );
       if (contentLength > this.maxEmbeddedImageBytes) return '';
 
       const arrayBuffer = await response.arrayBuffer();
@@ -126,7 +148,9 @@ export class PdfService {
 
       return `data:${contentType};base64,${Buffer.from(arrayBuffer).toString('base64')}`;
     } catch (error) {
-      this.logger.warn(`Failed to embed PDF image: ${error instanceof Error ? error.message : String(error)}`);
+      this.logger.warn(
+        `Failed to embed PDF image: ${error instanceof Error ? error.message : String(error)}`,
+      );
       return '';
     } finally {
       clearTimeout(timeout);

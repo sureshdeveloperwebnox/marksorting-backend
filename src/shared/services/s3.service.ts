@@ -25,7 +25,8 @@ export class S3Service {
       endpoint: this.endpoint,
       credentials: {
         accessKeyId: this.configService.getOrThrow<string>('s3.accessKey'),
-        secretAccessKey: this.configService.getOrThrow<string>('s3.secretAccessKey'),
+        secretAccessKey:
+          this.configService.getOrThrow<string>('s3.secretAccessKey'),
       },
       forcePathStyle: false, // DigitalOcean Spaces requires this to be false
     });
@@ -52,7 +53,9 @@ export class S3Service {
 
       return await getSignedUrl(this.s3Client, command, { expiresIn });
     } catch (error) {
-      this.logger.error(`Error generating presigned upload URL: ${error.message}`);
+      this.logger.error(
+        `Error generating presigned upload URL: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -65,7 +68,7 @@ export class S3Service {
     // Return the full URL using the base URL and bucket name
     if (!key) return null;
     if (key.startsWith('http')) return key;
-    
+
     const url = new URL(this.endpoint);
     return `${url.protocol}//${this.bucketName}.${url.host}/${key}`;
   }

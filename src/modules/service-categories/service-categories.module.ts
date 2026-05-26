@@ -5,9 +5,9 @@ import { ServiceCategoriesService } from './service-categories.service';
 import { ServiceCategoriesController } from './service-categories.controller';
 
 @Module({
-    imports: [PrismaModule, RedisModule],
-    controllers: [ServiceCategoriesController],
-    providers: [ServiceCategoriesService],
-    exports: [ServiceCategoriesService],
+  imports: [PrismaModule, RedisModule],
+  controllers: [ServiceCategoriesController],
+  providers: [ServiceCategoriesService],
+  exports: [ServiceCategoriesService],
 })
-export class ServiceCategoriesModule { }
+export class ServiceCategoriesModule {}

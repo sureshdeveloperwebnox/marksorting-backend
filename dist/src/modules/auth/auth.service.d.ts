@@ -9,6 +9,7 @@ export declare class AuthService {
     private redisService;
     constructor(usersService: UsersService, jwtService: JwtService, configService: ConfigService, redisService: RedisService);
     validateUser(email: string, pass: string): Promise<any>;
+    validateServiceEngineer(email: string, pass: string): Promise<any>;
     register(registerDto: any): Promise<{
         access_token: string;
         refresh_token: string;
@@ -36,6 +37,10 @@ export declare class AuthService {
             background_image: any;
             background_image_url: any;
         };
+    }>;
+    mobileLogin(user: any): Promise<{
+        access_token: string;
+        refresh_token: string;
     }>;
     getProfile(userId: string): Promise<any>;
     logout(userId: string): Promise<void>;

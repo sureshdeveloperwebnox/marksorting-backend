@@ -21,7 +21,8 @@ let UploadService = class UploadService {
     constructor(s3Service, configService) {
         this.s3Service = s3Service;
         this.configService = configService;
-        this.folderName = this.configService.get('s3.folderName') || 'uploads';
+        this.folderName =
+            this.configService.get('s3.folderName') || 'uploads';
     }
     async createPresignedUrl(dto) {
         const { fileName, fileType } = dto;

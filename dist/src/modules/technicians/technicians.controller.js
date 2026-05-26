@@ -30,7 +30,9 @@ let TechniciansController = class TechniciansController {
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+') {
-                orConditions.push({ phone: { contains: cleanedPhone, mode: 'insensitive' } });
+                orConditions.push({
+                    phone: { contains: cleanedPhone, mode: 'insensitive' },
+                });
             }
             where.OR = orConditions;
         }
@@ -54,7 +56,9 @@ let TechniciansController = class TechniciansController {
 exports.TechniciansController = TechniciansController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all technicians with pagination and filtering' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all technicians with pagination and filtering',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),

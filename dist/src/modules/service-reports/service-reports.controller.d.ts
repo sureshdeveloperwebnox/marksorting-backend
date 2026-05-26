@@ -9,18 +9,18 @@ export declare class ServiceReportsController {
     downloadPdf(id: string, res: Response): Promise<void>;
     findOne(id: string): Promise<any>;
     create(dto: CreateServiceReportDto): Promise<({
-        serviceCategory: {
-            id: string;
-            name: string;
-        };
         mill: {
-            id: string;
             name: string;
+            id: string;
+        };
+        serviceCategory: {
+            name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             service_report_id: string;
@@ -32,24 +32,26 @@ export declare class ServiceReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         service_category_id: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
-        machine_mfg_date: Date | null;
-        machine_installation_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
-        previous_visit_engineer: string | null;
         nature_of_complaint: string;
-        problem_observed: string | null;
         action_taken: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
+        machine_mfg_date: Date | null;
+        machine_installation_date: Date | null;
+        previous_visit_engineer: string | null;
+        problem_observed: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -62,24 +64,22 @@ export declare class ServiceReportsController {
         line_filter_condition: string | null;
         machine_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto): Promise<{
-        serviceCategory: {
-            id: string;
-            name: string;
-        };
         mill: {
-            id: string;
             name: string;
+            id: string;
+        };
+        serviceCategory: {
+            name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             service_report_id: string;
@@ -91,24 +91,26 @@ export declare class ServiceReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         service_category_id: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
-        machine_mfg_date: Date | null;
-        machine_installation_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
-        previous_visit_engineer: string | null;
         nature_of_complaint: string;
-        problem_observed: string | null;
         action_taken: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
+        machine_mfg_date: Date | null;
+        machine_installation_date: Date | null;
+        previous_visit_engineer: string | null;
+        problem_observed: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -121,24 +123,22 @@ export declare class ServiceReportsController {
         line_filter_condition: string | null;
         machine_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
     }>;
     remove(id: string): Promise<{
-        serviceCategory: {
-            id: string;
-            name: string;
-        };
         mill: {
-            id: string;
             name: string;
+            id: string;
+        };
+        serviceCategory: {
+            name: string;
+            id: string;
         };
         technicians: ({
             technician: {
-                id: string;
                 full_name: string;
+                id: string;
             };
         } & {
             service_report_id: string;
@@ -150,24 +150,26 @@ export declare class ServiceReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         service_category_id: string;
         mill_id: string;
         place: string;
         mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
-        machine_mfg_date: Date | null;
-        machine_installation_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
-        previous_visit_engineer: string | null;
         nature_of_complaint: string;
-        problem_observed: string | null;
         action_taken: string;
+        engineer_remarks: string;
+        engineer_signature: string;
+        customer_signature: string;
+        mill_email: string | null;
+        machine_mfg_date: Date | null;
+        machine_installation_date: Date | null;
+        previous_visit_engineer: string | null;
+        problem_observed: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -180,9 +182,7 @@ export declare class ServiceReportsController {
         line_filter_condition: string | null;
         machine_filter_condition: string | null;
         auto_drain_valve_working: boolean;
-        engineer_remarks: string;
-        engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
+        report_number: string;
     }>;
 }

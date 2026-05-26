@@ -28,8 +28,10 @@ const maintenanceItems = [
   'Frequently make sure that there is no oil or water spillage in the filter bowl of the sorter machine and compressor filter bowls, if there is any spillage immediately turn off the machine. Because it will entirely harm the machine performance and lead to the replacement of valves and all the pneumatic parts. You can run the machine only if the problem has been solved.',
 ];
 
-const labelCell = (label: string, extraClass = '') => `<td class="label-cell ${extraClass}">${label}</td>`;
-const valueCell = (value: string, extraClass = '') => `<td class="value-cell ${extraClass}">${value}</td>`;
+const labelCell = (label: string, extraClass = '') =>
+  `<td class="label-cell ${extraClass}">${label}</td>`;
+const valueCell = (value: string, extraClass = '') =>
+  `<td class="value-cell ${extraClass}">${value}</td>`;
 
 const row = (label: string, value: string, extraValueClass = '') => `
   <tr>
@@ -123,11 +125,11 @@ export function renderInstallationReportTemplate(
   const formatGroundEarthField = (val: string) => {
     if (!val) return '-';
     const mapping: Record<string, string> = {
-      'PRIMARY': 'Primary',
-      'SECONDARY': 'Secondary',
-      'REJECTION_1': 'Rejection 1',
-      'REJECTION_2': 'Rejection 2',
-      'SPLIT': 'Split'
+      PRIMARY: 'Primary',
+      SECONDARY: 'Secondary',
+      REJECTION_1: 'Rejection 1',
+      REJECTION_2: 'Rejection 2',
+      SPLIT: 'Split',
     };
     return mapping[val] || val;
   };

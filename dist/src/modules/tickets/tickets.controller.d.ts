@@ -8,30 +8,30 @@ export declare class TicketsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateTicketDto): Promise<{
         mill: {
-            id: string;
             name: string;
+            id: string;
         } | null;
         customer: {
-            id: string;
             email: string | null;
             name: string;
+            id: string;
             phone: string | null;
         } | null;
         service_engineer: {
-            id: string;
             full_name: string;
             email: string | null;
-            phone: string | null;
+            id: string;
             status: string;
+            phone: string | null;
         } | null;
     } & {
+        description: string;
         id: string;
         created_at: Date;
         updated_at: Date;
-        description: string;
         status: string;
-        mill_id: string | null;
         customer_id: string | null;
+        mill_id: string | null;
         service_engineer_id: string | null;
         subject: string;
         priority: string;
@@ -40,30 +40,30 @@ export declare class TicketsController {
     }>;
     update(id: string, dto: UpdateTicketDto): Promise<{
         mill: {
-            id: string;
             name: string;
+            id: string;
         } | null;
         customer: {
-            id: string;
             email: string | null;
             name: string;
+            id: string;
             phone: string | null;
         } | null;
         service_engineer: {
-            id: string;
             full_name: string;
             email: string | null;
-            phone: string | null;
+            id: string;
             status: string;
+            phone: string | null;
         } | null;
     } & {
+        description: string;
         id: string;
         created_at: Date;
         updated_at: Date;
-        description: string;
         status: string;
-        mill_id: string | null;
         customer_id: string | null;
+        mill_id: string | null;
         service_engineer_id: string | null;
         subject: string;
         priority: string;
@@ -72,30 +72,30 @@ export declare class TicketsController {
     }>;
     remove(id: string): Promise<{
         mill: {
-            id: string;
             name: string;
+            id: string;
         } | null;
         customer: {
-            id: string;
             email: string | null;
             name: string;
+            id: string;
             phone: string | null;
         } | null;
         service_engineer: {
-            id: string;
             full_name: string;
             email: string | null;
-            phone: string | null;
+            id: string;
             status: string;
+            phone: string | null;
         } | null;
     } & {
+        description: string;
         id: string;
         created_at: Date;
         updated_at: Date;
-        description: string;
         status: string;
-        mill_id: string | null;
         customer_id: string | null;
+        mill_id: string | null;
         service_engineer_id: string | null;
         subject: string;
         priority: string;

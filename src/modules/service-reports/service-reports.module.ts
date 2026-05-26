@@ -7,9 +7,9 @@ import { ServiceReportsService } from './service-reports.service';
 import { ServiceReportsController } from './service-reports.controller';
 
 @Module({
-    imports: [PrismaModule, RedisModule, PdfModule, SettingsModule],
-    controllers: [ServiceReportsController],
-    providers: [ServiceReportsService],
-    exports: [ServiceReportsService],
+  imports: [PrismaModule, RedisModule, PdfModule, SettingsModule],
+  controllers: [ServiceReportsController],
+  providers: [ServiceReportsService],
+  exports: [ServiceReportsService],
 })
-export class ServiceReportsModule { }
+export class ServiceReportsModule {}

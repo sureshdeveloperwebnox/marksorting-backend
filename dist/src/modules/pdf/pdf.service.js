@@ -62,8 +62,11 @@ let PdfService = PdfService_1 = class PdfService {
                 const resourceType = request.resourceType();
                 const url = request.url();
                 const isExternalAsset = url.startsWith('https://') || url.startsWith('http://');
-                const isAllowedExternalAsset = isExternalAsset && ['document', 'image', 'font'].includes(resourceType);
-                if (url.startsWith('data:') || resourceType === 'document' || isAllowedExternalAsset) {
+                const isAllowedExternalAsset = isExternalAsset &&
+                    ['document', 'image', 'font'].includes(resourceType);
+                if (url.startsWith('data:') ||
+                    resourceType === 'document' ||
+                    isAllowedExternalAsset) {
                     request.continue();
                     return;
                 }
@@ -123,7 +126,11 @@ let PdfService = PdfService_1 = class PdfService {
             });
             if (!response.ok)
                 return '';
-            const contentType = response.headers.get('content-type')?.split(';')[0]?.trim().toLowerCase() || '';
+            const contentType = response.headers
+                .get('content-type')
+                ?.split(';')[0]
+                ?.trim()
+                .toLowerCase() || '';
             if (!this.allowedImageContentTypes.has(contentType))
                 return '';
             const contentLength = Number(response.headers.get('content-length') || '0');

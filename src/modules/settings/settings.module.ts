@@ -5,9 +5,9 @@ import { PrismaModule } from '../../prisma/prisma.module';
 import { RedisModule } from '../../redis/redis.module';
 
 @Module({
-    imports: [PrismaModule, RedisModule],
-    controllers: [SettingsController],
-    providers: [SettingsService],
-    exports: [SettingsService],
+  imports: [PrismaModule, RedisModule],
+  controllers: [SettingsController],
+  providers: [SettingsService],
+  exports: [SettingsService],
 })
 export class SettingsModule {}

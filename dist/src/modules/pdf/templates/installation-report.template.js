@@ -84,11 +84,11 @@ function renderInstallationReportTemplate(data, template) {
         if (!val)
             return '-';
         const mapping = {
-            'PRIMARY': 'Primary',
-            'SECONDARY': 'Secondary',
-            'REJECTION_1': 'Rejection 1',
-            'REJECTION_2': 'Rejection 2',
-            'SPLIT': 'Split'
+            PRIMARY: 'Primary',
+            SECONDARY: 'Secondary',
+            REJECTION_1: 'Rejection 1',
+            REJECTION_2: 'Rejection 2',
+            SPLIT: 'Split',
         };
         return mapping[val] || val;
     };

@@ -17,40 +17,40 @@ export declare class MillsService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
-        id: string;
         email: string | null;
+        name: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        name: string;
-        phone: string | null;
         status: string;
-        address: string | null;
         customer_id: string | null;
+        phone: string | null;
+        address: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
-        id: string;
         email: string | null;
+        name: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        name: string;
-        phone: string | null;
         status: string;
-        address: string | null;
         customer_id: string | null;
+        phone: string | null;
+        address: string | null;
     }>;
     remove(id: string): Promise<{
-        id: string;
         email: string | null;
+        name: string;
+        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        name: string;
-        phone: string | null;
         status: string;
-        address: string | null;
         customer_id: string | null;
+        phone: string | null;
+        address: string | null;
     }>;
     private invalidateCache;
 }

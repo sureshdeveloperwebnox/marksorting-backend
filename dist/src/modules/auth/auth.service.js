@@ -68,6 +68,18 @@ let AuthService = class AuthService {
         }
         return null;
     }
+    async validateServiceEngineer(email, pass) {
+        const user = await this.usersService.findByEmail(email);
+        if (user &&
+            user.role?.name === 'Service Engineer' &&
+            user.account_status === 'ACTIVE' &&
+            !user.deleted_at &&
+            (await bcrypt.compare(pass, user.password_hash))) {
+            const { password_hash, ...result } = user;
+            return result;
+        }
+        return null;
+    }
     async register(registerDto) {
         const roles = await this.usersService.getRoles();
         const defaultRole = roles.find((r) => r.name === 'USER') || roles[0];
@@ -79,7 +91,7 @@ let AuthService = class AuthService {
             email: registerDto.email,
             password: registerDto.password,
             role_id: defaultRole.id,
-            account_status: 'ACTIVE'
+            account_status: 'ACTIVE',
         });
         return this.login(user);
     }
@@ -96,8 +108,15 @@ let AuthService = class AuthService {
                 profile_image: user.profile_image,
                 profile_image_url: user.profile_image_url,
                 background_image: user.background_image,
-                background_image_url: user.background_image_url
-            }
+                background_image_url: user.background_image_url,
+            },
+        };
+    }
+    async mobileLogin(user) {
+        const payload = { email: user.email, sub: user.id, role: user.role.name };
+        return {
+            access_token: this.jwtService.sign(payload),
+            refresh_token: await this.generateRefreshToken(user.id),
         };
     }
     async getProfile(userId) {
@@ -135,7 +154,11 @@ let AuthService = class AuthService {
             if (!user) {
                 throw new common_1.UnauthorizedException('User not found');
             }
-            const newPayload = { email: user.email, sub: user.id, role: user.role.name };
+            const newPayload = {
+                email: user.email,
+                sub: user.id,
+                role: user.role.name,
+            };
             return {
                 access_token: this.jwtService.sign(newPayload),
                 user: {
@@ -146,8 +169,8 @@ let AuthService = class AuthService {
                     profile_image: user.profile_image,
                     profile_image_url: user.profile_image_url,
                     background_image: user.background_image,
-                    background_image_url: user.background_image_url
-                }
+                    background_image_url: user.background_image_url,
+                },
             };
         }
         catch (e) {

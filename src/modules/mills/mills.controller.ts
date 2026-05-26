@@ -29,7 +29,7 @@ export class MillsController {
     @Query('customer_id') customerId?: string,
   ) {
     const where: Prisma.MillWhereInput = {};
-    
+
     if (search) {
       const orConditions: Prisma.MillWhereInput[] = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -47,7 +47,7 @@ export class MillsController {
 
       where.OR = orConditions;
     }
-    
+
     if (status) {
       where.status = status;
     }

@@ -39,7 +39,12 @@ let ExpenseCategoriesService = class ExpenseCategoriesService {
             where.status = status;
         }
         const [expenseCategories, total] = await Promise.all([
-            this.prisma.expenseCategory.findMany({ skip, take, where, orderBy: { created_at: 'desc' } }),
+            this.prisma.expenseCategory.findMany({
+                skip,
+                take,
+                where,
+                orderBy: { created_at: 'desc' },
+            }),
             this.prisma.expenseCategory.count({ where }),
         ]);
         const result = { expenseCategories, total };
@@ -86,7 +91,9 @@ let ExpenseCategoriesService = class ExpenseCategoriesService {
         return expenseCategory;
     }
     async invalidateCache(id) {
-        const promises = [this.redis.delByPrefix(this.LIST_CACHE_KEY)];
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
         if (id) {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }
