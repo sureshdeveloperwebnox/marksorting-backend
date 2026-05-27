@@ -20,8 +20,10 @@ export class PdfService {
 
   private async getBrowser(): Promise<Browser> {
     if (!this.browserPromise) {
+      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
       this.browserPromise = puppeteer.launch({
         headless: true,
+        executablePath,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
