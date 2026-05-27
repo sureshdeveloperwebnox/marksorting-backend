@@ -20,7 +20,9 @@ async function bootstrap() {
             const allowed = /^http:\/\/localhost(:\d+)?$/.test(origin) ||
                 /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
                 /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-                /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
+                /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+                /^https:\/\/.*\.ngrok-free\.app$/.test(origin) ||
+                /^https:\/\/.*\.ngrok\.io$/.test(origin);
             callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
         },
         credentials: true,
