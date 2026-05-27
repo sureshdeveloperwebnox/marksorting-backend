@@ -55,6 +55,7 @@ const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
 const mobile_login_dto_1 = require("./dto/mobile-login.dto");
 const mobile_login_response_dto_1 = require("./dto/mobile-login-response.dto");
+const update_profile_dto_1 = require("./dto/update-profile.dto");
 const express = __importStar(require("express"));
 let AuthController = class AuthController {
     authService;
@@ -119,6 +120,9 @@ let AuthController = class AuthController {
     async getProfile(req) {
         return this.authService.getProfile(req.user.userId);
     }
+    async updateProfile(req, dto) {
+        return this.authService.updateProfile(req.user.userId, dto);
+    }
     async mobileLogin(mobileLoginDto) {
         const user = await this.authService.validateServiceEngineer(mobileLoginDto.email, mobileLoginDto.password);
         if (!user) {
@@ -176,6 +180,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Put)('profile'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update current user profile' }),
+    (0, swagger_1.ApiBody)({ type: update_profile_dto_1.UpdateProfileDto }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateProfile", null);
 __decorate([
     (0, common_1.Post)('mobile/login'),
     (0, swagger_1.ApiOperation)({ summary: 'Login for service engineers (mobile clients)' }),

@@ -5,6 +5,7 @@ import {
   Request,
   Body,
   Get,
+  Put,
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
 import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as express from 'express';
 
 @ApiTags('Authentication')
@@ -115,6 +117,14 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user profile' })
   async getProfile(@Request() req: any) {
     return this.authService.getProfile(req.user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('profile')
+  @ApiOperation({ summary: 'Update current user profile' })
+  @ApiBody({ type: UpdateProfileDto })
+  async updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(req.user.userId, dto);
   }
 
   @Post('mobile/login')

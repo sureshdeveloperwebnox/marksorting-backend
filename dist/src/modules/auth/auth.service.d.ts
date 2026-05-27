@@ -2,6 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../redis/redis.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 export declare class AuthService {
     private usersService;
     private jwtService;
@@ -44,6 +45,7 @@ export declare class AuthService {
     }>;
     getProfile(userId: string): Promise<any>;
     logout(userId: string): Promise<void>;
+    updateProfile(userId: string, dto: UpdateProfileDto): Promise<any>;
     decodeToken(token: string): any;
     generateRefreshToken(userId: string): Promise<string>;
     refresh(refreshToken: string): Promise<{

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../redis/redis.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
@@ -94,6 +95,10 @@ export class AuthService {
 
   async logout(userId: string) {
     await this.redisService.del(`refresh_token:${userId}`);
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    return this.usersService.update(userId, dto);
   }
 
   decodeToken(token: string) {

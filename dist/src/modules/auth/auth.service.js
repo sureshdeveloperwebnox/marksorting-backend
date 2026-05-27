@@ -129,6 +129,9 @@ let AuthService = class AuthService {
     async logout(userId) {
         await this.redisService.del(`refresh_token:${userId}`);
     }
+    async updateProfile(userId, dto) {
+        return this.usersService.update(userId, dto);
+    }
     decodeToken(token) {
         return this.jwtService.decode(token);
     }

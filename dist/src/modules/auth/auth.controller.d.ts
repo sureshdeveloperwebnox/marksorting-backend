@@ -1,6 +1,7 @@
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import * as express from 'express';
 export declare class AuthController {
     private authService;
@@ -46,6 +47,7 @@ export declare class AuthController {
         };
     }>;
     getProfile(req: any): Promise<any>;
+    updateProfile(req: any, dto: UpdateProfileDto): Promise<any>;
     mobileLogin(mobileLoginDto: MobileLoginDto): Promise<{
         access_token: string;
         refresh_token: string;
