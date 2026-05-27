@@ -23,6 +23,8 @@ import { TicketsModule } from './modules/tickets/tickets.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportsModule } from './modules/reports/reports.module';
+import { MaterialsModule } from './modules/materials/materials.module';
+import { StoresModule } from './modules/stores/stores.module';
 
 @Module({
   imports: [
@@ -70,6 +72,8 @@ import { ReportsModule } from './modules/reports/reports.module';
     SettingsModule,
     DashboardModule,
     ReportsModule,
+    MaterialsModule,
+    StoresModule,
   ],
 })
 export class AppModule {}

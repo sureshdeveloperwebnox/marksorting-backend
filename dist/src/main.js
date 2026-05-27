@@ -14,7 +14,15 @@ async function bootstrap() {
     app.use((0, cookie_parser_1.default)());
     app.useLogger(app.get(nestjs_pino_1.Logger));
     app.enableCors({
-        origin: ['http://localhost:3000'],
+        origin: (origin, callback) => {
+            if (!origin)
+                return callback(null, true);
+            const allowed = /^http:\/\/localhost(:\d+)?$/.test(origin) ||
+                /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+                /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+                /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin);
+            callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+        },
         credentials: true,
     });
     app.setGlobalPrefix('api/v1');

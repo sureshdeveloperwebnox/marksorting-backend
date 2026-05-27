@@ -35,6 +35,8 @@ const tickets_module_1 = require("./modules/tickets/tickets.module");
 const settings_module_1 = require("./modules/settings/settings.module");
 const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const reports_module_1 = require("./modules/reports/reports.module");
+const materials_module_1 = require("./modules/materials/materials.module");
+const stores_module_1 = require("./modules/stores/stores.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -84,6 +86,8 @@ exports.AppModule = AppModule = __decorate([
             settings_module_1.SettingsModule,
             dashboard_module_1.DashboardModule,
             reports_module_1.ReportsModule,
+            materials_module_1.MaterialsModule,
+            stores_module_1.StoresModule,
         ],
     })
 ], AppModule);

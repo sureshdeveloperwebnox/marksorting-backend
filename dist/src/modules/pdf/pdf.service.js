@@ -35,8 +35,10 @@ let PdfService = PdfService_1 = class PdfService {
     }
     async getBrowser() {
         if (!this.browserPromise) {
+            const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
             this.browserPromise = puppeteer_1.default.launch({
                 headless: true,
+                executablePath,
                 args: [
                     '--no-sandbox',
                     '--disable-setuid-sandbox',

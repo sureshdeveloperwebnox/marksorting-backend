@@ -11,6 +11,8 @@ interface ReportParams {
     categoryId?: string;
     dateFrom?: string;
     dateTo?: string;
+    millId?: string;
+    technicianId?: string;
 }
 interface UserSessionPayload {
     userId: string;

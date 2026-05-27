@@ -186,6 +186,7 @@ model Customer {
   deleted_at  DateTime?
   mills       Mill[]
   supportTickets SupportTicket[]
+  stores      Store[]
 
   @@map("customers")
 }
@@ -218,6 +219,7 @@ model Technician {
   installationReports InstallationReportTechnician[]
   expenses    ExpenseTechnician[]
   supportTickets SupportTicket[]
+  stores      Store[]
 
   @@map("technicians")
 }
@@ -446,3 +448,47 @@ model ExpenseCategory {
 
   @@map("expense_categories")
 }
+
+model Material {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String?
+  status      String         @default("ACTIVE")
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+  deleted_at  DateTime?
+  stores      StoreMaterial[]
+
+  @@map("materials")
+}
+
+model Store {
+  id                  String         @id @default(uuid())
+  service_engineer_id String
+  service_engineer    Technician     @relation(fields: [service_engineer_id], references: [id])
+  customer_id         String
+  customer            Customer       @relation(fields: [customer_id], references: [id])
+  quantity            Int
+  warranty_status     String         // Under Warranty, Expired
+  frame_number        String         @unique
+  return_status       String         // Returned, Pending, Not Returned
+  inflow_status       String         // Inflow, Outflow, Available, Damaged
+  barcode             String?
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+  deleted_at          DateTime?
+  materials           StoreMaterial[]
+
+  @@map("stores")
+}
+
+model StoreMaterial {
+  store_id    String
+  material_id String
+  store       Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  material    Material @relation(fields: [material_id], references: [id])
+
+  @@id([store_id, material_id])
+  @@map("store_materials")
+}
+
