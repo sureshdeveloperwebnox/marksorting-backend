@@ -355,6 +355,7 @@ export class ExpensesService {
   private async invalidateCache(id?: string) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),
+      this.redis.delByPrefix('reports:'),
     ];
     if (id) {
       promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
