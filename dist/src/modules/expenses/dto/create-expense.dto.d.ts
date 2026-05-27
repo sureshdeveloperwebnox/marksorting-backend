@@ -1,5 +1,6 @@
 export declare class CreateExpenseDto {
-    technician_ids: string[];
+    technician_ids?: string[];
+    customer_id?: string;
     mill_id?: string;
     place?: string;
     visit_date: string;

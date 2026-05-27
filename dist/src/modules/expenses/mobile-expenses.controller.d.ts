@@ -1,32 +1,12 @@
-import { PrismaService } from '../../prisma/prisma.service';
-import { RedisService } from '../../redis/redis.service';
+import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
-export declare class ExpensesService {
-    private prisma;
-    private redis;
-    private readonly CACHE_PREFIX;
-    private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService);
-    findAll(params: {
-        skip?: number;
-        take?: number;
-        search?: string;
-        status?: string;
-        dateFrom?: string;
-        dateTo?: string;
-    }, user?: {
-        userId: string;
-        role: string;
-    }): Promise<any>;
-    findById(id: string, user?: {
-        userId: string;
-        role: string;
-    }): Promise<any>;
-    create(dto: CreateExpenseDto, user?: {
-        userId: string;
-        role: string;
-    }): Promise<({
+export declare class MobileExpensesController {
+    private readonly expensesService;
+    constructor(expensesService: ExpensesService);
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findOne(id: string, req: any): Promise<any>;
+    create(dto: CreateExpenseDto, req: any): Promise<({
         mill: {
             id: string;
             name: string;
@@ -60,10 +40,7 @@ export declare class ExpensesService {
         expense_images: string[];
         expense_number: string;
     }) | null>;
-    update(id: string, dto: UpdateExpenseDto, user?: {
-        userId: string;
-        role: string;
-    }): Promise<{
+    update(id: string, dto: UpdateExpenseDto, req: any): Promise<{
         mill: {
             id: string;
             name: string;
@@ -97,10 +74,7 @@ export declare class ExpensesService {
         expense_images: string[];
         expense_number: string;
     }>;
-    remove(id: string, user?: {
-        userId: string;
-        role: string;
-    }): Promise<{
+    remove(id: string, req: any): Promise<{
         mill: {
             id: string;
             name: string;
@@ -134,5 +108,4 @@ export declare class ExpensesService {
         expense_images: string[];
         expense_number: string;
     }>;
-    private invalidateCache;
 }

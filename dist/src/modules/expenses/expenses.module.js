@@ -10,12 +10,13 @@ exports.ExpensesModule = void 0;
 const common_1 = require("@nestjs/common");
 const expenses_service_1 = require("./expenses.service");
 const expenses_controller_1 = require("./expenses.controller");
+const mobile_expenses_controller_1 = require("./mobile-expenses.controller");
 let ExpensesModule = class ExpensesModule {
 };
 exports.ExpensesModule = ExpensesModule;
 exports.ExpensesModule = ExpensesModule = __decorate([
     (0, common_1.Module)({
-        controllers: [expenses_controller_1.ExpensesController],
+        controllers: [expenses_controller_1.ExpensesController, mobile_expenses_controller_1.MobileExpensesController],
         providers: [expenses_service_1.ExpensesService],
         exports: [expenses_service_1.ExpensesService],
     })

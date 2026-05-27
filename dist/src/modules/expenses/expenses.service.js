@@ -29,13 +29,20 @@ let ExpensesService = class ExpensesService {
         this.prisma = prisma;
         this.redis = redis;
     }
-    async findAll(params) {
-        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+    async findAll(params, user) {
+        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
         const { skip, take, search, status, dateFrom, dateTo } = params;
         const where = { deleted_at: null };
+        if (user && user.role === 'Service Engineer') {
+            where.technicians = {
+                some: {
+                    technician_id: user.userId,
+                },
+            };
+        }
         if (search) {
             where.OR = [
                 { expense_number: { contains: search, mode: 'insensitive' } },
@@ -73,8 +80,8 @@ let ExpensesService = class ExpensesService {
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
-    async findById(id) {
-        const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+    async findById(id, user) {
+        const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
         const cached = await this.redis.getJson(cacheKey);
         if (cached)
             return cached;
@@ -85,11 +92,49 @@ let ExpensesService = class ExpensesService {
         if (!expense) {
             throw new common_1.NotFoundException(`Expense with ID "${id}" not found`);
         }
+        if (user && user.role === 'Service Engineer') {
+            const isAssigned = expense.technicians.some((t) => t.technician_id === user.userId);
+            if (!isAssigned) {
+                throw new common_1.ForbiddenException('You do not have permission to access this expense');
+            }
+        }
         await this.redis.setJson(cacheKey, expense, 3600);
         return expense;
     }
-    async create(dto) {
+    async create(dto, user) {
         const { technician_ids, ...expenseData } = dto;
+        delete expenseData.customer_id;
+        const finalTechnicianIds = [...(technician_ids || [])];
+        if (user &&
+            user.role === 'Service Engineer' &&
+            !finalTechnicianIds.includes(user.userId)) {
+            finalTechnicianIds.push(user.userId);
+        }
+        const categoryExists = await this.prisma.expenseCategory.findFirst({
+            where: { id: expenseData.expense_category_id, deleted_at: null },
+        });
+        if (!categoryExists) {
+            throw new common_1.BadRequestException(`Expense category with ID "${expenseData.expense_category_id}" not found`);
+        }
+        if (expenseData.mill_id) {
+            const millExists = await this.prisma.mill.findFirst({
+                where: { id: expenseData.mill_id, deleted_at: null },
+            });
+            if (!millExists) {
+                throw new common_1.BadRequestException(`Mill with ID "${expenseData.mill_id}" not found`);
+            }
+        }
+        if (finalTechnicianIds.length > 0) {
+            const techniciansCount = await this.prisma.technician.count({
+                where: { id: { in: finalTechnicianIds }, deleted_at: null },
+            });
+            if (techniciansCount !== finalTechnicianIds.length) {
+                throw new common_1.BadRequestException('One or more technician IDs are invalid');
+            }
+        }
+        else {
+            throw new common_1.BadRequestException('At least one technician ID is required');
+        }
         const expense = await this.prisma.$transaction(async (tx) => {
             const todayStart = new Date();
             todayStart.setUTCHours(0, 0, 0, 0);
@@ -117,7 +162,7 @@ let ExpensesService = class ExpensesService {
                 include: INCLUDE_SHAPE,
             });
             await tx.expenseTechnician.createMany({
-                data: technician_ids.map((tid) => ({
+                data: finalTechnicianIds.map((tid) => ({
                     expense_id: created.id,
                     technician_id: tid,
                 })),
@@ -130,9 +175,34 @@ let ExpensesService = class ExpensesService {
         await this.invalidateCache();
         return expense;
     }
-    async update(id, dto) {
-        await this.findById(id);
+    async update(id, dto, user) {
+        await this.findById(id, user);
         const { technician_ids, ...expenseData } = dto;
+        delete expenseData.customer_id;
+        if (expenseData.expense_category_id !== undefined) {
+            const categoryExists = await this.prisma.expenseCategory.findFirst({
+                where: { id: expenseData.expense_category_id, deleted_at: null },
+            });
+            if (!categoryExists) {
+                throw new common_1.BadRequestException(`Expense category with ID "${expenseData.expense_category_id}" not found`);
+            }
+        }
+        if (expenseData.mill_id !== undefined && expenseData.mill_id !== null) {
+            const millExists = await this.prisma.mill.findFirst({
+                where: { id: expenseData.mill_id, deleted_at: null },
+            });
+            if (!millExists) {
+                throw new common_1.BadRequestException(`Mill with ID "${expenseData.mill_id}" not found`);
+            }
+        }
+        if (technician_ids !== undefined && technician_ids.length > 0) {
+            const techniciansCount = await this.prisma.technician.count({
+                where: { id: { in: technician_ids }, deleted_at: null },
+            });
+            if (techniciansCount !== technician_ids.length) {
+                throw new common_1.BadRequestException('One or more technician IDs are invalid');
+            }
+        }
         const updateData = {};
         if (expenseData.visit_date !== undefined) {
             updateData.visit_date = new Date(expenseData.visit_date);
@@ -180,8 +250,8 @@ let ExpensesService = class ExpensesService {
         await this.invalidateCache(id);
         return expense;
     }
-    async remove(id) {
-        await this.findById(id);
+    async remove(id, user) {
+        await this.findById(id, user);
         const expense = await this.prisma.expense.update({
             where: { id },
             data: { deleted_at: new Date() },
