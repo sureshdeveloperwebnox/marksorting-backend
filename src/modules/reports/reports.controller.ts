@@ -27,6 +27,8 @@ export class ReportsController {
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'millId', required: false, type: String })
+  @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
   async getServices(
     @Request() req: any,
@@ -38,6 +40,8 @@ export class ReportsController {
     @Query('categoryId') categoryId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('millId') millId?: string,
+    @Query('technicianId') technicianId?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -48,6 +52,8 @@ export class ReportsController {
       categoryId,
       dateFrom,
       dateTo,
+      millId,
+      technicianId,
     };
 
     if (exportType) {
@@ -70,6 +76,8 @@ export class ReportsController {
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'millId', required: false, type: String })
+  @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
   async getInstallations(
     @Request() req: any,
@@ -80,6 +88,8 @@ export class ReportsController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('millId') millId?: string,
+    @Query('technicianId') technicianId?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -89,6 +99,8 @@ export class ReportsController {
       status,
       dateFrom,
       dateTo,
+      millId,
+      technicianId,
     };
 
     if (exportType) {
@@ -112,6 +124,8 @@ export class ReportsController {
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'millId', required: false, type: String })
+  @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
   async getExpenses(
     @Request() req: any,
@@ -123,6 +137,8 @@ export class ReportsController {
     @Query('categoryId') categoryId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('millId') millId?: string,
+    @Query('technicianId') technicianId?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -133,6 +149,8 @@ export class ReportsController {
       categoryId,
       dateFrom,
       dateTo,
+      millId,
+      technicianId,
     };
 
     if (exportType) {
