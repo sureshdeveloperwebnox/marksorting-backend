@@ -2,6 +2,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { CreateMobileInstallationReportDto } from './dto/create-mobile-installation-report.dto';
+import { UpdateMobileInstallationReportDto } from './dto/update-mobile-installation-report.dto';
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
 import { DocumentTemplateService } from '../pdf/templates/document-template.service';
@@ -29,7 +31,7 @@ export declare class InstallationReportsService {
         userId: string;
         role: string;
     }): Promise<any>;
-    create(dto: CreateInstallationReportDto, user?: {
+    create(dto: CreateInstallationReportDto | CreateMobileInstallationReportDto, user?: {
         userId: string;
         role: string;
     }): Promise<({
@@ -88,7 +90,7 @@ export declare class InstallationReportsService {
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }) | null>;
-    update(id: string, dto: UpdateInstallationReportDto, user?: {
+    update(id: string, dto: UpdateInstallationReportDto | UpdateMobileInstallationReportDto, user?: {
         userId: string;
         role: string;
     }): Promise<{

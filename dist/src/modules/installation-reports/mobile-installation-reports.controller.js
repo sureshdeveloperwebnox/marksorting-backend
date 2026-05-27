@@ -16,8 +16,8 @@ exports.MobileInstallationReportsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const installation_reports_service_1 = require("./installation-reports.service");
-const create_installation_report_dto_1 = require("./dto/create-installation-report.dto");
-const update_installation_report_dto_1 = require("./dto/update-installation-report.dto");
+const create_mobile_installation_report_dto_1 = require("./dto/create-mobile-installation-report.dto");
+const update_mobile_installation_report_dto_1 = require("./dto/update-mobile-installation-report.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let MobileInstallationReportsController = class MobileInstallationReportsController {
     installationReportsService;
@@ -141,70 +141,7 @@ __decorate([
             'appended to technician_ids even if omitted from the body.',
     }),
     (0, swagger_1.ApiBody)({
-        type: create_installation_report_dto_1.CreateInstallationReportDto,
-        examples: {
-            minimal: {
-                summary: 'Minimal required fields',
-                value: {
-                    technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-                    customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    place: 'Coimbatore',
-                    mill_whatsapp_number: '+919876543210',
-                    visit_date: '2026-05-26',
-                    visit_time: '10:30',
-                    call_registered_date: '2026-05-20',
-                    machine_model: 'MarkSort Pro 500',
-                    serial_or_frame_no: 'SN-2026-00123',
-                    authorized_person: 'Rajesh Kumar',
-                    engineer_remarks: 'Machine installed and operating within normal parameters',
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                },
-            },
-            full: {
-                summary: 'Full payload with optional fields',
-                value: {
-                    technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-                    customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    place: 'Coimbatore',
-                    mill_whatsapp_number: '+919876543210',
-                    mill_email: 'mill@example.com',
-                    visit_date: '2026-05-26',
-                    visit_time: '10:30',
-                    call_registered_date: '2026-05-20',
-                    machine_model: 'MarkSort Pro 500',
-                    serial_or_frame_no: 'SN-2026-00123',
-                    authorized_person: 'Rajesh Kumar',
-                    invoice_number: 'IR-INV-100234',
-                    invoice_date: '2026-05-15',
-                    warranty_start_date: '2026-05-26',
-                    warranty_end_date: '2027-05-26',
-                    commodity: 'Rice',
-                    contamination: '2%',
-                    output_capacity_per_hour: '500 kg/hr',
-                    rejection_ratio: '0.5%',
-                    purity: '99.5%',
-                    no_of_programs_set: 5,
-                    ac_provided: true,
-                    compressor_details: 'Atlas Copco GA11, 11 kW',
-                    air_drier_details: 'Refrigerated type, working fine',
-                    ground_earth_provided: true,
-                    ground_earth_value: 3,
-                    ground_earth_field: 'PRIMARY',
-                    no_of_filters_installed: 3,
-                    oil_filter_condition: 'Good',
-                    line_filter_condition: 'Clean',
-                    auto_drain_valve_working: true,
-                    engineer_remarks: 'Machine installed and operating within normal parameters',
-                    customer_remarks: 'Satisfied with the installation',
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    status: 'COMPLETED',
-                },
-            },
-        },
+        type: create_mobile_installation_report_dto_1.CreateMobileInstallationReportDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Installation report created' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
@@ -212,7 +149,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_installation_report_dto_1.CreateInstallationReportDto, Object]),
+    __metadata("design:paramtypes", [create_mobile_installation_report_dto_1.CreateMobileInstallationReportDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileInstallationReportsController.prototype, "create", null);
 __decorate([
@@ -222,27 +159,7 @@ __decorate([
         description: 'Service Engineers can only update reports they are assigned to.',
     }),
     (0, swagger_1.ApiBody)({
-        type: update_installation_report_dto_1.UpdateInstallationReportDto,
-        examples: {
-            status_update: {
-                summary: 'Update status only',
-                value: {
-                    status: 'COMPLETED',
-                },
-            },
-            partial_update: {
-                summary: 'Update remarks and warranty dates',
-                value: {
-                    engineer_remarks: 'Machine fully operational after reconfiguration',
-                    customer_remarks: 'Very satisfied with the installation',
-                    warranty_start_date: '2026-05-26',
-                    warranty_end_date: '2027-05-26',
-                    status: 'COMPLETED',
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                },
-            },
-        },
+        type: update_mobile_installation_report_dto_1.UpdateMobileInstallationReportDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Installation report updated' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
@@ -256,7 +173,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_installation_report_dto_1.UpdateInstallationReportDto, Object]),
+    __metadata("design:paramtypes", [String, update_mobile_installation_report_dto_1.UpdateMobileInstallationReportDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileInstallationReportsController.prototype, "update", null);
 __decorate([

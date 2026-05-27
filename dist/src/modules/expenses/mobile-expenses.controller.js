@@ -16,8 +16,8 @@ exports.MobileExpensesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const expenses_service_1 = require("./expenses.service");
-const create_expense_dto_1 = require("./dto/create-expense.dto");
-const update_expense_dto_1 = require("./dto/update-expense.dto");
+const create_mobile_expense_dto_1 = require("./dto/create-mobile-expense.dto");
+const update_mobile_expense_dto_1 = require("./dto/update-mobile-expense.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const technicianSchema = {
     type: 'object',
@@ -185,7 +185,7 @@ __decorate([
             'verified to exist in the database before creation. Invalid IDs return **400**.',
     }),
     (0, swagger_1.ApiBody)({
-        type: create_expense_dto_1.CreateExpenseDto,
+        type: create_mobile_expense_dto_1.CreateMobileExpenseDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Expense created successfully', schema: expenseSchema }),
     (0, swagger_1.ApiResponse)({
@@ -211,7 +211,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_expense_dto_1.CreateExpenseDto, Object]),
+    __metadata("design:paramtypes", [create_mobile_expense_dto_1.CreateMobileExpenseDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileExpensesController.prototype, "create", null);
 __decorate([
@@ -224,7 +224,7 @@ __decorate([
     }),
     (0, swagger_1.ApiParam)({ name: 'id', type: String, format: 'uuid', description: 'Expense UUID to update' }),
     (0, swagger_1.ApiBody)({
-        type: update_expense_dto_1.UpdateExpenseDto,
+        type: update_mobile_expense_dto_1.UpdateMobileExpenseDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Expense updated successfully', schema: expenseSchema }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error or invalid reference', schema: errorSchema('Expense category with ID "..." not found') }),
@@ -235,7 +235,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_expense_dto_1.UpdateExpenseDto, Object]),
+    __metadata("design:paramtypes", [String, update_mobile_expense_dto_1.UpdateMobileExpenseDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileExpensesController.prototype, "update", null);
 __decorate([

@@ -21,8 +21,8 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { InstallationReportsService } from './installation-reports.service';
-import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
-import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { CreateMobileInstallationReportDto } from './dto/create-mobile-installation-report.dto';
+import { UpdateMobileInstallationReportDto } from './dto/update-mobile-installation-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('mobile / installation-reports')
@@ -137,77 +137,12 @@ export class MobileInstallationReportsController {
       'appended to technician_ids even if omitted from the body.',
   })
   @ApiBody({
-    type: CreateInstallationReportDto,
-    examples: {
-      minimal: {
-        summary: 'Minimal required fields',
-        value: {
-          technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-          customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          place: 'Coimbatore',
-          mill_whatsapp_number: '+919876543210',
-          visit_date: '2026-05-26',
-          visit_time: '10:30',
-          call_registered_date: '2026-05-20',
-          machine_model: 'MarkSort Pro 500',
-          serial_or_frame_no: 'SN-2026-00123',
-          authorized_person: 'Rajesh Kumar',
-          engineer_remarks:
-            'Machine installed and operating within normal parameters',
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-        },
-      },
-      full: {
-        summary: 'Full payload with optional fields',
-        value: {
-          technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-          customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          place: 'Coimbatore',
-          mill_whatsapp_number: '+919876543210',
-          mill_email: 'mill@example.com',
-          visit_date: '2026-05-26',
-          visit_time: '10:30',
-          call_registered_date: '2026-05-20',
-          machine_model: 'MarkSort Pro 500',
-          serial_or_frame_no: 'SN-2026-00123',
-          authorized_person: 'Rajesh Kumar',
-          invoice_number: 'IR-INV-100234',
-          invoice_date: '2026-05-15',
-          warranty_start_date: '2026-05-26',
-          warranty_end_date: '2027-05-26',
-          commodity: 'Rice',
-          contamination: '2%',
-          output_capacity_per_hour: '500 kg/hr',
-          rejection_ratio: '0.5%',
-          purity: '99.5%',
-          no_of_programs_set: 5,
-          ac_provided: true,
-          compressor_details: 'Atlas Copco GA11, 11 kW',
-          air_drier_details: 'Refrigerated type, working fine',
-          ground_earth_provided: true,
-          ground_earth_value: 3,
-          ground_earth_field: 'PRIMARY',
-          no_of_filters_installed: 3,
-          oil_filter_condition: 'Good',
-          line_filter_condition: 'Clean',
-          auto_drain_valve_working: true,
-          engineer_remarks:
-            'Machine installed and operating within normal parameters',
-          customer_remarks: 'Satisfied with the installation',
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          status: 'COMPLETED',
-        },
-      },
-    },
+    type: CreateMobileInstallationReportDto,
   })
   @ApiResponse({ status: 201, description: 'Installation report created' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  create(@Body() dto: CreateInstallationReportDto, @Request() req: any) {
+  create(@Body() dto: CreateMobileInstallationReportDto, @Request() req: any) {
     return this.installationReportsService.create(dto, req.user);
   }
 
@@ -220,27 +155,7 @@ export class MobileInstallationReportsController {
       'Service Engineers can only update reports they are assigned to.',
   })
   @ApiBody({
-    type: UpdateInstallationReportDto,
-    examples: {
-      status_update: {
-        summary: 'Update status only',
-        value: {
-          status: 'COMPLETED',
-        },
-      },
-      partial_update: {
-        summary: 'Update remarks and warranty dates',
-        value: {
-          engineer_remarks: 'Machine fully operational after reconfiguration',
-          customer_remarks: 'Very satisfied with the installation',
-          warranty_start_date: '2026-05-26',
-          warranty_end_date: '2027-05-26',
-          status: 'COMPLETED',
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-        },
-      },
-    },
+    type: UpdateMobileInstallationReportDto,
   })
   @ApiResponse({ status: 200, description: 'Installation report updated' })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -252,7 +167,7 @@ export class MobileInstallationReportsController {
   @ApiResponse({ status: 404, description: 'Installation report not found' })
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateInstallationReportDto,
+    @Body() dto: UpdateMobileInstallationReportDto,
     @Request() req: any,
   ) {
     return this.installationReportsService.update(id, dto, req.user);

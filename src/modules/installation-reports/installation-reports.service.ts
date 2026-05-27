@@ -7,6 +7,9 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { CreateMobileInstallationReportDto } from './dto/create-mobile-installation-report.dto';
+import { UpdateMobileInstallationReportDto } from './dto/update-mobile-installation-report.dto';
+
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
 import { DocumentTemplateService } from '../pdf/templates/document-template.service';
@@ -136,13 +139,18 @@ export class InstallationReportsService {
   }
 
   async create(
-    dto: CreateInstallationReportDto,
+    dto: CreateInstallationReportDto | CreateMobileInstallationReportDto,
     user?: { userId: string; role: string },
   ) {
-    const { technician_ids, ...reportData } = dto;
+    const rawDto = dto as any;
+    const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
+    delete reportData.technician_id;
 
     const finalTechnicianIds = [...(technician_ids || [])];
+    if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+      finalTechnicianIds.push(rawDto.technician_id);
+    }
     if (
       user &&
       user.role === 'Service Engineer' &&
@@ -209,13 +217,26 @@ export class InstallationReportsService {
 
   async update(
     id: string,
-    dto: UpdateInstallationReportDto,
+    dto: UpdateInstallationReportDto | UpdateMobileInstallationReportDto,
     user?: { userId: string; role: string },
   ) {
     await this.findById(id, user);
 
-    const { technician_ids, ...reportData } = dto;
+    const rawDto = dto as any;
+    const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
+    delete reportData.technician_id;
+
+    let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
+    if (rawDto.technician_id !== undefined) {
+      if (finalTechnicianIds !== undefined) {
+        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+          finalTechnicianIds.push(rawDto.technician_id);
+        }
+      } else {
+        finalTechnicianIds = rawDto.technician_id ? [rawDto.technician_id] : [];
+      }
+    }
 
     const updateData: any = { ...reportData };
 
@@ -250,12 +271,12 @@ export class InstallationReportsService {
     });
 
     // Sync technician join table
-    if (technician_ids !== undefined) {
+    if (finalTechnicianIds !== undefined) {
       await this.prisma.installationReportTechnician.deleteMany({
         where: { installation_report_id: id },
       });
       await this.prisma.installationReportTechnician.createMany({
-        data: technician_ids.map((tid) => ({
+        data: finalTechnicianIds.map((tid) => ({
           installation_report_id: id,
           technician_id: tid,
         })),

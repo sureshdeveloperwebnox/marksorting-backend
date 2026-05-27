@@ -21,8 +21,8 @@ import {
   getSchemaPath,
 } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
-import { CreateExpenseDto } from './dto/create-expense.dto';
-import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
+import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 // ── Reusable inline schema fragments ────────────────────────────────────────
@@ -193,7 +193,7 @@ export class MobileExpensesController {
       'verified to exist in the database before creation. Invalid IDs return **400**.',
   })
   @ApiBody({
-    type: CreateExpenseDto,
+    type: CreateMobileExpenseDto,
   })
   @ApiResponse({ status: 201, description: 'Expense created successfully',          schema: expenseSchema })
   @ApiResponse({
@@ -216,7 +216,7 @@ export class MobileExpensesController {
     },
   })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token',   schema: errorSchema('Unauthorized') })
-  create(@Body() dto: CreateExpenseDto, @Request() req: any) {
+  create(@Body() dto: CreateMobileExpenseDto, @Request() req: any) {
     return this.expensesService.create(dto, req.user);
   }
 
@@ -232,7 +232,7 @@ export class MobileExpensesController {
   })
   @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'Expense UUID to update' })
   @ApiBody({
-    type: UpdateExpenseDto,
+    type: UpdateMobileExpenseDto,
   })
   @ApiResponse({ status: 200, description: 'Expense updated successfully',         schema: expenseSchema })
   @ApiResponse({ status: 400, description: 'Validation error or invalid reference', schema: errorSchema('Expense category with ID "..." not found') })
@@ -241,7 +241,7 @@ export class MobileExpensesController {
   @ApiResponse({ status: 404, description: 'Expense not found',                    schema: errorSchema('Expense with ID "..." not found') })
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateExpenseDto,
+    @Body() dto: UpdateMobileExpenseDto,
     @Request() req: any,
   ) {
     return this.expensesService.update(id, dto, req.user);

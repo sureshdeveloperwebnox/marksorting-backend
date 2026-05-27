@@ -1,12 +1,12 @@
 import { ExpensesService } from './expenses.service';
-import { CreateExpenseDto } from './dto/create-expense.dto';
-import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
+import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
 export declare class MobileExpensesController {
     private readonly expensesService;
     constructor(expensesService: ExpensesService);
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
-    create(dto: CreateExpenseDto, req: any): Promise<({
+    create(dto: CreateMobileExpenseDto, req: any): Promise<({
         mill: {
             id: string;
             name: string;
@@ -40,7 +40,7 @@ export declare class MobileExpensesController {
         expense_images: string[];
         expense_number: string;
     }) | null>;
-    update(id: string, dto: UpdateExpenseDto, req: any): Promise<{
+    update(id: string, dto: UpdateMobileExpenseDto, req: any): Promise<{
         mill: {
             id: string;
             name: string;

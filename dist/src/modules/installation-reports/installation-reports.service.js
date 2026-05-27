@@ -110,9 +110,14 @@ let InstallationReportsService = class InstallationReportsService {
         return installationReport;
     }
     async create(dto, user) {
-        const { technician_ids, ...reportData } = dto;
+        const rawDto = dto;
+        const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
+        delete reportData.technician_id;
         const finalTechnicianIds = [...(technician_ids || [])];
+        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+            finalTechnicianIds.push(rawDto.technician_id);
+        }
         if (user &&
             user.role === 'Service Engineer' &&
             !finalTechnicianIds.includes(user.userId)) {
@@ -163,8 +168,21 @@ let InstallationReportsService = class InstallationReportsService {
     }
     async update(id, dto, user) {
         await this.findById(id, user);
-        const { technician_ids, ...reportData } = dto;
+        const rawDto = dto;
+        const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
+        delete reportData.technician_id;
+        let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
+        if (rawDto.technician_id !== undefined) {
+            if (finalTechnicianIds !== undefined) {
+                if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+                    finalTechnicianIds.push(rawDto.technician_id);
+                }
+            }
+            else {
+                finalTechnicianIds = rawDto.technician_id ? [rawDto.technician_id] : [];
+            }
+        }
         const updateData = { ...reportData };
         if (reportData.visit_date !== undefined) {
             updateData.visit_date = new Date(reportData.visit_date);
@@ -192,12 +210,12 @@ let InstallationReportsService = class InstallationReportsService {
             data: updateData,
             include: INCLUDE_SHAPE,
         });
-        if (technician_ids !== undefined) {
+        if (finalTechnicianIds !== undefined) {
             await this.prisma.installationReportTechnician.deleteMany({
                 where: { installation_report_id: id },
             });
             await this.prisma.installationReportTechnician.createMany({
-                data: technician_ids.map((tid) => ({
+                data: finalTechnicianIds.map((tid) => ({
                     installation_report_id: id,
                     technician_id: tid,
                 })),

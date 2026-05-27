@@ -102,9 +102,14 @@ let ExpensesService = class ExpensesService {
         return expense;
     }
     async create(dto, user) {
-        const { technician_ids, ...expenseData } = dto;
+        const rawDto = dto;
+        const { technician_ids, ...expenseData } = rawDto;
         delete expenseData.customer_id;
+        delete expenseData.technician_id;
         const finalTechnicianIds = [...(technician_ids || [])];
+        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+            finalTechnicianIds.push(rawDto.technician_id);
+        }
         if (user &&
             user.role === 'Service Engineer' &&
             !finalTechnicianIds.includes(user.userId)) {
@@ -177,8 +182,21 @@ let ExpensesService = class ExpensesService {
     }
     async update(id, dto, user) {
         await this.findById(id, user);
-        const { technician_ids, ...expenseData } = dto;
+        const rawDto = dto;
+        const { technician_ids, ...expenseData } = rawDto;
         delete expenseData.customer_id;
+        delete expenseData.technician_id;
+        let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
+        if (rawDto.technician_id !== undefined) {
+            if (finalTechnicianIds !== undefined) {
+                if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+                    finalTechnicianIds.push(rawDto.technician_id);
+                }
+            }
+            else {
+                finalTechnicianIds = rawDto.technician_id ? [rawDto.technician_id] : [];
+            }
+        }
         if (expenseData.expense_category_id !== undefined) {
             const categoryExists = await this.prisma.expenseCategory.findFirst({
                 where: { id: expenseData.expense_category_id, deleted_at: null },
@@ -195,11 +213,11 @@ let ExpensesService = class ExpensesService {
                 throw new common_1.BadRequestException(`Mill with ID "${expenseData.mill_id}" not found`);
             }
         }
-        if (technician_ids !== undefined && technician_ids.length > 0) {
+        if (finalTechnicianIds !== undefined && finalTechnicianIds.length > 0) {
             const techniciansCount = await this.prisma.technician.count({
-                where: { id: { in: technician_ids }, deleted_at: null },
+                where: { id: { in: finalTechnicianIds }, deleted_at: null },
             });
-            if (techniciansCount !== technician_ids.length) {
+            if (techniciansCount !== finalTechnicianIds.length) {
                 throw new common_1.BadRequestException('One or more technician IDs are invalid');
             }
         }
@@ -236,12 +254,12 @@ let ExpensesService = class ExpensesService {
             data: updateData,
             include: INCLUDE_SHAPE,
         });
-        if (technician_ids !== undefined) {
+        if (finalTechnicianIds !== undefined) {
             await this.prisma.expenseTechnician.deleteMany({
                 where: { expense_id: id },
             });
             await this.prisma.expenseTechnician.createMany({
-                data: technician_ids.map((tid) => ({
+                data: finalTechnicianIds.map((tid) => ({
                     expense_id: id,
                     technician_id: tid,
                 })),

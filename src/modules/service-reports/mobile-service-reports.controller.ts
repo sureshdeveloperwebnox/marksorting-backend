@@ -21,8 +21,8 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ServiceReportsService } from './service-reports.service';
-import { CreateServiceReportDto } from './dto/create-service-report.dto';
-import { UpdateServiceReportDto } from './dto/update-service-report.dto';
+import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
+import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('mobile / service-reports')
@@ -142,77 +142,12 @@ export class MobileServiceReportsController {
       'appended to technician_ids even if omitted from the body.',
   })
   @ApiBody({
-    type: CreateServiceReportDto,
-    examples: {
-      minimal: {
-        summary: 'Minimal required fields',
-        value: {
-          service_category_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-          customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          place: 'Coimbatore',
-          mill_whatsapp_number: '+919876543210',
-          visit_date: '2026-05-26',
-          visit_time: '10:30',
-          call_registered_date: '2026-05-20',
-          machine_model: 'MarkSort Pro 500',
-          serial_or_frame_no: 'SN-2026-00123',
-          authorized_person: 'Rajesh Kumar',
-          nature_of_complaint: 'Machine not sorting correctly at high speed',
-          action_taken: 'Cleaned sensors and recalibrated sorting thresholds',
-          engineer_remarks: 'Machine is now operating within normal parameters',
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-        },
-      },
-      full: {
-        summary: 'Full payload with optional fields',
-        value: {
-          service_category_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-          customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-          place: 'Coimbatore',
-          mill_whatsapp_number: '+919876543210',
-          mill_email: 'mill@example.com',
-          visit_date: '2026-05-26',
-          visit_time: '10:30',
-          call_registered_date: '2026-05-20',
-          machine_model: 'MarkSort Pro 500',
-          serial_or_frame_no: 'SN-2026-00123',
-          machine_mfg_date: '2020-03-01',
-          machine_installation_date: '2020-06-15',
-          authorized_person: 'Rajesh Kumar',
-          nature_of_complaint: 'Machine not sorting correctly at high speed',
-          problem_observed: 'Vibration noise from sorting chamber',
-          action_taken: 'Cleaned sensors and recalibrated sorting thresholds',
-          engineer_remarks: 'Machine is now operating within normal parameters',
-          customer_remarks: 'Satisfied with the service',
-          previous_visit_engineer: 'Suresh Babu',
-          commodity: 'Rice',
-          contamination: '2%',
-          output_capacity_per_hour: '500 kg/hr',
-          rejection_ratio: '0.5%',
-          purity: '99.5%',
-          no_of_programs_set: 5,
-          ac_provided: false,
-          compressor_details: 'Atlas Copco GA11, 11 kW',
-          air_drier_details: 'Refrigerated type, working fine',
-          line_filter_condition: 'Clean',
-          machine_filter_condition: 'Needs replacement',
-          auto_drain_valve_working: true,
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          status: 'COMPLETED',
-        },
-      },
-    },
+    type: CreateMobileServiceReportDto,
   })
   @ApiResponse({ status: 201, description: 'Service report created' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  create(@Body() dto: CreateServiceReportDto, @Request() req: any) {
+  create(@Body() dto: CreateMobileServiceReportDto, @Request() req: any) {
     return this.serviceReportsService.create(dto, req.user);
   }
 
@@ -225,27 +160,7 @@ export class MobileServiceReportsController {
       'Service Engineers can only update reports they are assigned to.',
   })
   @ApiBody({
-    type: UpdateServiceReportDto,
-    examples: {
-      status_update: {
-        summary: 'Update status only',
-        value: {
-          status: 'COMPLETED',
-        },
-      },
-      partial_update: {
-        summary: 'Update remarks and action taken',
-        value: {
-          action_taken: 'Replaced faulty sensor module',
-          engineer_remarks:
-            'Machine running at optimal performance after sensor replacement',
-          customer_remarks: 'Very satisfied',
-          status: 'COMPLETED',
-          engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-          customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-        },
-      },
-    },
+    type: UpdateMobileServiceReportDto,
   })
   @ApiResponse({ status: 200, description: 'Service report updated' })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -257,7 +172,7 @@ export class MobileServiceReportsController {
   @ApiResponse({ status: 404, description: 'Service report not found' })
   update(
     @Param('id') id: string,
-    @Body() dto: UpdateServiceReportDto,
+    @Body() dto: UpdateMobileServiceReportDto,
     @Request() req: any,
   ) {
     return this.serviceReportsService.update(id, dto, req.user);

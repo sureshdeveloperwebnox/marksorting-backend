@@ -16,8 +16,8 @@ exports.MobileServiceReportsController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const service_reports_service_1 = require("./service-reports.service");
-const create_service_report_dto_1 = require("./dto/create-service-report.dto");
-const update_service_report_dto_1 = require("./dto/update-service-report.dto");
+const create_mobile_service_report_dto_1 = require("./dto/create-mobile-service-report.dto");
+const update_mobile_service_report_dto_1 = require("./dto/update-mobile-service-report.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let MobileServiceReportsController = class MobileServiceReportsController {
     serviceReportsService;
@@ -149,72 +149,7 @@ __decorate([
             'appended to technician_ids even if omitted from the body.',
     }),
     (0, swagger_1.ApiBody)({
-        type: create_service_report_dto_1.CreateServiceReportDto,
-        examples: {
-            minimal: {
-                summary: 'Minimal required fields',
-                value: {
-                    service_category_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-                    customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    place: 'Coimbatore',
-                    mill_whatsapp_number: '+919876543210',
-                    visit_date: '2026-05-26',
-                    visit_time: '10:30',
-                    call_registered_date: '2026-05-20',
-                    machine_model: 'MarkSort Pro 500',
-                    serial_or_frame_no: 'SN-2026-00123',
-                    authorized_person: 'Rajesh Kumar',
-                    nature_of_complaint: 'Machine not sorting correctly at high speed',
-                    action_taken: 'Cleaned sensors and recalibrated sorting thresholds',
-                    engineer_remarks: 'Machine is now operating within normal parameters',
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                },
-            },
-            full: {
-                summary: 'Full payload with optional fields',
-                value: {
-                    service_category_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    technician_ids: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
-                    customer_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    mill_id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-                    place: 'Coimbatore',
-                    mill_whatsapp_number: '+919876543210',
-                    mill_email: 'mill@example.com',
-                    visit_date: '2026-05-26',
-                    visit_time: '10:30',
-                    call_registered_date: '2026-05-20',
-                    machine_model: 'MarkSort Pro 500',
-                    serial_or_frame_no: 'SN-2026-00123',
-                    machine_mfg_date: '2020-03-01',
-                    machine_installation_date: '2020-06-15',
-                    authorized_person: 'Rajesh Kumar',
-                    nature_of_complaint: 'Machine not sorting correctly at high speed',
-                    problem_observed: 'Vibration noise from sorting chamber',
-                    action_taken: 'Cleaned sensors and recalibrated sorting thresholds',
-                    engineer_remarks: 'Machine is now operating within normal parameters',
-                    customer_remarks: 'Satisfied with the service',
-                    previous_visit_engineer: 'Suresh Babu',
-                    commodity: 'Rice',
-                    contamination: '2%',
-                    output_capacity_per_hour: '500 kg/hr',
-                    rejection_ratio: '0.5%',
-                    purity: '99.5%',
-                    no_of_programs_set: 5,
-                    ac_provided: false,
-                    compressor_details: 'Atlas Copco GA11, 11 kW',
-                    air_drier_details: 'Refrigerated type, working fine',
-                    line_filter_condition: 'Clean',
-                    machine_filter_condition: 'Needs replacement',
-                    auto_drain_valve_working: true,
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    status: 'COMPLETED',
-                },
-            },
-        },
+        type: create_mobile_service_report_dto_1.CreateMobileServiceReportDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Service report created' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
@@ -222,7 +157,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_service_report_dto_1.CreateServiceReportDto, Object]),
+    __metadata("design:paramtypes", [create_mobile_service_report_dto_1.CreateMobileServiceReportDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileServiceReportsController.prototype, "create", null);
 __decorate([
@@ -232,26 +167,7 @@ __decorate([
         description: 'Service Engineers can only update reports they are assigned to.',
     }),
     (0, swagger_1.ApiBody)({
-        type: update_service_report_dto_1.UpdateServiceReportDto,
-        examples: {
-            status_update: {
-                summary: 'Update status only',
-                value: {
-                    status: 'COMPLETED',
-                },
-            },
-            partial_update: {
-                summary: 'Update remarks and action taken',
-                value: {
-                    action_taken: 'Replaced faulty sensor module',
-                    engineer_remarks: 'Machine running at optimal performance after sensor replacement',
-                    customer_remarks: 'Very satisfied',
-                    status: 'COMPLETED',
-                    engineer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                    customer_signature: 'data:image/png;base64,iVBORw0KGgo=',
-                },
-            },
-        },
+        type: update_mobile_service_report_dto_1.UpdateMobileServiceReportDto,
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Service report updated' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
@@ -265,7 +181,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_service_report_dto_1.UpdateServiceReportDto, Object]),
+    __metadata("design:paramtypes", [String, update_mobile_service_report_dto_1.UpdateMobileServiceReportDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileServiceReportsController.prototype, "update", null);
 __decorate([

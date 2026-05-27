@@ -2,6 +2,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
+import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
 export declare class ExpensesService {
     private prisma;
     private redis;
@@ -23,7 +25,7 @@ export declare class ExpensesService {
         userId: string;
         role: string;
     }): Promise<any>;
-    create(dto: CreateExpenseDto, user?: {
+    create(dto: CreateExpenseDto | CreateMobileExpenseDto, user?: {
         userId: string;
         role: string;
     }): Promise<({
@@ -60,7 +62,7 @@ export declare class ExpensesService {
         expense_images: string[];
         expense_number: string;
     }) | null>;
-    update(id: string, dto: UpdateExpenseDto, user?: {
+    update(id: string, dto: UpdateExpenseDto | UpdateMobileExpenseDto, user?: {
         userId: string;
         role: string;
     }): Promise<{

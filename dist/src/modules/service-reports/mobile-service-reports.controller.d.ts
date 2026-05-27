@@ -1,13 +1,13 @@
 import type { Response } from 'express';
 import { ServiceReportsService } from './service-reports.service';
-import { CreateServiceReportDto } from './dto/create-service-report.dto';
-import { UpdateServiceReportDto } from './dto/update-service-report.dto';
+import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
+import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
 export declare class MobileServiceReportsController {
     private readonly serviceReportsService;
     constructor(serviceReportsService: ServiceReportsService);
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
-    create(dto: CreateServiceReportDto, req: any): Promise<({
+    create(dto: CreateMobileServiceReportDto, req: any): Promise<({
         serviceCategory: {
             id: string;
             name: string;
@@ -22,8 +22,8 @@ export declare class MobileServiceReportsController {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;
@@ -66,7 +66,7 @@ export declare class MobileServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
     }) | null>;
-    update(id: string, dto: UpdateServiceReportDto, req: any): Promise<{
+    update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         serviceCategory: {
             id: string;
             name: string;
@@ -81,8 +81,8 @@ export declare class MobileServiceReportsController {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;
@@ -140,8 +140,8 @@ export declare class MobileServiceReportsController {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;

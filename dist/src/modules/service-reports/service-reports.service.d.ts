@@ -2,6 +2,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
+import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
+import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
 import { DocumentTemplateService } from '../pdf/templates/document-template.service';
@@ -30,7 +32,7 @@ export declare class ServiceReportsService {
         userId: string;
         role: string;
     }): Promise<any>;
-    create(dto: CreateServiceReportDto, user?: {
+    create(dto: CreateServiceReportDto | CreateMobileServiceReportDto, user?: {
         userId: string;
         role: string;
     }): Promise<({
@@ -48,8 +50,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;
@@ -92,7 +94,7 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
     }) | null>;
-    update(id: string, dto: UpdateServiceReportDto, user?: {
+    update(id: string, dto: UpdateServiceReportDto | UpdateMobileServiceReportDto, user?: {
         userId: string;
         role: string;
     }): Promise<{
@@ -110,8 +112,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;
@@ -172,8 +174,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;

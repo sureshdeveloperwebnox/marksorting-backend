@@ -1,13 +1,13 @@
 import type { Response } from 'express';
 import { InstallationReportsService } from './installation-reports.service';
-import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
-import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
+import { CreateMobileInstallationReportDto } from './dto/create-mobile-installation-report.dto';
+import { UpdateMobileInstallationReportDto } from './dto/update-mobile-installation-report.dto';
 export declare class MobileInstallationReportsController {
     private readonly installationReportsService;
     constructor(installationReportsService: InstallationReportsService);
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
-    create(dto: CreateInstallationReportDto, req: any): Promise<({
+    create(dto: CreateMobileInstallationReportDto, req: any): Promise<({
         mill: {
             id: string;
             name: string;
@@ -63,7 +63,7 @@ export declare class MobileInstallationReportsController {
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
     }) | null>;
-    update(id: string, dto: UpdateInstallationReportDto, req: any): Promise<{
+    update(id: string, dto: UpdateMobileInstallationReportDto, req: any): Promise<{
         mill: {
             id: string;
             name: string;
