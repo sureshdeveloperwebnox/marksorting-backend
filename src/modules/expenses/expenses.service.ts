@@ -246,7 +246,7 @@ export class ExpensesService {
     dto: UpdateExpenseDto | UpdateMobileExpenseDto,
     user?: { userId: string; role: string },
   ) {
-    await this.findById(id, user);
+    const existingExpense = await this.findById(id, user);
 
     const rawDto = dto as any;
     const { technician_ids, ...expenseData } = rawDto;
@@ -360,7 +360,7 @@ export class ExpensesService {
       });
     }
 
-    return expense;
+    return { before: existingExpense, after: expense };
   }
 
   async remove(id: string, user?: { userId: string; role: string }) {

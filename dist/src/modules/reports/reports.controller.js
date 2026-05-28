@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const reports_service_1 = require("./reports.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 let ReportsController = class ReportsController {
     reportsService;
     constructor(reportsService) {
@@ -92,6 +94,17 @@ exports.ReportsController = ReportsController;
 __decorate([
     (0, common_1.Get)('services'),
     (0, swagger_1.ApiOperation)({ summary: 'Get service reports log or export it' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.EXPORT,
+        entityType: 'reports',
+        description: (ctx) => {
+            const exportType = ctx.query.export;
+            return exportType
+                ? `Exported service reports as ${exportType.toUpperCase()}`
+                : 'Viewed service reports list';
+        },
+        ignoreNullEntity: true,
+    }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
@@ -121,6 +134,17 @@ __decorate([
 __decorate([
     (0, common_1.Get)('installations'),
     (0, swagger_1.ApiOperation)({ summary: 'Get installation reports log or export it' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.EXPORT,
+        entityType: 'reports',
+        description: (ctx) => {
+            const exportType = ctx.query.export;
+            return exportType
+                ? `Exported installation reports as ${exportType.toUpperCase()}`
+                : 'Viewed installation reports list';
+        },
+        ignoreNullEntity: true,
+    }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
@@ -148,6 +172,17 @@ __decorate([
 __decorate([
     (0, common_1.Get)('expenses'),
     (0, swagger_1.ApiOperation)({ summary: 'Get expense reports log or export it' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.EXPORT,
+        entityType: 'reports',
+        description: (ctx) => {
+            const exportType = ctx.query.export;
+            return exportType
+                ? `Exported expense reports as ${exportType.toUpperCase()}`
+                : 'Viewed expense reports list';
+        },
+        ignoreNullEntity: true,
+    }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),

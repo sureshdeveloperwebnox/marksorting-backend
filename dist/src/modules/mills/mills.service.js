@@ -74,7 +74,7 @@ let MillsService = class MillsService {
             data: dto,
         });
         await this.invalidateCache(id);
-        return mill;
+        return { before: existing, after: mill };
     }
     async remove(id) {
         const existing = await this.prisma.mill.findFirst({

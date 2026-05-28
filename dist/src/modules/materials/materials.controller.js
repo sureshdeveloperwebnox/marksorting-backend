@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const materials_service_1 = require("./materials.service");
 const create_material_dto_1 = require("./dto/create-material.dto");
 const update_material_dto_1 = require("./dto/update-material.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let MaterialsController = class MaterialsController {
     materialsService;
     constructor(materialsService) {
@@ -98,6 +101,19 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new material' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'materials',
+        description: (ctx) => {
+            const material = ctx.result;
+            const name = material?.name || ctx.body.name || 'Unknown';
+            const details = [
+                material?.unit || ctx.body.unit ? `Unit: ${material?.unit || ctx.body.unit}` : null,
+                material?.status ? `Status: ${material.status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Material', name, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_material_dto_1.CreateMaterialDto]),
@@ -106,6 +122,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing material' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'materials',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.name || before?.name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Material "${name}" — ${diff}`
+                : `${who} Material "${name}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -115,6 +146,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete material' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'materials',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const material = ctx.result;
+            const name = material?.name || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Material', name, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

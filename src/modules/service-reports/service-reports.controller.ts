@@ -23,6 +23,9 @@ import { ServiceReportsService } from './service-reports.service';
 import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('service-reports')
 @ApiBearerAuth()
@@ -115,6 +118,12 @@ export class ServiceReportsController {
     description: 'Forbidden access to this service report',
   })
   @ApiResponse({ status: 404, description: 'Service report not found' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'service_reports',
+    entityIdParam: 'id',
+    description: (ctx) => `Downloaded PDF for service report ${ctx.params.id} — file exported`,
+  })
   async downloadPdf(
     @Param('id') id: string,
     @Request() req: any,
@@ -154,6 +163,22 @@ export class ServiceReportsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input payload' })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'service_reports',
+    description: (ctx) => {
+      const report = ctx.result;
+      const repNo = report?.report_number || 'N/A';
+      const parts = [
+        report?.machine_model || ctx.body.machine_model ? `Machine: ${report?.machine_model || ctx.body.machine_model}` : null,
+        report?.place || ctx.body.place ? `Place: ${report?.place || ctx.body.place}` : null,
+        report?.mill?.name ? `Mill: ${report.mill.name}` : null,
+        report?.status ? `Status: ${report.status}` : null,
+      ].filter(Boolean).join(', ');
+      const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+      return `${who} Service Report "${repNo}"` + (parts ? ` — ${parts}` : '');
+    },
+  })
   create(@Body() dto: CreateServiceReportDto, @Request() req: any) {
     return this.serviceReportsService.create(dto, req.user);
   }
@@ -171,6 +196,21 @@ export class ServiceReportsController {
     description: 'Forbidden access to edit this service report',
   })
   @ApiResponse({ status: 404, description: 'Service report not found' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'service_reports',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const repNo = after?.report_number || before?.report_number || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Service Report "${repNo}" — ${diff}`
+        : `${who} Service Report "${repNo}" (no changes detected)`;
+    },
+  })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateServiceReportDto,
@@ -191,6 +231,16 @@ export class ServiceReportsController {
     description: 'Forbidden access to delete this service report',
   })
   @ApiResponse({ status: 404, description: 'Service report not found' })
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'service_reports',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const report = ctx.result;
+      const repNo = report?.report_number || ctx.params.id;
+      return deleteDescription('Service Report', repNo, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string, @Request() req: any) {
     return this.serviceReportsService.remove(id, req.user);
   }

@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const mills_service_1 = require("./mills.service");
 const create_mill_dto_1 = require("./dto/create-mill.dto");
 const update_mill_dto_1 = require("./dto/update-mill.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let MillsController = class MillsController {
     millsService;
     constructor(millsService) {
@@ -59,6 +62,7 @@ let MillsController = class MillsController {
         return this.millsService.create(dto);
     }
     update(id, dto) {
+        console.log(`[MillsController] UPDATE called: id=${id}, name=${dto.name}`);
         return this.millsService.update(id, dto);
     }
     remove(id) {
@@ -119,6 +123,21 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new mill' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'mills',
+        description: (ctx) => {
+            const mill = ctx.result;
+            const name = mill?.name || ctx.body.name || 'Unknown';
+            const details = [
+                mill?.customer?.name ? `Customer: ${mill.customer.name}` : null,
+                mill?.email ? `Email: ${mill.email}` : null,
+                mill?.phone ? `Phone: ${mill.phone}` : null,
+                mill?.status ? `Status: ${mill.status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Mill', name, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_mill_dto_1.CreateMillDto]),
@@ -127,6 +146,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing mill' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'mills',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.name || before?.name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Mill "${name}" — ${diff}`
+                : `${who} Mill "${name}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -136,6 +170,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete mill' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'mills',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const mill = ctx.result;
+            const name = mill?.name || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Mill', name, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

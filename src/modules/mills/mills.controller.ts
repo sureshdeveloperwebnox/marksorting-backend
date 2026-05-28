@@ -13,6 +13,9 @@ import { MillsService } from './mills.service';
 import { Prisma } from '@prisma/client';
 import { CreateMillDto } from './dto/create-mill.dto';
 import { UpdateMillDto } from './dto/update-mill.dto';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('mills')
 @Controller('mills')
@@ -102,18 +105,59 @@ export class MillsController {
 
   @Post()
   @ApiOperation({ summary: 'Create new mill' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'mills',
+    description: (ctx) => {
+      const mill = ctx.result;
+      const name = mill?.name || ctx.body.name || 'Unknown';
+      const details = [
+        mill?.customer?.name ? `Customer: ${mill.customer.name}` : null,
+        mill?.email ? `Email: ${mill.email}` : null,
+        mill?.phone ? `Phone: ${mill.phone}` : null,
+        mill?.status ? `Status: ${mill.status}` : null,
+      ].filter(Boolean).join(', ');
+      return createDescription('Mill', name, details || undefined, ctx.user.full_name);
+    },
+  })
   create(@Body() dto: CreateMillDto) {
     return this.millsService.create(dto);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update existing mill' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'mills',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const name = after?.name || before?.name || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Mill "${name}" — ${diff}`
+        : `${who} Mill "${name}" (no changes detected)`;
+    },
+  })
   update(@Param('id') id: string, @Body() dto: UpdateMillDto) {
+    console.log(`[MillsController] UPDATE called: id=${id}, name=${dto.name}`);
     return this.millsService.update(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete mill' })
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'mills',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const mill = ctx.result;
+      const name = mill?.name || ctx.params.id;
+      return deleteDescription('Mill', name, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string) {
     return this.millsService.remove(id);
   }

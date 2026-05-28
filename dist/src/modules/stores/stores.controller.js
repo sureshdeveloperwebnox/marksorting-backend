@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const stores_service_1 = require("./stores.service");
 const create_store_dto_1 = require("./dto/create-store.dto");
 const update_store_dto_1 = require("./dto/update-store.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let StoresController = class StoresController {
     storesService;
     constructor(storesService) {
@@ -165,6 +168,21 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new store record' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'stores',
+        description: (ctx) => {
+            const store = ctx.result;
+            const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
+            const details = [
+                store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+                store?.material?.name ? `Material: ${store.material.name}` : null,
+                store?.customer?.name ? `Customer: ${store.customer.name}` : null,
+                store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Store Record', `Frame ${frame}`, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_store_dto_1.CreateStoreDto]),
@@ -173,6 +191,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing store record' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'stores',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const frame = after?.frame_number || before?.frame_number || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Store Record "Frame ${frame}" — ${diff}`
+                : `${who} Store Record "Frame ${frame}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -182,6 +215,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete store record' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'stores',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const store = ctx.result;
+            const frame = store?.frame_number || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Store Record', `Frame ${frame}`, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

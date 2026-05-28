@@ -179,7 +179,7 @@ let ServiceReportsService = class ServiceReportsService {
         return serviceReport;
     }
     async update(id, dto, user) {
-        await this.findById(id, user);
+        const existingReport = await this.findById(id, user);
         const rawDto = dto;
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
@@ -230,7 +230,7 @@ let ServiceReportsService = class ServiceReportsService {
             });
         }
         await this.invalidateCache(id);
-        return serviceReport;
+        return { before: existingReport, after: serviceReport };
     }
     async remove(id, user) {
         await this.findById(id, user);

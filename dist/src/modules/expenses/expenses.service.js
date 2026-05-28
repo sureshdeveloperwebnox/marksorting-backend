@@ -192,7 +192,7 @@ let ExpensesService = class ExpensesService {
         return expense;
     }
     async update(id, dto, user) {
-        await this.findById(id, user);
+        const existingExpense = await this.findById(id, user);
         const rawDto = dto;
         const { technician_ids, ...expenseData } = rawDto;
         delete expenseData.customer_id;
@@ -285,7 +285,7 @@ let ExpensesService = class ExpensesService {
                 technicianUserIds,
             });
         }
-        return expense;
+        return { before: existingExpense, after: expense };
     }
     async remove(id, user) {
         await this.findById(id, user);

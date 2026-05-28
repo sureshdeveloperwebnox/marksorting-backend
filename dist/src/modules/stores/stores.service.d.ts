@@ -17,13 +17,13 @@ export declare class StoresService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
-        customer: {
-            id: string;
-            name: string;
-        };
         service_engineer: {
             id: string;
             full_name: string;
+        };
+        customer: {
+            id: string;
+            name: string;
         };
         materials: ({
             material: {
@@ -36,63 +36,79 @@ export declare class StoresService {
         })[];
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        customer_id: string;
         service_engineer_id: string;
+        customer_id: string;
         quantity: number;
         warranty_status: string;
         frame_number: string;
         return_status: string;
         inflow_status: string;
         barcode: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
-        customer: {
+        before: {
             id: string;
-            name: string;
+            service_engineer_id: string;
+            customer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
         };
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
-        materials: ({
-            material: {
+        after: {
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+            customer: {
                 id: string;
                 name: string;
             };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                store_id: string;
+                material_id: string;
+            })[];
         } & {
-            store_id: string;
-            material_id: string;
-        })[];
-    } & {
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        customer_id: string;
-        service_engineer_id: string;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
+            id: string;
+            service_engineer_id: string;
+            customer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+        };
     }>;
     remove(id: string): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        customer_id: string;
         service_engineer_id: string;
+        customer_id: string;
         quantity: number;
         warranty_status: string;
         frame_number: string;
         return_status: string;
         inflow_status: string;
         barcode: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     private invalidateCache;
 }

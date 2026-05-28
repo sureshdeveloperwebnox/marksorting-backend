@@ -82,7 +82,7 @@ export class ExpenseCategoriesService {
   }
 
   async update(id: string, dto: UpdateExpenseCategoryDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
 
     const expenseCategory = await this.prisma.expenseCategory.update({
       where: { id },
@@ -90,7 +90,7 @@ export class ExpenseCategoriesService {
     });
 
     await this.invalidateCache(id);
-    return expenseCategory;
+    return { before: existing, after: expenseCategory };
   }
 
   async remove(id: string) {

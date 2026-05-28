@@ -232,7 +232,7 @@ export class InstallationReportsService {
     dto: UpdateInstallationReportDto | UpdateMobileInstallationReportDto,
     user?: { userId: string; role: string },
   ) {
-    await this.findById(id, user);
+    const existingReport = await this.findById(id, user);
 
     const rawDto = dto as any;
     const { technician_ids, ...reportData } = rawDto;
@@ -296,7 +296,7 @@ export class InstallationReportsService {
     }
 
     await this.invalidateCache(id);
-    return installationReport;
+    return { before: existingReport, after: installationReport };
   }
 
   async remove(id: string, user?: { userId: string; role: string }) {

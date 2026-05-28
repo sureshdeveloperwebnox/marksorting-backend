@@ -80,7 +80,7 @@ export class MaterialsService {
     });
 
     await this.invalidateCache(id);
-    return material;
+    return { before: existing, after: material };
   }
 
   async remove(id: string) {

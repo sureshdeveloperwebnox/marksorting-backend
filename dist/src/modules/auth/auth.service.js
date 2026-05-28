@@ -103,6 +103,7 @@ let AuthService = class AuthService {
         const payload = {
             email: user.email,
             sub: user.id,
+            full_name: user.full_name,
             role: user.role.name,
             permissions: permissions
         };
@@ -127,6 +128,7 @@ let AuthService = class AuthService {
         const payload = {
             email: user.email,
             sub: user.id,
+            full_name: user.full_name,
             role: user.role.name,
             permissions: permissions
         };
@@ -157,7 +159,7 @@ let AuthService = class AuthService {
         await this.redisService.del(`refresh_token:${userId}`);
     }
     async updateProfile(userId, dto) {
-        const user = await this.usersService.update(userId, dto);
+        const { after: user } = await this.usersService.update(userId, dto);
         const permissions = await this.permissionsService.getUserPermissions(userId);
         return {
             id: user.id,
@@ -200,6 +202,7 @@ let AuthService = class AuthService {
             const newPayload = {
                 email: user.email,
                 sub: user.id,
+                full_name: user.full_name,
                 role: user.role.name,
                 permissions: permissions,
             };

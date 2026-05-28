@@ -21,6 +21,9 @@ const update_role_dto_1 = require("./dto/update-role.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const permissions_guard_1 = require("../../common/guards/permissions.guard");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let RolesController = class RolesController {
     rolesService;
     constructor(rolesService) {
@@ -108,6 +111,19 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new role' }),
     (0, permissions_decorator_1.Permissions)('roles.create'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'roles',
+        description: (ctx) => {
+            const role = ctx.result;
+            const name = role?.name || ctx.body.name || 'Unknown';
+            const details = [
+                ctx.body.description ? `Description: ${ctx.body.description}` : null,
+                Array.isArray(ctx.body.permissions) ? `Permissions: ${ctx.body.permissions.length} assigned` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Role', name, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_role_dto_1.CreateRoleDto]),
@@ -117,6 +133,22 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing role' }),
     (0, permissions_decorator_1.Permissions)('roles.update'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'roles',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.name || before?.name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const permNote = Array.isArray(ctx.body.permission_ids) ? ` | Permissions: ${ctx.body.permission_ids.length} assigned` : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Role "${name}" — ${diff}${permNote}`
+                : `${who} Role "${name}"${permNote || ' (no changes detected)'}`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -127,6 +159,16 @@ __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete role' }),
     (0, permissions_decorator_1.Permissions)('roles.delete'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'roles',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const role = ctx.result;
+            const name = role?.name || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Role', name, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

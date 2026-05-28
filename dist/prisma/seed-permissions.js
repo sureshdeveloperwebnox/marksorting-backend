@@ -111,6 +111,7 @@ const PERMISSIONS = [
     { name: 'notifications.view', description: 'View notifications' },
     { name: 'notifications.manage', description: 'Manage notifications' },
     { name: 'notifications.broadcast', description: 'Broadcast notifications' },
+    { name: 'activity_logs.view', description: 'View activity logs' },
 ];
 const ROLES = [
     {
@@ -142,6 +143,7 @@ const ROLES = [
             'reports.view', 'reports.generate', 'reports.export',
             'tickets.view', 'tickets.create', 'tickets.update', 'tickets.assign',
             'notifications.view',
+            'activity_logs.view',
         ],
     },
     {

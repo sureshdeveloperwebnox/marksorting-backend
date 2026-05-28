@@ -23,6 +23,9 @@ import { InstallationReportsService } from './installation-reports.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('installation-reports')
 @ApiBearerAuth()
@@ -110,6 +113,12 @@ export class InstallationReportsController {
     description: 'Forbidden access to this installation report',
   })
   @ApiResponse({ status: 404, description: 'Installation report not found' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'installation_reports',
+    entityIdParam: 'id',
+    description: (ctx) => `Downloaded PDF for installation report ${ctx.params.id} — file exported`,
+  })
   async downloadPdf(
     @Param('id') id: string,
     @Request() req: any,
@@ -147,6 +156,22 @@ export class InstallationReportsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input payload' })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'installation_reports',
+    description: (ctx) => {
+      const report = ctx.result;
+      const repNo = report?.report_number || 'N/A';
+      const parts = [
+        report?.machine_model || ctx.body.machine_model ? `Machine: ${report?.machine_model || ctx.body.machine_model}` : null,
+        report?.place || ctx.body.place ? `Place: ${report?.place || ctx.body.place}` : null,
+        report?.mill?.name ? `Mill: ${report.mill.name}` : null,
+        report?.status ? `Status: ${report.status}` : null,
+      ].filter(Boolean).join(', ');
+      const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+      return `${who} Installation Report "${repNo}"` + (parts ? ` — ${parts}` : '');
+    },
+  })
   create(@Body() dto: CreateInstallationReportDto, @Request() req: any) {
     return this.installationReportsService.create(dto, req.user);
   }
@@ -164,6 +189,21 @@ export class InstallationReportsController {
     description: 'Forbidden access to edit this installation report',
   })
   @ApiResponse({ status: 404, description: 'Installation report not found' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'installation_reports',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const repNo = after?.report_number || before?.report_number || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Installation Report "${repNo}" — ${diff}`
+        : `${who} Installation Report "${repNo}" (no changes detected)`;
+    },
+  })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateInstallationReportDto,
@@ -184,6 +224,16 @@ export class InstallationReportsController {
     description: 'Forbidden access to delete this installation report',
   })
   @ApiResponse({ status: 404, description: 'Installation report not found' })
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'installation_reports',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const report = ctx.result;
+      const repNo = report?.report_number || ctx.params.id;
+      return deleteDescription('Installation Report', repNo, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string, @Request() req: any) {
     return this.installationReportsService.remove(id, req.user);
   }

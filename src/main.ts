@@ -5,11 +5,18 @@ import { Logger } from 'nestjs-pino';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   app.use(cookieParser());
+
+  // Log all requests
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.log(`[REQUEST] ${req.method} ${req.url}`);
+    next();
+  });
 
   app.useLogger(app.get(Logger));
 

@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const customers_service_1 = require("./customers.service");
 const create_customer_dto_1 = require("./dto/create-customer.dto");
 const update_customer_dto_1 = require("./dto/update-customer.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let CustomersController = class CustomersController {
     customersService;
     constructor(customersService) {
@@ -108,6 +111,20 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new customer' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'customers',
+        description: (ctx) => {
+            const customer = ctx.result;
+            const name = customer?.name || ctx.body.name || 'Unknown';
+            const details = [
+                customer?.email ? `Email: ${customer.email}` : null,
+                customer?.phone ? `Phone: ${customer.phone}` : null,
+                customer?.status ? `Status: ${customer.status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Customer', name, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_customer_dto_1.CreateCustomerDto]),
@@ -116,6 +133,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing customer' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'customers',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.name || before?.name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Customer "${name}" — ${diff}`
+                : `${who} Customer "${name}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -125,6 +157,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete customer' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'customers',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const customer = ctx.result;
+            const name = customer?.name || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Customer', name, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

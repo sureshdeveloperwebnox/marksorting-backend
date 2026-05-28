@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const service_categories_service_1 = require("./service-categories.service");
 const create_service_category_dto_1 = require("./dto/create-service-category.dto");
 const update_service_category_dto_1 = require("./dto/update-service-category.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let ServiceCategoriesController = class ServiceCategoriesController {
     serviceCategoriesService;
     constructor(serviceCategoriesService) {
@@ -93,6 +96,16 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new service category' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'service_categories',
+        description: (ctx) => {
+            const cat = ctx.result;
+            const name = cat?.name || ctx.body.name || 'Unknown';
+            const details = ctx.body.description ? `Description: ${ctx.body.description}` : undefined;
+            return (0, description_helper_1.createDescription)('Service Category', name, details, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_service_category_dto_1.CreateServiceCategoryDto]),
@@ -101,6 +114,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing service category' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'service_categories',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.name || before?.name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Service Category "${name}" — ${diff}`
+                : `${who} Service Category "${name}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -110,6 +138,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete service category' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'service_categories',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const cat = ctx.result;
+            const name = cat?.name || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Service Category', name, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

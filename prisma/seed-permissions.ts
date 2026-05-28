@@ -111,6 +111,9 @@ const PERMISSIONS = [
   { name: 'notifications.view', description: 'View notifications' },
   { name: 'notifications.manage', description: 'Manage notifications' },
   { name: 'notifications.broadcast', description: 'Broadcast notifications' },
+
+  // Activity Logs permissions
+  { name: 'activity_logs.view', description: 'View activity logs' },
 ];
 
 // Define role configurations
@@ -123,7 +126,7 @@ const ROLES = [
   {
     name: 'Admin',
     description: 'Administrative access with most permissions',
-    permissions: PERMISSIONS.map(p => p.name).filter(p => 
+    permissions: PERMISSIONS.map(p => p.name).filter(p =>
       !p.includes('roles.') && // Cannot manage roles
       !p.includes('users.assign_role') // Cannot assign admin roles
     ),
@@ -146,6 +149,7 @@ const ROLES = [
       'reports.view', 'reports.generate', 'reports.export',
       'tickets.view', 'tickets.create', 'tickets.update', 'tickets.assign',
       'notifications.view',
+      'activity_logs.view',
     ],
   },
   {

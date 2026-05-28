@@ -21,6 +21,9 @@ const update_user_dto_1 = require("./dto/update-user.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const permissions_guard_1 = require("../../common/guards/permissions.guard");
 const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -126,6 +129,20 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new user' }),
     (0, permissions_decorator_1.Permissions)('users.create'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'users',
+        description: (ctx) => {
+            const user = ctx.result;
+            const name = user?.full_name || ctx.body.full_name || 'Unknown';
+            const details = [
+                user?.email ? `Email: ${user.email}` : (ctx.body.email ? `Email: ${ctx.body.email}` : null),
+                user?.role?.name ? `Role: ${user.role.name}` : null,
+                user?.account_status ? `Status: ${user.account_status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('User', name, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
@@ -135,6 +152,21 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing user' }),
     (0, permissions_decorator_1.Permissions)('users.update'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'users',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const name = after?.full_name || before?.full_name || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} User "${name}" — ${diff}`
+                : `${who} User "${name}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -145,6 +177,17 @@ __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete user' }),
     (0, permissions_decorator_1.Permissions)('users.delete'),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'users',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const user = ctx.result;
+            const name = user?.full_name || ctx.params.id;
+            const email = user?.email ? ` (${user.email})` : '';
+            return (0, description_helper_1.deleteDescription)('User', `${name}${email}`, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

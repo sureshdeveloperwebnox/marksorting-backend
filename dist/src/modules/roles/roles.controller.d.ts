@@ -12,7 +12,16 @@ export declare class RolesController {
     }[]>;
     findOne(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
-    update(id: string, dto: UpdateRoleDto): Promise<any>;
+    update(id: string, dto: UpdateRoleDto): Promise<{
+        before: {
+            created_at: Date;
+            id: string;
+            name: string;
+            description: string | null;
+            updated_at: Date;
+        };
+        after: any;
+    }>;
     remove(id: string): Promise<{
         message: string;
     }>;

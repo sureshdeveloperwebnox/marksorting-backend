@@ -82,7 +82,7 @@ export class MillsService {
     });
 
     await this.invalidateCache(id);
-    return mill;
+    return { before: existing, after: mill };
   }
 
   async remove(id: string) {

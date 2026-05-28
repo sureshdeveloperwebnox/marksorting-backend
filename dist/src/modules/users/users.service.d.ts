@@ -20,7 +20,10 @@ export declare class UsersService {
     findByEmail(email: string): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateUserDto): Promise<any>;
-    update(id: string, dto: UpdateUserDto): Promise<any>;
+    update(id: string, dto: UpdateUserDto): Promise<{
+        before: any;
+        after: any;
+    }>;
     remove(id: string): Promise<{
         id: string;
         full_name: string;

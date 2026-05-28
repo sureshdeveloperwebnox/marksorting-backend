@@ -17,7 +17,16 @@ export declare class RolesService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
-    update(id: string, dto: UpdateRoleDto): Promise<any>;
+    update(id: string, dto: UpdateRoleDto): Promise<{
+        before: {
+            id: string;
+            name: string;
+            description: string | null;
+            created_at: Date;
+            updated_at: Date;
+        };
+        after: any;
+    }>;
     remove(id: string): Promise<{
         message: string;
     }>;

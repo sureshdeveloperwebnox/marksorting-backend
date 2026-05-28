@@ -67,7 +67,8 @@ export class AuthService {
     
     const payload = { 
       email: user.email, 
-      sub: user.id, 
+      sub: user.id,
+      full_name: user.full_name,
       role: user.role.name,
       permissions: permissions
     };
@@ -95,7 +96,8 @@ export class AuthService {
     
     const payload = { 
       email: user.email, 
-      sub: user.id, 
+      sub: user.id,
+      full_name: user.full_name,
       role: user.role.name,
       permissions: permissions
     };
@@ -130,7 +132,7 @@ export class AuthService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const user = await this.usersService.update(userId, dto);
+    const { after: user } = await this.usersService.update(userId, dto);
     const permissions = await this.permissionsService.getUserPermissions(userId);
     return {
       id: user.id,
@@ -197,6 +199,7 @@ export class AuthService {
       const newPayload = {
         email: user.email,
         sub: user.id,
+        full_name: user.full_name,
         role: user.role.name,
         permissions: permissions,
       };

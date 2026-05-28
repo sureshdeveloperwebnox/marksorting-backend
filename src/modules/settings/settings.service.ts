@@ -96,13 +96,13 @@ export class SettingsService {
   }
 
   async update(id: string, dto: UpdateSettingDto) {
-    await this.findById(id);
+    const existingSetting = await this.findById(id);
 
     if (dto.key) {
-      const existing = await this.prisma.setting.findFirst({
+      const duplicate = await this.prisma.setting.findFirst({
         where: { key: dto.key, id: { not: id } },
       });
-      if (existing) {
+      if (duplicate) {
         throw new BadRequestException(
           `Setting with key "${dto.key}" already exists`,
         );
@@ -115,7 +115,7 @@ export class SettingsService {
     });
 
     await this.invalidateCache(id);
-    return setting;
+    return { before: existingSetting, after: setting };
   }
 
   async remove(id: string) {

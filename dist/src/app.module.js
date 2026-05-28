@@ -11,6 +11,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const bullmq_1 = require("@nestjs/bullmq");
 const event_emitter_1 = require("@nestjs/event-emitter");
@@ -40,6 +41,10 @@ const materials_module_1 = require("./modules/materials/materials.module");
 const stores_module_1 = require("./modules/stores/stores.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const permissions_module_1 = require("./modules/permissions/permissions.module");
+const activity_logs_module_1 = require("./modules/activity-logs/activity-logs.module");
+const activity_log_interceptor_1 = require("./modules/activity-logs/interceptors/activity-log.interceptor");
+const auto_activity_log_interceptor_1 = require("./modules/activity-logs/interceptors/auto-activity-log.interceptor");
+const jwt_auth_guard_1 = require("./common/guards/jwt-auth.guard");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -94,6 +99,21 @@ exports.AppModule = AppModule = __decorate([
             stores_module_1.StoresModule,
             notifications_module_1.NotificationsModule,
             permissions_module_1.PermissionsModule,
+            activity_logs_module_1.ActivityLogsModule,
+        ],
+        providers: [
+            {
+                provide: core_1.APP_GUARD,
+                useClass: jwt_auth_guard_1.JwtAuthGuard,
+            },
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: activity_log_interceptor_1.ActivityLogInterceptor,
+            },
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: auto_activity_log_interceptor_1.AutoActivityLogInterceptor,
+            },
         ],
     })
 ], AppModule);

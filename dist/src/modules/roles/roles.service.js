@@ -136,7 +136,7 @@ let RolesService = class RolesService {
             },
         });
         await this.invalidateCache(id, dto.permission_ids !== undefined);
-        return this.formatRole(role);
+        return { before: existingRole, after: this.formatRole(role) };
     }
     async remove(id) {
         const existingRole = await this.prisma.role.findUnique({ where: { id } });

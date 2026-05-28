@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const tickets_service_1 = require("./tickets.service");
 const create_ticket_dto_1 = require("./dto/create-ticket.dto");
 const update_ticket_dto_1 = require("./dto/update-ticket.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let TicketsController = class TicketsController {
     ticketsService;
     constructor(ticketsService) {
@@ -101,6 +104,19 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new support ticket' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'tickets',
+        description: (ctx) => {
+            const ticket = ctx.result;
+            const title = ticket?.title || ticket?.subject || ctx.body.title || ctx.body.subject || 'Unknown';
+            const details = [
+                ticket?.priority || ctx.body.priority ? `Priority: ${ticket?.priority || ctx.body.priority}` : null,
+                ticket?.status ? `Status: ${ticket.status}` : null,
+            ].filter(Boolean).join(', ');
+            return (0, description_helper_1.createDescription)('Support Ticket', title, details || undefined, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_ticket_dto_1.CreateTicketDto]),
@@ -109,6 +125,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing support ticket' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'tickets',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const title = after?.title || after?.subject || before?.title || before?.subject || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Support Ticket "${title}" — ${diff}`
+                : `${who} Support Ticket "${title}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -118,6 +149,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete support ticket' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'tickets',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const ticket = ctx.result;
+            const title = ticket?.title || ticket?.subject || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Support Ticket', title, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

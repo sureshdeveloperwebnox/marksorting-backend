@@ -23,34 +23,40 @@ model User {
   last_login_at         DateTime?
   failed_login_attempts Int       @default(0)
   locked_until          DateTime?
-  
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  deleted_at            DateTime?
-  created_by            String?
-  updated_by            String?
 
-  sessions              UserSession[]
-  refresh_tokens        RefreshToken[]
-  otps                  OtpVerification[]
-  password_resets       PasswordReset[]
-  activity_logs         ActivityLog[]
-  support_tickets       SupportTicket[]
-  push_tokens           PushToken[]
-  notifications         Notification[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+  created_by String?
+  updated_by String?
+
+  sessions          UserSession[]
+  refresh_tokens    RefreshToken[]
+  otps              OtpVerification[]
+  password_resets   PasswordReset[]
+  activity_logs     ActivityLog[]
+  audit_trails      AuditTrail[]
+  security_logs     SecurityLog[]
+  api_logs          ApiLog[]
+  error_logs        ErrorLog[]
+  notification_logs NotificationLog[]
+  websocket_logs    WebSocketLog[]
+  support_tickets   SupportTicket[]
+  push_tokens       PushToken[]
+  notifications     Notification[]
 
   @@map("users")
 }
 
 model Role {
-  id          String       @id @default(uuid())
-  name        String       @unique
+  id          String           @id @default(uuid())
+  name        String           @unique
   description String?
   permissions RolePermission[]
   users       User[]
 
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("roles")
 }
@@ -75,29 +81,29 @@ model RolePermission {
 }
 
 model RefreshToken {
-  id          String   @id @default(uuid())
-  user_id     String
-  user        User     @relation(fields: [user_id], references: [id])
-  token_hash  String
-  expires_at  DateTime
-  created_at  DateTime @default(now())
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  token_hash String
+  expires_at DateTime
+  created_at DateTime @default(now())
 
   @@map("refresh_tokens")
 }
 
 model UserSession {
-  id                String    @id @default(uuid())
-  user_id           String
-  user              User      @relation(fields: [user_id], references: [id])
+  id                 String    @id @default(uuid())
+  user_id            String
+  user               User      @relation(fields: [user_id], references: [id])
   refresh_token_hash String
-  ip_address        String?
-  device_name       String?
-  browser           String?
-  operating_system  String?
-  location          String?
-  expires_at        DateTime
-  revoked_at        DateTime?
-  created_at        DateTime  @default(now())
+  ip_address         String?
+  device_name        String?
+  browser            String?
+  operating_system   String?
+  location           String?
+  expires_at         DateTime
+  revoked_at         DateTime?
+  created_at         DateTime  @default(now())
 
   @@map("user_sessions")
 }
@@ -107,7 +113,7 @@ model OtpVerification {
   user_id     String
   user        User      @relation(fields: [user_id], references: [id])
   otp_code    String
-  type        String    // EMAIL_VERIFICATION, PHONE_VERIFICATION, LOGIN_OTP, PASSWORD_RESET
+  type        String // EMAIL_VERIFICATION, PHONE_VERIFICATION, LOGIN_OTP, PASSWORD_RESET
   expires_at  DateTime
   verified_at DateTime?
   created_at  DateTime  @default(now())
@@ -116,48 +122,82 @@ model OtpVerification {
 }
 
 model PasswordReset {
-  id          String    @id @default(uuid())
-  user_id     String
-  user        User      @relation(fields: [user_id], references: [id])
-  token_hash  String
-  expires_at  DateTime
-  used_at     DateTime?
-  created_at  DateTime  @default(now())
+  id         String    @id @default(uuid())
+  user_id    String
+  user       User      @relation(fields: [user_id], references: [id])
+  token_hash String
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime  @default(now())
 
   @@map("password_resets")
 }
 
 model ActivityLog {
-  id          String   @id @default(uuid())
-  user_id     String
-  user        User     @relation(fields: [user_id], references: [id])
-  action      String
-  description String?
-  ip_address  String?
-  device_name String?
-  created_at  DateTime @default(now())
+  id      String @id @default(uuid())
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
 
+  // Action classification
+  action      String // LOGIN, LOGOUT, CREATE, UPDATE, DELETE, VIEW, EXPORT, etc.
+  entity_type String? // users, mills, service_reports, expenses, etc.
+  entity_id   String? // ID of the affected entity
+
+  // Human-readable description
+  description String
+
+  // Context data (JSON for flexibility)
+  metadata Json? // { previous_values, new_values, additional_context }
+
+  // Request context - Enhanced
+  ip_address  String?
+  user_agent  String?
+  device_name String?
+  browser     String?
+  os          String?
+
+  // Correlation tracking
+  correlation_id String? @db.Uuid
+  request_id     String? @db.Uuid
+  session_id     String?
+
+  // Performance metrics
+  execution_time_ms Int?
+
+  // Archival status
+  archived Boolean @default(false)
+
+  // Timestamps
+  created_at DateTime @default(now())
+
+  // Indexes for efficient queries
+  @@index([user_id, created_at])
+  @@index([entity_type, entity_id])
+  @@index([action, created_at])
+  @@index([correlation_id])
+  @@index([created_at])
+  @@index([archived, created_at])
   @@map("activity_logs")
 }
 
 // Business Models
 
 model Mill {
-  id          String     @id @default(uuid())
-  name        String
-  email       String?
-  phone       String?
-  address     String?
-  status      String     @default("ACTIVE")
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
-  deleted_at  DateTime?
-  customer_id String?
-  customer    Customer?  @relation(fields: [customer_id], references: [id])
-  serviceReports ServiceReport[]
+  id                  String               @id @default(uuid())
+  name                String
+  email               String?
+  phone               String?
+  address             String?
+  status              String               @default("ACTIVE")
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+  deleted_at          DateTime?
+  customer_id         String?
+  customer            Customer?            @relation(fields: [customer_id], references: [id])
+  serviceReports      ServiceReport[]
   installationReports InstallationReport[]
-  expenses    Expense[]
-  supportTickets SupportTicket[]
+  expenses            Expense[]
+  supportTickets      SupportTicket[]
 
   @@map("mills")
 }
@@ -177,18 +217,18 @@ model ServiceCategory {
 }
 
 model Customer {
-  id          String    @id @default(uuid())
-  name        String
-  email       String?
-  phone       String?
-  address     String?
-  status      String    @default("ACTIVE") // ACTIVE, INACTIVE
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  deleted_at  DateTime?
-  mills       Mill[]
+  id             String          @id @default(uuid())
+  name           String
+  email          String?
+  phone          String?
+  address        String?
+  status         String          @default("ACTIVE") // ACTIVE, INACTIVE
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  deleted_at     DateTime?
+  mills          Mill[]
   supportTickets SupportTicket[]
-  stores      Store[]
+  stores         Store[]
 
   @@map("customers")
 }
@@ -208,20 +248,20 @@ model ProductService {
 }
 
 model Technician {
-  id          String    @id @default(uuid())
-  full_name   String
-  email       String?   @unique
-  phone       String?   @unique
-  status      String    @default("AVAILABLE") // AVAILABLE, ON_LEAVE, BUSY, INACTIVE
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  deleted_at  DateTime?
+  id         String    @id @default(uuid())
+  full_name  String
+  email      String?   @unique
+  phone      String?   @unique
+  status     String    @default("AVAILABLE") // AVAILABLE, ON_LEAVE, BUSY, INACTIVE
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
 
-  serviceReports ServiceReportTechnician[]
+  serviceReports      ServiceReportTechnician[]
   installationReports InstallationReportTechnician[]
-  expenses    ExpenseTechnician[]
-  supportTickets SupportTicket[]
-  stores      Store[]
+  expenses            ExpenseTechnician[]
+  supportTickets      SupportTicket[]
+  stores              Store[]
 
   @@map("technicians")
 }
@@ -242,28 +282,28 @@ model ServiceRecord {
 }
 
 model Notification {
-  id          String    @id @default(uuid())
-  user_id     String?
-  user        User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  title       String
-  message     String
-  type        String    // SERVICE_REPORT, INSTALLATION, EXPENSE, TICKET, BROADCAST
-  status      String    @default("UNREAD") // UNREAD, READ
-  meta_data   Json?
-  created_at  DateTime  @default(now())
+  id         String   @id @default(uuid())
+  user_id    String?
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  title      String
+  message    String
+  type       String // SERVICE_REPORT, INSTALLATION, EXPENSE, TICKET, BROADCAST
+  status     String   @default("UNREAD") // UNREAD, READ
+  meta_data  Json?
+  created_at DateTime @default(now())
 
   @@index([user_id])
   @@map("notifications")
 }
 
 model PushToken {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   user_id     String
-  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   token       String
-  device_type String    @default("WEB") // WEB, ANDROID, IOS
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  device_type String   @default("WEB") // WEB, ANDROID, IOS
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
   @@unique([user_id, token])
   @@index([user_id])
@@ -296,12 +336,12 @@ model SupportTicket {
 }
 
 model Setting {
-  id          String    @id @default(uuid())
-  key         String    @unique
-  value       String
-  group       String    // GENERAL, APP, PAYMENT, NOTIFICATION, SECURITY
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id         String   @id @default(uuid())
+  key        String   @unique
+  value      String
+  group      String // GENERAL, APP, PAYMENT, NOTIFICATION, SECURITY
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("settings")
 }
@@ -347,8 +387,8 @@ model ServiceReport {
   updated_at                DateTime  @updatedAt
   deleted_at                DateTime?
 
-  serviceCategory ServiceCategory @relation(fields: [service_category_id], references: [id])
-  mill            Mill            @relation(fields: [mill_id], references: [id])
+  serviceCategory ServiceCategory           @relation(fields: [service_category_id], references: [id])
+  mill            Mill                      @relation(fields: [mill_id], references: [id])
   technicians     ServiceReportTechnician[]
 
   @@map("service_reports")
@@ -365,82 +405,82 @@ model ServiceReportTechnician {
 }
 
 model InstallationReport {
-  id                        String    @id @default(uuid())
-  report_number             String    @unique
-  mill_id                   String
-  place                     String
-  mill_whatsapp_number      String
-  mill_email                String?
-  visit_date                DateTime
-  visit_time                String
-  call_registered_date      DateTime
-  machine_model             String
-  serial_or_frame_no        String
-  authorized_person         String
-  invoice_number            String?
-  invoice_date              DateTime?
-  warranty_start_date       DateTime?
-  warranty_end_date         DateTime?
-  commodity                 String?
-  contamination             String?
-  output_capacity_per_hour  String?
-  rejection_ratio           String?
-  purity                    String?
-  no_of_programs_set        Int?
-  ac_provided               Boolean   @default(false)
-  compressor_details        String?
-  air_drier_details         String?
-  ground_earth_provided     Boolean   @default(false)
-  ground_earth_value        Int?
-  ground_earth_field        String?
-  no_of_filters_installed   Int?
-  oil_filter_condition      String?
-  line_filter_condition     String?
-  auto_drain_valve_working  Boolean   @default(false)
-  engineer_remarks          String
-  engineer_signature        String
-  customer_remarks          String?
-  customer_signature        String
-  status                    String    @default("PENDING")
-  created_at                DateTime  @default(now())
-  updated_at                DateTime  @updatedAt
-  deleted_at                DateTime?
+  id                       String    @id @default(uuid())
+  report_number            String    @unique
+  mill_id                  String
+  place                    String
+  mill_whatsapp_number     String
+  mill_email               String?
+  visit_date               DateTime
+  visit_time               String
+  call_registered_date     DateTime
+  machine_model            String
+  serial_or_frame_no       String
+  authorized_person        String
+  invoice_number           String?
+  invoice_date             DateTime?
+  warranty_start_date      DateTime?
+  warranty_end_date        DateTime?
+  commodity                String?
+  contamination            String?
+  output_capacity_per_hour String?
+  rejection_ratio          String?
+  purity                   String?
+  no_of_programs_set       Int?
+  ac_provided              Boolean   @default(false)
+  compressor_details       String?
+  air_drier_details        String?
+  ground_earth_provided    Boolean   @default(false)
+  ground_earth_value       Int?
+  ground_earth_field       String?
+  no_of_filters_installed  Int?
+  oil_filter_condition     String?
+  line_filter_condition    String?
+  auto_drain_valve_working Boolean   @default(false)
+  engineer_remarks         String
+  engineer_signature       String
+  customer_remarks         String?
+  customer_signature       String
+  status                   String    @default("PENDING")
+  created_at               DateTime  @default(now())
+  updated_at               DateTime  @updatedAt
+  deleted_at               DateTime?
 
-  mill                      Mill            @relation(fields: [mill_id], references: [id])
-  technicians               InstallationReportTechnician[]
+  mill        Mill                           @relation(fields: [mill_id], references: [id])
+  technicians InstallationReportTechnician[]
 
   @@map("installation_reports")
 }
 
 model InstallationReportTechnician {
   installation_report_id String
-  technician_id         String
-  installationReport    InstallationReport @relation(fields: [installation_report_id], references: [id], onDelete: Cascade)
-  technician            Technician         @relation(fields: [technician_id], references: [id])
+  technician_id          String
+  installationReport     InstallationReport @relation(fields: [installation_report_id], references: [id], onDelete: Cascade)
+  technician             Technician         @relation(fields: [technician_id], references: [id])
 
   @@id([installation_report_id, technician_id])
   @@map("installation_report_technicians")
 }
 
 model Expense {
-  id                  String              @id @default(uuid())
-  expense_number      String              @unique
+  id                  String    @id @default(uuid())
+  expense_number      String    @unique
   mill_id             String?
   place               String?
   visit_date          DateTime
   visit_time          String
   expense_category_id String
   others              String?
-  amount              Decimal             @default(0)
-  expense_images      String[]            @default([])
-  status              String              @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
-  created_at          DateTime            @default(now())
-  updated_at          DateTime            @updatedAt
+  amount              Decimal   @default(0)
+  expense_images      String[]  @default([])
+  status              String    @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, CANCELLED
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
   deleted_at          DateTime?
 
-  mill                Mill?               @relation(fields: [mill_id], references: [id])
-  expenseCategory     ExpenseCategory     @relation(fields: [expense_category_id], references: [id])
-  technicians         ExpenseTechnician[]
+  mill            Mill?               @relation(fields: [mill_id], references: [id])
+  expenseCategory ExpenseCategory     @relation(fields: [expense_category_id], references: [id])
+  technicians     ExpenseTechnician[]
 
   @@map("expenses")
 }
@@ -464,18 +504,18 @@ model ExpenseCategory {
   updated_at  DateTime  @updatedAt
   deleted_at  DateTime?
 
-  expenses    Expense[]
+  expenses Expense[]
 
   @@map("expense_categories")
 }
 
 model Material {
-  id          String         @id @default(uuid())
-  name        String         @unique
+  id          String          @id @default(uuid())
+  name        String          @unique
   description String?
-  status      String         @default("ACTIVE")
-  created_at  DateTime       @default(now())
-  updated_at  DateTime       @updatedAt
+  status      String          @default("ACTIVE")
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
   deleted_at  DateTime?
   stores      StoreMaterial[]
 
@@ -483,19 +523,19 @@ model Material {
 }
 
 model Store {
-  id                  String         @id @default(uuid())
+  id                  String          @id @default(uuid())
   service_engineer_id String
-  service_engineer    Technician     @relation(fields: [service_engineer_id], references: [id])
+  service_engineer    Technician      @relation(fields: [service_engineer_id], references: [id])
   customer_id         String
-  customer            Customer       @relation(fields: [customer_id], references: [id])
+  customer            Customer        @relation(fields: [customer_id], references: [id])
   quantity            Int
-  warranty_status     String         // Under Warranty, Expired
-  frame_number        String         @unique
-  return_status       String         // Returned, Pending, Not Returned
-  inflow_status       String         // Inflow, Outflow, Available, Damaged
+  warranty_status     String // Under Warranty, Expired
+  frame_number        String          @unique
+  return_status       String // Returned, Pending, Not Returned
+  inflow_status       String // Inflow, Outflow, Available, Damaged
   barcode             String?
-  created_at          DateTime       @default(now())
-  updated_at          DateTime       @updatedAt
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
   deleted_at          DateTime?
   materials           StoreMaterial[]
 
@@ -512,3 +552,271 @@ model StoreMaterial {
   @@map("store_materials")
 }
 
+// ============================================
+// ENHANCED LOGGING MODELS (Enterprise Architecture)
+// ============================================
+
+model AuditTrail {
+  id      String @id @default(uuid())
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+
+  // Action Details
+  action      String // CREATE, UPDATE, DELETE
+  entity_type String
+  entity_id   String
+
+  // Change Tracking
+  before_data    Json? // Previous state (null for CREATE)
+  after_data     Json? // New state (null for DELETE)
+  changed_fields Json? // Array of changed field names
+
+  // Context
+  description String?
+  reason      String? // Optional reason for change
+
+  // Metadata
+  ip_address     String?
+  user_agent     String?
+  correlation_id String? @db.Uuid
+
+  // Archival
+  archived Boolean @default(false)
+
+  created_at DateTime @default(now())
+
+  @@index([entity_type, entity_id, created_at])
+  @@index([user_id, created_at])
+  @@index([correlation_id])
+  @@index([archived, created_at])
+  @@map("audit_trails")
+}
+
+model SecurityLog {
+  id      String  @id @default(uuid())
+  user_id String?
+  user    User?   @relation(fields: [user_id], references: [id])
+
+  // Event Details
+  event_type  String // LOGIN, LOGOUT, LOGIN_FAILED, ACCESS_DENIED, etc.
+  severity    String // INFO, WARNING, ERROR, CRITICAL
+  description String
+
+  // Auth Context
+  email_attempted String?
+  auth_method     String? // PASSWORD, OAUTH, SAML
+  mfa_used        Boolean @default(false)
+
+  // Failure Details
+  failure_reason String?
+
+  // Request Context
+  ip_address         String
+  user_agent         String?
+  device_fingerprint String?
+  geolocation        Json? // { country, city, lat, lng }
+
+  // Correlation
+  correlation_id String? @db.Uuid
+  session_id     String?
+
+  // Risk Analysis
+  risk_score    Int?
+  is_suspicious Boolean @default(false)
+
+  created_at DateTime @default(now())
+
+  @@index([user_id, created_at])
+  @@index([event_type, created_at])
+  @@index([ip_address, created_at])
+  @@index([is_suspicious])
+  @@index([created_at])
+  @@map("security_logs")
+}
+
+model ApiLog {
+  id String @id @default(uuid())
+
+  // Request
+  method          String
+  path            String
+  query_params    Json?
+  request_body    Json? // Sanitized
+  request_headers Json? // Sanitized
+
+  // Response
+  status_code      Int?
+  response_body    Json? // Truncated
+  response_time_ms Int?
+
+  // User Context
+  user_id    String?
+  user       User?   @relation(fields: [user_id], references: [id])
+  api_key_id String?
+
+  // Rate Limiting
+  rate_limit_hit       Boolean @default(false)
+  rate_limit_remaining Int?
+
+  // Context
+  ip_address     String?
+  correlation_id String? @db.Uuid
+
+  created_at DateTime @default(now())
+
+  @@index([user_id, created_at])
+  @@index([path, created_at])
+  @@index([status_code, created_at])
+  @@index([created_at])
+  @@map("api_logs")
+}
+
+model ErrorLog {
+  id String @id @default(uuid())
+
+  // Error Details
+  error_type  String // ValidationError, DatabaseError, etc.
+  error_code  String?
+  message     String
+  stack_trace String?
+
+  // Context
+  user_id        String?
+  user           User?   @relation(fields: [user_id], references: [id])
+  correlation_id String? @db.Uuid
+
+  // Request Context
+  method       String?
+  path         String?
+  request_body Json?
+
+  // Resolution
+  is_resolved      Boolean   @default(false)
+  resolved_by      String?
+  resolved_at      DateTime?
+  resolution_notes String?
+
+  // Alerting
+  alert_sent Boolean @default(false)
+  severity   String  @default("ERROR") // INFO, WARNING, ERROR, CRITICAL
+
+  created_at DateTime @default(now())
+
+  @@index([is_resolved])
+  @@index([error_type, created_at])
+  @@index([correlation_id])
+  @@index([created_at])
+  @@map("error_logs")
+}
+
+model JobLog {
+  id String @id @default(uuid())
+
+  // Job Identification
+  job_id     String
+  job_name   String
+  queue_name String
+
+  // Status
+  status String // PENDING, PROCESSING, COMPLETED, FAILED
+
+  // Timing
+  started_at   DateTime?
+  completed_at DateTime?
+  duration_ms  Int?
+
+  // Details
+  payload       Json?
+  result        Json?
+  error_message String?
+  retry_count   Int     @default(0)
+
+  // Worker
+  worker_id String?
+
+  created_at DateTime @default(now())
+
+  @@index([status, created_at])
+  @@index([job_name, created_at])
+  @@index([status])
+  @@index([created_at])
+  @@map("job_logs")
+}
+
+model NotificationLog {
+  id String @id @default(uuid())
+
+  user_id String?
+  user    User?   @relation(fields: [user_id], references: [id])
+
+  // Content
+  notification_type String // EMAIL, SMS, PUSH, WEBSOCKET
+  channel           String // Transactional, Marketing, Alert
+  title_hash        String?
+  content_length    Int?
+
+  // Status
+  status String // SENT, DELIVERED, OPENED, FAILED
+
+  // Provider
+  provider            String? // SendGrid, Twilio, Firebase
+  provider_message_id String?
+
+  // Tracking
+  sent_at      DateTime?
+  delivered_at DateTime?
+  opened_at    DateTime?
+
+  // Error
+  error_message String?
+
+  created_at DateTime @default(now())
+
+  @@index([user_id, created_at])
+  @@index([status, created_at])
+  @@index([created_at])
+  @@map("notification_logs")
+}
+
+model WebSocketLog {
+  id String @id @default(uuid())
+
+  // Connection
+  socket_id String
+  user_id   String?
+  user      User?   @relation(fields: [user_id], references: [id])
+
+  // Event
+  event_type         String // CONNECT, DISCONNECT, JOIN_ROOM, MESSAGE
+  room               String?
+  event_name         String?
+  payload_size_bytes Int?
+
+  // Connection Info
+  ip_address       String?
+  connected_at     DateTime?
+  disconnected_at  DateTime?
+  duration_seconds Int?
+
+  created_at DateTime @default(now())
+
+  @@index([user_id, created_at])
+  @@index([socket_id, created_at])
+  @@index([created_at])
+  @@map("websocket_logs")
+}
+
+model LogRetentionPolicy {
+  id String @id @default(uuid())
+
+  log_type           String  @unique // activity_logs, audit_trails, security_logs, etc.
+  retention_days     Int
+  archive_enabled    Boolean @default(true)
+  archive_after_days Int?
+  delete_after_days  Int?
+
+  last_cleanup_at DateTime?
+  created_at      DateTime  @default(now())
+
+  @@map("log_retention_policies")
+}

@@ -7,36 +7,49 @@ export declare class CustomersController {
     findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateCustomerDto): Promise<{
-        id: string;
-        email: string | null;
         created_at: Date;
+        id: string;
+        name: string;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        status: string;
         updated_at: Date;
         deleted_at: Date | null;
-        name: string;
-        phone: string | null;
-        status: string;
-        address: string | null;
     }>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
-        id: string;
-        email: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        phone: string | null;
-        status: string;
-        address: string | null;
+        before: {
+            created_at: Date;
+            id: string;
+            name: string;
+            email: string | null;
+            phone: string | null;
+            address: string | null;
+            status: string;
+            updated_at: Date;
+            deleted_at: Date | null;
+        };
+        after: {
+            created_at: Date;
+            id: string;
+            name: string;
+            email: string | null;
+            phone: string | null;
+            address: string | null;
+            status: string;
+            updated_at: Date;
+            deleted_at: Date | null;
+        };
     }>;
     remove(id: string): Promise<{
-        id: string;
-        email: string | null;
         created_at: Date;
+        id: string;
+        name: string;
+        email: string | null;
+        phone: string | null;
+        address: string | null;
+        status: string;
         updated_at: Date;
         deleted_at: Date | null;
-        name: string;
-        phone: string | null;
-        status: string;
-        address: string | null;
     }>;
 }

@@ -8,29 +8,32 @@ export declare class ExpenseCategoriesController {
     findOne(id: string): Promise<any>;
     create(dto: CreateExpenseCategoryDto): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         name: string;
         description: string | null;
         status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     update(id: string, dto: UpdateExpenseCategoryDto): Promise<{
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        description: string | null;
-        status: string;
+        before: any;
+        after: {
+            id: string;
+            name: string;
+            description: string | null;
+            status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+        };
     }>;
     remove(id: string): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         name: string;
         description: string | null;
         status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
 }

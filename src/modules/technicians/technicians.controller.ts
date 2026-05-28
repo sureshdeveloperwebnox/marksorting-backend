@@ -2,6 +2,9 @@ import { Controller, Get, Param, Query, Put, Body } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TechniciansService } from './technicians.service';
 import { Prisma } from '@prisma/client';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { updateDescription } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('technicians')
 @Controller('technicians')
@@ -80,6 +83,17 @@ export class TechniciansController {
 
   @Put(':id/status')
   @ApiOperation({ summary: 'Update technician availability status' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'technicians',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const technician = ctx.result;
+      const name = technician?.full_name || ctx.params.id;
+      const email = technician?.email ? ` (${technician.email})` : '';
+      return updateDescription('Technician', `${name}${email}`, ctx.body, ctx.user.full_name);
+    },
+  })
   updateStatus(@Param('id') id: string, @Body('status') status: string) {
     return this.techniciansService.updateStatus(id, status);
   }

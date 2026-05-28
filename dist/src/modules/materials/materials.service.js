@@ -72,7 +72,7 @@ let MaterialsService = class MaterialsService {
             data: dto,
         });
         await this.invalidateCache(id);
-        return material;
+        return { before: existing, after: material };
     }
     async remove(id) {
         const existing = await this.prisma.material.findFirst({

@@ -153,7 +153,7 @@ let TicketsService = class TicketsService {
                 assignedTechnicianUserIds: [dto.service_engineer_id],
             });
         }
-        return ticket;
+        return { before: existing, after: ticket };
     }
     async remove(id) {
         await this.findById(id);

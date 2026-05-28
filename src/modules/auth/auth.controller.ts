@@ -8,6 +8,7 @@ import {
   Put,
   Res,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -18,12 +19,20 @@ import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
 import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { Public } from '../../common/decorators/public.decorator';
 import * as express from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  private readonly logger = new Logger(AuthController.name);
+
+  constructor(
+    private authService: AuthService,
+    private activityLogsService: ActivityLogsService,
+  ) {}
 
   private setTokens(res: express.Response, result: any) {
     const isProduction = process.env.NODE_ENV === 'production';
@@ -47,6 +56,7 @@ export class AuthController {
     }
   }
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({ summary: 'Login with email and password' })
@@ -57,9 +67,39 @@ export class AuthController {
   ) {
     const result = await this.authService.login(req.user);
     this.setTokens(res, result);
+
+    // Log successful login
+    const userAgent = req.headers['user-agent'] as string | undefined;
+    const deviceName = this.getDeviceName(userAgent);
+    const roleName = result.user.role?.name || result.user.role || 'Unknown Role';
+    await this.activityLogsService.create({
+      user_id: result.user.id,
+      action: ActivityAction.LOGIN,
+      description: `"${result.user.full_name}" (${result.user.email}) logged in — Role: ${roleName} | Device: ${deviceName || 'Unknown'} | IP: ${req.ip || 'N/A'}`,
+      metadata: {
+        role: result.user.role,
+        ip_address: req.ip,
+        device: deviceName,
+      },
+      ip_address: req.ip,
+      user_agent: userAgent,
+      device_name: deviceName,
+    });
+
     return { user: result.user };
   }
 
+  private getDeviceName(userAgent?: string): string | undefined {
+    if (!userAgent) return undefined;
+    if (userAgent.includes('Mobile')) return 'Mobile';
+    if (userAgent.includes('Tablet')) return 'Tablet';
+    if (userAgent.includes('Windows')) return 'Windows';
+    if (userAgent.includes('Mac')) return 'Mac';
+    if (userAgent.includes('Linux')) return 'Linux';
+    return 'Unknown';
+  }
+
+  @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new account' })
   @ApiBody({ type: RegisterDto })
@@ -72,12 +112,16 @@ export class AuthController {
     return { user: result.user };
   }
 
+  @Public()
   @Post('logout')
   @ApiOperation({ summary: 'Logout user' })
   async logout(
     @Request() req: any,
     @Res({ passthrough: true }) res: express.Response,
   ) {
+    let userId: string | null = null;
+    let userEmail = 'Unknown';
+
     // Try to get user ID from token even if expired for Redis cleanup
     try {
       const authHeader = req.headers.authorization;
@@ -85,6 +129,8 @@ export class AuthController {
         const token = authHeader.split(' ')[1];
         const payload = this.authService.decodeToken(token);
         if (payload?.sub) {
+          userId = payload.sub;
+          userEmail = payload.email || 'Unknown';
           await this.authService.logout(payload.sub);
         }
       }
@@ -92,11 +138,26 @@ export class AuthController {
       // Ignore Redis errors during logout
     }
 
+    // Log logout if we have a user ID
+    if (userId) {
+      const userAgent = req.headers['user-agent'] as string | undefined;
+      const deviceName = this.getDeviceName(userAgent);
+      await this.activityLogsService.create({
+        user_id: userId,
+        action: ActivityAction.LOGOUT,
+        description: `"${userEmail}" logged out — Device: ${deviceName || 'Unknown'} | IP: ${req.ip || 'N/A'} | Session ended`,
+        ip_address: req.ip,
+        user_agent: userAgent,
+        device_name: deviceName,
+      });
+    }
+
     res.clearCookie('access_token', { path: '/' });
     res.clearCookie('refresh_token', { path: '/' });
     return { message: 'Logged out successfully' };
   }
 
+  @Public()
   @Get('refresh')
   @ApiOperation({ summary: 'Refresh access token' })
   async refresh(
@@ -127,6 +188,7 @@ export class AuthController {
     return this.authService.updateProfile(req.user.userId, dto);
   }
 
+  @Public()
   @Post('mobile/login')
   @ApiOperation({ summary: 'Login for service engineers (mobile clients)' })
   @ApiBody({ type: MobileLoginDto })

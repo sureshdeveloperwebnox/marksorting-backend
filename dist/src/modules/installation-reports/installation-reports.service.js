@@ -178,7 +178,7 @@ let InstallationReportsService = class InstallationReportsService {
         return installationReport;
     }
     async update(id, dto, user) {
-        await this.findById(id, user);
+        const existingReport = await this.findById(id, user);
         const rawDto = dto;
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
@@ -233,7 +233,7 @@ let InstallationReportsService = class InstallationReportsService {
             });
         }
         await this.invalidateCache(id);
-        return installationReport;
+        return { before: existingReport, after: installationReport };
     }
     async remove(id, user) {
         await this.findById(id, user);

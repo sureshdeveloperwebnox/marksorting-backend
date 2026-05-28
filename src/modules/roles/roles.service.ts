@@ -149,7 +149,7 @@ export class RolesService {
     });
 
     await this.invalidateCache(id, dto.permission_ids !== undefined);
-    return this.formatRole(role);
+    return { before: existingRole, after: this.formatRole(role) };
   }
 
   async remove(id: string) {

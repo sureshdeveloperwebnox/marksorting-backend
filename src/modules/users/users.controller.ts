@@ -17,6 +17,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('users')
 @Controller('users')
@@ -106,6 +109,20 @@ export class UsersController {
   @Post()
   @ApiOperation({ summary: 'Create new user' })
   @Permissions('users.create')
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'users',
+    description: (ctx) => {
+      const user = ctx.result;
+      const name = user?.full_name || ctx.body.full_name || 'Unknown';
+      const details = [
+        user?.email ? `Email: ${user.email}` : (ctx.body.email ? `Email: ${ctx.body.email}` : null),
+        user?.role?.name ? `Role: ${user.role.name}` : null,
+        user?.account_status ? `Status: ${user.account_status}` : null,
+      ].filter(Boolean).join(', ');
+      return createDescription('User', name, details || undefined, ctx.user.full_name);
+    },
+  })
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
@@ -113,6 +130,21 @@ export class UsersController {
   @Put(':id')
   @ApiOperation({ summary: 'Update existing user' })
   @Permissions('users.update')
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'users',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const name = after?.full_name || before?.full_name || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} User "${name}" — ${diff}`
+        : `${who} User "${name}" (no changes detected)`;
+    },
+  })
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
@@ -120,6 +152,17 @@ export class UsersController {
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete user' })
   @Permissions('users.delete')
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'users',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const user = ctx.result;
+      const name = user?.full_name || ctx.params.id;
+      const email = user?.email ? ` (${user.email})` : '';
+      return deleteDescription('User', `${name}${email}`, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

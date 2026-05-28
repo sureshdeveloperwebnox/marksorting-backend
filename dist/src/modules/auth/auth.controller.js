@@ -44,6 +44,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var AuthController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
@@ -56,11 +57,17 @@ const register_dto_1 = require("./dto/register.dto");
 const mobile_login_dto_1 = require("./dto/mobile-login.dto");
 const mobile_login_response_dto_1 = require("./dto/mobile-login-response.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
+const activity_logs_service_1 = require("../activity-logs/activity-logs.service");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const public_decorator_1 = require("../../common/decorators/public.decorator");
 const express = __importStar(require("express"));
-let AuthController = class AuthController {
+let AuthController = AuthController_1 = class AuthController {
     authService;
-    constructor(authService) {
+    activityLogsService;
+    logger = new common_1.Logger(AuthController_1.name);
+    constructor(authService, activityLogsService) {
         this.authService = authService;
+        this.activityLogsService = activityLogsService;
     }
     setTokens(res, result) {
         const isProduction = process.env.NODE_ENV === 'production';
@@ -84,7 +91,38 @@ let AuthController = class AuthController {
     async login(req, res) {
         const result = await this.authService.login(req.user);
         this.setTokens(res, result);
+        const userAgent = req.headers['user-agent'];
+        const deviceName = this.getDeviceName(userAgent);
+        const roleName = result.user.role?.name || result.user.role || 'Unknown Role';
+        await this.activityLogsService.create({
+            user_id: result.user.id,
+            action: activity_action_enum_1.ActivityAction.LOGIN,
+            description: `"${result.user.full_name}" (${result.user.email}) logged in — Role: ${roleName} | Device: ${deviceName || 'Unknown'} | IP: ${req.ip || 'N/A'}`,
+            metadata: {
+                role: result.user.role,
+                ip_address: req.ip,
+                device: deviceName,
+            },
+            ip_address: req.ip,
+            user_agent: userAgent,
+            device_name: deviceName,
+        });
         return { user: result.user };
+    }
+    getDeviceName(userAgent) {
+        if (!userAgent)
+            return undefined;
+        if (userAgent.includes('Mobile'))
+            return 'Mobile';
+        if (userAgent.includes('Tablet'))
+            return 'Tablet';
+        if (userAgent.includes('Windows'))
+            return 'Windows';
+        if (userAgent.includes('Mac'))
+            return 'Mac';
+        if (userAgent.includes('Linux'))
+            return 'Linux';
+        return 'Unknown';
     }
     async register(registerDto, res) {
         const result = await this.authService.register(registerDto);
@@ -92,17 +130,33 @@ let AuthController = class AuthController {
         return { user: result.user };
     }
     async logout(req, res) {
+        let userId = null;
+        let userEmail = 'Unknown';
         try {
             const authHeader = req.headers.authorization;
             if (authHeader && authHeader.startsWith('Bearer ')) {
                 const token = authHeader.split(' ')[1];
                 const payload = this.authService.decodeToken(token);
                 if (payload?.sub) {
+                    userId = payload.sub;
+                    userEmail = payload.email || 'Unknown';
                     await this.authService.logout(payload.sub);
                 }
             }
         }
         catch (e) {
+        }
+        if (userId) {
+            const userAgent = req.headers['user-agent'];
+            const deviceName = this.getDeviceName(userAgent);
+            await this.activityLogsService.create({
+                user_id: userId,
+                action: activity_action_enum_1.ActivityAction.LOGOUT,
+                description: `"${userEmail}" logged out — Device: ${deviceName || 'Unknown'} | IP: ${req.ip || 'N/A'} | Session ended`,
+                ip_address: req.ip,
+                user_agent: userAgent,
+                device_name: deviceName,
+            });
         }
         res.clearCookie('access_token', { path: '/' });
         res.clearCookie('refresh_token', { path: '/' });
@@ -133,6 +187,7 @@ let AuthController = class AuthController {
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.UseGuards)(local_auth_guard_1.LocalAuthGuard),
     (0, common_1.Post)('login'),
     (0, swagger_1.ApiOperation)({ summary: 'Login with email and password' }),
@@ -144,6 +199,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('register'),
     (0, swagger_1.ApiOperation)({ summary: 'Register a new account' }),
     (0, swagger_1.ApiBody)({ type: register_dto_1.RegisterDto }),
@@ -154,6 +210,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('logout'),
     (0, swagger_1.ApiOperation)({ summary: 'Logout user' }),
     __param(0, (0, common_1.Request)()),
@@ -163,6 +220,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "logout", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('refresh'),
     (0, swagger_1.ApiOperation)({ summary: 'Refresh access token' }),
     __param(0, (0, common_1.Request)()),
@@ -192,6 +250,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "updateProfile", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('mobile/login'),
     (0, swagger_1.ApiOperation)({ summary: 'Login for service engineers (mobile clients)' }),
     (0, swagger_1.ApiBody)({ type: mobile_login_dto_1.MobileLoginDto }),
@@ -209,9 +268,10 @@ __decorate([
     __metadata("design:paramtypes", [mobile_login_dto_1.MobileLoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "mobileLogin", null);
-exports.AuthController = AuthController = __decorate([
+exports.AuthController = AuthController = AuthController_1 = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),
-    __metadata("design:paramtypes", [auth_service_1.AuthService])
+    __metadata("design:paramtypes", [auth_service_1.AuthService,
+        activity_logs_service_1.ActivityLogsService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map

@@ -12,6 +12,9 @@ import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { SettingsService } from './settings.service';
 import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('settings')
 @Controller('settings')
@@ -66,18 +69,57 @@ export class SettingsController {
 
   @Post()
   @ApiOperation({ summary: 'Create new setting' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'settings',
+    description: (ctx) => {
+      const setting = ctx.result;
+      const key = setting?.key || ctx.body.key || 'Unknown';
+      const value = setting?.value !== undefined ? setting.value : ctx.body.value;
+      const group = setting?.group || ctx.body.group ? ` [Group: ${setting?.group || ctx.body.group}]` : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+      return `${who} Setting "${key}" = "${value}"${group}`;
+    },
+  })
   create(@Body() dto: CreateSettingDto) {
     return this.settingsService.create(dto);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update existing setting' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'settings',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const key = after?.key || before?.key || ctx.params.id;
+      const group = after?.group ? ` [Group: ${after.group}]` : '';
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Setting "${key}${group}" — ${diff}`
+        : `${who} Setting "${key}${group}" (no changes detected)`;
+    },
+  })
   update(@Param('id') id: string, @Body() dto: UpdateSettingDto) {
     return this.settingsService.update(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete setting' })
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'settings',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const setting = ctx.result;
+      const key = setting?.key || ctx.params.id;
+      const group = setting?.group ? ` [Group: ${setting.group}]` : '';
+      return deleteDescription('Setting', key + group, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string) {
     return this.settingsService.remove(id);
   }

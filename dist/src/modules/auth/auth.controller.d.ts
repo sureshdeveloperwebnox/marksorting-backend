@@ -2,10 +2,13 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import * as express from 'express';
 export declare class AuthController {
     private authService;
-    constructor(authService: AuthService);
+    private activityLogsService;
+    private readonly logger;
+    constructor(authService: AuthService, activityLogsService: ActivityLogsService);
     private setTokens;
     login(req: any, res: express.Response): Promise<{
         user: {
@@ -20,6 +23,7 @@ export declare class AuthController {
             background_image_url: any;
         };
     }>;
+    private getDeviceName;
     register(registerDto: RegisterDto, res: express.Response): Promise<{
         user: {
             id: any;

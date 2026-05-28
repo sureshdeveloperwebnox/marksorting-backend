@@ -77,7 +77,7 @@ export class ServiceCategoriesService {
   }
 
   async update(id: string, dto: UpdateServiceCategoryDto) {
-    await this.findById(id);
+    const existing = await this.findById(id);
 
     const serviceCategory = await this.prisma.serviceCategory.update({
       where: { id },
@@ -85,7 +85,7 @@ export class ServiceCategoriesService {
     });
 
     await this.invalidateCache(id);
-    return serviceCategory;
+    return { before: existing, after: serviceCategory };
   }
 
   async remove(id: string) {

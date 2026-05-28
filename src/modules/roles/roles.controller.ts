@@ -17,6 +17,9 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
+import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('roles')
 @Controller('roles')
@@ -84,6 +87,19 @@ export class RolesController {
   @Post()
   @ApiOperation({ summary: 'Create new role' })
   @Permissions('roles.create')
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'roles',
+    description: (ctx) => {
+      const role = ctx.result;
+      const name = role?.name || ctx.body.name || 'Unknown';
+      const details = [
+        ctx.body.description ? `Description: ${ctx.body.description}` : null,
+        Array.isArray(ctx.body.permissions) ? `Permissions: ${ctx.body.permissions.length} assigned` : null,
+      ].filter(Boolean).join(', ');
+      return createDescription('Role', name, details || undefined, ctx.user.full_name);
+    },
+  })
   create(@Body() dto: CreateRoleDto) {
     return this.rolesService.create(dto);
   }
@@ -91,6 +107,22 @@ export class RolesController {
   @Put(':id')
   @ApiOperation({ summary: 'Update existing role' })
   @Permissions('roles.update')
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'roles',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const name = after?.name || before?.name || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const permNote = Array.isArray(ctx.body.permission_ids) ? ` | Permissions: ${ctx.body.permission_ids.length} assigned` : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Role "${name}" — ${diff}${permNote}`
+        : `${who} Role "${name}"${permNote || ' (no changes detected)'}`;
+    },
+  })
   update(@Param('id') id: string, @Body() dto: UpdateRoleDto) {
     return this.rolesService.update(id, dto);
   }
@@ -98,6 +130,16 @@ export class RolesController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete role' })
   @Permissions('roles.delete')
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'roles',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const role = ctx.result;
+      const name = role?.name || ctx.params.id;
+      return deleteDescription('Role', name, ctx.user.full_name);
+    },
+  })
   remove(@Param('id') id: string) {
     return this.rolesService.remove(id);
   }

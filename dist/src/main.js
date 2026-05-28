@@ -13,6 +13,10 @@ const cookie_parser_1 = __importDefault(require("cookie-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
     app.use((0, cookie_parser_1.default)());
+    app.use((req, res, next) => {
+        console.log(`[REQUEST] ${req.method} ${req.url}`);
+        next();
+    });
     app.useLogger(app.get(nestjs_pino_1.Logger));
     app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
     app.enableCors({

@@ -19,6 +19,8 @@ const passport_1 = require("@nestjs/passport");
 const notifications_service_1 = require("./notifications.service");
 const register_push_token_dto_1 = require("./dto/register-push-token.dto");
 const broadcast_notification_dto_1 = require("./dto/broadcast-notification.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 let NotificationsController = class NotificationsController {
     notificationsService;
     constructor(notificationsService) {
@@ -95,6 +97,21 @@ __decorate([
 __decorate([
     (0, common_1.Post)('broadcast'),
     (0, swagger_1.ApiOperation)({ summary: 'Send a broadcast notification (Admin only)' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'notifications',
+        description: (ctx) => {
+            const target = ctx.body.target;
+            const title = ctx.body.title;
+            if (target === 'ROLE') {
+                return `Broadcast notification "${title}" to roles: ${ctx.body.role_names?.join(', ') || ctx.body.role_name}`;
+            }
+            else if (target === 'USERS') {
+                return `Sent notification "${title}" to ${ctx.body.user_ids?.length || 0} users`;
+            }
+            return `Broadcast notification "${title}" to all users`;
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [broadcast_notification_dto_1.BroadcastNotificationDto]),

@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const expenses_service_1 = require("./expenses.service");
 const create_expense_dto_1 = require("./dto/create-expense.dto");
 const update_expense_dto_1 = require("./dto/update-expense.dto");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let ExpensesController = class ExpensesController {
     expensesService;
     constructor(expensesService) {
@@ -107,6 +110,23 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new expense' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'expenses',
+        description: (ctx) => {
+            const expense = ctx.result;
+            const expNo = expense?.expense_number || 'N/A';
+            const parts = [
+                expense?.expenseCategory?.name ? `Category: ${expense.expenseCategory.name}` : null,
+                expense?.amount ? `Amount: ₹${expense.amount}` : null,
+                expense?.mill?.name ? `Mill: ${expense.mill.name}` : null,
+                expense?.place ? `Place: ${expense.place}` : null,
+                expense?.status ? `Status: ${expense.status}` : null,
+            ].filter(Boolean).join(', ');
+            const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+            return `${who} Expense "${expNo}"` + (parts ? ` — ${parts}` : '');
+        },
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_expense_dto_1.CreateExpenseDto]),
@@ -115,6 +135,21 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing expense' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'expenses',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const expNo = after?.expense_number || before?.expense_number || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Expense "${expNo}" — ${diff}`
+                : `${who} Expense "${expNo}" (no changes detected)`;
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -124,6 +159,16 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete expense' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'expenses',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const expense = ctx.result;
+            const expNo = expense?.expense_number || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Expense', expNo, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

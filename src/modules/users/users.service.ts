@@ -120,13 +120,18 @@ export class UsersService {
   }
 
   async update(id: string, dto: UpdateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+      include: { role: true },
+    });
+
     const { password, ...data } = dto;
 
     if (data.email) {
-      const existingUser = await this.prisma.user.findUnique({
+      const emailConflict = await this.prisma.user.findUnique({
         where: { email: data.email },
       });
-      if (existingUser && existingUser.id !== id) {
+      if (emailConflict && emailConflict.id !== id) {
         throw new ConflictException('User with this email already exists');
       }
     }
@@ -146,7 +151,7 @@ export class UsersService {
     });
 
     await this.invalidateCache(id, user.email);
-    return this.formatUser(user);
+    return { before: existingUser ? this.formatUser(existingUser) : null, after: this.formatUser(user) };
   }
 
   async remove(id: string) {

@@ -176,7 +176,7 @@ export class TicketsService {
       });
     }
 
-    return ticket;
+    return { before: existing, after: ticket };
   }
 
   async remove(id: string) {

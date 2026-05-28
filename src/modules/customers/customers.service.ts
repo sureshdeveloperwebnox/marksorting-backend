@@ -75,7 +75,7 @@ export class CustomersService {
     });
 
     await this.invalidateCache(id);
-    return customer;
+    return { before: existing, after: customer };
   }
 
   async remove(id: string) {

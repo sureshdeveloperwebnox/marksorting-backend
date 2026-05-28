@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -28,6 +29,10 @@ import { MaterialsModule } from './modules/materials/materials.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
+import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
+import { ActivityLogInterceptor } from './modules/activity-logs/interceptors/activity-log.interceptor';
+import { AutoActivityLogInterceptor } from './modules/activity-logs/interceptors/auto-activity-log.interceptor';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -80,6 +85,21 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
     StoresModule,
     NotificationsModule,
     PermissionsModule,
+    ActivityLogsModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ActivityLogInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AutoActivityLogInterceptor,
+    },
   ],
 })
 export class AppModule {}

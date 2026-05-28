@@ -23,6 +23,8 @@ import {
   BroadcastNotificationDto,
   NotificationTarget,
 } from './dto/broadcast-notification.dto';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 
 @ApiTags('Notifications')
 @ApiBearerAuth()
@@ -72,6 +74,20 @@ export class NotificationsController {
 
   @Post('broadcast')
   @ApiOperation({ summary: 'Send a broadcast notification (Admin only)' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'notifications',
+    description: (ctx) => {
+      const target = ctx.body.target;
+      const title = ctx.body.title;
+      if (target === 'ROLE') {
+        return `Broadcast notification "${title}" to roles: ${ctx.body.role_names?.join(', ') || ctx.body.role_name}`;
+      } else if (target === 'USERS') {
+        return `Sent notification "${title}" to ${ctx.body.user_ids?.length || 0} users`;
+      }
+      return `Broadcast notification "${title}" to all users`;
+    },
+  })
   async broadcast(@Body() dto: BroadcastNotificationDto) {
     if (dto.target === NotificationTarget.ROLE && (dto.role_names?.length || dto.role_name)) {
       const roleNames = dto.role_names?.length

@@ -73,13 +73,13 @@ let ExpenseCategoriesService = class ExpenseCategoriesService {
         return expenseCategory;
     }
     async update(id, dto) {
-        await this.findById(id);
+        const existing = await this.findById(id);
         const expenseCategory = await this.prisma.expenseCategory.update({
             where: { id },
             data: dto,
         });
         await this.invalidateCache(id);
-        return expenseCategory;
+        return { before: existing, after: expenseCategory };
     }
     async remove(id) {
         await this.findById(id);

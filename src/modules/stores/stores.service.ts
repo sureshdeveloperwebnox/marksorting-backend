@@ -156,7 +156,7 @@ export class StoresService {
     });
 
     await this.invalidateCache(id);
-    return store;
+    return { before: existing, after: store };
   }
 
   async remove(id: string) {

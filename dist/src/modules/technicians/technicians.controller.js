@@ -16,6 +16,9 @@ exports.TechniciansController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const technicians_service_1 = require("./technicians.service");
+const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
+const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
+const description_helper_1 = require("../activity-logs/helpers/description.helper");
 let TechniciansController = class TechniciansController {
     techniciansService;
     constructor(techniciansService) {
@@ -102,6 +105,17 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id/status'),
     (0, swagger_1.ApiOperation)({ summary: 'Update technician availability status' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'technicians',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const technician = ctx.result;
+            const name = technician?.full_name || ctx.params.id;
+            const email = technician?.email ? ` (${technician.email})` : '';
+            return (0, description_helper_1.updateDescription)('Technician', `${name}${email}`, ctx.body, ctx.user.full_name);
+        },
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)('status')),
     __metadata("design:type", Function),

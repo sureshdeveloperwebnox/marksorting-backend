@@ -10,6 +10,8 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from '@ne
 import type { Response } from 'express';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
+import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 
 @ApiTags('reports')
 @ApiBearerAuth()
@@ -20,6 +22,17 @@ export class ReportsController {
 
   @Get('services')
   @ApiOperation({ summary: 'Get service reports log or export it' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'reports',
+    description: (ctx) => {
+      const exportType = ctx.query.export;
+      return exportType 
+        ? `Exported service reports as ${exportType.toUpperCase()}`
+        : 'Viewed service reports list';
+    },
+    ignoreNullEntity: true,
+  })
   @ApiQuery({ name: 'skip', required: false, type: String })
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -70,6 +83,17 @@ export class ReportsController {
 
   @Get('installations')
   @ApiOperation({ summary: 'Get installation reports log or export it' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'reports',
+    description: (ctx) => {
+      const exportType = ctx.query.export;
+      return exportType 
+        ? `Exported installation reports as ${exportType.toUpperCase()}`
+        : 'Viewed installation reports list';
+    },
+    ignoreNullEntity: true,
+  })
   @ApiQuery({ name: 'skip', required: false, type: String })
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -117,6 +141,17 @@ export class ReportsController {
 
   @Get('expenses')
   @ApiOperation({ summary: 'Get expense reports log or export it' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'reports',
+    description: (ctx) => {
+      const exportType = ctx.query.export;
+      return exportType 
+        ? `Exported expense reports as ${exportType.toUpperCase()}`
+        : 'Viewed expense reports list';
+    },
+    ignoreNullEntity: true,
+  })
   @ApiQuery({ name: 'skip', required: false, type: String })
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })

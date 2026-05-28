@@ -70,7 +70,7 @@ let CustomersService = class CustomersService {
             data: dto,
         });
         await this.invalidateCache(id);
-        return customer;
+        return { before: existing, after: customer };
     }
     async remove(id) {
         const existing = await this.prisma.customer.findFirst({
