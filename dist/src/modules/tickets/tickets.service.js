@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TicketsService = void 0;
 const common_1 = require("@nestjs/common");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
@@ -42,11 +43,13 @@ const INCLUDE_SHAPE = {
 let TicketsService = class TicketsService {
     prisma;
     redis;
+    eventEmitter;
     CACHE_PREFIX = 'ticket:';
     LIST_CACHE_KEY = 'tickets:list:';
-    constructor(prisma, redis) {
+    constructor(prisma, redis, eventEmitter) {
         this.prisma = prisma;
         this.redis = redis;
+        this.eventEmitter = eventEmitter;
     }
     async findAll(params) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
@@ -118,6 +121,12 @@ let TicketsService = class TicketsService {
         });
         const ticket = await this.createWithUniqueTicketNumber(dto);
         await this.invalidateCache();
+        const assignedIds = dto.service_engineer_id ? [dto.service_engineer_id] : [];
+        this.eventEmitter.emit('ticket.created', {
+            ticketNumber: ticket.ticket_number,
+            subject: ticket.subject,
+            assignedTechnicianUserIds: assignedIds,
+        });
         return ticket;
     }
     async update(id, dto) {
@@ -137,6 +146,13 @@ let TicketsService = class TicketsService {
             include: INCLUDE_SHAPE,
         });
         await this.invalidateCache(id);
+        if (dto.service_engineer_id && dto.service_engineer_id !== existing.service_engineer_id) {
+            this.eventEmitter.emit('ticket.assigned', {
+                ticketNumber: ticket.ticket_number,
+                subject: ticket.subject,
+                assignedTechnicianUserIds: [dto.service_engineer_id],
+            });
+        }
         return ticket;
     }
     async remove(id) {
@@ -241,6 +257,7 @@ exports.TicketsService = TicketsService;
 exports.TicketsService = TicketsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        event_emitter_1.EventEmitter2])
 ], TicketsService);
 //# sourceMappingURL=tickets.service.js.map

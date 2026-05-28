@@ -22,5 +22,10 @@ declare const _default: () => {
         secretAccessKey: string | undefined;
         baseUrl: string | undefined;
     };
+    firebase: {
+        projectId: string | undefined;
+        clientEmail: string | undefined;
+        privateKey: string | undefined;
+    };
 };
 export default _default;

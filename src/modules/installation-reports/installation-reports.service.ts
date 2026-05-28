@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
@@ -37,6 +38,7 @@ export class InstallationReportsService {
     private settingsService: SettingsService,
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(
@@ -212,6 +214,16 @@ export class InstallationReportsService {
     });
 
     await this.invalidateCache();
+
+    if (installationReport) {
+      this.eventEmitter.emit('installation-report.created', {
+        reportNumber: installationReport.report_number,
+        millName: installationReport.mill?.name || '',
+        technicianUserIds: finalTechnicianIds,
+        creatorUserId: user?.userId,
+      });
+    }
+
     return installationReport;
   }
 

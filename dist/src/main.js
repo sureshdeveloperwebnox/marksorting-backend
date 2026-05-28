@@ -7,12 +7,14 @@ const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const nestjs_pino_1 = require("nestjs-pino");
+const platform_socket_io_1 = require("@nestjs/platform-socket.io");
 const app_module_1 = require("./app.module");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
     app.use((0, cookie_parser_1.default)());
     app.useLogger(app.get(nestjs_pino_1.Logger));
+    app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
     app.enableCors({
         origin: (origin, callback) => {
             if (!origin)
@@ -21,8 +23,7 @@ async function bootstrap() {
                 /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
                 /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
                 /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-                /^https:\/\/.*\.ngrok-free\.app$/.test(origin) ||
-                /^https:\/\/.*\.ngrok\.io$/.test(origin);
+                /^https:\/\/.*\.ngrok(-free)?\.(app|dev|io)$/.test(origin);
             callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
         },
         credentials: true,

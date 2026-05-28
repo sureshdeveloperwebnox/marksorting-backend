@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
@@ -5,9 +6,10 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 export declare class TicketsService {
     private prisma;
     private redis;
+    private eventEmitter;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService);
+    constructor(prisma: PrismaService, redis: RedisService, eventEmitter: EventEmitter2);
     findAll(params: {
         skip?: number;
         take?: number;

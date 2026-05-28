@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ServiceReportsService = void 0;
 const common_1 = require("@nestjs/common");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const settings_service_1 = require("../settings/settings.service");
@@ -30,14 +31,16 @@ let ServiceReportsService = class ServiceReportsService {
     settingsService;
     pdfService;
     documentTemplateService;
+    eventEmitter;
     CACHE_PREFIX = 'service-report:';
     LIST_CACHE_KEY = 'service-reports:list:';
-    constructor(prisma, redis, settingsService, pdfService, documentTemplateService) {
+    constructor(prisma, redis, settingsService, pdfService, documentTemplateService, eventEmitter) {
         this.prisma = prisma;
         this.redis = redis;
         this.settingsService = settingsService;
         this.pdfService = pdfService;
         this.documentTemplateService = documentTemplateService;
+        this.eventEmitter = eventEmitter;
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -165,6 +168,14 @@ let ServiceReportsService = class ServiceReportsService {
             });
         });
         await this.invalidateCache();
+        if (serviceReport) {
+            this.eventEmitter.emit('service-report.created', {
+                reportNumber: serviceReport.report_number,
+                millName: serviceReport.mill?.name || '',
+                technicianUserIds: finalTechnicianIds,
+                creatorUserId: user?.userId,
+            });
+        }
         return serviceReport;
     }
     async update(id, dto, user) {
@@ -283,6 +294,7 @@ exports.ServiceReportsService = ServiceReportsService = __decorate([
         redis_service_1.RedisService,
         settings_service_1.SettingsService,
         pdf_service_1.PdfService,
-        document_template_service_1.DocumentTemplateService])
+        document_template_service_1.DocumentTemplateService,
+        event_emitter_1.EventEmitter2])
 ], ServiceReportsService);
 //# sourceMappingURL=service-reports.service.js.map

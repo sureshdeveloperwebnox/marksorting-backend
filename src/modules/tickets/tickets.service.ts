@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -43,6 +44,7 @@ export class TicketsService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(params: {
@@ -133,6 +135,14 @@ export class TicketsService {
     const ticket = await this.createWithUniqueTicketNumber(dto);
 
     await this.invalidateCache();
+
+    const assignedIds = dto.service_engineer_id ? [dto.service_engineer_id] : [];
+    this.eventEmitter.emit('ticket.created', {
+      ticketNumber: ticket.ticket_number,
+      subject: ticket.subject,
+      assignedTechnicianUserIds: assignedIds,
+    });
+
     return ticket;
   }
 
@@ -157,6 +167,15 @@ export class TicketsService {
     });
 
     await this.invalidateCache(id);
+
+    if (dto.service_engineer_id && dto.service_engineer_id !== existing.service_engineer_id) {
+      this.eventEmitter.emit('ticket.assigned', {
+        ticketNumber: ticket.ticket_number,
+        subject: ticket.subject,
+        assignedTechnicianUserIds: [dto.service_engineer_id],
+      });
+    }
+
     return ticket;
   }
 

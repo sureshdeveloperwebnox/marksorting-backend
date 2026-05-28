@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerModule } from 'nestjs-pino';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
@@ -25,6 +26,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { StoresModule } from './modules/stores/stores.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { StoresModule } from './modules/stores/stores.module';
       }),
       inject: [ConfigService],
     }),
+    EventEmitterModule.forRoot(),
     PrismaModule,
     RedisModule,
     AuthModule,
@@ -74,6 +77,7 @@ import { StoresModule } from './modules/stores/stores.module';
     ReportsModule,
     MaterialsModule,
     StoresModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}

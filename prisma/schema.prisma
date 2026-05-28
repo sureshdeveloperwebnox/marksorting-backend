@@ -36,6 +36,8 @@ model User {
   password_resets       PasswordReset[]
   activity_logs         ActivityLog[]
   support_tickets       SupportTicket[]
+  push_tokens           PushToken[]
+  notifications         Notification[]
 
   @@map("users")
 }
@@ -241,13 +243,31 @@ model ServiceRecord {
 
 model Notification {
   id          String    @id @default(uuid())
+  user_id     String?
+  user        User?     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   title       String
   message     String
-  type        String    // PUSH, EMAIL, SMS, ANNOUNCEMENT
-  status      String    @default("PENDING")
+  type        String    // SERVICE_REPORT, INSTALLATION, EXPENSE, TICKET, BROADCAST
+  status      String    @default("UNREAD") // UNREAD, READ
+  meta_data   Json?
   created_at  DateTime  @default(now())
 
+  @@index([user_id])
   @@map("notifications")
+}
+
+model PushToken {
+  id          String    @id @default(uuid())
+  user_id     String
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token       String
+  device_type String    @default("WEB") // WEB, ANDROID, IOS
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  @@unique([user_id, token])
+  @@index([user_id])
+  @@map("push_tokens")
 }
 
 model SupportTicket {

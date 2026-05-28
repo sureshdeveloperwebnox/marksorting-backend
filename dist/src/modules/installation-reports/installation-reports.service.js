@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstallationReportsService = void 0;
 const common_1 = require("@nestjs/common");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const settings_service_1 = require("../settings/settings.service");
@@ -29,14 +30,16 @@ let InstallationReportsService = class InstallationReportsService {
     settingsService;
     pdfService;
     documentTemplateService;
+    eventEmitter;
     CACHE_PREFIX = 'installation-report:';
     LIST_CACHE_KEY = 'installation-reports:list:';
-    constructor(prisma, redis, settingsService, pdfService, documentTemplateService) {
+    constructor(prisma, redis, settingsService, pdfService, documentTemplateService, eventEmitter) {
         this.prisma = prisma;
         this.redis = redis;
         this.settingsService = settingsService;
         this.pdfService = pdfService;
         this.documentTemplateService = documentTemplateService;
+        this.eventEmitter = eventEmitter;
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -164,6 +167,14 @@ let InstallationReportsService = class InstallationReportsService {
             });
         });
         await this.invalidateCache();
+        if (installationReport) {
+            this.eventEmitter.emit('installation-report.created', {
+                reportNumber: installationReport.report_number,
+                millName: installationReport.mill?.name || '',
+                technicianUserIds: finalTechnicianIds,
+                creatorUserId: user?.userId,
+            });
+        }
         return installationReport;
     }
     async update(id, dto, user) {
@@ -286,6 +297,7 @@ exports.InstallationReportsService = InstallationReportsService = __decorate([
         redis_service_1.RedisService,
         settings_service_1.SettingsService,
         pdf_service_1.PdfService,
-        document_template_service_1.DocumentTemplateService])
+        document_template_service_1.DocumentTemplateService,
+        event_emitter_1.EventEmitter2])
 ], InstallationReportsService);
 //# sourceMappingURL=installation-reports.service.js.map

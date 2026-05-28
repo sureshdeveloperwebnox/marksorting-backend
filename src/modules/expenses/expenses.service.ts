@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
@@ -23,6 +24,7 @@ export class ExpensesService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(
@@ -226,6 +228,16 @@ export class ExpensesService {
     });
 
     await this.invalidateCache();
+
+    if (expense) {
+      this.eventEmitter.emit('expense.created', {
+        expenseNumber: expense.expense_number,
+        amount: expense.amount?.toString() || '0',
+        creatorUserId: user?.userId,
+        technicianUserIds: finalTechnicianIds,
+      });
+    }
+
     return expense;
   }
 
@@ -336,6 +348,18 @@ export class ExpensesService {
     }
 
     await this.invalidateCache(id);
+
+    if ((dto as any).status && expense) {
+      const technicianUserIds: string[] = (expense as any).technicians?.map(
+        (t: any) => t.technician_id,
+      ) ?? [];
+      this.eventEmitter.emit('expense.status_updated', {
+        expenseNumber: expense.expense_number,
+        status: expense.status,
+        technicianUserIds,
+      });
+    }
+
     return expense;
   }
 

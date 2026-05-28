@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpensesService = void 0;
 const common_1 = require("@nestjs/common");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const INCLUDE_SHAPE = {
@@ -23,11 +24,13 @@ const INCLUDE_SHAPE = {
 let ExpensesService = class ExpensesService {
     prisma;
     redis;
+    eventEmitter;
     CACHE_PREFIX = 'expense:';
     LIST_CACHE_KEY = 'expenses:list:';
-    constructor(prisma, redis) {
+    constructor(prisma, redis, eventEmitter) {
         this.prisma = prisma;
         this.redis = redis;
+        this.eventEmitter = eventEmitter;
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -178,6 +181,14 @@ let ExpensesService = class ExpensesService {
             });
         });
         await this.invalidateCache();
+        if (expense) {
+            this.eventEmitter.emit('expense.created', {
+                expenseNumber: expense.expense_number,
+                amount: expense.amount?.toString() || '0',
+                creatorUserId: user?.userId,
+                technicianUserIds: finalTechnicianIds,
+            });
+        }
         return expense;
     }
     async update(id, dto, user) {
@@ -266,6 +277,14 @@ let ExpensesService = class ExpensesService {
             });
         }
         await this.invalidateCache(id);
+        if (dto.status && expense) {
+            const technicianUserIds = expense.technicians?.map((t) => t.technician_id) ?? [];
+            this.eventEmitter.emit('expense.status_updated', {
+                expenseNumber: expense.expense_number,
+                status: expense.status,
+                technicianUserIds,
+            });
+        }
         return expense;
     }
     async remove(id, user) {
@@ -293,6 +312,7 @@ exports.ExpensesService = ExpensesService;
 exports.ExpensesService = ExpensesService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        event_emitter_1.EventEmitter2])
 ], ExpensesService);
 //# sourceMappingURL=expenses.service.js.map

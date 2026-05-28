@@ -53,5 +53,8 @@ exports.validationSchema = Joi.object({
     ACCESS_KEY: Joi.string().required(),
     SECRET_ACCESS_KEY: Joi.string().required(),
     S3_BASE_URL: Joi.string().uri().required(),
+    FIREBASE_PROJECT_ID: Joi.string().optional().allow(''),
+    FIREBASE_CLIENT_EMAIL: Joi.string().optional().allow(''),
+    FIREBASE_PRIVATE_KEY: Joi.string().optional().allow(''),
 });
 //# sourceMappingURL=validation.js.map

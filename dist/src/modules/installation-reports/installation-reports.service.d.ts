@@ -1,3 +1,4 @@
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateInstallationReportDto } from './dto/create-installation-report.dto';
@@ -13,9 +14,10 @@ export declare class InstallationReportsService {
     private settingsService;
     private pdfService;
     private documentTemplateService;
+    private eventEmitter;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService);
+    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService, eventEmitter: EventEmitter2);
     findAll(params: {
         skip?: number;
         take?: number;

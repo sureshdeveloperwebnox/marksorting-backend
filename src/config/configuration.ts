@@ -22,4 +22,9 @@ export default () => ({
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
     baseUrl: process.env.S3_BASE_URL,
   },
+  firebase: {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+  },
 });

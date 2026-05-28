@@ -13,6 +13,7 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const bullmq_1 = require("@nestjs/bullmq");
+const event_emitter_1 = require("@nestjs/event-emitter");
 const nestjs_pino_1 = require("nestjs-pino");
 const configuration_1 = __importDefault(require("./config/configuration"));
 const validation_1 = require("./config/validation");
@@ -37,6 +38,7 @@ const dashboard_module_1 = require("./modules/dashboard/dashboard.module");
 const reports_module_1 = require("./modules/reports/reports.module");
 const materials_module_1 = require("./modules/materials/materials.module");
 const stores_module_1 = require("./modules/stores/stores.module");
+const notifications_module_1 = require("./modules/notifications/notifications.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -67,6 +69,7 @@ exports.AppModule = AppModule = __decorate([
                 }),
                 inject: [config_1.ConfigService],
             }),
+            event_emitter_1.EventEmitterModule.forRoot(),
             prisma_module_1.PrismaModule,
             redis_module_1.RedisModule,
             auth_module_1.AuthModule,
@@ -88,6 +91,7 @@ exports.AppModule = AppModule = __decorate([
             reports_module_1.ReportsModule,
             materials_module_1.MaterialsModule,
             stores_module_1.StoresModule,
+            notifications_module_1.NotificationsModule,
         ],
     })
 ], AppModule);

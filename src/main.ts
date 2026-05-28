@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
@@ -11,6 +12,8 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.useLogger(app.get(Logger));
+
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Enable CORS
   app.enableCors({
