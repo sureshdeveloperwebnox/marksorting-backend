@@ -58,6 +58,15 @@ export class BroadcastNotificationDto {
   role_name?: string;
 
   @ApiPropertyOptional({
+    description: 'Multiple role names to target when target=ROLE',
+    type: [String],
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  role_names?: string[];
+
+  @ApiPropertyOptional({
     description: 'Specific user IDs to target when target=USERS',
     type: [String],
   })

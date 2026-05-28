@@ -32,6 +32,7 @@ class BroadcastNotificationDto {
     type = NotificationType.BROADCAST;
     target = NotificationTarget.ALL;
     role_name;
+    role_names;
     user_ids;
     meta_data;
 }
@@ -75,6 +76,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], BroadcastNotificationDto.prototype, "role_name", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Multiple role names to target when target=ROLE',
+        type: [String],
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], BroadcastNotificationDto.prototype, "role_names", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Specific user IDs to target when target=USERS',

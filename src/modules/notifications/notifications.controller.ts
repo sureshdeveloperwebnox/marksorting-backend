@@ -73,9 +73,12 @@ export class NotificationsController {
   @Post('broadcast')
   @ApiOperation({ summary: 'Send a broadcast notification (Admin only)' })
   async broadcast(@Body() dto: BroadcastNotificationDto) {
-    if (dto.target === NotificationTarget.ROLE && dto.role_name) {
-      await this.notificationsService.broadcastToRole(
-        dto.role_name,
+    if (dto.target === NotificationTarget.ROLE && (dto.role_names?.length || dto.role_name)) {
+      const roleNames = dto.role_names?.length
+        ? dto.role_names
+        : [dto.role_name!];
+      await this.notificationsService.broadcastToRoles(
+        roleNames,
         dto.title,
         dto.message,
         dto.type!,

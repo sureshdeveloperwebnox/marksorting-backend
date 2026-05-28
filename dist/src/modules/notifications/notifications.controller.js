@@ -37,8 +37,11 @@ let NotificationsController = class NotificationsController {
         return this.notificationsService.markAllAsRead(req.user.userId);
     }
     async broadcast(dto) {
-        if (dto.target === broadcast_notification_dto_1.NotificationTarget.ROLE && dto.role_name) {
-            await this.notificationsService.broadcastToRole(dto.role_name, dto.title, dto.message, dto.type, dto.meta_data);
+        if (dto.target === broadcast_notification_dto_1.NotificationTarget.ROLE && (dto.role_names?.length || dto.role_name)) {
+            const roleNames = dto.role_names?.length
+                ? dto.role_names
+                : [dto.role_name];
+            await this.notificationsService.broadcastToRoles(roleNames, dto.title, dto.message, dto.type, dto.meta_data);
         }
         else if (dto.target === broadcast_notification_dto_1.NotificationTarget.USERS && dto.user_ids?.length) {
             await this.notificationsService.sendToUsers(dto.user_ids, dto.title, dto.message, dto.type, dto.meta_data);

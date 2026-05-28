@@ -83,11 +83,21 @@ export class NotificationsService {
     type: NotificationType,
     metaData?: Record<string, any>,
   ) {
+    await this.broadcastToRoles([roleName], title, message, type, metaData);
+  }
+
+  async broadcastToRoles(
+    roleNames: string[],
+    title: string,
+    message: string,
+    type: NotificationType,
+    metaData?: Record<string, any>,
+  ) {
     const users = await this.prisma.user.findMany({
       where: {
         account_status: 'ACTIVE',
         deleted_at: null,
-        role: { name: roleName },
+        role: { name: { in: roleNames } },
       },
       select: { id: true },
     });

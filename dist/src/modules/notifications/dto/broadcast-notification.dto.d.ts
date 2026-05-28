@@ -16,6 +16,7 @@ export declare class BroadcastNotificationDto {
     type?: NotificationType;
     target?: NotificationTarget;
     role_name?: string;
+    role_names?: string[];
     user_ids?: string[];
     meta_data?: Record<string, any>;
 }

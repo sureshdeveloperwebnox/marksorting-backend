@@ -55,11 +55,14 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         await this.sendToUsers(users.map((u) => u.id), title, message, type, metaData);
     }
     async broadcastToRole(roleName, title, message, type, metaData) {
+        await this.broadcastToRoles([roleName], title, message, type, metaData);
+    }
+    async broadcastToRoles(roleNames, title, message, type, metaData) {
         const users = await this.prisma.user.findMany({
             where: {
                 account_status: 'ACTIVE',
                 deleted_at: null,
-                role: { name: roleName },
+                role: { name: { in: roleNames } },
             },
             select: { id: true },
         });
