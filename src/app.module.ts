@@ -27,6 +27,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     MaterialsModule,
     StoresModule,
     NotificationsModule,
+    PermissionsModule,
   ],
 })
 export class AppModule {}

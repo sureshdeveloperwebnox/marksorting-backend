@@ -39,6 +39,7 @@ const reports_module_1 = require("./modules/reports/reports.module");
 const materials_module_1 = require("./modules/materials/materials.module");
 const stores_module_1 = require("./modules/stores/stores.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
+const permissions_module_1 = require("./modules/permissions/permissions.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -92,6 +93,7 @@ exports.AppModule = AppModule = __decorate([
             materials_module_1.MaterialsModule,
             stores_module_1.StoresModule,
             notifications_module_1.NotificationsModule,
+            permissions_module_1.PermissionsModule,
         ],
     })
 ], AppModule);

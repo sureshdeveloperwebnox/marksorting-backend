@@ -5,6 +5,11 @@ export declare class RolesController {
     private readonly rolesService;
     constructor(rolesService: RolesService);
     findAll(skip?: string, take?: string, search?: string): Promise<any>;
+    getAllPermissions(): Promise<{
+        id: string;
+        name: string;
+        description: string | null;
+    }[]>;
     findOne(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
     update(id: string, dto: UpdateRoleDto): Promise<any>;

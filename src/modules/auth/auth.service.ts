@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../redis/redis.service';
+import { PermissionsService } from '../permissions/permissions.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private redisService: RedisService,
+    private permissionsService: PermissionsService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -60,7 +62,16 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role.name };
+    // Get user permissions
+    const permissions = await this.permissionsService.getUserPermissions(user.id);
+    
+    const payload = { 
+      email: user.email, 
+      sub: user.id, 
+      role: user.role.name,
+      permissions: permissions
+    };
+    
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user.id),
@@ -69,6 +80,7 @@ export class AuthService {
         email: user.email,
         full_name: user.full_name,
         role: user.role.name,
+        permissions: permissions,
         profile_image: user.profile_image,
         profile_image_url: user.profile_image_url,
         background_image: user.background_image,
@@ -78,7 +90,16 @@ export class AuthService {
   }
 
   async mobileLogin(user: any) {
-    const payload = { email: user.email, sub: user.id, role: user.role.name };
+    // Get user permissions
+    const permissions = await this.permissionsService.getUserPermissions(user.id);
+    
+    const payload = { 
+      email: user.email, 
+      sub: user.id, 
+      role: user.role.name,
+      permissions: permissions
+    };
+    
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user.id),
@@ -90,7 +111,18 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    return user;
+    const permissions = await this.permissionsService.getUserPermissions(userId);
+    return {
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role?.name ?? user.role,
+      permissions,
+      profile_image: user.profile_image,
+      profile_image_url: user.profile_image_url,
+      background_image: user.background_image,
+      background_image_url: user.background_image_url,
+    };
   }
 
   async logout(userId: string) {
@@ -98,7 +130,19 @@ export class AuthService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
-    return this.usersService.update(userId, dto);
+    const user = await this.usersService.update(userId, dto);
+    const permissions = await this.permissionsService.getUserPermissions(userId);
+    return {
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role?.name ?? user.role,
+      permissions,
+      profile_image: user.profile_image,
+      profile_image_url: user.profile_image_url,
+      background_image: user.background_image,
+      background_image_url: user.background_image_url,
+    };
   }
 
   decodeToken(token: string) {
@@ -147,10 +191,14 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
 
+      // Get fresh permissions
+      const permissions = await this.permissionsService.getUserPermissions(userId);
+
       const newPayload = {
         email: user.email,
         sub: user.id,
         role: user.role.name,
+        permissions: permissions,
       };
       return {
         access_token: this.jwtService.sign(newPayload),
@@ -159,6 +207,7 @@ export class AuthService {
           email: user.email,
           full_name: user.full_name,
           role: user.role.name,
+          permissions: permissions,
           profile_image: user.profile_image,
           profile_image_url: user.profile_image_url,
           background_image: user.background_image,

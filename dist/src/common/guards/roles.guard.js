@@ -9,31 +9,31 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PermissionsGuard = void 0;
+exports.RolesGuard = void 0;
 const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
-const permissions_decorator_js_1 = require("../decorators/permissions.decorator.js");
-let PermissionsGuard = class PermissionsGuard {
+const roles_decorator_js_1 = require("../decorators/roles.decorator.js");
+let RolesGuard = class RolesGuard {
     reflector;
     constructor(reflector) {
         this.reflector = reflector;
     }
     canActivate(context) {
-        const requiredPermissions = this.reflector.getAllAndOverride(permissions_decorator_js_1.PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
-        if (!requiredPermissions || requiredPermissions.length === 0) {
+        const requiredRoles = this.reflector.getAllAndOverride(roles_decorator_js_1.ROLES_KEY, [context.getHandler(), context.getClass()]);
+        if (!requiredRoles || requiredRoles.length === 0) {
             return true;
         }
         const request = context.switchToHttp().getRequest();
         const user = request.user;
-        if (!user || !user.permissions) {
+        if (!user || !user.role) {
             return false;
         }
-        return requiredPermissions.some((permission) => user.permissions.includes(permission));
+        return requiredRoles.includes(user.role);
     }
 };
-exports.PermissionsGuard = PermissionsGuard;
-exports.PermissionsGuard = PermissionsGuard = __decorate([
+exports.RolesGuard = RolesGuard;
+exports.RolesGuard = RolesGuard = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [core_1.Reflector])
-], PermissionsGuard);
-//# sourceMappingURL=permissions.guard.js.map
+], RolesGuard);
+//# sourceMappingURL=roles.guard.js.map

@@ -13,6 +13,7 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            permissions: string[];
             profile_image: any;
             profile_image_url: any;
             background_image: any;
@@ -25,6 +26,7 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            permissions: string[];
             profile_image: any;
             profile_image_url: any;
             background_image: any;
@@ -40,14 +42,35 @@ export declare class AuthController {
             email: any;
             full_name: any;
             role: any;
+            permissions: string[];
             profile_image: any;
             profile_image_url: any;
             background_image: any;
             background_image_url: any;
         };
     }>;
-    getProfile(req: any): Promise<any>;
-    updateProfile(req: any, dto: UpdateProfileDto): Promise<any>;
+    getProfile(req: any): Promise<{
+        id: any;
+        email: any;
+        full_name: any;
+        role: any;
+        permissions: string[];
+        profile_image: any;
+        profile_image_url: any;
+        background_image: any;
+        background_image_url: any;
+    }>;
+    updateProfile(req: any, dto: UpdateProfileDto): Promise<{
+        id: any;
+        email: any;
+        full_name: any;
+        role: any;
+        permissions: string[];
+        profile_image: any;
+        profile_image_url: any;
+        background_image: any;
+        background_image_url: any;
+    }>;
     mobileLogin(mobileLoginDto: MobileLoginDto): Promise<{
         access_token: string;
         refresh_token: string;

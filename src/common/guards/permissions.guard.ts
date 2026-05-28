@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
+import { PERMISSIONS_KEY } from '../decorators/permissions.decorator.js';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -11,14 +11,23 @@ export class PermissionsGuard implements CanActivate {
       PERMISSIONS_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (!requiredPermissions) {
+    
+    // If no permissions are required, allow access
+    if (!requiredPermissions || requiredPermissions.length === 0) {
       return true;
     }
-    const { user } = context.switchToHttp().getRequest();
-    // In a real application, you would fetch the user's permissions from the database or cache.
-    // For now, we'll assume they are attached to the user object by a middleware or interceptor.
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    // Check if user exists and has permissions
+    if (!user || !user.permissions) {
+      return false;
+    }
+
+    // Check if user has any of the required permissions
     return requiredPermissions.some((permission) =>
-      user.permissions?.includes(permission),
+      user.permissions.includes(permission),
     );
   }
 }

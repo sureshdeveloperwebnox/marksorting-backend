@@ -14,20 +14,26 @@ import { UsersService } from './users.service';
 import { Prisma } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../common/guards/permissions.guard';
+import { Permissions } from '../../common/decorators/permissions.decorator';
 
 @ApiTags('users')
 @Controller('users')
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('meta/roles')
   @ApiOperation({ summary: 'Get all user roles' })
+  @Permissions('users.view')
   getRoles() {
     return this.usersService.getRoles();
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all users with pagination and filtering' })
+  @Permissions('users.view')
   @ApiQuery({
     name: 'skip',
     required: false,
@@ -92,24 +98,28 @@ export class UsersController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get user by ID' })
+  @Permissions('users.view')
   findOne(@Param('id') id: string) {
     return this.usersService.findById(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create new user' })
+  @Permissions('users.create')
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update existing user' })
+  @Permissions('users.update')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete user' })
+  @Permissions('users.delete')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }

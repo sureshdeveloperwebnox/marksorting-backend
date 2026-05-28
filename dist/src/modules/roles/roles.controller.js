@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const roles_service_1 = require("./roles.service");
 const create_role_dto_1 = require("./dto/create-role.dto");
 const update_role_dto_1 = require("./dto/update-role.dto");
+const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let RolesController = class RolesController {
     rolesService;
     constructor(rolesService) {
@@ -38,6 +41,9 @@ let RolesController = class RolesController {
             orderBy: { created_at: 'desc' },
         });
     }
+    getAllPermissions() {
+        return this.rolesService.getAllPermissions();
+    }
     findOne(id) {
         return this.rolesService.findById(id);
     }
@@ -55,6 +61,7 @@ exports.RolesController = RolesController;
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all roles with pagination and filtering' }),
+    (0, permissions_decorator_1.Permissions)('roles.view'),
     (0, swagger_1.ApiQuery)({
         name: 'skip',
         required: false,
@@ -81,8 +88,17 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], RolesController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('meta/permissions'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all available permissions' }),
+    (0, permissions_decorator_1.Permissions)('roles.view'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], RolesController.prototype, "getAllPermissions", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get role by ID' }),
+    (0, permissions_decorator_1.Permissions)('roles.view'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -91,6 +107,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new role' }),
+    (0, permissions_decorator_1.Permissions)('roles.create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_role_dto_1.CreateRoleDto]),
@@ -99,6 +116,7 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing role' }),
+    (0, permissions_decorator_1.Permissions)('roles.update'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -108,6 +126,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Delete role' }),
+    (0, permissions_decorator_1.Permissions)('roles.delete'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -116,6 +135,7 @@ __decorate([
 exports.RolesController = RolesController = __decorate([
     (0, swagger_1.ApiTags)('roles'),
     (0, common_1.Controller)('roles'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     __metadata("design:paramtypes", [roles_service_1.RolesService])
 ], RolesController);
 //# sourceMappingURL=roles.controller.js.map

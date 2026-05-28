@@ -22,5 +22,10 @@ export declare class RolesService {
         message: string;
     }>;
     private invalidateCache;
+    getAllPermissions(): Promise<{
+        id: string;
+        name: string;
+        description: string | null;
+    }[]>;
     private formatRole;
 }

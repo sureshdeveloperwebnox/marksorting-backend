@@ -18,6 +18,9 @@ const swagger_1 = require("@nestjs/swagger");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
+const permissions_guard_1 = require("../../common/guards/permissions.guard");
+const permissions_decorator_1 = require("../../common/decorators/permissions.decorator");
 let UsersController = class UsersController {
     usersService;
     constructor(usersService) {
@@ -69,6 +72,7 @@ exports.UsersController = UsersController;
 __decorate([
     (0, common_1.Get)('meta/roles'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all user roles' }),
+    (0, permissions_decorator_1.Permissions)('users.view'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
@@ -76,6 +80,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all users with pagination and filtering' }),
+    (0, permissions_decorator_1.Permissions)('users.view'),
     (0, swagger_1.ApiQuery)({
         name: 'skip',
         required: false,
@@ -111,6 +116,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get user by ID' }),
+    (0, permissions_decorator_1.Permissions)('users.view'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -119,6 +125,7 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new user' }),
+    (0, permissions_decorator_1.Permissions)('users.create'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
@@ -127,6 +134,7 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing user' }),
+    (0, permissions_decorator_1.Permissions)('users.update'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -136,6 +144,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete user' }),
+    (0, permissions_decorator_1.Permissions)('users.delete'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -144,6 +153,7 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('users'),
     (0, common_1.Controller)('users'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, permissions_guard_1.PermissionsGuard),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

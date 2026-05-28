@@ -124,17 +124,31 @@ export class RolesService {
     if (dto.name) updateData.name = dto.name;
     if (dto.description !== undefined) updateData.description = dto.description;
 
+    if (dto.permission_ids !== undefined) {
+      await this.prisma.rolePermission.deleteMany({ where: { role_id: id } });
+      if (dto.permission_ids.length > 0) {
+        updateData.permissions = {
+          create: dto.permission_ids.map((permissionId) => ({
+            permission: { connect: { id: permissionId } },
+          })),
+        };
+      }
+    }
+
     const role = await this.prisma.role.update({
       where: { id },
       data: updateData,
       include: {
+        permissions: {
+          include: { permission: true },
+        },
         _count: {
           select: { users: true },
         },
       },
     });
 
-    await this.invalidateCache(id);
+    await this.invalidateCache(id, dto.permission_ids !== undefined);
     return this.formatRole(role);
   }
 
@@ -154,12 +168,21 @@ export class RolesService {
     return { message: 'Role deleted successfully' };
   }
 
-  private async invalidateCache(id?: string) {
+  private async invalidateCache(id?: string, invalidateUserPermissions = false) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),
     ];
     if (id) promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
+    if (invalidateUserPermissions) {
+      promises.push(this.redis.delByPrefix('user_permissions:'));
+    }
     await Promise.all(promises);
+  }
+
+  async getAllPermissions() {
+    return this.prisma.permission.findMany({
+      orderBy: { name: 'asc' },
+    });
   }
 
   private formatRole(role: any) {
