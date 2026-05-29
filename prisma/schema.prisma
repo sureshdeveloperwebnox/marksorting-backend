@@ -534,6 +534,8 @@ model Store {
   return_status       String // Returned, Pending, Not Returned
   inflow_status       String // Inflow, Outflow, Available, Damaged
   barcode             String?
+  provider_name       String?
+  invoice_number      String?
   created_at          DateTime        @default(now())
   updated_at          DateTime        @updatedAt
   deleted_at          DateTime?

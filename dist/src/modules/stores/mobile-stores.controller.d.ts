@@ -1,46 +1,46 @@
 import { StoresService } from './stores.service';
-import { CreateStoreDto } from './dto/create-store.dto';
-import { UpdateStoreDto } from './dto/update-store.dto';
-export declare class StoresController {
+import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
+export declare class MobileStoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
-    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, customerId?: string, materialId?: string, warrantyStatus?: string, returnStatus?: string, inflowStatus?: string): Promise<any>;
-    findOne(id: string): Promise<any>;
-    create(dto: CreateStoreDto): Promise<{
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
-        customer: {
-            id: string;
-            name: string;
-        };
-        materials: ({
-            material: {
+    findAll(req: any, skip?: string, take?: string, search?: string): Promise<{
+        stores: ({
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+            customer: {
                 id: string;
                 name: string;
             };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                store_id: string;
+                material_id: string;
+            })[];
         } & {
-            store_id: string;
-            material_id: string;
+            id: string;
+            service_engineer_id: string;
+            customer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            provider_name: string | null;
+            invoice_number: string | null;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
         })[];
-    } & {
-        id: string;
-        service_engineer_id: string;
-        customer_id: string;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
-        provider_name: string | null;
-        invoice_number: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
+        total: number;
     }>;
-    update(id: string, dto: UpdateStoreDto): Promise<{
+    submitReturn(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
         before: {
             id: string;
             service_engineer_id: string;
@@ -91,21 +91,5 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
         };
-    }>;
-    remove(id: string): Promise<{
-        id: string;
-        service_engineer_id: string;
-        customer_id: string;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
-        provider_name: string | null;
-        invoice_number: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
 }

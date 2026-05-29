@@ -10,6 +10,7 @@ exports.StoresModule = void 0;
 const common_1 = require("@nestjs/common");
 const stores_service_1 = require("./stores.service");
 const stores_controller_1 = require("./stores.controller");
+const mobile_stores_controller_1 = require("./mobile-stores.controller");
 const prisma_module_1 = require("../../prisma/prisma.module");
 const redis_module_1 = require("../../redis/redis.module");
 let StoresModule = class StoresModule {
@@ -18,7 +19,7 @@ exports.StoresModule = StoresModule;
 exports.StoresModule = StoresModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule],
-        controllers: [stores_controller_1.StoresController],
+        controllers: [stores_controller_1.StoresController, mobile_stores_controller_1.MobileStoresController],
         providers: [stores_service_1.StoresService],
         exports: [stores_service_1.StoresService],
     })

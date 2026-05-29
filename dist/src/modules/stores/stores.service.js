@@ -160,6 +160,77 @@ let StoresService = class StoresService {
         await this.invalidateCache(id);
         return store;
     }
+    async findPendingByTechnician(technicianId, params) {
+        const { skip, take, search } = params;
+        const where = {
+            service_engineer_id: technicianId,
+            return_status: 'Pending',
+            deleted_at: null,
+        };
+        if (search) {
+            where.OR = [
+                { frame_number: { contains: search, mode: 'insensitive' } },
+                { barcode: { contains: search, mode: 'insensitive' } },
+                {
+                    customer: {
+                        name: { contains: search, mode: 'insensitive' },
+                    },
+                },
+            ];
+        }
+        const [stores, total] = await Promise.all([
+            this.prisma.store.findMany({
+                skip,
+                take,
+                where,
+                include: {
+                    service_engineer: { select: { id: true, full_name: true } },
+                    customer: { select: { id: true, name: true } },
+                    materials: {
+                        include: {
+                            material: { select: { id: true, name: true } },
+                        },
+                    },
+                },
+                orderBy: { created_at: 'desc' },
+            }),
+            this.prisma.store.count({ where }),
+        ]);
+        return { stores, total };
+    }
+    async submitReturnDetails(storeId, technicianId, dto) {
+        const existing = await this.prisma.store.findFirst({
+            where: { id: storeId, deleted_at: null },
+        });
+        if (!existing) {
+            throw new common_1.NotFoundException('Store record not found');
+        }
+        if (existing.service_engineer_id !== technicianId) {
+            throw new common_1.ForbiddenException('You are not authorized to update this store record');
+        }
+        if (existing.return_status !== 'Pending') {
+            throw new common_1.ConflictException(`Store return status is already ${existing.return_status}`);
+        }
+        const store = await this.prisma.store.update({
+            where: { id: storeId },
+            data: {
+                provider_name: dto.provider_name,
+                invoice_number: dto.invoice_number,
+                return_status: 'Completed',
+            },
+            include: {
+                service_engineer: { select: { id: true, full_name: true } },
+                customer: { select: { id: true, name: true } },
+                materials: {
+                    include: {
+                        material: { select: { id: true, name: true } },
+                    },
+                },
+            },
+        });
+        await this.invalidateCache(storeId);
+        return { before: existing, after: store };
+    }
     async invalidateCache(id) {
         const promises = [
             this.redis.delByPrefix(this.LIST_CACHE_KEY),
