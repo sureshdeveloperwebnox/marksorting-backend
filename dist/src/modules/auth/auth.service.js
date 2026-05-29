@@ -85,7 +85,7 @@ let AuthService = class AuthService {
     }
     async register(registerDto) {
         const roles = await this.usersService.getRoles();
-        const defaultRole = roles.find((r) => r.name === 'USER') || roles[0];
+        const defaultRole = roles.find((r) => r.name === 'Super Admin') || roles[0];
         if (!defaultRole) {
             throw new common_1.UnauthorizedException('No default roles defined in the system');
         }

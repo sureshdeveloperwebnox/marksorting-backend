@@ -42,9 +42,9 @@ export class AuthService {
   }
 
   async register(registerDto: any) {
-    // Find default role (USER or any existing role)
+    // Find default role (Super Admin)
     const roles = await this.usersService.getRoles();
-    const defaultRole = roles.find((r: any) => r.name === 'USER') || roles[0];
+    const defaultRole = roles.find((r: any) => r.name === 'Super Admin') || roles[0];
 
     if (!defaultRole) {
       throw new UnauthorizedException('No default roles defined in the system');
