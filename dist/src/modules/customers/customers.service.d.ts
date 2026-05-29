@@ -18,49 +18,49 @@ export declare class CustomersService {
     findById(id: string): Promise<any>;
     create(dto: CreateCustomerDto): Promise<{
         id: string;
-        name: string;
-        email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         created_at: Date;
+        email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
     }>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
         before: {
             id: string;
-            name: string;
-            email: string | null;
-            phone: string | null;
-            address: string | null;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
         };
         after: {
             id: string;
-            name: string;
-            email: string | null;
-            phone: string | null;
-            address: string | null;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
-        email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         created_at: Date;
+        email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
     }>;
     private invalidateCache;
 }

@@ -17,13 +17,13 @@ export declare class StoresService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
         customer: {
             id: string;
             name: string;
+        };
+        service_engineer: {
+            id: string;
+            full_name: string;
         };
         materials: ({
             material: {
@@ -31,46 +31,46 @@ export declare class StoresService {
                 name: string;
             };
         } & {
-            store_id: string;
             material_id: string;
+            store_id: string;
         })[];
     } & {
         id: string;
-        service_engineer_id: string;
-        customer_id: string;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        customer_id: string;
+        frame_number: string;
+        barcode: string | null;
+        warranty_status: string;
+        return_status: string;
+        inflow_status: string;
+        service_engineer_id: string;
+        quantity: number;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
         before: {
             id: string;
-            service_engineer_id: string;
-            customer_id: string;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            customer_id: string;
+            frame_number: string;
+            barcode: string | null;
+            warranty_status: string;
+            return_status: string;
+            inflow_status: string;
+            service_engineer_id: string;
+            quantity: number;
         };
         after: {
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
             customer: {
                 id: string;
                 name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
             };
             materials: ({
                 material: {
@@ -78,37 +78,37 @@ export declare class StoresService {
                     name: string;
                 };
             } & {
-                store_id: string;
                 material_id: string;
+                store_id: string;
             })[];
         } & {
             id: string;
-            service_engineer_id: string;
-            customer_id: string;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            customer_id: string;
+            frame_number: string;
+            barcode: string | null;
+            warranty_status: string;
+            return_status: string;
+            inflow_status: string;
+            service_engineer_id: string;
+            quantity: number;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        service_engineer_id: string;
-        customer_id: string;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        customer_id: string;
+        frame_number: string;
+        barcode: string | null;
+        warranty_status: string;
+        return_status: string;
+        inflow_status: string;
+        service_engineer_id: string;
+        quantity: number;
     }>;
     private invalidateCache;
 }

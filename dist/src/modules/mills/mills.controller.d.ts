@@ -7,53 +7,53 @@ export declare class MillsController {
     findAll(skip?: string, take?: string, search?: string, status?: string, customerId?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
-        created_at: Date;
         id: string;
-        name: string;
+        created_at: Date;
         email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
         customer_id: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
         before: {
-            created_at: Date;
             id: string;
-            name: string;
+            created_at: Date;
             email: string | null;
-            phone: string | null;
-            address: string | null;
-            status: string;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
             customer_id: string | null;
         };
         after: {
-            created_at: Date;
             id: string;
-            name: string;
+            created_at: Date;
             email: string | null;
-            phone: string | null;
-            address: string | null;
-            status: string;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
             customer_id: string | null;
         };
     }>;
     remove(id: string): Promise<{
-        created_at: Date;
         id: string;
-        name: string;
+        created_at: Date;
         email: string | null;
-        phone: string | null;
-        address: string | null;
-        status: string;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
         customer_id: string | null;
     }>;
 }

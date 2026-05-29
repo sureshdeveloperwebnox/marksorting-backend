@@ -14,6 +14,7 @@ export declare class ActivityLogsService {
         };
     } & {
         id: string;
+        user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
@@ -30,7 +31,6 @@ export declare class ActivityLogsService {
         execution_time_ms: number | null;
         archived: boolean;
         created_at: Date;
-        user_id: string;
     }) | null>;
     findAll(dto: QueryActivityLogsDto): Promise<{
         data: ({
@@ -41,6 +41,7 @@ export declare class ActivityLogsService {
             };
         } & {
             id: string;
+            user_id: string;
             action: string;
             entity_type: string | null;
             entity_id: string | null;
@@ -57,7 +58,6 @@ export declare class ActivityLogsService {
             execution_time_ms: number | null;
             archived: boolean;
             created_at: Date;
-            user_id: string;
         })[];
         meta: {
             total: number;
@@ -74,6 +74,7 @@ export declare class ActivityLogsService {
         };
     } & {
         id: string;
+        user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
@@ -90,7 +91,6 @@ export declare class ActivityLogsService {
         execution_time_ms: number | null;
         archived: boolean;
         created_at: Date;
-        user_id: string;
     })[]>;
     getEntityActivity(entityType: string, entityId: string, limit?: number): Promise<({
         user: {
@@ -100,6 +100,7 @@ export declare class ActivityLogsService {
         };
     } & {
         id: string;
+        user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
@@ -116,7 +117,6 @@ export declare class ActivityLogsService {
         execution_time_ms: number | null;
         archived: boolean;
         created_at: Date;
-        user_id: string;
     })[]>;
     getStats(startDate?: Date, endDate?: Date): Promise<{
         total_activities: number;

@@ -19,103 +19,103 @@ export declare class TicketsService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateTicketDto): Promise<{
-        service_engineer: {
-            id: string;
-            status: string;
-            full_name: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
-        customer: {
-            id: string;
-            email: string | null;
-            phone: string | null;
-            name: string;
-        } | null;
         mill: {
             id: string;
             name: string;
         } | null;
+        customer: {
+            id: string;
+            email: string | null;
+            name: string;
+            phone: string | null;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+            email: string | null;
+            phone: string | null;
+            status: string;
+        } | null;
     } & {
         id: string;
-        ticket_number: string | null;
         user_id: string | null;
-        service_engineer_id: string | null;
-        customer_id: string | null;
-        mill_id: string | null;
-        subject: string;
         description: string;
-        status: string;
-        priority: string;
         created_at: Date;
         updated_at: Date;
+        status: string;
+        mill_id: string | null;
+        customer_id: string | null;
+        priority: string;
+        subject: string;
+        service_engineer_id: string | null;
+        ticket_number: string | null;
     }>;
     update(id: string, dto: UpdateTicketDto): Promise<{
         before: any;
         after: {
-            service_engineer: {
-                id: string;
-                status: string;
-                full_name: string;
-                email: string | null;
-                phone: string | null;
-            } | null;
-            customer: {
-                id: string;
-                email: string | null;
-                phone: string | null;
-                name: string;
-            } | null;
             mill: {
                 id: string;
                 name: string;
             } | null;
+            customer: {
+                id: string;
+                email: string | null;
+                name: string;
+                phone: string | null;
+            } | null;
+            service_engineer: {
+                id: string;
+                full_name: string;
+                email: string | null;
+                phone: string | null;
+                status: string;
+            } | null;
         } & {
             id: string;
-            ticket_number: string | null;
             user_id: string | null;
-            service_engineer_id: string | null;
-            customer_id: string | null;
-            mill_id: string | null;
-            subject: string;
             description: string;
-            status: string;
-            priority: string;
             created_at: Date;
             updated_at: Date;
+            status: string;
+            mill_id: string | null;
+            customer_id: string | null;
+            priority: string;
+            subject: string;
+            service_engineer_id: string | null;
+            ticket_number: string | null;
         };
     }>;
     remove(id: string): Promise<{
-        service_engineer: {
-            id: string;
-            status: string;
-            full_name: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
-        customer: {
-            id: string;
-            email: string | null;
-            phone: string | null;
-            name: string;
-        } | null;
         mill: {
             id: string;
             name: string;
         } | null;
+        customer: {
+            id: string;
+            email: string | null;
+            name: string;
+            phone: string | null;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+            email: string | null;
+            phone: string | null;
+            status: string;
+        } | null;
     } & {
         id: string;
-        ticket_number: string | null;
         user_id: string | null;
-        service_engineer_id: string | null;
-        customer_id: string | null;
-        mill_id: string | null;
-        subject: string;
         description: string;
-        status: string;
-        priority: string;
         created_at: Date;
         updated_at: Date;
+        status: string;
+        mill_id: string | null;
+        customer_id: string | null;
+        priority: string;
+        subject: string;
+        service_engineer_id: string | null;
+        ticket_number: string | null;
     }>;
     private invalidateCache;
     private normalizePayload;

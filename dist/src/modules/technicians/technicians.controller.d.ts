@@ -5,13 +5,13 @@ export declare class TechniciansController {
     findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     updateStatus(id: string, status: string): Promise<{
-        full_name: string;
-        email: string | null;
-        phone: string | null;
-        status: string;
         id: string;
         created_at: Date;
+        full_name: string;
+        email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
+        phone: string | null;
+        status: string;
     }>;
 }

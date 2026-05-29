@@ -8,32 +8,32 @@ export declare class ServiceCategoriesController {
     findOne(id: string): Promise<any>;
     create(dto: CreateServiceCategoryDto): Promise<{
         id: string;
-        name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
     update(id: string, dto: UpdateServiceCategoryDto): Promise<{
         before: any;
         after: {
             id: string;
-            name: string;
             description: string | null;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
 }

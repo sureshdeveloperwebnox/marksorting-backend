@@ -8,29 +8,29 @@ export declare class SettingsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateSettingDto): Promise<{
         id: string;
-        key: string;
-        value: string;
-        group: string;
         created_at: Date;
         updated_at: Date;
+        value: string;
+        key: string;
+        group: string;
     }>;
     update(id: string, dto: UpdateSettingDto): Promise<{
         before: any;
         after: {
             id: string;
-            key: string;
-            value: string;
-            group: string;
             created_at: Date;
             updated_at: Date;
+            value: string;
+            key: string;
+            group: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        key: string;
-        value: string;
-        group: string;
         created_at: Date;
         updated_at: Date;
+        value: string;
+        key: string;
+        group: string;
     }>;
 }

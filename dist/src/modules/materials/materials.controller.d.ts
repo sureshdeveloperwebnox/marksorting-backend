@@ -7,41 +7,41 @@ export declare class MaterialsController {
     findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMaterialDto): Promise<{
-        name: string;
         id: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
         before: {
-            name: string;
             id: string;
             description: string | null;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
         };
         after: {
-            name: string;
             id: string;
             description: string | null;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
         };
     }>;
     remove(id: string): Promise<{
-        name: string;
         id: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
 }
