@@ -27,14 +27,14 @@ let MobileStoresController = class MobileStoresController {
         this.storesService = storesService;
     }
     findAll(req, skip, take, search) {
-        return this.storesService.findPendingByTechnician(req.user.id, {
+        return this.storesService.findPendingByTechnician(req.user.userId, {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
         });
     }
     submitReturn(id, dto, req) {
-        return this.storesService.submitReturnDetails(id, req.user.id, dto);
+        return this.storesService.submitReturnDetails(id, req.user.userId, dto);
     }
 };
 exports.MobileStoresController = MobileStoresController;

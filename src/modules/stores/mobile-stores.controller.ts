@@ -61,7 +61,7 @@ export class MobileStoresController {
     @Query('take') take?: string,
     @Query('search') search?: string,
   ) {
-    return this.storesService.findPendingByTechnician(req.user.id, {
+    return this.storesService.findPendingByTechnician(req.user.userId, {
       skip: skip ? parseInt(skip, 10) : 0,
       take: take ? parseInt(take, 10) : 10,
       search,
@@ -97,6 +97,6 @@ export class MobileStoresController {
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.id, dto);
+    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
   }
 }
