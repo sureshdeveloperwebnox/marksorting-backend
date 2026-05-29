@@ -9,6 +9,7 @@ export declare class AutoActivityLogInterceptor implements NestInterceptor {
     private readonly EXCLUDED_PATHS;
     constructor(reflector: Reflector, activityLogsService: ActivityLogsService);
     intercept(context: ExecutionContext, next: CallHandler): Observable<any>;
+    private logActivityAsync;
     private isMutatingMethod;
     private detectActionAndEntity;
     private extractEntityName;

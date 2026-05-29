@@ -8,6 +8,7 @@ export declare class ActivityLogInterceptor implements NestInterceptor {
     private readonly logger;
     constructor(reflector: Reflector, activityLogsService: ActivityLogsService);
     intercept(context: ExecutionContext, next: CallHandler): Observable<any>;
+    private logActivityAsync;
     private getClientIp;
     private getDeviceName;
     private sanitizeBody;

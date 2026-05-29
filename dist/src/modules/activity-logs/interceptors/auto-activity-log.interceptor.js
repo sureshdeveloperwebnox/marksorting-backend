@@ -63,38 +63,45 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
         const deviceName = this.getDeviceName(userAgent);
         const startTime = Date.now();
         const { action, entityType } = this.detectActionAndEntity(method, path);
-        return next.handle().pipe((0, rxjs_1.tap)(async (result) => {
-            try {
-                if (result === null || result === undefined) {
-                    return;
-                }
-                const entityName = this.extractEntityName(request.body, result);
-                const entityId = this.extractEntityId(request.params, result);
-                const description = this.buildDescription(action, entityType, entityName, entityId, path, result);
-                await this.activityLogsService.create({
-                    user_id: userId,
-                    action,
-                    entity_type: entityType,
-                    entity_id: entityId,
-                    description,
-                    metadata: {
-                        execution_time_ms: Date.now() - startTime,
-                        method: request.method,
-                        path: request.path,
-                        body: this.sanitizeBody(request.body),
-                        result: this.sanitizeResult(result),
-                        auto_logged: true,
-                    },
-                    ip_address: ipAddress,
-                    user_agent: userAgent,
-                    device_name: deviceName,
-                });
-                this.logger.log(`AUTO-LOGGED: ${action} ${entityType} - ${description}`);
-            }
-            catch (error) {
-                this.logger.error(`Failed to auto-log activity: ${error.message}`, error.stack);
+        return next.handle().pipe((0, rxjs_1.tap)({
+            next: (result) => {
+                this.logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path);
+            },
+            error: () => {
             }
         }));
+    }
+    async logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path) {
+        try {
+            if (result === null || result === undefined) {
+                return;
+            }
+            const entityName = this.extractEntityName(request.body, result);
+            const entityId = this.extractEntityId(request.params, result);
+            const description = this.buildDescription(action, entityType, entityName, entityId, path, result);
+            await this.activityLogsService.create({
+                user_id: userId,
+                action,
+                entity_type: entityType,
+                entity_id: entityId,
+                description,
+                metadata: {
+                    execution_time_ms: Date.now() - startTime,
+                    method: request.method,
+                    path: request.path,
+                    body: this.sanitizeBody(request.body),
+                    result: this.sanitizeResult(result),
+                    auto_logged: true,
+                },
+                ip_address: ipAddress,
+                user_agent: userAgent,
+                device_name: deviceName,
+            });
+            this.logger.log(`AUTO-LOGGED: ${action} ${entityType} - ${description}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to auto-log activity: ${error?.message}`, error?.stack);
+        }
     }
     isMutatingMethod(method) {
         return ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);

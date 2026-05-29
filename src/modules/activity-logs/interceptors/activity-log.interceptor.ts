@@ -63,74 +63,94 @@ export class ActivityLogInterceptor implements NestInterceptor {
     const startTime = Date.now();
 
     return next.handle().pipe(
-      tap(async (result) => {
-        try {
-          // Don't log if result is null/undefined and ignoreNullEntity is true
-          if (options.ignoreNullEntity && (result === null || result === undefined)) {
-            return;
-          }
-
-          // Build context for description generation
-          const logContext: LogActivityContext = {
-            user: {
-              id: userId,
-              email: user.email,
-              full_name: user.full_name || user.email || user.userId,
-            },
-            body: request.body,
-            params: request.params,
-            query: request.query,
-            result: result,
-            ip_address: ipAddress,
-            user_agent: userAgent,
-            device_name: deviceName,
-          };
-
-          // Generate description
-          let description: string;
-          if (typeof options.description === 'function') {
-            description = await options.description(logContext);
-          } else {
-            description = options.description;
-          }
-
-          // Extract entity ID from result or params
-          let entityId: string | undefined;
-          if (options.entityIdParam) {
-            const paramValue = request.params[options.entityIdParam];
-            if (paramValue) {
-              entityId = Array.isArray(paramValue) ? paramValue[0] : paramValue;
-            }
-          } else if (result && typeof result === 'object' && 'id' in result) {
-            entityId = result.id;
-          }
-
-          // Create the activity log
-          const log = await this.activityLogsService.create({
-            user_id: userId,
-            action: options.action,
-            entity_type: options.entityType,
-            entity_id: entityId,
-            description,
-            metadata: {
-              execution_time_ms: Date.now() - startTime,
-              method: request.method,
-              path: request.path,
-              body: this.sanitizeBody(request.body),
-              result: this.sanitizeResult(result),
-            },
-            ip_address: ipAddress,
-            user_agent: userAgent,
-            device_name: deviceName,
-          });
-          
-          console.log(`[ActivityLogInterceptor] LOG CREATED: ${log?.id || 'FAILED'} - ${description}`);
-        } catch (error) {
-          // Don't let logging errors break the main flow
-          this.logger.error(`Failed to log activity: ${error.message}`, error.stack);
+      tap({
+        next: (result) => {
+          // Fire-and-forget logging - don't block the response
+          this.logActivityAsync(result, options, user, userId, request, startTime, ipAddress, userAgent, deviceName);
+        },
+        error: () => {
+          // Error already handled by exception filters, no need to log here
         }
       }),
     );
+  }
+
+  private async logActivityAsync(
+    result: any,
+    options: LogActivityOptions,
+    user: any,
+    userId: string,
+    request: Request,
+    startTime: number,
+    ipAddress: string | undefined,
+    userAgent: string | undefined,
+    deviceName: string | undefined,
+  ): Promise<void> {
+    try {
+      // Don't log if result is null/undefined and ignoreNullEntity is true
+      if (options.ignoreNullEntity && (result === null || result === undefined)) {
+        return;
+      }
+
+      // Build context for description generation
+      const logContext: LogActivityContext = {
+        user: {
+          id: userId,
+          email: user.email,
+          full_name: user.full_name || user.email || user.userId,
+        },
+        body: request.body,
+        params: request.params,
+        query: request.query,
+        result: result,
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        device_name: deviceName,
+      };
+
+      // Generate description
+      let description: string;
+      if (typeof options.description === 'function') {
+        description = await options.description(logContext);
+      } else {
+        description = options.description;
+      }
+
+      // Extract entity ID from result or params
+      let entityId: string | undefined;
+      if (options.entityIdParam) {
+        const paramValue = request.params[options.entityIdParam];
+        if (paramValue) {
+          entityId = Array.isArray(paramValue) ? paramValue[0] : paramValue;
+        }
+      } else if (result && typeof result === 'object' && 'id' in result) {
+        entityId = result.id;
+      }
+
+      // Create the activity log
+      const log = await this.activityLogsService.create({
+        user_id: userId,
+        action: options.action,
+        entity_type: options.entityType,
+        entity_id: entityId,
+        description,
+        metadata: {
+          execution_time_ms: Date.now() - startTime,
+          method: request.method,
+          path: request.path,
+          body: this.sanitizeBody(request.body),
+          result: this.sanitizeResult(result),
+        },
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        device_name: deviceName,
+      });
+      
+      console.log(`[ActivityLogInterceptor] LOG CREATED: ${log?.id || 'FAILED'} - ${description}`);
+    } catch (error: any) {
+      // Don't let logging errors break the main flow
+      this.logger.error(`Failed to log activity: ${error?.message}`, error?.stack);
+    }
   }
 
   private getClientIp(request: Request): string | undefined {

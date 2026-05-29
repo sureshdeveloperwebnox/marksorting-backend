@@ -92,47 +92,68 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     const { action, entityType } = this.detectActionAndEntity(method, path);
 
     return next.handle().pipe(
-      tap(async (result) => {
-        try {
-          // Skip if result is null/undefined
-          if (result === null || result === undefined) {
-            return;
-          }
-
-          // Extract entity name from body or result
-          const entityName = this.extractEntityName(request.body, result);
-          const entityId = this.extractEntityId(request.params, result);
-
-          // Build description
-          const description = this.buildDescription(action, entityType, entityName, entityId, path, result);
-
-          // Create the activity log
-          await this.activityLogsService.create({
-            user_id: userId,
-            action,
-            entity_type: entityType,
-            entity_id: entityId,
-            description,
-            metadata: {
-              execution_time_ms: Date.now() - startTime,
-              method: request.method,
-              path: request.path,
-              body: this.sanitizeBody(request.body),
-              result: this.sanitizeResult(result),
-              auto_logged: true,
-            },
-            ip_address: ipAddress,
-            user_agent: userAgent,
-            device_name: deviceName,
-          });
-
-          this.logger.log(`AUTO-LOGGED: ${action} ${entityType} - ${description}`);
-        } catch (error) {
-          // Don't let logging errors break the main flow
-          this.logger.error(`Failed to auto-log activity: ${error.message}`, error.stack);
+      tap({
+        next: (result) => {
+          // Fire-and-forget logging - don't block the response
+          this.logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path);
+        },
+        error: () => {
+          // Error already handled by exception filters
         }
       }),
     );
+  }
+
+  private async logActivityAsync(
+    result: any,
+    action: ActivityAction,
+    entityType: string,
+    userId: string,
+    request: Request,
+    startTime: number,
+    ipAddress: string | undefined,
+    userAgent: string | undefined,
+    deviceName: string | undefined,
+    path: string,
+  ): Promise<void> {
+    try {
+      // Skip if result is null/undefined
+      if (result === null || result === undefined) {
+        return;
+      }
+
+      // Extract entity name from body or result
+      const entityName = this.extractEntityName(request.body, result);
+      const entityId = this.extractEntityId(request.params, result);
+
+      // Build description
+      const description = this.buildDescription(action, entityType, entityName, entityId, path, result);
+
+      // Create the activity log
+      await this.activityLogsService.create({
+        user_id: userId,
+        action,
+        entity_type: entityType,
+        entity_id: entityId,
+        description,
+        metadata: {
+          execution_time_ms: Date.now() - startTime,
+          method: request.method,
+          path: request.path,
+          body: this.sanitizeBody(request.body),
+          result: this.sanitizeResult(result),
+          auto_logged: true,
+        },
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        device_name: deviceName,
+      });
+
+      this.logger.log(`AUTO-LOGGED: ${action} ${entityType} - ${description}`);
+    } catch (error: any) {
+      // Don't let logging errors break the main flow
+      this.logger.error(`Failed to auto-log activity: ${error?.message}`, error?.stack);
+    }
   }
 
   private isMutatingMethod(method: string): boolean {
