@@ -27,13 +27,15 @@ async function bootstrap() {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Allow requests with no origin (mobile apps, curl, Swagger)
       if (!origin) return callback(null, true);
-      // Allow any localhost or LAN IP on port 3000 or 4000, and ngrok tunnels
+      // Allow any localhost or LAN IP on port 3000 or 4000, ngrok tunnels, and production domain
       const allowed =
         /^http:\/\/localhost(:\d+)?$/.test(origin) ||
         /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
         /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
         /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-        /^https:\/\/.*\.ngrok(-free)?\.(app|dev|io)$/.test(origin);
+        /^https:\/\/.*\.ngrok(-free)?\.(app|dev|io)$/.test(origin) ||
+        origin === 'https://adminmarksorter.webnoxdigital.com' ||
+        origin === 'https://apimarksorter.webnoxdigital.com';
       callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
     },
     credentials: true,
