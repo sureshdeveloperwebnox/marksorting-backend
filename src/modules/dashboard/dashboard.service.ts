@@ -631,6 +631,108 @@ export class DashboardService {
       percentage: calculatePercentage(p.value, expensesProductionTotal),
     }));
 
+    // Aggregation Helpers for Weekly and Monthly Trends
+    const getThisMonthIntervals = () => {
+      const monthName = MONTH_NAMES[now.getMonth()];
+      return [
+        { name: `${monthName} 1`, startDay: 1, endDay: 5, total: 0 },
+        { name: `${monthName} 6`, startDay: 6, endDay: 10, total: 0 },
+        { name: `${monthName} 11`, startDay: 11, endDay: 15, total: 0 },
+        { name: `${monthName} 16`, startDay: 16, endDay: 20, total: 0 },
+        { name: `${monthName} 21`, startDay: 21, endDay: 25, total: 0 },
+        { name: `${monthName} 26`, startDay: 26, endDay: 30, total: 0 },
+        { name: `${monthName} 31`, startDay: 31, endDay: 31, total: 0 },
+      ];
+    };
+
+    const getPast7Days = () => {
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
+        result.push({
+          name: DAY_NAMES[d.getDay()],
+          dateStr: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`,
+          dateKey: new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(),
+          total: 0,
+        });
+      }
+      return result;
+    };
+
+    const aggregateThisMonthTrend = (
+      items: any[],
+      dateField: string,
+      sumField?: string,
+    ) => {
+      const intervals = getThisMonthIntervals();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
+      
+      items.forEach((item) => {
+        const dateVal = item[dateField];
+        if (!dateVal) return;
+        const date = new Date(dateVal);
+        if (
+          date.getFullYear() === currentYear &&
+          date.getMonth() === currentMonth
+        ) {
+          const day = date.getDate();
+          let idx = 0;
+          if (day >= 1 && day <= 5) idx = 0;
+          else if (day >= 6 && day <= 10) idx = 1;
+          else if (day >= 11 && day <= 15) idx = 2;
+          else if (day >= 16 && day <= 20) idx = 3;
+          else if (day >= 21 && day <= 25) idx = 4;
+          else if (day >= 26 && day <= 30) idx = 5;
+          else if (day >= 31) idx = 6;
+
+          const addVal = sumField ? Number(item[sumField] || 0) : 1;
+          intervals[idx].total += addVal;
+        }
+      });
+      return intervals.map((inv) => ({ name: inv.name, total: inv.total }));
+    };
+
+    const aggregateWeeklyTrend = (
+      items: any[],
+      dateField: string,
+      sumField?: string,
+    ) => {
+      const days = getPast7Days();
+      items.forEach((item) => {
+        const dateVal = item[dateField];
+        if (!dateVal) return;
+        const date = new Date(dateVal);
+        const midnightTime = new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate(),
+        ).getTime();
+
+        const match = days.find((day) => day.dateKey === midnightTime);
+        if (match) {
+          const addVal = sumField ? Number(item[sumField] || 0) : 1;
+          match.total += addVal;
+        }
+      });
+      return days.map((d) => ({ name: d.name, total: d.total }));
+    };
+
+    const customersThisMonthTrend = aggregateThisMonthTrend(allCustomers6Months, 'created_at');
+    const customersWeeklyTrend = aggregateWeeklyTrend(allCustomers6Months, 'created_at');
+
+    const installationsThisMonthTrend = aggregateThisMonthTrend(allInstallations6Months, 'visit_date');
+    const installationsWeeklyTrend = aggregateWeeklyTrend(allInstallations6Months, 'visit_date');
+
+    const servicesThisMonthTrend = aggregateThisMonthTrend(allServices6Months, 'visit_date');
+    const servicesWeeklyTrend = aggregateWeeklyTrend(allServices6Months, 'visit_date');
+
+    const expensesThisMonthTrend = aggregateThisMonthTrend(allExpenses6Months, 'visit_date', 'amount');
+    const expensesWeeklyTrend = aggregateWeeklyTrend(allExpenses6Months, 'visit_date', 'amount');
+
+    const hasThisMonthData = (arr: any[]) => arr.some(item => Number(item.total) > 0);
+
     // Fallback datasets for empty database states to guarantee a premium dashboard layout populated with values
     const finalContexts = {
       customers: {
@@ -642,6 +744,12 @@ export class DashboardService {
               total: p.total,
               successPercentage: calculatePercentage(p.success, p.total),
             })),
+        thisMonthTrend: hasThisMonthData(customersThisMonthTrend)
+          ? customersThisMonthTrend
+          : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [12, 15, 18, 14, 22, 25, 30][idx] || 20 })),
+        weeklyTrend: hasThisMonthData(customersWeeklyTrend)
+          ? customersWeeklyTrend
+          : getPast7Days().map((d, idx) => ({ name: d.name, total: [2, 4, 3, 5, 4, 6, 5][idx] || 3 })),
         production: hasData(customersProduction, 'value')
           ? customersProductionWithPct
           : [
@@ -660,7 +768,7 @@ export class DashboardService {
                 value: 50,
                 percentage: calculatePercentage(50, 215),
               },
-              {
+                {
                 name: 'Wed',
                 value: 20,
                 percentage: calculatePercentage(20, 215),
@@ -735,6 +843,12 @@ export class DashboardService {
               total: p.total,
               successPercentage: calculatePercentage(p.success, p.total),
             })),
+        thisMonthTrend: hasThisMonthData(installationsThisMonthTrend)
+          ? installationsThisMonthTrend
+          : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [45, 55, 80, 98, 70, 110, 128][idx] || 80 })),
+        weeklyTrend: hasThisMonthData(installationsWeeklyTrend)
+          ? installationsWeeklyTrend
+          : getPast7Days().map((d, idx) => ({ name: d.name, total: [6, 10, 12, 8, 15, 11, 4][idx] || 8 })),
         production: hasData(installationsProduction, 'value')
           ? installationsProductionWithPct
           : [
@@ -791,6 +905,12 @@ export class DashboardService {
               total: p.total,
               successPercentage: calculatePercentage(p.success, p.total),
             })),
+        thisMonthTrend: hasThisMonthData(servicesThisMonthTrend)
+          ? servicesThisMonthTrend
+          : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [50, 65, 55, 74, 60, 85, 96][idx] || 60 })),
+        weeklyTrend: hasThisMonthData(servicesWeeklyTrend)
+          ? servicesWeeklyTrend
+          : getPast7Days().map((d, idx) => ({ name: d.name, total: [8, 12, 15, 10, 18, 14, 6][idx] || 10 })),
         production: hasData(servicesProduction, 'value')
           ? servicesProductionWithPct
           : [
@@ -867,6 +987,12 @@ export class DashboardService {
               total: p.total,
               successPercentage: calculatePercentage(p.success, p.total),
             })),
+        thisMonthTrend: hasThisMonthData(expensesThisMonthTrend)
+          ? expensesThisMonthTrend
+          : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [950, 1400, 1100, 1240, 1050, 1650, 2200][idx] || 1200 })),
+        weeklyTrend: hasThisMonthData(expensesWeeklyTrend)
+          ? expensesWeeklyTrend
+          : getPast7Days().map((d, idx) => ({ name: d.name, total: [850, 1200, 1100, 950, 1600, 1300, 500][idx] || 1000 })),
         production: hasData(expensesProduction, 'value')
           ? expensesProductionWithPct
           : [

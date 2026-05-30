@@ -11,34 +11,34 @@ export declare class MobileExpensesController {
             id: string;
             name: string;
         } | null;
-        expenseCategory: {
-            id: string;
-            name: string;
-        };
         technicians: ({
             technician: {
                 id: string;
                 full_name: string;
             };
         } & {
-            expense_id: string;
             technician_id: string;
+            expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
-        expense_number: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
+        expense_number: string;
     }) | null>;
     update(id: string, dto: UpdateMobileExpenseDto, req: any): Promise<{
         before: any;
@@ -47,34 +47,34 @@ export declare class MobileExpensesController {
                 id: string;
                 name: string;
             } | null;
-            expenseCategory: {
-                id: string;
-                name: string;
-            };
             technicians: ({
                 technician: {
                     id: string;
                     full_name: string;
                 };
             } & {
-                expense_id: string;
                 technician_id: string;
+                expense_id: string;
             })[];
+            expenseCategory: {
+                id: string;
+                name: string;
+            };
         } & {
             id: string;
-            expense_number: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            status: string;
             mill_id: string | null;
             place: string | null;
             visit_date: Date;
             visit_time: string;
+            amount: import("@prisma/client/runtime/client").Decimal;
             expense_category_id: string;
             others: string | null;
-            amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
-            status: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
+            expense_number: string;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -82,33 +82,33 @@ export declare class MobileExpensesController {
             id: string;
             name: string;
         } | null;
-        expenseCategory: {
-            id: string;
-            name: string;
-        };
         technicians: ({
             technician: {
                 id: string;
                 full_name: string;
             };
         } & {
-            expense_id: string;
             technician_id: string;
+            expense_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
-        expense_number: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
+        expense_number: string;
     }>;
 }
