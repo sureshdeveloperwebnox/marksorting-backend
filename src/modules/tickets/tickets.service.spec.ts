@@ -40,7 +40,7 @@ describe('TicketsService', () => {
       id: 'mill-id',
       customer_id: 'customer-id',
     });
-    service = new TicketsService(prisma as any, redis as any);
+    service = new TicketsService(prisma as any, redis as any, { emit: jest.fn() } as any);
   });
 
   it('creates a ticket with service engineer, customer, and mill relations', async () => {

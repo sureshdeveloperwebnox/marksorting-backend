@@ -18,6 +18,7 @@ class CreateMobileExpenseDto extends (0, swagger_1.OmitType)(create_expense_dto_
     'technician_ids',
 ]) {
     technician_id;
+    technician_ids;
 }
 exports.CreateMobileExpenseDto = CreateMobileExpenseDto;
 __decorate([
@@ -30,4 +31,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMobileExpenseDto.prototype, "technician_id", void 0);
+__decorate([
+    (0, swagger_2.ApiProperty)({
+        example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
+        type: [String],
+        required: false,
+        description: 'List of technician UUIDs assigned to this expense.',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('all', { each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateMobileExpenseDto.prototype, "technician_ids", void 0);
 //# sourceMappingURL=create-mobile-expense.dto.js.map

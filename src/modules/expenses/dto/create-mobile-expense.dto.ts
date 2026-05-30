@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger';
 import { CreateExpenseDto } from './create-expense.dto';
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsUUID, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMobileExpenseDto extends OmitType(CreateExpenseDto, [
@@ -15,4 +15,15 @@ export class CreateMobileExpenseDto extends OmitType(CreateExpenseDto, [
   @IsUUID()
   @IsOptional()
   technician_id?: string;
+
+  @ApiProperty({
+    example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
+    type: [String],
+    required: false,
+    description: 'List of technician UUIDs assigned to this expense.',
+  })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  technician_ids?: string[];
 }

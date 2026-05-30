@@ -251,7 +251,7 @@ let InstallationReportsService = class InstallationReportsService {
             this.redis.delByPrefix('reports:'),
         ];
         if (id) {
-            promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
+            promises.push(this.redis.delByPrefix(`${this.CACHE_PREFIX}id:${id}`));
         }
         await Promise.all(promises);
     }
