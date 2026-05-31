@@ -1,10 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../redis/redis.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
@@ -15,6 +18,8 @@ export class AuthService {
     private configService: ConfigService,
     private redisService: RedisService,
     private permissionsService: PermissionsService,
+    private prisma: PrismaService,
+    private mailService: MailService,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -220,5 +225,79 @@ export class AuthService {
     } catch (e) {
       throw new UnauthorizedException('Invalid refresh token');
     }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Return successfully even if user doesn't exist for security reasons (prevents user enumeration)
+      return;
+    }
+
+    // Generate a secure random token
+    const token = crypto.randomBytes(32).toString('hex');
+    // Store hashed version of the token in database for security
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    
+    // Set token expiration (1 hour from now)
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 1);
+
+    // Save to password_resets table
+    await this.prisma.passwordReset.create({
+      data: {
+        user_id: user.id,
+        token_hash: tokenHash,
+        expires_at: expiresAt,
+      },
+    });
+
+    // Queue email sending asynchronously
+    await this.mailService.sendPasswordResetMail(user.email, user.full_name, token);
+  }
+
+  async resetPassword(token: string, newPass: string): Promise<void> {
+    // Hash the incoming token to match what's stored in the database
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    // Find the latest active password reset record for this token hash
+    const resetRecord = await this.prisma.passwordReset.findFirst({
+      where: {
+        token_hash: tokenHash,
+        used_at: null,
+        expires_at: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!resetRecord) {
+      throw new BadRequestException('Invalid or expired password reset token');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+
+    // Update user's password and invalidate cache
+    await this.prisma.$transaction([
+      // Update user password
+      this.prisma.user.update({
+        where: { id: resetRecord.user_id },
+        data: { password_hash: hashedPassword },
+      }),
+      // Mark token as used
+      this.prisma.passwordReset.update({
+        where: { id: resetRecord.id },
+        data: { used_at: new Date() },
+      }),
+    ]);
+
+    // Invalidate user cache to ensure clean updates
+    await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
+    await this.redisService.del(`users:email:${resetRecord.user.email}`);
+    await this.redisService.del(`users:id:${resetRecord.user_id}`);
   }
 }

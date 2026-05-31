@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { RedisService } from '../../redis/redis.service';
 import { PermissionsService } from '../permissions/permissions.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 export declare class AuthService {
     private usersService;
@@ -10,7 +12,9 @@ export declare class AuthService {
     private configService;
     private redisService;
     private permissionsService;
-    constructor(usersService: UsersService, jwtService: JwtService, configService: ConfigService, redisService: RedisService, permissionsService: PermissionsService);
+    private prisma;
+    private mailService;
+    constructor(usersService: UsersService, jwtService: JwtService, configService: ConfigService, redisService: RedisService, permissionsService: PermissionsService, prisma: PrismaService, mailService: MailService);
     validateUser(email: string, pass: string): Promise<any>;
     validateServiceEngineer(email: string, pass: string): Promise<any>;
     register(registerDto: any): Promise<{
@@ -86,4 +90,6 @@ export declare class AuthService {
             background_image_url: any;
         };
     }>;
+    forgotPassword(email: string): Promise<void>;
+    resetPassword(token: string, newPass: string): Promise<void>;
 }

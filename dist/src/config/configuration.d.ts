@@ -27,5 +27,15 @@ declare const _default: () => {
         clientEmail: string | undefined;
         privateKey: string | undefined;
     };
+    mail: {
+        host: string;
+        port: number;
+        user: string | undefined;
+        pass: string | undefined;
+        fromName: string;
+    };
+    app: {
+        frontendUrl: string;
+    };
 };
 export default _default;

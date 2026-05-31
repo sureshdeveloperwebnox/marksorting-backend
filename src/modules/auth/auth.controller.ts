@@ -9,6 +9,8 @@ import {
   Res,
   UnauthorizedException,
   Logger,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -19,6 +21,8 @@ import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
 import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import { Public } from '../../common/decorators/public.decorator';
@@ -212,5 +216,30 @@ export class AuthController {
       );
     }
     return this.authService.mobileLogin(user);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset link' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 200, description: 'Reset email queued successfully' })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(forgotPasswordDto.email);
+    return { message: 'If the email exists, a password reset link has been sent' };
+  }
+
+  @Public()
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password using token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    await this.authService.resetPassword(
+      resetPasswordDto.token,
+      resetPasswordDto.password,
+    );
+    return { message: 'Password has been reset successfully' };
   }
 }

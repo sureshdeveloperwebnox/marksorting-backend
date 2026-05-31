@@ -21,4 +21,10 @@ export const validationSchema = Joi.object({
   FIREBASE_PROJECT_ID: Joi.string().optional().allow(''),
   FIREBASE_CLIENT_EMAIL: Joi.string().optional().allow(''),
   FIREBASE_PRIVATE_KEY: Joi.string().optional().allow(''),
+  SMTP_HOST: Joi.string().default('smtp.gmail.com'),
+  SMTP_PORT: Joi.number().default(465),
+  SMTP_USER: Joi.string().optional().allow(''),
+  APP_PASSWORD: Joi.string().optional().allow(''),
+  SMTP_FROM_NAME: Joi.string().default('Mark Sorting System'),
+  FRONTEND_URL: Joi.string().uri().default('http://localhost:3000'),
 });

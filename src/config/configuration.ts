@@ -27,4 +27,14 @@ export default () => ({
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
     privateKey: process.env.FIREBASE_PRIVATE_KEY,
   },
+  mail: {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '465', 10),
+    user: process.env.SMTP_USER,
+    pass: process.env.APP_PASSWORD,
+    fromName: process.env.SMTP_FROM_NAME || 'Mark Sorting System',
+  },
+  app: {
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+  },
 });

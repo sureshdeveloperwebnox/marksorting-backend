@@ -40,6 +40,7 @@ const reports_module_1 = require("./modules/reports/reports.module");
 const materials_module_1 = require("./modules/materials/materials.module");
 const stores_module_1 = require("./modules/stores/stores.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
+const mail_module_1 = require("./modules/mail/mail.module");
 const permissions_module_1 = require("./modules/permissions/permissions.module");
 const activity_logs_module_1 = require("./modules/activity-logs/activity-logs.module");
 const activity_log_interceptor_1 = require("./modules/activity-logs/interceptors/activity-log.interceptor");
@@ -98,6 +99,7 @@ exports.AppModule = AppModule = __decorate([
             materials_module_1.MaterialsModule,
             stores_module_1.StoresModule,
             notifications_module_1.NotificationsModule,
+            mail_module_1.MailModule,
             permissions_module_1.PermissionsModule,
             activity_logs_module_1.ActivityLogsModule,
         ],

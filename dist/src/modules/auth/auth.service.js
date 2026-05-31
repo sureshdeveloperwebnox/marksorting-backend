@@ -47,21 +47,28 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const bcrypt = __importStar(require("bcrypt"));
+const crypto = __importStar(require("crypto"));
 const users_service_1 = require("../users/users.service");
 const redis_service_1 = require("../../redis/redis.service");
 const permissions_service_1 = require("../permissions/permissions.service");
+const prisma_service_1 = require("../../prisma/prisma.service");
+const mail_service_1 = require("../mail/mail.service");
 let AuthService = class AuthService {
     usersService;
     jwtService;
     configService;
     redisService;
     permissionsService;
-    constructor(usersService, jwtService, configService, redisService, permissionsService) {
+    prisma;
+    mailService;
+    constructor(usersService, jwtService, configService, redisService, permissionsService, prisma, mailService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
         this.configService = configService;
         this.redisService = redisService;
         this.permissionsService = permissionsService;
+        this.prisma = prisma;
+        this.mailService = mailService;
     }
     async validateUser(email, pass) {
         const user = await this.usersService.findByEmail(email);
@@ -225,6 +232,56 @@ let AuthService = class AuthService {
             throw new common_1.UnauthorizedException('Invalid refresh token');
         }
     }
+    async forgotPassword(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            return;
+        }
+        const token = crypto.randomBytes(32).toString('hex');
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 1);
+        await this.prisma.passwordReset.create({
+            data: {
+                user_id: user.id,
+                token_hash: tokenHash,
+                expires_at: expiresAt,
+            },
+        });
+        await this.mailService.sendPasswordResetMail(user.email, user.full_name, token);
+    }
+    async resetPassword(token, newPass) {
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+        const resetRecord = await this.prisma.passwordReset.findFirst({
+            where: {
+                token_hash: tokenHash,
+                used_at: null,
+                expires_at: {
+                    gt: new Date(),
+                },
+            },
+            include: {
+                user: true,
+            },
+        });
+        if (!resetRecord) {
+            throw new common_1.BadRequestException('Invalid or expired password reset token');
+        }
+        const hashedPassword = await bcrypt.hash(newPass, 10);
+        await this.prisma.$transaction([
+            this.prisma.user.update({
+                where: { id: resetRecord.user_id },
+                data: { password_hash: hashedPassword },
+            }),
+            this.prisma.passwordReset.update({
+                where: { id: resetRecord.id },
+                data: { used_at: new Date() },
+            }),
+        ]);
+        await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
+        await this.redisService.del(`users:email:${resetRecord.user.email}`);
+        await this.redisService.del(`users:id:${resetRecord.user_id}`);
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
@@ -233,6 +290,8 @@ exports.AuthService = AuthService = __decorate([
         jwt_1.JwtService,
         config_1.ConfigService,
         redis_service_1.RedisService,
-        permissions_service_1.PermissionsService])
+        permissions_service_1.PermissionsService,
+        prisma_service_1.PrismaService,
+        mail_service_1.MailService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

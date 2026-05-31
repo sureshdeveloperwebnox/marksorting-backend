@@ -28,6 +28,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { MaterialsModule } from './modules/materials/materials.module';
 import { StoresModule } from './modules/stores/stores.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { MailModule } from './modules/mail/mail.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
 import { ActivityLogInterceptor } from './modules/activity-logs/interceptors/activity-log.interceptor';
@@ -84,6 +85,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     MaterialsModule,
     StoresModule,
     NotificationsModule,
+    MailModule,
     PermissionsModule,
     ActivityLogsModule,
   ],

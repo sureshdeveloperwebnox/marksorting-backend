@@ -2,6 +2,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import * as express from 'express';
 export declare class AuthController {
@@ -78,5 +80,11 @@ export declare class AuthController {
     mobileLogin(mobileLoginDto: MobileLoginDto): Promise<{
         access_token: string;
         refresh_token: string;
+    }>;
+    forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<{
+        message: string;
+    }>;
+    resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
+        message: string;
     }>;
 }

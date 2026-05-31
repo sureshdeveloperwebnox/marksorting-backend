@@ -57,6 +57,8 @@ const register_dto_1 = require("./dto/register.dto");
 const mobile_login_dto_1 = require("./dto/mobile-login.dto");
 const mobile_login_response_dto_1 = require("./dto/mobile-login-response.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
+const forgot_password_dto_1 = require("./dto/forgot-password.dto");
+const reset_password_dto_1 = require("./dto/reset-password.dto");
 const activity_logs_service_1 = require("../activity-logs/activity-logs.service");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
@@ -184,6 +186,14 @@ let AuthController = AuthController_1 = class AuthController {
         }
         return this.authService.mobileLogin(user);
     }
+    async forgotPassword(forgotPasswordDto) {
+        await this.authService.forgotPassword(forgotPasswordDto.email);
+        return { message: 'If the email exists, a password reset link has been sent' };
+    }
+    async resetPassword(resetPasswordDto) {
+        await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.password);
+        return { message: 'Password has been reset successfully' };
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -268,6 +278,30 @@ __decorate([
     __metadata("design:paramtypes", [mobile_login_dto_1.MobileLoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "mobileLogin", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('forgot-password'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Request password reset link' }),
+    (0, swagger_1.ApiBody)({ type: forgot_password_dto_1.ForgotPasswordDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Reset email queued successfully' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [forgot_password_dto_1.ForgotPasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('reset-password'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({ summary: 'Reset password using token' }),
+    (0, swagger_1.ApiBody)({ type: reset_password_dto_1.ResetPasswordDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Password reset successfully' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = AuthController_1 = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),
