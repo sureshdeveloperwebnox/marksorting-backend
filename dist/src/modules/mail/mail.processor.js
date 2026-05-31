@@ -48,6 +48,8 @@ const bullmq_1 = require("@nestjs/bullmq");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const nodemailer = __importStar(require("nodemailer"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 let MailProcessor = MailProcessor_1 = class MailProcessor extends bullmq_1.WorkerHost {
     configService;
     logger = new common_1.Logger(MailProcessor_1.name);
@@ -101,11 +103,27 @@ let MailProcessor = MailProcessor_1 = class MailProcessor extends bullmq_1.Worke
             return;
         }
         try {
+            let logoPath = path.join(__dirname, 'assets', 'logo.png');
+            if (!fs.existsSync(logoPath)) {
+                logoPath = path.join(process.cwd(), 'src', 'modules', 'mail', 'assets', 'logo.png');
+            }
+            const attachments = [];
+            if (fs.existsSync(logoPath)) {
+                attachments.push({
+                    filename: 'logo.png',
+                    path: logoPath,
+                    cid: 'logo',
+                });
+            }
+            else {
+                this.logger.warn(`Logo image not found at ${logoPath}. Sending email without logo attachment.`);
+            }
             const info = await this.transporter.sendMail({
                 from: `"${fromName}" <${fromUser}>`,
                 to,
                 subject,
                 html,
+                attachments,
             });
             this.logger.log(`Email successfully sent to ${to}. MessageId: ${info.messageId}`);
         }

@@ -3,6 +3,8 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Processor('mail')
 export class MailProcessor extends WorkerHost {
@@ -67,11 +69,30 @@ export class MailProcessor extends WorkerHost {
     }
 
     try {
+      // Find the logo image file in the assets directory
+      let logoPath = path.join(__dirname, 'assets', 'logo.png');
+      if (!fs.existsSync(logoPath)) {
+        // Fallback for ts-node development mode
+        logoPath = path.join(process.cwd(), 'src', 'modules', 'mail', 'assets', 'logo.png');
+      }
+
+      const attachments: any[] = [];
+      if (fs.existsSync(logoPath)) {
+        attachments.push({
+          filename: 'logo.png',
+          path: logoPath,
+          cid: 'logo',
+        });
+      } else {
+        this.logger.warn(`Logo image not found at ${logoPath}. Sending email without logo attachment.`);
+      }
+
       const info = await this.transporter.sendMail({
         from: `"${fromName}" <${fromUser}>`,
         to,
         subject,
         html,
+        attachments,
       });
 
       this.logger.log(`Email successfully sent to ${to}. MessageId: ${info.messageId}`);

@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBaseTemplate = getBaseTemplate;
 exports.getForgotPasswordTemplate = getForgotPasswordTemplate;
-function getBaseTemplate({ title, previewText = '', bodyHtml }) {
+function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl }) {
     const currentYear = new Date().getFullYear();
     return `<!DOCTYPE html>
 <html lang="en">
@@ -57,8 +57,19 @@ function getBaseTemplate({ title, previewText = '', bodyHtml }) {
   <div class="wrapper">
     <div class="main-card">
       <div class="header">
-        <div class="logo-text">MARK</div>
-        <div class="logo-subtext">Sorting System</div>
+        <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 0 12px; vertical-align: middle;">
+              <div style="background-color: #ffffff; padding: 6px 12px; border-radius: 12px; display: inline-block;">
+                <img src="cid:logo" alt="Mark Sorting System Logo" width="100" style="display: block; border: 0; max-height: 32px; object-fit: contain;" />
+              </div>
+            </td>
+            <td style="padding: 0 12px; text-align: left; vertical-align: middle;">
+              <div class="logo-text" style="line-height: 1;">MARK</div>
+              <div class="logo-subtext" style="margin-top: 2px;">Sorting System</div>
+            </td>
+          </tr>
+        </table>
       </div>
       <div class="content">
         ${bodyHtml}
@@ -72,7 +83,7 @@ function getBaseTemplate({ title, previewText = '', bodyHtml }) {
 </body>
 </html>`;
 }
-function getForgotPasswordTemplate(name, resetUrl, expiresInMinutes = 60) {
+function getForgotPasswordTemplate(name, resetUrl, expiresInMinutes = 60, frontendUrl) {
     const bodyHtml = `
     <h1>Password Reset Request</h1>
     <p>Hello <strong>${name}</strong>,</p>
@@ -95,6 +106,7 @@ function getForgotPasswordTemplate(name, resetUrl, expiresInMinutes = 60) {
         title: 'Reset Password - Mark Sorting System',
         previewText: 'Reset the password for your Mark Sorting System account.',
         bodyHtml,
+        frontendUrl,
     });
 }
 //# sourceMappingURL=mail-templates.js.map

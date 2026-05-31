@@ -7,12 +7,13 @@ interface BaseTemplateOptions {
   title: string;
   previewText?: string;
   bodyHtml: string;
+  frontendUrl?: string;
 }
 
 /**
  * Wraps content in the standard branding layout of Mark Sorting System
  */
-export function getBaseTemplate({ title, previewText = '', bodyHtml }: BaseTemplateOptions): string {
+export function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl }: BaseTemplateOptions): string {
   const currentYear = new Date().getFullYear();
   
   return `<!DOCTYPE html>
@@ -68,8 +69,19 @@ export function getBaseTemplate({ title, previewText = '', bodyHtml }: BaseTempl
   <div class="wrapper">
     <div class="main-card">
       <div class="header">
-        <div class="logo-text">MARK</div>
-        <div class="logo-subtext">Sorting System</div>
+        <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 0 12px; vertical-align: middle;">
+              <div style="background-color: #ffffff; padding: 6px 12px; border-radius: 12px; display: inline-block;">
+                <img src="cid:logo" alt="Mark Sorting System Logo" width="100" style="display: block; border: 0; max-height: 32px; object-fit: contain;" />
+              </div>
+            </td>
+            <td style="padding: 0 12px; text-align: left; vertical-align: middle;">
+              <div class="logo-text" style="line-height: 1;">MARK</div>
+              <div class="logo-subtext" style="margin-top: 2px;">Sorting System</div>
+            </td>
+          </tr>
+        </table>
       </div>
       <div class="content">
         ${bodyHtml}
@@ -87,7 +99,7 @@ export function getBaseTemplate({ title, previewText = '', bodyHtml }: BaseTempl
 /**
  * Returns HTML for the password reset email template
  */
-export function getForgotPasswordTemplate(name: string, resetUrl: string, expiresInMinutes = 60): string {
+export function getForgotPasswordTemplate(name: string, resetUrl: string, expiresInMinutes = 60, frontendUrl?: string): string {
   const bodyHtml = `
     <h1>Password Reset Request</h1>
     <p>Hello <strong>${name}</strong>,</p>
@@ -111,5 +123,6 @@ export function getForgotPasswordTemplate(name: string, resetUrl: string, expire
     title: 'Reset Password - Mark Sorting System',
     previewText: 'Reset the password for your Mark Sorting System account.',
     bodyHtml,
+    frontendUrl,
   });
 }
