@@ -230,8 +230,7 @@ export class AuthService {
   async forgotPassword(email: string): Promise<void> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      // Return successfully even if user doesn't exist for security reasons (prevents user enumeration)
-      return;
+      throw new NotFoundException('Email address not found');
     }
 
     // Generate a secure random token
