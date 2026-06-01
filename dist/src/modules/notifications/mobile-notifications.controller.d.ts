@@ -17,9 +17,9 @@ export declare class MobileNotificationsController {
             user_id: string | null;
             created_at: Date;
             status: string;
+            message: string;
             type: string;
             title: string;
-            message: string;
             meta_data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
         total: number;
@@ -31,9 +31,9 @@ export declare class MobileNotificationsController {
         user_id: string | null;
         created_at: Date;
         status: string;
+        message: string;
         type: string;
         title: string;
-        message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
 }

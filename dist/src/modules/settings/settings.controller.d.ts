@@ -10,8 +10,8 @@ export declare class SettingsController {
         id: string;
         created_at: Date;
         updated_at: Date;
-        key: string;
         value: string;
+        key: string;
         group: string;
     }>;
     update(id: string, dto: UpdateSettingDto): Promise<{
@@ -20,8 +20,8 @@ export declare class SettingsController {
             id: string;
             created_at: Date;
             updated_at: Date;
-            key: string;
             value: string;
+            key: string;
             group: string;
         };
     }>;
@@ -29,8 +29,8 @@ export declare class SettingsController {
         id: string;
         created_at: Date;
         updated_at: Date;
-        key: string;
         value: string;
+        key: string;
         group: string;
     }>;
 }

@@ -52,8 +52,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;
@@ -116,8 +116,8 @@ export declare class ServiceReportsService {
                     full_name: string;
                 };
             } & {
-                service_report_id: string;
                 technician_id: string;
+                service_report_id: string;
             })[];
         } & {
             id: string;
@@ -179,8 +179,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            service_report_id: string;
             technician_id: string;
+            service_report_id: string;
         })[];
     } & {
         id: string;

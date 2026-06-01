@@ -34,11 +34,11 @@ export declare class ExpensesController {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_number: string;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
+        expense_number: string;
     }) | null>;
     update(id: string, dto: UpdateExpenseDto): Promise<{
         before: any;
@@ -70,11 +70,11 @@ export declare class ExpensesController {
             place: string | null;
             visit_date: Date;
             visit_time: string;
-            expense_number: string;
+            amount: import("@prisma/client/runtime/client").Decimal;
             expense_category_id: string;
             others: string | null;
-            amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            expense_number: string;
         };
     }>;
     remove(id: string): Promise<{
@@ -105,10 +105,10 @@ export declare class ExpensesController {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_number: string;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
+        expense_number: string;
     }>;
 }
