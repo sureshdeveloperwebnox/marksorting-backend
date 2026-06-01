@@ -38,13 +38,26 @@ export class AuthController {
     private activityLogsService: ActivityLogsService,
   ) {}
 
-  private setTokens(res: express.Response, result: any) {
+  private setTokens(
+    req: express.Request,
+    res: express.Response,
+    result: any,
+  ) {
     const isProduction = process.env.NODE_ENV === 'production';
+    const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    
+    // Detect ngrok tunnels or cross-site contexts for sameSite: 'none'
+    const host = (req.headers.host || '').toLowerCase();
+    const origin = (req.headers.origin || '').toLowerCase();
+    const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
+    
+    const cookieSecure = isProduction || isSecure;
+    const cookieSameSite = isNgrok ? 'none' : 'lax';
 
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: 'lax', // Changed to lax for better dev experience with redirects
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
       maxAge: 15 * 60 * 1000, // 15 minutes
       path: '/',
     });
@@ -52,8 +65,8 @@ export class AuthController {
     if (result.refresh_token) {
       res.cookie('refresh_token', result.refresh_token, {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: 'lax',
+        secure: cookieSecure,
+        sameSite: cookieSameSite,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         path: '/',
       });
@@ -70,7 +83,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const result = await this.authService.login(req.user);
-    this.setTokens(res, result);
+    this.setTokens(req, res, result);
 
     // Log successful login
     const userAgent = req.headers['user-agent'] as string | undefined;
@@ -90,7 +103,11 @@ export class AuthController {
       device_name: deviceName,
     });
 
-    return { user: result.user };
+    return { 
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: result.user,
+    };
   }
 
   private getDeviceName(userAgent?: string): string | undefined {
@@ -108,12 +125,17 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new account' })
   @ApiBody({ type: RegisterDto })
   async register(
+    @Request() req: any,
     @Body() registerDto: RegisterDto,
     @Res({ passthrough: true }) res: express.Response,
   ) {
     const result = await this.authService.register(registerDto);
-    this.setTokens(res, result);
-    return { user: result.user };
+    this.setTokens(req, res, result);
+    return { 
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: result.user,
+    };
   }
 
   @Public()
@@ -168,13 +190,26 @@ export class AuthController {
     @Request() req: any,
     @Res({ passthrough: true }) res: express.Response,
   ) {
-    const refreshToken = req.cookies?.['refresh_token'];
+    let refreshToken = req.cookies?.['refresh_token'];
+    
+    // Check Authorization header for Bearer token if not in cookies (for mobile clients)
+    if (!refreshToken && req.headers.authorization) {
+      const parts = req.headers.authorization.split(' ');
+      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+        refreshToken = parts[1];
+      }
+    }
+
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token not found');
     }
     const result = await this.authService.refresh(refreshToken);
-    this.setTokens(res, result);
-    return { user: result.user };
+    this.setTokens(req, res, result);
+    return { 
+      access_token: result.access_token,
+      refresh_token: result.refresh_token,
+      user: result.user,
+    };
   }
 
   @UseGuards(JwtAuthGuard)

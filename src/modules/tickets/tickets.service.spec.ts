@@ -123,8 +123,16 @@ describe('TicketsService', () => {
     await expect(
       service.update('ticket-id', { priority: 'HIGH' }),
     ).resolves.toEqual({
-      id: 'ticket-id',
-      customer_id: 'customer-id',
+      before: {
+        id: 'ticket-id',
+        service_engineer_id: 'engineer-id',
+        customer_id: 'customer-id',
+        mill_id: 'mill-id',
+      },
+      after: {
+        id: 'ticket-id',
+        customer_id: 'customer-id',
+      },
     });
 
     expect(prisma.mill.findFirst).toHaveBeenCalledWith({

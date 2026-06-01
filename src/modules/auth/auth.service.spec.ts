@@ -1,9 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../../redis/redis.service';
+import { PermissionsService } from '../permissions/permissions.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 
 jest.mock('bcrypt');
@@ -13,13 +17,16 @@ describe('AuthService', () => {
   let usersService: UsersService;
   let jwtService: JwtService;
   let redisService: RedisService;
+  let permissionsService: PermissionsService;
 
   const mockUsersService = {
     findByEmail: jest.fn(),
+    findById: jest.fn(),
   };
 
   const mockJwtService = {
     sign: jest.fn(),
+    verify: jest.fn(),
   };
 
   const mockConfigService = {
@@ -32,6 +39,17 @@ describe('AuthService', () => {
 
   const mockRedisService = {
     set: jest.fn(),
+    get: jest.fn(),
+  };
+
+  const mockPermissionsService = {
+    getUserPermissions: jest.fn(),
+  };
+
+  const mockPrismaService = {};
+
+  const mockMailService = {
+    sendPasswordResetMail: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -42,6 +60,9 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: RedisService, useValue: mockRedisService },
+        { provide: PermissionsService, useValue: mockPermissionsService },
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: MailService, useValue: mockMailService },
       ],
     }).compile();
 
@@ -189,6 +210,65 @@ describe('AuthService', () => {
         access_token: 'access-token-val',
         refresh_token: 'refresh-token-val',
       });
+    });
+  });
+
+  describe('refresh', () => {
+    it('should verify the token, rotate it, and return a new token pair and user data', async () => {
+      const mockUser = {
+        id: 'user-id',
+        email: 'engineer@marksorting.com',
+        full_name: 'Test Engineer',
+        role: { name: 'Service Engineer' },
+        account_status: 'ACTIVE',
+      };
+      
+      mockJwtService.verify.mockReturnValue({ sub: 'user-id' });
+      mockRedisService.get.mockResolvedValue('old-refresh-token');
+      mockUsersService.findById.mockResolvedValue(mockUser);
+      mockPermissionsService.getUserPermissions.mockResolvedValue(['some.permission']);
+      
+      mockJwtService.sign.mockImplementation((payload) => {
+        if (payload.sub && !payload.email) return 'new-refresh-token';
+        return 'new-access-token';
+      });
+
+      const result = await service.refresh('old-refresh-token');
+
+      expect(jwtService.verify).toHaveBeenCalledWith('old-refresh-token', {
+        secret: 'refresh-secret',
+      });
+      expect(redisService.get).toHaveBeenCalledWith('refresh_token:user-id');
+      expect(redisService.set).toHaveBeenCalledWith(
+        'refresh_token:user-id',
+        'new-refresh-token',
+        'EX',
+        expect.any(Number),
+      );
+      expect(result).toEqual({
+        access_token: 'new-access-token',
+        refresh_token: 'new-refresh-token',
+        user: {
+          id: 'user-id',
+          email: 'engineer@marksorting.com',
+          full_name: 'Test Engineer',
+          role: 'Service Engineer',
+          permissions: ['some.permission'],
+          profile_image: undefined,
+          profile_image_url: undefined,
+          background_image: undefined,
+          background_image_url: undefined,
+        },
+      });
+    });
+
+    it('should throw UnauthorizedException if token in Redis is not found or mismatch', async () => {
+      mockJwtService.verify.mockReturnValue({ sub: 'user-id' });
+      mockRedisService.get.mockResolvedValue(null);
+
+      await expect(service.refresh('some-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

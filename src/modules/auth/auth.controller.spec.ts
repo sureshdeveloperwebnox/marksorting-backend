@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { UnauthorizedException } from '@nestjs/common';
 
 describe('AuthController', () => {
@@ -12,6 +13,10 @@ describe('AuthController', () => {
     mobileLogin: jest.fn(),
   };
 
+  const mockActivityLogsService = {
+    create: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
@@ -19,6 +24,10 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: mockAuthService,
+        },
+        {
+          provide: ActivityLogsService,
+          useValue: mockActivityLogsService,
         },
       ],
     }).compile();

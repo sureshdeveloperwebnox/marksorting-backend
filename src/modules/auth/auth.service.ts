@@ -201,6 +201,9 @@ export class AuthService {
       // Get fresh permissions
       const permissions = await this.permissionsService.getUserPermissions(userId);
 
+      // Generate new refresh token for rotation
+      const newRefreshToken = await this.generateRefreshToken(userId);
+
       const newPayload = {
         email: user.email,
         sub: user.id,
@@ -210,6 +213,7 @@ export class AuthService {
       };
       return {
         access_token: this.jwtService.sign(newPayload),
+        refresh_token: newRefreshToken,
         user: {
           id: user.id,
           email: user.email,
