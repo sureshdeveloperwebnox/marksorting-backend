@@ -44,6 +44,7 @@ model User {
   support_tickets   SupportTicket[]
   push_tokens       PushToken[]
   notifications     Notification[]
+  ticket_timelines  TicketTimeline[]
 
   @@map("users")
 }
@@ -327,12 +328,31 @@ model SupportTicket {
   priority            String      @default("MEDIUM")
   created_at          DateTime    @default(now())
   updated_at          DateTime    @updatedAt
+  timelines           TicketTimeline[]
 
   @@index([ticket_number])
   @@index([service_engineer_id])
   @@index([customer_id])
   @@index([mill_id])
   @@map("support_tickets")
+}
+
+model TicketTimeline {
+  id                  String        @id @default(uuid())
+  ticket_id           String
+  ticket              SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  user_id             String
+  user                User          @relation(fields: [user_id], references: [id])
+  notes               String
+  status              String?
+  timeline_date       DateTime      @default(now())
+  next_follow_up_date DateTime?
+  created_at          DateTime      @default(now())
+  updated_at          DateTime      @updatedAt
+
+  @@index([ticket_id])
+  @@index([user_id])
+  @@map("ticket_timelines")
 }
 
 model Setting {

@@ -277,6 +277,62 @@ let TicketsService = class TicketsService {
             throw new common_1.BadRequestException('Selected mill does not belong to the selected customer');
         }
     }
+    async createTimeline(ticketId, dto, user) {
+        const ticket = await this.prisma.supportTicket.findUnique({
+            where: { id: ticketId },
+        });
+        if (!ticket) {
+            throw new common_1.NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+        }
+        if (dto.status) {
+            await this.prisma.supportTicket.update({
+                where: { id: ticketId },
+                data: { status: dto.status },
+            });
+        }
+        const timeline = await this.prisma.ticketTimeline.create({
+            data: {
+                ticket_id: ticketId,
+                user_id: user.userId,
+                notes: dto.notes,
+                status: dto.status || null,
+                timeline_date: dto.timeline_date ? new Date(dto.timeline_date) : new Date(),
+                next_follow_up_date: dto.next_follow_up_date ? new Date(dto.next_follow_up_date) : null,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+        await this.invalidateCache(ticketId);
+        return timeline;
+    }
+    async getTimelines(ticketId) {
+        const ticket = await this.prisma.supportTicket.findUnique({
+            where: { id: ticketId },
+        });
+        if (!ticket) {
+            throw new common_1.NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+        }
+        return this.prisma.ticketTimeline.findMany({
+            where: { ticket_id: ticketId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        full_name: true,
+                        email: true,
+                    },
+                },
+            },
+            orderBy: { timeline_date: 'desc' },
+        });
+    }
 };
 exports.TicketsService = TicketsService;
 exports.TicketsService = TicketsService = __decorate([

@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const tickets_service_1 = require("./tickets.service");
 const create_ticket_dto_1 = require("./dto/create-ticket.dto");
 const update_ticket_dto_1 = require("./dto/update-ticket.dto");
+const create_timeline_dto_1 = require("./dto/create-timeline.dto");
 const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const description_helper_1 = require("../activity-logs/helpers/description.helper");
@@ -46,6 +47,12 @@ let TicketsController = class TicketsController {
     }
     remove(id) {
         return this.ticketsService.remove(id);
+    }
+    createTimeline(ticketId, dto, req) {
+        return this.ticketsService.createTimeline(ticketId, dto, req.user);
+    }
+    getTimelines(ticketId) {
+        return this.ticketsService.getTimelines(ticketId);
     }
 };
 exports.TicketsController = TicketsController;
@@ -164,6 +171,33 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Post)(':id/timeline'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new timeline entry for a ticket' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'tickets',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const who = ctx.user.full_name ? `${ctx.user.full_name}` : 'A user';
+            return `${who} added a timeline entry to support ticket #${ctx.params.id}`;
+        },
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, create_timeline_dto_1.CreateTimelineDto, Object]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "createTimeline", null);
+__decorate([
+    (0, common_1.Get)(':id/timeline'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all timeline entries for a ticket' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TicketsController.prototype, "getTimelines", null);
 exports.TicketsController = TicketsController = __decorate([
     (0, swagger_1.ApiTags)('tickets'),
     (0, common_1.Controller)('tickets'),

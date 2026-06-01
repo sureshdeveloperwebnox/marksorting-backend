@@ -12,6 +12,7 @@ import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { CreateMobileTicketDto } from './dto/create-mobile-ticket.dto';
 import { UpdateMobileTicketDto } from './dto/update-mobile-ticket.dto';
+import { CreateTimelineDto } from './dto/create-timeline.dto';
 
 const INCLUDE_SHAPE = {
   service_engineer: {
@@ -351,5 +352,73 @@ export class TicketsService {
         'Selected mill does not belong to the selected customer',
       );
     }
+  }
+
+  async createTimeline(
+    ticketId: string,
+    dto: CreateTimelineDto,
+    user: { userId: string; role: string },
+  ) {
+    const ticket = await this.prisma.supportTicket.findUnique({
+      where: { id: ticketId },
+    });
+    if (!ticket) {
+      throw new NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+    }
+
+    // Update parent ticket status if status is provided in request
+    if (dto.status) {
+      await this.prisma.supportTicket.update({
+        where: { id: ticketId },
+        data: { status: dto.status },
+      });
+    }
+
+    const timeline = await this.prisma.ticketTimeline.create({
+      data: {
+        ticket_id: ticketId,
+        user_id: user.userId,
+        notes: dto.notes,
+        status: dto.status || null,
+        timeline_date: dto.timeline_date ? new Date(dto.timeline_date) : new Date(),
+        next_follow_up_date: dto.next_follow_up_date ? new Date(dto.next_follow_up_date) : null,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    await this.invalidateCache(ticketId);
+
+    return timeline;
+  }
+
+  async getTimelines(ticketId: string) {
+    const ticket = await this.prisma.supportTicket.findUnique({
+      where: { id: ticketId },
+    });
+    if (!ticket) {
+      throw new NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+    }
+
+    return this.prisma.ticketTimeline.findMany({
+      where: { ticket_id: ticketId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            full_name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { timeline_date: 'desc' },
+    });
   }
 }

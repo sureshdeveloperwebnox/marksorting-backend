@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { CreateTimelineDto } from './dto/create-timeline.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
@@ -131,5 +133,30 @@ export class TicketsController {
   })
   remove(@Param('id') id: string) {
     return this.ticketsService.remove(id);
+  }
+
+  @Post(':id/timeline')
+  @ApiOperation({ summary: 'Create a new timeline entry for a ticket' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'tickets',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const who = ctx.user.full_name ? `${ctx.user.full_name}` : 'A user';
+      return `${who} added a timeline entry to support ticket #${ctx.params.id}`;
+    },
+  })
+  createTimeline(
+    @Param('id') ticketId: string,
+    @Body() dto: CreateTimelineDto,
+    @Request() req: any,
+  ) {
+    return this.ticketsService.createTimeline(ticketId, dto, req.user);
+  }
+
+  @Get(':id/timeline')
+  @ApiOperation({ summary: 'Get all timeline entries for a ticket' })
+  getTimelines(@Param('id') ticketId: string) {
+    return this.ticketsService.getTimelines(ticketId);
   }
 }
