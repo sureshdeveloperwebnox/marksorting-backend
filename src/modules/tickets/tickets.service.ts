@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,8 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { CreateMobileTicketDto } from './dto/create-mobile-ticket.dto';
+import { UpdateMobileTicketDto } from './dto/update-mobile-ticket.dto';
 
 const INCLUDE_SHAPE = {
   service_engineer: {
@@ -47,20 +50,27 @@ export class TicketsService {
     private eventEmitter: EventEmitter2,
   ) {}
 
-  async findAll(params: {
-    skip?: number;
-    take?: number;
-    search?: string;
-    status?: string;
-    priority?: string;
-  }) {
-    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+  async findAll(
+    params: {
+      skip?: number;
+      take?: number;
+      search?: string;
+      status?: string;
+      priority?: string;
+    },
+    user?: { userId: string; role: string },
+  ) {
+    const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
     const { skip, take, search, status, priority } = params;
 
     const where: any = {};
+
+    if (user && user.role === 'Service Engineer') {
+      where.service_engineer_id = user.userId;
+    }
 
     if (search) {
       where.OR = [
@@ -107,8 +117,8 @@ export class TicketsService {
     return result;
   }
 
-  async findById(id: string) {
-    const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+  async findById(id: string, user?: { userId: string; role: string }) {
+    const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
     const cached = await this.redis.getJson<any>(cacheKey);
     if (cached) return cached;
 
@@ -121,22 +131,43 @@ export class TicketsService {
       throw new NotFoundException(`Support ticket with ID "${id}" not found`);
     }
 
+    if (user && user.role === 'Service Engineer') {
+      if (ticket.service_engineer_id !== user.userId) {
+        throw new ForbiddenException(
+          'You do not have permission to access this ticket',
+        );
+      }
+    }
+
     await this.redis.setJson(cacheKey, ticket, 3600); // Cache for 1 hour
     return ticket;
   }
 
-  async create(dto: CreateTicketDto) {
+  async create(
+    dto: CreateTicketDto | CreateMobileTicketDto,
+    user?: { userId: string; role: string },
+  ) {
+    const rawDto = dto as any;
+    let service_engineer_id = rawDto.service_engineer_id;
+
+    if (user && user.role === 'Service Engineer') {
+      service_engineer_id = user.userId;
+    }
+
     await this.validateTicketRelations({
-      service_engineer_id: dto.service_engineer_id,
+      service_engineer_id,
       customer_id: dto.customer_id,
       mill_id: dto.mill_id,
     });
 
-    const ticket = await this.createWithUniqueTicketNumber(dto);
+    const ticket = await this.createWithUniqueTicketNumber({
+      ...dto,
+      service_engineer_id,
+    });
 
     await this.invalidateCache();
 
-    const assignedIds = dto.service_engineer_id ? [dto.service_engineer_id] : [];
+    const assignedIds = service_engineer_id ? [service_engineer_id] : [];
     this.eventEmitter.emit('ticket.created', {
       ticketNumber: ticket.ticket_number,
       subject: ticket.subject,
@@ -146,41 +177,58 @@ export class TicketsService {
     return ticket;
   }
 
-  async update(id: string, dto: UpdateTicketDto) {
-    const existing = await this.findById(id);
+  async update(
+    id: string,
+    dto: UpdateTicketDto | UpdateMobileTicketDto,
+    user?: { userId: string; role: string },
+  ) {
+    const existing = await this.findById(id, user);
     const nextCustomerId = dto.customer_id ?? existing.customer_id;
     const nextMillId = Object.prototype.hasOwnProperty.call(dto, 'mill_id')
       ? this.normalizeNullableId(dto.mill_id)
       : existing.mill_id;
 
+    const rawDto = dto as any;
+    let nextServiceEngineerId =
+      rawDto.service_engineer_id ?? existing.service_engineer_id;
+
+    if (user && user.role === 'Service Engineer') {
+      nextServiceEngineerId = user.userId;
+    }
+
     await this.validateTicketRelations({
-      service_engineer_id:
-        dto.service_engineer_id ?? existing.service_engineer_id,
+      service_engineer_id: nextServiceEngineerId,
       customer_id: nextCustomerId,
       mill_id: nextMillId,
     });
 
     const ticket = await this.prisma.supportTicket.update({
       where: { id },
-      data: this.normalizePayload(dto),
+      data: {
+        ...this.normalizePayload(dto),
+        service_engineer_id: nextServiceEngineerId,
+      },
       include: INCLUDE_SHAPE,
     });
 
     await this.invalidateCache(id);
 
-    if (dto.service_engineer_id && dto.service_engineer_id !== existing.service_engineer_id) {
+    if (
+      nextServiceEngineerId &&
+      nextServiceEngineerId !== existing.service_engineer_id
+    ) {
       this.eventEmitter.emit('ticket.assigned', {
         ticketNumber: ticket.ticket_number,
         subject: ticket.subject,
-        assignedTechnicianUserIds: [dto.service_engineer_id],
+        assignedTechnicianUserIds: [nextServiceEngineerId],
       });
     }
 
     return { before: existing, after: ticket };
   }
 
-  async remove(id: string) {
-    await this.findById(id);
+  async remove(id: string, user?: { userId: string; role: string }) {
+    await this.findById(id, user);
 
     const ticket = await this.prisma.supportTicket.delete({
       where: { id },
@@ -196,7 +244,7 @@ export class TicketsService {
       this.redis.delByPrefix(this.LIST_CACHE_KEY),
     ];
     if (id) {
-      promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
+      promises.push(this.redis.delByPrefix(`${this.CACHE_PREFIX}id:${id}`));
     }
     await Promise.all(promises);
   }

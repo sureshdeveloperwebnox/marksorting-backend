@@ -51,13 +51,16 @@ let TicketsService = class TicketsService {
         this.redis = redis;
         this.eventEmitter = eventEmitter;
     }
-    async findAll(params) {
-        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+    async findAll(params, user) {
+        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
         const { skip, take, search, status, priority } = params;
         const where = {};
+        if (user && user.role === 'Service Engineer') {
+            where.service_engineer_id = user.userId;
+        }
         if (search) {
             where.OR = [
                 { ticket_number: { contains: search, mode: 'insensitive' } },
@@ -98,8 +101,8 @@ let TicketsService = class TicketsService {
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
-    async findById(id) {
-        const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+    async findById(id, user) {
+        const cacheKey = `${this.CACHE_PREFIX}id:${id}:${user?.userId || 'all'}`;
         const cached = await this.redis.getJson(cacheKey);
         if (cached)
             return cached;
@@ -110,18 +113,31 @@ let TicketsService = class TicketsService {
         if (!ticket) {
             throw new common_1.NotFoundException(`Support ticket with ID "${id}" not found`);
         }
+        if (user && user.role === 'Service Engineer') {
+            if (ticket.service_engineer_id !== user.userId) {
+                throw new common_1.ForbiddenException('You do not have permission to access this ticket');
+            }
+        }
         await this.redis.setJson(cacheKey, ticket, 3600);
         return ticket;
     }
-    async create(dto) {
+    async create(dto, user) {
+        const rawDto = dto;
+        let service_engineer_id = rawDto.service_engineer_id;
+        if (user && user.role === 'Service Engineer') {
+            service_engineer_id = user.userId;
+        }
         await this.validateTicketRelations({
-            service_engineer_id: dto.service_engineer_id,
+            service_engineer_id,
             customer_id: dto.customer_id,
             mill_id: dto.mill_id,
         });
-        const ticket = await this.createWithUniqueTicketNumber(dto);
+        const ticket = await this.createWithUniqueTicketNumber({
+            ...dto,
+            service_engineer_id,
+        });
         await this.invalidateCache();
-        const assignedIds = dto.service_engineer_id ? [dto.service_engineer_id] : [];
+        const assignedIds = service_engineer_id ? [service_engineer_id] : [];
         this.eventEmitter.emit('ticket.created', {
             ticketNumber: ticket.ticket_number,
             subject: ticket.subject,
@@ -129,34 +145,43 @@ let TicketsService = class TicketsService {
         });
         return ticket;
     }
-    async update(id, dto) {
-        const existing = await this.findById(id);
+    async update(id, dto, user) {
+        const existing = await this.findById(id, user);
         const nextCustomerId = dto.customer_id ?? existing.customer_id;
         const nextMillId = Object.prototype.hasOwnProperty.call(dto, 'mill_id')
             ? this.normalizeNullableId(dto.mill_id)
             : existing.mill_id;
+        const rawDto = dto;
+        let nextServiceEngineerId = rawDto.service_engineer_id ?? existing.service_engineer_id;
+        if (user && user.role === 'Service Engineer') {
+            nextServiceEngineerId = user.userId;
+        }
         await this.validateTicketRelations({
-            service_engineer_id: dto.service_engineer_id ?? existing.service_engineer_id,
+            service_engineer_id: nextServiceEngineerId,
             customer_id: nextCustomerId,
             mill_id: nextMillId,
         });
         const ticket = await this.prisma.supportTicket.update({
             where: { id },
-            data: this.normalizePayload(dto),
+            data: {
+                ...this.normalizePayload(dto),
+                service_engineer_id: nextServiceEngineerId,
+            },
             include: INCLUDE_SHAPE,
         });
         await this.invalidateCache(id);
-        if (dto.service_engineer_id && dto.service_engineer_id !== existing.service_engineer_id) {
+        if (nextServiceEngineerId &&
+            nextServiceEngineerId !== existing.service_engineer_id) {
             this.eventEmitter.emit('ticket.assigned', {
                 ticketNumber: ticket.ticket_number,
                 subject: ticket.subject,
-                assignedTechnicianUserIds: [dto.service_engineer_id],
+                assignedTechnicianUserIds: [nextServiceEngineerId],
             });
         }
         return { before: existing, after: ticket };
     }
-    async remove(id) {
-        await this.findById(id);
+    async remove(id, user) {
+        await this.findById(id, user);
         const ticket = await this.prisma.supportTicket.delete({
             where: { id },
             include: INCLUDE_SHAPE,
@@ -169,7 +194,7 @@ let TicketsService = class TicketsService {
             this.redis.delByPrefix(this.LIST_CACHE_KEY),
         ];
         if (id) {
-            promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
+            promises.push(this.redis.delByPrefix(`${this.CACHE_PREFIX}id:${id}`));
         }
         await Promise.all(promises);
     }

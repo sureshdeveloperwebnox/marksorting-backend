@@ -13,6 +13,8 @@ export declare class AuthController {
     constructor(authService: AuthService, activityLogsService: ActivityLogsService);
     private setTokens;
     login(req: any, res: express.Response): Promise<{
+        access_token: string;
+        refresh_token: string;
         user: {
             id: any;
             email: any;
@@ -26,7 +28,9 @@ export declare class AuthController {
         };
     }>;
     private getDeviceName;
-    register(registerDto: RegisterDto, res: express.Response): Promise<{
+    register(req: any, registerDto: RegisterDto, res: express.Response): Promise<{
+        access_token: string;
+        refresh_token: string;
         user: {
             id: any;
             email: any;
@@ -43,6 +47,8 @@ export declare class AuthController {
         message: string;
     }>;
     refresh(req: any, res: express.Response): Promise<{
+        access_token: string;
+        refresh_token: string;
         user: {
             id: any;
             email: any;

@@ -206,6 +206,7 @@ let AuthService = class AuthService {
                 throw new common_1.UnauthorizedException('User not found');
             }
             const permissions = await this.permissionsService.getUserPermissions(userId);
+            const newRefreshToken = await this.generateRefreshToken(userId);
             const newPayload = {
                 email: user.email,
                 sub: user.id,
@@ -215,6 +216,7 @@ let AuthService = class AuthService {
             };
             return {
                 access_token: this.jwtService.sign(newPayload),
+                refresh_token: newRefreshToken,
                 user: {
                     id: user.id,
                     email: user.email,

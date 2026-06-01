@@ -1,35 +1,12 @@
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { PrismaService } from '../../prisma/prisma.service';
-import { RedisService } from '../../redis/redis.service';
-import { CreateTicketDto } from './dto/create-ticket.dto';
-import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { TicketsService } from './tickets.service';
 import { CreateMobileTicketDto } from './dto/create-mobile-ticket.dto';
 import { UpdateMobileTicketDto } from './dto/update-mobile-ticket.dto';
-export declare class TicketsService {
-    private prisma;
-    private redis;
-    private eventEmitter;
-    private readonly CACHE_PREFIX;
-    private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService, eventEmitter: EventEmitter2);
-    findAll(params: {
-        skip?: number;
-        take?: number;
-        search?: string;
-        status?: string;
-        priority?: string;
-    }, user?: {
-        userId: string;
-        role: string;
-    }): Promise<any>;
-    findById(id: string, user?: {
-        userId: string;
-        role: string;
-    }): Promise<any>;
-    create(dto: CreateTicketDto | CreateMobileTicketDto, user?: {
-        userId: string;
-        role: string;
-    }): Promise<{
+export declare class MobileTicketsController {
+    private readonly ticketsService;
+    constructor(ticketsService: TicketsService);
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, priority?: string): Promise<any>;
+    findOne(id: string, req: any): Promise<any>;
+    create(dto: CreateMobileTicketDto, req: any): Promise<{
         mill: {
             id: string;
             name: string;
@@ -61,10 +38,7 @@ export declare class TicketsService {
         service_engineer_id: string | null;
         ticket_number: string | null;
     }>;
-    update(id: string, dto: UpdateTicketDto | UpdateMobileTicketDto, user?: {
-        userId: string;
-        role: string;
-    }): Promise<{
+    update(id: string, dto: UpdateMobileTicketDto, req: any): Promise<{
         before: any;
         after: {
             mill: {
@@ -99,10 +73,7 @@ export declare class TicketsService {
             ticket_number: string | null;
         };
     }>;
-    remove(id: string, user?: {
-        userId: string;
-        role: string;
-    }): Promise<{
+    remove(id: string, req: any): Promise<{
         mill: {
             id: string;
             name: string;
@@ -134,11 +105,4 @@ export declare class TicketsService {
         service_engineer_id: string | null;
         ticket_number: string | null;
     }>;
-    private invalidateCache;
-    private normalizePayload;
-    private normalizeNullableId;
-    private createWithUniqueTicketNumber;
-    private isTicketNumberConflict;
-    private generateTicketNumber;
-    private validateTicketRelations;
 }

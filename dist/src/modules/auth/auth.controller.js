@@ -71,20 +71,26 @@ let AuthController = AuthController_1 = class AuthController {
         this.authService = authService;
         this.activityLogsService = activityLogsService;
     }
-    setTokens(res, result) {
+    setTokens(req, res, result) {
         const isProduction = process.env.NODE_ENV === 'production';
+        const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+        const host = (req.headers.host || '').toLowerCase();
+        const origin = (req.headers.origin || '').toLowerCase();
+        const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
+        const cookieSecure = isProduction || isSecure;
+        const cookieSameSite = isNgrok ? 'none' : 'lax';
         res.cookie('access_token', result.access_token, {
             httpOnly: true,
-            secure: isProduction,
-            sameSite: 'lax',
+            secure: cookieSecure,
+            sameSite: cookieSameSite,
             maxAge: 15 * 60 * 1000,
             path: '/',
         });
         if (result.refresh_token) {
             res.cookie('refresh_token', result.refresh_token, {
                 httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
+                secure: cookieSecure,
+                sameSite: cookieSameSite,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 path: '/',
             });
@@ -92,7 +98,7 @@ let AuthController = AuthController_1 = class AuthController {
     }
     async login(req, res) {
         const result = await this.authService.login(req.user);
-        this.setTokens(res, result);
+        this.setTokens(req, res, result);
         const userAgent = req.headers['user-agent'];
         const deviceName = this.getDeviceName(userAgent);
         const roleName = result.user.role?.name || result.user.role || 'Unknown Role';
@@ -109,7 +115,11 @@ let AuthController = AuthController_1 = class AuthController {
             user_agent: userAgent,
             device_name: deviceName,
         });
-        return { user: result.user };
+        return {
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            user: result.user,
+        };
     }
     getDeviceName(userAgent) {
         if (!userAgent)
@@ -126,10 +136,14 @@ let AuthController = AuthController_1 = class AuthController {
             return 'Linux';
         return 'Unknown';
     }
-    async register(registerDto, res) {
+    async register(req, registerDto, res) {
         const result = await this.authService.register(registerDto);
-        this.setTokens(res, result);
-        return { user: result.user };
+        this.setTokens(req, res, result);
+        return {
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            user: result.user,
+        };
     }
     async logout(req, res) {
         let userId = null;
@@ -165,13 +179,23 @@ let AuthController = AuthController_1 = class AuthController {
         return { message: 'Logged out successfully' };
     }
     async refresh(req, res) {
-        const refreshToken = req.cookies?.['refresh_token'];
+        let refreshToken = req.cookies?.['refresh_token'];
+        if (!refreshToken && req.headers.authorization) {
+            const parts = req.headers.authorization.split(' ');
+            if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+                refreshToken = parts[1];
+            }
+        }
         if (!refreshToken) {
             throw new common_1.UnauthorizedException('Refresh token not found');
         }
         const result = await this.authService.refresh(refreshToken);
-        this.setTokens(res, result);
-        return { user: result.user };
+        this.setTokens(req, res, result);
+        return {
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+            user: result.user,
+        };
     }
     async getProfile(req) {
         return this.authService.getProfile(req.user.userId);
@@ -213,10 +237,11 @@ __decorate([
     (0, common_1.Post)('register'),
     (0, swagger_1.ApiOperation)({ summary: 'Register a new account' }),
     (0, swagger_1.ApiBody)({ type: register_dto_1.RegisterDto }),
-    __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [register_dto_1.RegisterDto, Object]),
+    __metadata("design:paramtypes", [Object, register_dto_1.RegisterDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "register", null);
 __decorate([

@@ -10,12 +10,13 @@ exports.TicketsModule = void 0;
 const common_1 = require("@nestjs/common");
 const tickets_service_1 = require("./tickets.service");
 const tickets_controller_1 = require("./tickets.controller");
+const mobile_tickets_controller_1 = require("./mobile-tickets.controller");
 let TicketsModule = class TicketsModule {
 };
 exports.TicketsModule = TicketsModule;
 exports.TicketsModule = TicketsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [tickets_controller_1.TicketsController],
+        controllers: [tickets_controller_1.TicketsController, mobile_tickets_controller_1.MobileTicketsController],
         providers: [tickets_service_1.TicketsService],
         exports: [tickets_service_1.TicketsService],
     })

@@ -78,6 +78,7 @@ export declare class AuthService {
     generateRefreshToken(userId: string): Promise<string>;
     refresh(refreshToken: string): Promise<{
         access_token: string;
+        refresh_token: string;
         user: {
             id: any;
             email: any;
