@@ -6,11 +6,17 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 import { Request, Response, NextFunction } from 'express';
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   app.use(cookieParser());
+
+  // Increase body parser limits for image uploads (50MB for base64 images)
+  app.use(bodyParser.json({ limit: '50mb' }));
+  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  app.use(bodyParser.raw({ limit: '50mb', type: 'application/octet-stream' }));
 
   // Log all requests
   app.use((req: Request, res: Response, next: NextFunction) => {

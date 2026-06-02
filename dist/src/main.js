@@ -10,9 +10,13 @@ const nestjs_pino_1 = require("nestjs-pino");
 const platform_socket_io_1 = require("@nestjs/platform-socket.io");
 const app_module_1 = require("./app.module");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const body_parser_1 = __importDefault(require("body-parser"));
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, { bufferLogs: true });
     app.use((0, cookie_parser_1.default)());
+    app.use(body_parser_1.default.json({ limit: '50mb' }));
+    app.use(body_parser_1.default.urlencoded({ limit: '50mb', extended: true }));
+    app.use(body_parser_1.default.raw({ limit: '50mb', type: 'application/octet-stream' }));
     app.use((req, res, next) => {
         console.log(`[REQUEST] ${req.method} ${req.url}`);
         next();
