@@ -22,7 +22,8 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
   }
 
   async onModuleInit() {
-    // Start consuming messages when module initializes
+    // Wait a bit for RabbitMQ service to connect, then start consuming
+    await this.delay(3000); // Wait 3 seconds for connection to establish
     await this.startConsuming();
   }
 
