@@ -18,6 +18,19 @@ let UploadService = class UploadService {
     s3Service;
     configService;
     folderName;
+    allowedImageTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'image/svg+xml',
+        'image/bmp',
+        'image/tiff',
+        'image/avif',
+        'image/heic',
+        'image/heif',
+    ];
     constructor(s3Service, configService) {
         this.s3Service = s3Service;
         this.configService = configService;
@@ -44,6 +57,35 @@ let UploadService = class UploadService {
             viewUrl,
             key,
         };
+    }
+    async uploadFile(fileBuffer, originalName, mimeType) {
+        if (!this.allowedImageTypes.includes(mimeType.toLowerCase())) {
+            throw new common_1.BadRequestException(`Invalid file type: ${mimeType}. Only image files are allowed (jpeg, png, webp, gif, svg, bmp, tiff, avif, heic, heif).`);
+        }
+        const extension = originalName.split('.').pop() || 'png';
+        const uniqueFileName = `${(0, uuid_1.v4)()}.${extension}`;
+        const key = `${this.folderName}/${uniqueFileName}`;
+        return this.s3Service.uploadFile(key, fileBuffer, mimeType);
+    }
+    async uploadBase64Image(base64String, fileName) {
+        let base64Data = base64String;
+        let mimeType = 'image/png';
+        if (base64String.includes(',')) {
+            const parts = base64String.split(',');
+            const header = parts[0];
+            base64Data = parts[1];
+            const mimeMatch = header.match(/data:([^;]+);base64/);
+            if (mimeMatch) {
+                mimeType = mimeMatch[1];
+            }
+        }
+        if (!this.allowedImageTypes.includes(mimeType.toLowerCase())) {
+            throw new common_1.BadRequestException(`Invalid file type: ${mimeType}. Only image files are allowed.`);
+        }
+        const buffer = Buffer.from(base64Data, 'base64');
+        const extension = mimeType.split('/')[1] || 'png';
+        const finalFileName = fileName || `image.${extension}`;
+        return this.uploadFile(buffer, finalFileName, mimeType);
     }
 };
 exports.UploadService = UploadService;

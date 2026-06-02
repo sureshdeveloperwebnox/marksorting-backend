@@ -4,6 +4,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  ObjectCannedACL,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -99,6 +100,38 @@ export class S3Service {
 
     const url = new URL(this.endpoint);
     return `${url.protocol}//${this.bucketName}.${url.host}/${key}`;
+  }
+
+  /**
+   * Upload a file buffer directly to S3 with public-read ACL
+   * @param key The file path in the bucket
+   * @param buffer The file buffer to upload
+   * @param contentType The MIME type of the file
+   */
+  async uploadFile(
+    key: string,
+    buffer: Buffer,
+    contentType: string,
+  ): Promise<{ key: string; fileUrl: string }> {
+    try {
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: buffer,
+        ContentType: contentType,
+        ACL: ObjectCannedACL.public_read,
+      });
+
+      await this.s3Client.send(command);
+
+      const fileUrl = this.getFileUrl(key) || '';
+      this.logger.log(`File uploaded successfully: ${key}`);
+
+      return { key, fileUrl };
+    } catch (error) {
+      this.logger.error(`Error uploading file to S3: ${error.message}`);
+      throw error;
+    }
   }
 
   getStorageInfo() {

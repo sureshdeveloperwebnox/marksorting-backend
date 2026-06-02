@@ -5,6 +5,7 @@ export declare class UploadService {
     private readonly s3Service;
     private readonly configService;
     private readonly folderName;
+    private readonly allowedImageTypes;
     constructor(s3Service: S3Service, configService: ConfigService);
     createPresignedUrl(dto: GetPresignedUrlDto): Promise<{
         uploadUrl: string;
@@ -15,5 +16,13 @@ export declare class UploadService {
     getViewUrl(key: string): Promise<{
         viewUrl: string | null;
         key: string;
+    }>;
+    uploadFile(fileBuffer: Buffer, originalName: string, mimeType: string): Promise<{
+        key: string;
+        fileUrl: string;
+    }>;
+    uploadBase64Image(base64String: string, fileName?: string): Promise<{
+        key: string;
+        fileUrl: string;
     }>;
 }

@@ -10,6 +10,10 @@ export declare class S3Service {
     getPresignedUploadUrl(key: string, contentType: string, expiresIn?: number): Promise<string>;
     getPresignedViewUrl(key: string, expiresIn?: number): Promise<string | null>;
     getFileUrl(key: string | null | undefined): string | null;
+    uploadFile(key: string, buffer: Buffer, contentType: string): Promise<{
+        key: string;
+        fileUrl: string;
+    }>;
     getStorageInfo(): {
         baseUrl: string;
         bucketName: string;

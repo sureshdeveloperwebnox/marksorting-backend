@@ -76,6 +76,25 @@ let S3Service = S3Service_1 = class S3Service {
         const url = new URL(this.endpoint);
         return `${url.protocol}//${this.bucketName}.${url.host}/${key}`;
     }
+    async uploadFile(key, buffer, contentType) {
+        try {
+            const command = new client_s3_1.PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: key,
+                Body: buffer,
+                ContentType: contentType,
+                ACL: client_s3_1.ObjectCannedACL.public_read,
+            });
+            await this.s3Client.send(command);
+            const fileUrl = this.getFileUrl(key) || '';
+            this.logger.log(`File uploaded successfully: ${key}`);
+            return { key, fileUrl };
+        }
+        catch (error) {
+            this.logger.error(`Error uploading file to S3: ${error.message}`);
+            throw error;
+        }
+    }
     getStorageInfo() {
         return {
             baseUrl: this.endpoint,
