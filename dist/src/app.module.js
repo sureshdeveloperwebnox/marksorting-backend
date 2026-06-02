@@ -41,6 +41,8 @@ const materials_module_1 = require("./modules/materials/materials.module");
 const stores_module_1 = require("./modules/stores/stores.module");
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const mail_module_1 = require("./modules/mail/mail.module");
+const whatsapp_module_1 = require("./modules/whatsapp/whatsapp.module");
+const report_notifications_module_1 = require("./modules/report-notifications/report-notifications.module");
 const permissions_module_1 = require("./modules/permissions/permissions.module");
 const activity_logs_module_1 = require("./modules/activity-logs/activity-logs.module");
 const activity_log_interceptor_1 = require("./modules/activity-logs/interceptors/activity-log.interceptor");
@@ -100,6 +102,8 @@ exports.AppModule = AppModule = __decorate([
             stores_module_1.StoresModule,
             notifications_module_1.NotificationsModule,
             mail_module_1.MailModule,
+            whatsapp_module_1.WhatsAppModule,
+            report_notifications_module_1.ReportNotificationsModule,
             permissions_module_1.PermissionsModule,
             activity_logs_module_1.ActivityLogsModule,
         ],

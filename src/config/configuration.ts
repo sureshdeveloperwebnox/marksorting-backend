@@ -37,4 +37,12 @@ export default () => ({
   app: {
     frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   },
+  whatsapp: {
+    apiToken: process.env.ULTRAMSG_API_TOKEN,
+    instanceId: process.env.ULTRAMSG_INSTANCE_ID,
+    baseUrl: process.env.ULTRAMSG_BASE_URL || 'https://api.ultramsg.com',
+    apiUrl: process.env.ULTRAMSG_API_URL,
+    documentEndpoint: process.env.ULTRAMSG_DOCUMENT_ENDPOINT || '/messages/document',
+    messageEndpoint: process.env.ULTRAMSG_MESSAGE_ENDPOINT || '/messages/chat',
+  },
 });

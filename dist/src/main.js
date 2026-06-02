@@ -43,6 +43,9 @@ async function bootstrap() {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
+        transformOptions: {
+            enableImplicitConversion: true,
+        },
     }));
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Mark Sorting Management System API')

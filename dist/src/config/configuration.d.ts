@@ -37,5 +37,13 @@ declare const _default: () => {
     app: {
         frontendUrl: string;
     };
+    whatsapp: {
+        apiToken: string | undefined;
+        instanceId: string | undefined;
+        baseUrl: string;
+        apiUrl: string | undefined;
+        documentEndpoint: string;
+        messageEndpoint: string;
+    };
 };
 export default _default;

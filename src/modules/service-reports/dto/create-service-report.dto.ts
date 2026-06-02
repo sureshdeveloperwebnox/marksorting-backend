@@ -12,6 +12,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateServiceReportDto {
   // ── Required fields ──────────────────────────────────────────────────────────
@@ -158,11 +159,17 @@ export class CreateServiceReportDto {
   @IsOptional()
   purity?: string;
 
-  @ApiProperty({ example: 5, required: false })
+  @ApiProperty({ example: 5 })
+  @Transform(({ value }) => {
+    if (typeof value === 'string' && value.trim() !== '') {
+      return parseInt(value, 10);
+    }
+    return value;
+  })
   @IsInt()
   @Min(0)
-  @IsOptional()
-  no_of_programs_set?: number;
+  @IsNotEmpty()
+  no_of_programs_set: number;
 
   @ApiProperty({ example: false, required: false })
   @IsBoolean()

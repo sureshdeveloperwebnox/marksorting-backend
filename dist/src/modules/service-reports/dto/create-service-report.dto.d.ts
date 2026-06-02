@@ -26,7 +26,7 @@ export declare class CreateServiceReportDto {
     output_capacity_per_hour?: string;
     rejection_ratio?: string;
     purity?: string;
-    no_of_programs_set?: number;
+    no_of_programs_set: number;
     ac_provided?: boolean;
     compressor_details?: string;
     air_drier_details?: string;

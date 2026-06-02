@@ -224,6 +224,16 @@ export class ServiceReportsService {
         technicianUserIds: finalTechnicianIds,
         creatorUserId: user?.userId,
       });
+
+      // Emit event for automatic PDF delivery via WhatsApp and Email
+      this.eventEmitter.emit('service-report.created.send-pdf', {
+        reportId: serviceReport.id,
+        reportNumber: serviceReport.report_number,
+        millId: serviceReport.mill?.id,
+        millName: serviceReport.mill?.name || '',
+        millWhatsappNumber: rawDto.mill_whatsapp_number,
+        millEmail: rawDto.mill_email,
+      });
     }
 
     return serviceReport;

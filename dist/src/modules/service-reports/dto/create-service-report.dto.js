@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateServiceReportDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
 class CreateServiceReportDto {
     service_category_id;
     technician_ids;
@@ -219,10 +220,16 @@ __decorate([
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "purity", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 5, required: false }),
+    (0, swagger_1.ApiProperty)({ example: 5 }),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (typeof value === 'string' && value.trim() !== '') {
+            return parseInt(value, 10);
+        }
+        return value;
+    }),
     (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
-    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", Number)
 ], CreateServiceReportDto.prototype, "no_of_programs_set", void 0);
 __decorate([

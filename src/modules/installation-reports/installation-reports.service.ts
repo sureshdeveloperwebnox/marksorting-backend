@@ -222,6 +222,16 @@ export class InstallationReportsService {
         technicianUserIds: finalTechnicianIds,
         creatorUserId: user?.userId,
       });
+
+      // Emit event for automatic PDF delivery via WhatsApp and Email
+      this.eventEmitter.emit('installation-report.created.send-pdf', {
+        reportId: installationReport.id,
+        reportNumber: installationReport.report_number,
+        millId: installationReport.mill?.id,
+        millName: installationReport.mill?.name || '',
+        millWhatsappNumber: rawDto.mill_whatsapp_number,
+        millEmail: rawDto.mill_email,
+      });
     }
 
     return installationReport;

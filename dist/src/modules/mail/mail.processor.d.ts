@@ -10,4 +10,5 @@ export declare class MailProcessor extends WorkerHost {
     private initTransporter;
     process(job: Job<any>): Promise<void>;
     private handleSendMail;
+    private handleSendMailWithAttachment;
 }
