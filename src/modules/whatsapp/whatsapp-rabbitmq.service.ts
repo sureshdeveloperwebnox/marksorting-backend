@@ -1,6 +1,6 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Connection, Channel, connect, ConsumeMessage } from 'amqplib';
+import { ChannelModel, Channel, connect, ConsumeMessage } from 'amqplib';
 
 export interface WhatsAppQueueMessage {
   to: string;
@@ -15,7 +15,7 @@ export interface WhatsAppQueueMessage {
 @Injectable()
 export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(WhatsAppRabbitMQService.name);
-  private connection: Connection | null = null;
+  private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
   private readonly QUEUE_NAME = 'whatsapp_messages';
   private readonly DLQ_NAME = 'whatsapp_messages_dlq';
@@ -40,6 +40,9 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
       const amqpUrl = `amqp://${user}:${pass}@${host}:${port}`;
       
       this.connection = await connect(amqpUrl);
+      if (!this.connection) {
+        throw new Error('Failed to establish RabbitMQ connection');
+      }
       this.channel = await this.connection.createChannel();
 
       // Assert main queue with dead letter exchange
