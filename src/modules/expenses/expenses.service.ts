@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { S3Service } from '../../shared/services/s3.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
@@ -25,7 +26,34 @@ export class ExpensesService {
     private prisma: PrismaService,
     private redis: RedisService,
     private eventEmitter: EventEmitter2,
+    private s3Service: S3Service,
   ) {}
+
+  /**
+   * Transform expense image keys to full S3 URLs
+   * @param expense The expense object with expense_images array
+   * @returns Expense with image URLs transformed
+   */
+  private mapExpenseImageUrls(expense: any): any {
+    if (!expense) return expense;
+    
+    return {
+      ...expense,
+      expense_images: (expense.expense_images || []).map((key: string) => {
+        // If it's already a full URL, return as-is
+        if (key.startsWith('http')) return key;
+        // Otherwise, convert S3 key to full URL
+        return this.s3Service.getFileUrl(key);
+      }),
+    };
+  }
+
+  /**
+   * Transform array of expenses with image URLs
+   */
+  private mapExpensesImageUrls(expenses: any[]): any[] {
+    return expenses.map(expense => this.mapExpenseImageUrls(expense));
+  }
 
   async findAll(
     params: {
@@ -91,7 +119,9 @@ export class ExpensesService {
       this.prisma.expense.count({ where }),
     ]);
 
-    const result = { expenses, total };
+    // Map image keys to full URLs
+    const expensesWithUrls = this.mapExpensesImageUrls(expenses);
+    const result = { expenses: expensesWithUrls, total };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
   }
@@ -121,8 +151,10 @@ export class ExpensesService {
       }
     }
 
-    await this.redis.setJson(cacheKey, expense, 3600); // Cache for 1 hour
-    return expense;
+    // Map image keys to full URLs
+    const expenseWithUrls = this.mapExpenseImageUrls(expense);
+    await this.redis.setJson(cacheKey, expenseWithUrls, 3600); // Cache for 1 hour
+    return expenseWithUrls;
   }
 
   async create(dto: CreateExpenseDto | CreateMobileExpenseDto, user?: { userId: string; role: string }) {

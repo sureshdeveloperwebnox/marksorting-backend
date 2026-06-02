@@ -38,6 +38,13 @@ let UploadService = class UploadService {
             baseUrl: this.configService.get('s3.baseUrl'),
         };
     }
+    async getViewUrl(key) {
+        const viewUrl = await this.s3Service.getPresignedViewUrl(key);
+        return {
+            viewUrl,
+            key,
+        };
+    }
 };
 exports.UploadService = UploadService;
 exports.UploadService = UploadService = __decorate([

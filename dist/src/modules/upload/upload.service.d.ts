@@ -12,4 +12,8 @@ export declare class UploadService {
         key: string;
         baseUrl: string | undefined;
     }>;
+    getViewUrl(key: string): Promise<{
+        viewUrl: string | null;
+        key: string;
+    }>;
 }

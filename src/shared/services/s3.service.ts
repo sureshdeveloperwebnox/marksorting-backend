@@ -36,19 +36,20 @@ export class S3Service {
    * Generates a presigned URL for uploading a file
    * @param key The file path in the bucket
    * @param contentType The MIME type of the file
-   * @param expiresIn Expiration time in seconds (default 5 minutes)
+   * @param expiresIn Expiration time in seconds (default 15 minutes)
    */
   async getPresignedUploadUrl(
     key: string,
     contentType: string,
-    expiresIn = 300,
+    expiresIn = 900,
   ): Promise<string> {
     try {
       const command = new PutObjectCommand({
         Bucket: this.bucketName,
         Key: key,
         ContentType: contentType,
-        ACL: 'public-read', // Assuming public access for images
+        // NOTE: ACL is NOT included here to avoid SignatureDoesNotMatch errors
+        // The bucket policy must allow public read access instead
       });
 
       return await getSignedUrl(this.s3Client, command, { expiresIn });
@@ -61,7 +62,34 @@ export class S3Service {
   }
 
   /**
-   * Returns the public URL for a file
+   * Generates a presigned URL for viewing/downloading a file (for private buckets)
+   * @param key The file path in the bucket
+   * @param expiresIn Expiration time in seconds (default 1 hour)
+   */
+  async getPresignedViewUrl(
+    key: string,
+    expiresIn = 3600,
+  ): Promise<string | null> {
+    if (!key) return null;
+    if (key.startsWith('http')) return key;
+
+    try {
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
+
+      return await getSignedUrl(this.s3Client, command, { expiresIn });
+    } catch (error) {
+      this.logger.error(
+        `Error generating presigned view URL: ${error.message}`,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Returns the public URL for a file (for public buckets)
    * @param key The file path in the bucket
    */
   getFileUrl(key: string | null | undefined): string | null {

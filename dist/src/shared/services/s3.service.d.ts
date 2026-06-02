@@ -8,6 +8,7 @@ export declare class S3Service {
     private readonly endpoint;
     constructor(configService: ConfigService);
     getPresignedUploadUrl(key: string, contentType: string, expiresIn?: number): Promise<string>;
+    getPresignedViewUrl(key: string, expiresIn?: number): Promise<string | null>;
     getFileUrl(key: string | null | undefined): string | null;
     getStorageInfo(): {
         baseUrl: string;

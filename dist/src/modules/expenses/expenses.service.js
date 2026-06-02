@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
+const s3_service_1 = require("../../shared/services/s3.service");
 const INCLUDE_SHAPE = {
     mill: { select: { id: true, name: true } },
     expenseCategory: { select: { id: true, name: true } },
@@ -25,12 +26,29 @@ let ExpensesService = class ExpensesService {
     prisma;
     redis;
     eventEmitter;
+    s3Service;
     CACHE_PREFIX = 'expense:';
     LIST_CACHE_KEY = 'expenses:list:';
-    constructor(prisma, redis, eventEmitter) {
+    constructor(prisma, redis, eventEmitter, s3Service) {
         this.prisma = prisma;
         this.redis = redis;
         this.eventEmitter = eventEmitter;
+        this.s3Service = s3Service;
+    }
+    mapExpenseImageUrls(expense) {
+        if (!expense)
+            return expense;
+        return {
+            ...expense,
+            expense_images: (expense.expense_images || []).map((key) => {
+                if (key.startsWith('http'))
+                    return key;
+                return this.s3Service.getFileUrl(key);
+            }),
+        };
+    }
+    mapExpensesImageUrls(expenses) {
+        return expenses.map(expense => this.mapExpenseImageUrls(expense));
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -79,7 +97,8 @@ let ExpensesService = class ExpensesService {
             }),
             this.prisma.expense.count({ where }),
         ]);
-        const result = { expenses, total };
+        const expensesWithUrls = this.mapExpensesImageUrls(expenses);
+        const result = { expenses: expensesWithUrls, total };
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
@@ -101,8 +120,9 @@ let ExpensesService = class ExpensesService {
                 throw new common_1.ForbiddenException('You do not have permission to access this expense');
             }
         }
-        await this.redis.setJson(cacheKey, expense, 3600);
-        return expense;
+        const expenseWithUrls = this.mapExpenseImageUrls(expense);
+        await this.redis.setJson(cacheKey, expenseWithUrls, 3600);
+        return expenseWithUrls;
     }
     async create(dto, user) {
         const rawDto = dto;
@@ -313,6 +333,7 @@ exports.ExpensesService = ExpensesService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         redis_service_1.RedisService,
-        event_emitter_1.EventEmitter2])
+        event_emitter_1.EventEmitter2,
+        s3_service_1.S3Service])
 ], ExpensesService);
 //# sourceMappingURL=expenses.service.js.map

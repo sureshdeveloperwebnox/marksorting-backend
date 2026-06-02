@@ -32,4 +32,16 @@ export class UploadService {
       baseUrl: this.configService.get<string>('s3.baseUrl'),
     };
   }
+
+  /**
+   * Get a presigned URL for viewing a file (for private buckets)
+   * @param key The file key in S3
+   */
+  async getViewUrl(key: string) {
+    const viewUrl = await this.s3Service.getPresignedViewUrl(key);
+    return {
+      viewUrl,
+      key,
+    };
+  }
 }

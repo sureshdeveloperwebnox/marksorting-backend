@@ -37,18 +37,34 @@ let S3Service = S3Service_1 = class S3Service {
             forcePathStyle: false,
         });
     }
-    async getPresignedUploadUrl(key, contentType, expiresIn = 300) {
+    async getPresignedUploadUrl(key, contentType, expiresIn = 900) {
         try {
             const command = new client_s3_1.PutObjectCommand({
                 Bucket: this.bucketName,
                 Key: key,
                 ContentType: contentType,
-                ACL: 'public-read',
             });
             return await (0, s3_request_presigner_1.getSignedUrl)(this.s3Client, command, { expiresIn });
         }
         catch (error) {
             this.logger.error(`Error generating presigned upload URL: ${error.message}`);
+            throw error;
+        }
+    }
+    async getPresignedViewUrl(key, expiresIn = 3600) {
+        if (!key)
+            return null;
+        if (key.startsWith('http'))
+            return key;
+        try {
+            const command = new client_s3_1.GetObjectCommand({
+                Bucket: this.bucketName,
+                Key: key,
+            });
+            return await (0, s3_request_presigner_1.getSignedUrl)(this.s3Client, command, { expiresIn });
+        }
+        catch (error) {
+            this.logger.error(`Error generating presigned view URL: ${error.message}`);
             throw error;
         }
     }
