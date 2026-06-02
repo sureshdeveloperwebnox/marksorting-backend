@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from '../../prisma/prisma.module';
 import { WhatsAppService } from './whatsapp.service';
 import { WhatsAppProcessor } from './whatsapp.processor';
+import { WhatsAppRabbitMQService } from './whatsapp-rabbitmq.service';
+import { WhatsAppRabbitMQProcessor } from './whatsapp-rabbitmq.processor';
 
 @Module({
   imports: [
+    ConfigModule,
     PrismaModule,
     HttpModule.register({
       timeout: 30000,
@@ -31,7 +35,12 @@ import { WhatsAppProcessor } from './whatsapp.processor';
       },
     }),
   ],
-  providers: [WhatsAppService, WhatsAppProcessor],
-  exports: [WhatsAppService],
+  providers: [
+    WhatsAppService,
+    WhatsAppProcessor,
+    WhatsAppRabbitMQService,
+    WhatsAppRabbitMQProcessor,
+  ],
+  exports: [WhatsAppService, WhatsAppRabbitMQService],
 })
 export class WhatsAppModule {}

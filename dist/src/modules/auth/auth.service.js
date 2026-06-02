@@ -281,8 +281,8 @@ let AuthService = class AuthService {
             }),
         ]);
         await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
-        await this.redisService.del(`users:email:${resetRecord.user.email}`);
-        await this.redisService.del(`users:id:${resetRecord.user_id}`);
+        await this.redisService.del(`user:email:${resetRecord.user.email}`);
+        await this.redisService.del(`user:id:${resetRecord.user_id}`);
     }
     async changePassword(userId, currentPassword, newPassword) {
         const user = await this.prisma.user.findUnique({
@@ -311,8 +311,8 @@ let AuthService = class AuthService {
             }),
         ]);
         await this.redisService.del(`refresh_token:${userId}`);
-        await this.redisService.del(`users:email:${user.email}`);
-        await this.redisService.del(`users:id:${userId}`);
+        await this.redisService.del(`user:email:${user.email}`);
+        await this.redisService.del(`user:id:${userId}`);
         await this.permissionsService.invalidateUserPermissionsCache(userId);
     }
 };

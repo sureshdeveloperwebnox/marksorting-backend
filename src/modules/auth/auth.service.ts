@@ -298,10 +298,10 @@ export class AuthService {
       }),
     ]);
 
-    // Invalidate user cache to ensure clean updates
+    // Invalidate user cache to ensure clean updates (must match UsersService cache keys)
     await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
-    await this.redisService.del(`users:email:${resetRecord.user.email}`);
-    await this.redisService.del(`users:id:${resetRecord.user_id}`);
+    await this.redisService.del(`user:email:${resetRecord.user.email}`);
+    await this.redisService.del(`user:id:${resetRecord.user_id}`);
   }
 
   async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
@@ -346,9 +346,9 @@ export class AuthService {
     // Invalidate all refresh tokens for this user (force re-login)
     await this.redisService.del(`refresh_token:${userId}`);
 
-    // Invalidate user cache
-    await this.redisService.del(`users:email:${user.email}`);
-    await this.redisService.del(`users:id:${userId}`);
+    // Invalidate user cache (must match UsersService cache keys)
+    await this.redisService.del(`user:email:${user.email}`);
+    await this.redisService.del(`user:id:${userId}`);
     await this.permissionsService.invalidateUserPermissionsCache(userId);
   }
 }
