@@ -38,6 +38,9 @@ let WhatsAppRabbitMQService = WhatsAppRabbitMQService_1 = class WhatsAppRabbitMQ
             const pass = this.configService.get('RABBITMQ_PASS', 'admin');
             const amqpUrl = `amqp://${user}:${pass}@${host}:${port}`;
             this.connection = await (0, amqplib_1.connect)(amqpUrl);
+            if (!this.connection) {
+                throw new Error('Failed to establish RabbitMQ connection');
+            }
             this.channel = await this.connection.createChannel();
             await this.channel.assertQueue(this.QUEUE_NAME, {
                 durable: true,

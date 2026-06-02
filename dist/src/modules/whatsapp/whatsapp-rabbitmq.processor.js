@@ -33,6 +33,7 @@ let WhatsAppRabbitMQProcessor = WhatsAppRabbitMQProcessor_1 = class WhatsAppRabb
         this.ultramsgInstance = this.configService.get('ULTRAMSG_INSTANCE', '');
     }
     async onModuleInit() {
+        await this.delay(3000);
         await this.startConsuming();
     }
     async startConsuming() {
