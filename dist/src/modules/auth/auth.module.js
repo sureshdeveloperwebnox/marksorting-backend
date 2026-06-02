@@ -18,6 +18,7 @@ const permissions_module_1 = require("../permissions/permissions.module");
 const activity_logs_module_1 = require("../activity-logs/activity-logs.module");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const local_strategy_1 = require("./strategies/local.strategy");
+const roles_guard_1 = require("../../common/guards/roles.guard");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -38,7 +39,7 @@ exports.AuthModule = AuthModule = __decorate([
             }),
         ],
         controllers: [auth_controller_1.AuthController],
-        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy],
+        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy, roles_guard_1.RolesGuard],
         exports: [auth_service_1.AuthService],
     })
 ], AuthModule);

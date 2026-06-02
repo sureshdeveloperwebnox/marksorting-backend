@@ -4,6 +4,7 @@ import { MobileLoginDto } from './dto/mobile-login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto, ChangePasswordResponseDto } from './dto/change-password.dto';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import * as express from 'express';
 export declare class AuthController {
@@ -93,4 +94,5 @@ export declare class AuthController {
     resetPassword(resetPasswordDto: ResetPasswordDto): Promise<{
         message: string;
     }>;
+    changePassword(req: any, changePasswordDto: ChangePasswordDto): Promise<ChangePasswordResponseDto>;
 }

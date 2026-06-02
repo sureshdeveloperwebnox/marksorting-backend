@@ -15,6 +15,8 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -23,6 +25,7 @@ import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto, ChangePasswordResponseDto } from './dto/change-password.dto';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import { Public } from '../../common/decorators/public.decorator';
@@ -276,5 +279,53 @@ export class AuthController {
       resetPasswordDto.password,
     );
     return { message: 'Password has been reset successfully' };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('Service Engineer')
+  @Post('mobile/change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Change password for service engineers (mobile app)',
+    description: 'Allows authenticated service engineers to change their password. Requires current password verification. All existing sessions will be invalidated after password change.',
+  })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully. User must login again.',
+    type: ChangePasswordResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Invalid current password or user is not a service engineer',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request - New password validation failed or same as current password',
+  })
+  async changePassword(
+    @Request() req: any,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ): Promise<ChangePasswordResponseDto> {
+    await this.authService.changePassword(
+      req.user.userId,
+      changePasswordDto.current_password,
+      changePasswordDto.new_password,
+    );
+
+    // Log the password change activity
+    await this.activityLogsService.create({
+      user_id: req.user.userId,
+      action: ActivityAction.UPDATE,
+      description: `Service engineer "${req.user.full_name || req.user.email}" changed their password`,
+      metadata: {
+        ip_address: req.ip,
+        user_agent: req.headers['user-agent'],
+      },
+      ip_address: req.ip,
+      user_agent: req.headers['user-agent'] as string,
+    });
+
+    return { message: 'Password changed successfully. Please login again with your new password.' };
   }
 }

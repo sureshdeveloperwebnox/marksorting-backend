@@ -284,6 +284,37 @@ let AuthService = class AuthService {
         await this.redisService.del(`users:email:${resetRecord.user.email}`);
         await this.redisService.del(`users:id:${resetRecord.user_id}`);
     }
+    async changePassword(userId, currentPassword, newPassword) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            include: { role: true },
+        });
+        if (!user) {
+            throw new common_1.UnauthorizedException('User not found');
+        }
+        if (user.role?.name !== 'Service Engineer') {
+            throw new common_1.UnauthorizedException('Only service engineers can change password via this endpoint');
+        }
+        const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!isPasswordValid) {
+            throw new common_1.UnauthorizedException('Current password is incorrect');
+        }
+        const isSamePassword = await bcrypt.compare(newPassword, user.password_hash);
+        if (isSamePassword) {
+            throw new common_1.BadRequestException('New password must be different from the current password');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await this.prisma.$transaction([
+            this.prisma.user.update({
+                where: { id: userId },
+                data: { password_hash: hashedPassword },
+            }),
+        ]);
+        await this.redisService.del(`refresh_token:${userId}`);
+        await this.redisService.del(`users:email:${user.email}`);
+        await this.redisService.del(`users:id:${userId}`);
+        await this.permissionsService.invalidateUserPermissionsCache(userId);
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([

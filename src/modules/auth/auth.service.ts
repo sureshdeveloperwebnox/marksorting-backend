@@ -303,4 +303,52 @@ export class AuthService {
     await this.redisService.del(`users:email:${resetRecord.user.email}`);
     await this.redisService.del(`users:id:${resetRecord.user_id}`);
   }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+    // Get user with role information
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { role: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Verify user is a Service Engineer
+    if (user.role?.name !== 'Service Engineer') {
+      throw new UnauthorizedException('Only service engineers can change password via this endpoint');
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    // Ensure new password is different from current
+    const isSamePassword = await bcrypt.compare(newPassword, user.password_hash);
+    if (isSamePassword) {
+      throw new BadRequestException('New password must be different from the current password');
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password and invalidate sessions in a transaction
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { password_hash: hashedPassword },
+      }),
+    ]);
+
+    // Invalidate all refresh tokens for this user (force re-login)
+    await this.redisService.del(`refresh_token:${userId}`);
+
+    // Invalidate user cache
+    await this.redisService.del(`users:email:${user.email}`);
+    await this.redisService.del(`users:id:${userId}`);
+    await this.permissionsService.invalidateUserPermissionsCache(userId);
+  }
 }

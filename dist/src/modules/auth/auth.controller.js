@@ -51,6 +51,8 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const local_auth_guard_1 = require("./guards/local-auth.guard");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
+const roles_guard_1 = require("../../common/guards/roles.guard");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const swagger_1 = require("@nestjs/swagger");
 const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
@@ -59,6 +61,7 @@ const mobile_login_response_dto_1 = require("./dto/mobile-login-response.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
 const forgot_password_dto_1 = require("./dto/forgot-password.dto");
 const reset_password_dto_1 = require("./dto/reset-password.dto");
+const change_password_dto_1 = require("./dto/change-password.dto");
 const activity_logs_service_1 = require("../activity-logs/activity-logs.service");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
@@ -218,6 +221,21 @@ let AuthController = AuthController_1 = class AuthController {
         await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.password);
         return { message: 'Password has been reset successfully' };
     }
+    async changePassword(req, changePasswordDto) {
+        await this.authService.changePassword(req.user.userId, changePasswordDto.current_password, changePasswordDto.new_password);
+        await this.activityLogsService.create({
+            user_id: req.user.userId,
+            action: activity_action_enum_1.ActivityAction.UPDATE,
+            description: `Service engineer "${req.user.full_name || req.user.email}" changed their password`,
+            metadata: {
+                ip_address: req.ip,
+                user_agent: req.headers['user-agent'],
+            },
+            ip_address: req.ip,
+            user_agent: req.headers['user-agent'],
+        });
+        return { message: 'Password changed successfully. Please login again with your new password.' };
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -327,6 +345,35 @@ __decorate([
     __metadata("design:paramtypes", [reset_password_dto_1.ResetPasswordDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('Service Engineer'),
+    (0, common_1.Post)('mobile/change-password'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Change password for service engineers (mobile app)',
+        description: 'Allows authenticated service engineers to change their password. Requires current password verification. All existing sessions will be invalidated after password change.',
+    }),
+    (0, swagger_1.ApiBody)({ type: change_password_dto_1.ChangePasswordDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Password changed successfully. User must login again.',
+        type: change_password_dto_1.ChangePasswordResponseDto,
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Unauthorized - Invalid current password or user is not a service engineer',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Bad Request - New password validation failed or same as current password',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "changePassword", null);
 exports.AuthController = AuthController = AuthController_1 = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),
