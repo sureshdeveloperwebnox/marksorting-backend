@@ -5,5 +5,5 @@ export declare class DashboardService {
     private redis;
     private readonly CACHE_KEY;
     constructor(prisma: PrismaService, redis: RedisService);
-    getDashboardData(): Promise<any>;
+    getDashboardData(startDate?: string, endDate?: string): Promise<any>;
 }

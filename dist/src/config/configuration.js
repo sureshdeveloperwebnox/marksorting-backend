@@ -47,5 +47,12 @@ exports.default = () => ({
         documentEndpoint: process.env.ULTRAMSG_DOCUMENT_ENDPOINT || '/messages/document',
         messageEndpoint: process.env.ULTRAMSG_MESSAGE_ENDPOINT || '/messages/chat',
     },
+    rabbitmq: {
+        host: process.env.RABBITMQ_HOST || 'localhost',
+        port: parseInt(process.env.RABBITMQ_PORT || '5672', 10),
+        user: process.env.RABBITMQ_USER || 'admin',
+        pass: process.env.RABBITMQ_PASS || 'admin',
+        vhost: process.env.RABBITMQ_VHOST || '',
+    },
 });
 //# sourceMappingURL=configuration.js.map

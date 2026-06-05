@@ -32,12 +32,13 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
 
   private async connect(): Promise<void> {
     try {
-      const host = this.configService.get<string>('RABBITMQ_HOST', 'localhost');
-      const port = this.configService.get<number>('RABBITMQ_PORT', 5672);
-      const user = this.configService.get<string>('RABBITMQ_USER', 'admin');
-      const pass = this.configService.get<string>('RABBITMQ_PASS', 'admin');
+      const host = this.configService.get<string>('rabbitmq.host') || this.configService.get<string>('RABBITMQ_HOST', 'localhost');
+      const port = this.configService.get<number>('rabbitmq.port') || this.configService.get<number>('RABBITMQ_PORT', 5672);
+      const user = this.configService.get<string>('rabbitmq.user') || this.configService.get<string>('RABBITMQ_USER', 'admin');
+      const pass = this.configService.get<string>('rabbitmq.pass') || this.configService.get<string>('RABBITMQ_PASS', 'admin');
+      const vhost = this.configService.get<string>('rabbitmq.vhost') || this.configService.get<string>('RABBITMQ_VHOST', '');
 
-      const amqpUrl = `amqp://${user}:${pass}@${host}:${port}`;
+      const amqpUrl = `amqp://${user}:${pass}@${host}:${port}${vhost ? `/${vhost}` : ''}`;
       
       this.connection = await connect(amqpUrl);
       if (!this.connection) {

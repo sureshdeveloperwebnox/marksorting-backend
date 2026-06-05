@@ -45,5 +45,12 @@ declare const _default: () => {
         documentEndpoint: string;
         messageEndpoint: string;
     };
+    rabbitmq: {
+        host: string;
+        port: number;
+        user: string;
+        pass: string;
+        vhost: string;
+    };
 };
 export default _default;

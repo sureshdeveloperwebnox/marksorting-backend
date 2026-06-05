@@ -11,9 +11,13 @@ export class DashboardService {
     private redis: RedisService,
   ) {}
 
-  async getDashboardData() {
+  async getDashboardData(startDate?: string, endDate?: string) {
+    const cacheKey = startDate && endDate
+      ? `${this.CACHE_KEY}:${startDate}:${endDate}`
+      : this.CACHE_KEY;
+
     try {
-      const cached = await this.redis.getJson<any>(this.CACHE_KEY);
+      const cached = await this.redis.getJson<any>(cacheKey);
       if (cached) {
         return cached;
       }
@@ -26,6 +30,23 @@ export class DashboardService {
     const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
+    let currentStartDate = startOfThisMonth;
+    let currentEndDate = now;
+    let previousStartDate = startOfLastMonth;
+    let previousEndDate = startOfThisMonth;
+
+    if (startDate && endDate) {
+      currentStartDate = new Date(startDate);
+      currentStartDate.setHours(0, 0, 0, 0);
+
+      currentEndDate = new Date(endDate);
+      currentEndDate.setHours(23, 59, 59, 999);
+
+      const diffMs = currentEndDate.getTime() - currentStartDate.getTime();
+      previousStartDate = new Date(currentStartDate.getTime() - diffMs - 1);
+      previousEndDate = new Date(currentStartDate.getTime() - 1);
+    }
+
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
     sixMonthsAgo.setDate(1);
@@ -35,6 +56,9 @@ export class DashboardService {
     twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
     twelveMonthsAgo.setDate(1);
     twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+    const trendStartDate = startDate && endDate ? currentStartDate : sixMonthsAgo;
+    const trendEndDate = startDate && endDate ? currentEndDate : now;
 
     const MONTH_NAMES = [
       'Jan',
@@ -54,8 +78,9 @@ export class DashboardService {
 
     const getPast6Months = () => {
       const result = [];
+      const anchorDate = startDate && endDate ? currentEndDate : now;
       for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const d = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
         result.push({
           name: MONTH_NAMES[d.getMonth()],
           monthNum: d.getMonth(),
@@ -73,8 +98,9 @@ export class DashboardService {
 
     const getComparison6Months = () => {
       const result = [];
+      const anchorDate = startDate && endDate ? currentEndDate : now;
       for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const d = new Date(anchorDate.getFullYear(), anchorDate.getMonth() - i, 1);
         result.push({
           name: MONTH_NAMES[d.getMonth()],
           monthNum: d.getMonth(),
@@ -116,101 +142,136 @@ export class DashboardService {
       expensesPast12Months,
     ] = await Promise.all([
       // Customers
-      this.prisma.customer.count({ where: { deleted_at: null } }),
       this.prisma.customer.count({
-        where: { deleted_at: null, created_at: { gte: startOfThisMonth } },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { created_at: { gte: currentStartDate, lte: currentEndDate } } : {})
+        }
+      }),
+      this.prisma.customer.count({
+        where: { deleted_at: null, created_at: { gte: currentStartDate, lte: currentEndDate } },
       }),
       this.prisma.customer.count({
         where: {
           deleted_at: null,
-          created_at: { gte: startOfLastMonth, lt: startOfThisMonth },
+          created_at: { gte: previousStartDate, lte: previousEndDate },
         },
       }),
       this.prisma.customer.findMany({
-        where: { deleted_at: null },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { created_at: { gte: currentStartDate, lte: currentEndDate } } : {})
+        },
         orderBy: { created_at: 'desc' },
         take: 4,
       }),
       this.prisma.customer.findMany({
-        where: { deleted_at: null, created_at: { gte: sixMonthsAgo } },
+        where: { deleted_at: null, created_at: { gte: trendStartDate, lte: trendEndDate } },
         select: { created_at: true, status: true },
       }),
 
       // Installations
-      this.prisma.installationReport.count({ where: { deleted_at: null } }),
       this.prisma.installationReport.count({
-        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        }
+      }),
+      this.prisma.installationReport.count({
+        where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
       }),
       this.prisma.installationReport.count({
         where: {
           deleted_at: null,
-          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+          visit_date: { gte: previousStartDate, lte: previousEndDate },
         },
       }),
       this.prisma.installationReport.findMany({
-        where: { deleted_at: null },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        },
         include: { mill: true },
         orderBy: { created_at: 'desc' },
         take: 4,
       }),
       this.prisma.installationReport.findMany({
-        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
         select: { visit_date: true, status: true },
       }),
 
       // Services
-      this.prisma.serviceReport.count({ where: { deleted_at: null } }),
       this.prisma.serviceReport.count({
-        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        }
+      }),
+      this.prisma.serviceReport.count({
+        where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
       }),
       this.prisma.serviceReport.count({
         where: {
           deleted_at: null,
-          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+          visit_date: { gte: previousStartDate, lte: previousEndDate },
         },
       }),
       this.prisma.serviceReport.findMany({
-        where: { deleted_at: null },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        },
         include: { mill: true },
         orderBy: { created_at: 'desc' },
         take: 4,
       }),
       this.prisma.serviceReport.findMany({
-        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
         select: { visit_date: true, status: true },
       }),
 
       // Expenses
-      this.prisma.expense.count({ where: { deleted_at: null } }),
+      this.prisma.expense.count({
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        }
+      }),
       this.prisma.expense.aggregate({
-        where: { deleted_at: null },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        },
         _sum: { amount: true },
       }),
       this.prisma.expense.aggregate({
-        where: { deleted_at: null, visit_date: { gte: startOfThisMonth } },
+        where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
         _sum: { amount: true },
       }),
       this.prisma.expense.aggregate({
         where: {
           deleted_at: null,
-          visit_date: { gte: startOfLastMonth, lt: startOfThisMonth },
+          visit_date: { gte: previousStartDate, lte: previousEndDate },
         },
         _sum: { amount: true },
       }),
       this.prisma.expense.findMany({
-        where: { deleted_at: null },
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+        },
         include: { mill: true, expenseCategory: true },
         orderBy: { created_at: 'desc' },
         take: 4,
       }),
       this.prisma.expense.findMany({
-        where: { deleted_at: null, visit_date: { gte: sixMonthsAgo } },
+        where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
         select: { visit_date: true, amount: true, status: true },
       }),
 
       // Expenses in past 12 months
       this.prisma.expense.findMany({
-        where: { deleted_at: null, visit_date: { gte: twelveMonthsAgo } },
+        where: { deleted_at: null, visit_date: { gte: startDate && endDate ? currentStartDate : twelveMonthsAgo } },
         select: {
           visit_date: true,
           amount: true,
@@ -420,6 +481,7 @@ export class DashboardService {
       color: 'bg-amber-500',
     }));
 
+    const periodSubtitle = startDate && endDate ? 'selected period' : 'this month';
     // Fallback overrides if database is empty/new to keep dashboard looking extremely premium and complete
     const finalStats = [
       {
@@ -429,7 +491,7 @@ export class DashboardService {
         change: customersCount > 0 ? customerTrend.change : '+15.8%',
         trend: customersCount > 0 ? customerTrend.trend : 'up',
         variant: 'emerald' as const,
-        subtitle: 'this month',
+        subtitle: periodSubtitle,
       },
       {
         id: 'installations',
@@ -438,7 +500,7 @@ export class DashboardService {
         change: installationsCount > 0 ? installationTrend.change : '+34.0%',
         trend: installationsCount > 0 ? installationTrend.trend : 'up',
         variant: 'rose' as const,
-        subtitle: 'this month',
+        subtitle: periodSubtitle,
       },
       {
         id: 'services',
@@ -447,7 +509,7 @@ export class DashboardService {
         change: servicesCount > 0 ? serviceTrend.change : '+24.2%',
         trend: servicesCount > 0 ? serviceTrend.trend : 'up',
         variant: 'blue' as const,
-        subtitle: 'this month',
+        subtitle: periodSubtitle,
       },
       {
         id: 'expenses',
@@ -458,7 +520,7 @@ export class DashboardService {
         change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
         trend: expensesCount > 0 ? expenseTrend.trend : 'up',
         variant: 'amber' as const,
-        subtitle: `${expensesCount > 0 ? expensesCount : 1} transactions`,
+        subtitle: startDate && endDate ? `${expensesCount} transactions` : `${expensesCount > 0 ? expensesCount : 1} transactions`,
       },
     ];
 
@@ -645,6 +707,21 @@ export class DashboardService {
       ];
     };
 
+    const getIntervalsForRange = (start: Date, end: Date) => {
+      const result = [];
+      const diffMs = end.getTime() - start.getTime();
+      const stepMs = diffMs / 6; // 7 points (0 to 6)
+      for (let i = 0; i <= 6; i++) {
+        const d = new Date(start.getTime() + stepMs * i);
+        result.push({
+          name: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`,
+          timestamp: d.getTime(),
+          total: 0,
+        });
+      }
+      return result;
+    };
+
     const getPast7Days = () => {
       const result = [];
       for (let i = 6; i >= 0; i--) {
@@ -660,35 +737,70 @@ export class DashboardService {
       return result;
     };
 
+    const getDaysForWeeklyTrend = (start: Date, end: Date) => {
+      const result = [];
+      const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+      const numDays = Math.min(diffDays + 1, 7);
+      for (let i = numDays - 1; i >= 0; i--) {
+        const d = new Date(end);
+        d.setDate(end.getDate() - i);
+        result.push({
+          name: DAY_NAMES[d.getDay()],
+          dateStr: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`,
+          dateKey: new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(),
+          total: 0,
+        });
+      }
+      return result;
+    };
+
     const aggregateThisMonthTrend = (
       items: any[],
       dateField: string,
       sumField?: string,
     ) => {
-      const intervals = getThisMonthIntervals();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
-      
+      const intervals = startDate && endDate
+        ? getIntervalsForRange(currentStartDate, currentEndDate)
+        : getThisMonthIntervals().map((inv) => ({ ...inv, timestamp: 0 }));
+
       items.forEach((item) => {
         const dateVal = item[dateField];
         if (!dateVal) return;
         const date = new Date(dateVal);
-        if (
-          date.getFullYear() === currentYear &&
-          date.getMonth() === currentMonth
-        ) {
-          const day = date.getDate();
-          let idx = 0;
-          if (day >= 1 && day <= 5) idx = 0;
-          else if (day >= 6 && day <= 10) idx = 1;
-          else if (day >= 11 && day <= 15) idx = 2;
-          else if (day >= 16 && day <= 20) idx = 3;
-          else if (day >= 21 && day <= 25) idx = 4;
-          else if (day >= 26 && day <= 30) idx = 5;
-          else if (day >= 31) idx = 6;
 
+        if (startDate && endDate) {
+          const time = date.getTime();
+          let closestIdx = 0;
+          let minDiff = Math.abs(time - (intervals[0] as any).timestamp);
+          for (let i = 1; i < intervals.length; i++) {
+            const diff = Math.abs(time - (intervals[i] as any).timestamp);
+            if (diff < minDiff) {
+              minDiff = diff;
+              closestIdx = i;
+            }
+          }
           const addVal = sumField ? Number(item[sumField] || 0) : 1;
-          intervals[idx].total += addVal;
+          (intervals[closestIdx] as any).total += addVal;
+        } else {
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth();
+          if (
+            date.getFullYear() === currentYear &&
+            date.getMonth() === currentMonth
+          ) {
+            const day = date.getDate();
+            let idx = 0;
+            if (day >= 1 && day <= 5) idx = 0;
+            else if (day >= 6 && day <= 10) idx = 1;
+            else if (day >= 11 && day <= 15) idx = 2;
+            else if (day >= 16 && day <= 20) idx = 3;
+            else if (day >= 21 && day <= 25) idx = 4;
+            else if (day >= 26 && day <= 30) idx = 5;
+            else if (day >= 31) idx = 6;
+
+            const addVal = sumField ? Number(item[sumField] || 0) : 1;
+            intervals[idx].total += addVal;
+          }
         }
       });
       return intervals.map((inv) => ({ name: inv.name, total: inv.total }));
@@ -699,7 +811,10 @@ export class DashboardService {
       dateField: string,
       sumField?: string,
     ) => {
-      const days = getPast7Days();
+      const days = startDate && endDate
+        ? getDaysForWeeklyTrend(currentStartDate, currentEndDate)
+        : getPast7Days();
+
       items.forEach((item) => {
         const dateVal = item[dateField];
         if (!dateVal) return;
@@ -710,7 +825,7 @@ export class DashboardService {
           date.getDate(),
         ).getTime();
 
-        const match = days.find((day) => day.dateKey === midnightTime);
+        const match = days.find((day) => (day as any).dateKey === midnightTime);
         if (match) {
           const addVal = sumField ? Number(item[sumField] || 0) : 1;
           match.total += addVal;
