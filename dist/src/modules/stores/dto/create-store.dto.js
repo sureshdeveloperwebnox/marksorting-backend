@@ -22,6 +22,8 @@ class CreateStoreDto {
     return_status;
     inflow_status;
     barcode;
+    provider_name;
+    invoice_number;
 }
 exports.CreateStoreDto = CreateStoreDto;
 __decorate([
@@ -79,4 +81,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateStoreDto.prototype, "barcode", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'DHL', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateStoreDto.prototype, "provider_name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'INV-12345', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateStoreDto.prototype, "invoice_number", void 0);
 //# sourceMappingURL=create-store.dto.js.map

@@ -8,4 +8,6 @@ export declare class CreateStoreDto {
     return_status: string;
     inflow_status: string;
     barcode?: string;
+    provider_name?: string;
+    invoice_number?: string;
 }

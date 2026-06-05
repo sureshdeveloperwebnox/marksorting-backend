@@ -56,4 +56,14 @@ export class CreateStoreDto {
   @IsString()
   @IsOptional()
   barcode?: string;
+
+  @ApiProperty({ example: 'DHL', required: false })
+  @IsString()
+  @IsOptional()
+  provider_name?: string;
+
+  @ApiProperty({ example: 'INV-12345', required: false })
+  @IsString()
+  @IsOptional()
+  invoice_number?: string;
 }

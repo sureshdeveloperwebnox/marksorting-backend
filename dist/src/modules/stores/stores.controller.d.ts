@@ -7,13 +7,13 @@ export declare class StoresController {
     findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, customerId?: string, materialId?: string, warrantyStatus?: string, returnStatus?: string, inflowStatus?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
-        customer: {
-            id: string;
-            name: string;
-        };
         service_engineer: {
             id: string;
             full_name: string;
+        };
+        customer: {
+            id: string;
+            name: string;
         };
         materials: ({
             material: {
@@ -21,50 +21,50 @@ export declare class StoresController {
                 name: string;
             };
         } & {
-            material_id: string;
             store_id: string;
+            material_id: string;
         })[];
     } & {
+        service_engineer_id: string;
+        customer_id: string;
+        quantity: number;
+        warranty_status: string;
+        frame_number: string;
+        return_status: string;
+        inflow_status: string;
+        barcode: string | null;
+        provider_name: string | null;
+        invoice_number: string | null;
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        customer_id: string;
-        frame_number: string;
-        barcode: string | null;
-        warranty_status: string;
-        return_status: string;
-        inflow_status: string;
-        invoice_number: string | null;
-        service_engineer_id: string;
-        quantity: number;
-        provider_name: string | null;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
         before: {
+            service_engineer_id: string;
+            customer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            provider_name: string | null;
+            invoice_number: string | null;
             id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            customer_id: string;
-            frame_number: string;
-            barcode: string | null;
-            warranty_status: string;
-            return_status: string;
-            inflow_status: string;
-            invoice_number: string | null;
-            service_engineer_id: string;
-            quantity: number;
-            provider_name: string | null;
         };
         after: {
-            customer: {
-                id: string;
-                name: string;
-            };
             service_engineer: {
                 id: string;
                 full_name: string;
+            };
+            customer: {
+                id: string;
+                name: string;
             };
             materials: ({
                 material: {
@@ -72,40 +72,40 @@ export declare class StoresController {
                     name: string;
                 };
             } & {
-                material_id: string;
                 store_id: string;
+                material_id: string;
             })[];
         } & {
+            service_engineer_id: string;
+            customer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            provider_name: string | null;
+            invoice_number: string | null;
             id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            customer_id: string;
-            frame_number: string;
-            barcode: string | null;
-            warranty_status: string;
-            return_status: string;
-            inflow_status: string;
-            invoice_number: string | null;
-            service_engineer_id: string;
-            quantity: number;
-            provider_name: string | null;
         };
     }>;
     remove(id: string): Promise<{
+        service_engineer_id: string;
+        customer_id: string;
+        quantity: number;
+        warranty_status: string;
+        frame_number: string;
+        return_status: string;
+        inflow_status: string;
+        barcode: string | null;
+        provider_name: string | null;
+        invoice_number: string | null;
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        customer_id: string;
-        frame_number: string;
-        barcode: string | null;
-        warranty_status: string;
-        return_status: string;
-        inflow_status: string;
-        invoice_number: string | null;
-        service_engineer_id: string;
-        quantity: number;
-        provider_name: string | null;
     }>;
 }
