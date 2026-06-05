@@ -77,6 +77,12 @@ export class InstallationReportsController {
     type: String,
     description: 'Filter to visit date (YYYY-MM-DD)',
   })
+  @ApiQuery({
+    name: 'technicianId',
+    required: false,
+    type: String,
+    description: 'Filter by technician/service engineer ID',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of installation reports successfully retrieved',
@@ -88,6 +94,7 @@ export class InstallationReportsController {
     @Query('take') take?: string,
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('technicianId') technicianId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -97,6 +104,7 @@ export class InstallationReportsController {
         take: take ? parseInt(take, 10) : 10,
         search,
         status,
+        technicianId,
         dateFrom,
         dateTo,
       },

@@ -26,12 +26,13 @@ let ExpensesController = class ExpensesController {
     constructor(expensesService) {
         this.expensesService = expensesService;
     }
-    findAll(skip, take, search, status, dateFrom, dateTo) {
+    findAll(skip, take, search, status, technicianId, dateFrom, dateTo) {
         return this.expensesService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
             status,
+            technicianId,
             dateFrom,
             dateTo,
         });
@@ -89,14 +90,21 @@ __decorate([
         type: String,
         description: 'Filter to visit date (YYYY-MM-DD)',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'technicianId',
+        required: false,
+        type: String,
+        description: 'Filter by technician/service engineer ID',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('status')),
-    __param(4, (0, common_1.Query)('dateFrom')),
-    __param(5, (0, common_1.Query)('dateTo')),
+    __param(4, (0, common_1.Query)('technicianId')),
+    __param(5, (0, common_1.Query)('dateFrom')),
+    __param(6, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ExpensesController.prototype, "findAll", null);
 __decorate([

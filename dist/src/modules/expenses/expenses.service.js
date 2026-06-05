@@ -55,7 +55,7 @@ let ExpensesService = class ExpensesService {
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
-        const { skip, take, search, status, dateFrom, dateTo } = params;
+        const { skip, take, search, status, technicianId, dateFrom, dateTo } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -77,6 +77,22 @@ let ExpensesService = class ExpensesService {
         }
         if (status) {
             where.status = status;
+        }
+        if (technicianId) {
+            if (user && user.role === 'Service Engineer') {
+                where.technicians = {
+                    some: {
+                        technician_id: user.userId,
+                    },
+                };
+            }
+            else {
+                where.technicians = {
+                    some: {
+                        technician_id: technicianId,
+                    },
+                };
+            }
         }
         if (dateFrom || dateTo) {
             where.visit_date = {};
