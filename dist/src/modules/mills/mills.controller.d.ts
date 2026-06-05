@@ -1,0 +1,59 @@
+import { MillsService } from './mills.service';
+import { CreateMillDto } from './dto/create-mill.dto';
+import { UpdateMillDto } from './dto/update-mill.dto';
+export declare class MillsController {
+    private readonly millsService;
+    constructor(millsService: MillsService);
+    findAll(skip?: string, take?: string, search?: string, status?: string, customerId?: string): Promise<any>;
+    findOne(id: string): Promise<any>;
+    create(dto: CreateMillDto): Promise<{
+        id: string;
+        created_at: Date;
+        email: string | null;
+        updated_at: Date;
+        deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
+        customer_id: string | null;
+    }>;
+    update(id: string, dto: UpdateMillDto): Promise<{
+        before: {
+            id: string;
+            created_at: Date;
+            email: string | null;
+            updated_at: Date;
+            deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
+            customer_id: string | null;
+        };
+        after: {
+            id: string;
+            created_at: Date;
+            email: string | null;
+            updated_at: Date;
+            deleted_at: Date | null;
+            name: string;
+            phone: string | null;
+            status: string;
+            address: string | null;
+            customer_id: string | null;
+        };
+    }>;
+    remove(id: string): Promise<{
+        id: string;
+        created_at: Date;
+        email: string | null;
+        updated_at: Date;
+        deleted_at: Date | null;
+        name: string;
+        phone: string | null;
+        status: string;
+        address: string | null;
+        customer_id: string | null;
+    }>;
+}
