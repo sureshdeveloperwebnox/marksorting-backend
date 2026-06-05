@@ -61,11 +61,18 @@ export class UsersController {
     type: String,
     description: 'Filter by status',
   })
+  @ApiQuery({
+    name: 'roleId',
+    required: false,
+    type: String,
+    description: 'Filter by role ID',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
     @Query('status') status?: string,
+    @Query('roleId') roleId?: string,
   ) {
     const where: Prisma.UserWhereInput = {};
 
@@ -89,6 +96,10 @@ export class UsersController {
 
     if (status) {
       where.account_status = status;
+    }
+
+    if (roleId) {
+      where.role_id = roleId;
     }
 
     return this.usersService.findAll({

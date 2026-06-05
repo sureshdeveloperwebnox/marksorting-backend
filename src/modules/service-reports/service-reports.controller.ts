@@ -85,6 +85,12 @@ export class ServiceReportsController {
     description: 'List of service reports successfully retrieved',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized access' })
+  @ApiQuery({
+    name: 'technicianId',
+    required: false,
+    type: String,
+    description: 'Filter by technician/service engineer ID',
+  })
   findAll(
     @Request() req: any,
     @Query('skip') skip?: string,
@@ -92,6 +98,7 @@ export class ServiceReportsController {
     @Query('search') search?: string,
     @Query('status') status?: string,
     @Query('serviceCategoryId') serviceCategoryId?: string,
+    @Query('technicianId') technicianId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -102,6 +109,7 @@ export class ServiceReportsController {
         search,
         status,
         serviceCategoryId,
+        technicianId,
         dateFrom,
         dateTo,
       },

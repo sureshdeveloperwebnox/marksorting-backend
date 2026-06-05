@@ -27,13 +27,14 @@ let ServiceReportsController = class ServiceReportsController {
     constructor(serviceReportsService) {
         this.serviceReportsService = serviceReportsService;
     }
-    findAll(req, skip, take, search, status, serviceCategoryId, dateFrom, dateTo) {
+    findAll(req, skip, take, search, status, serviceCategoryId, technicianId, dateFrom, dateTo) {
         return this.serviceReportsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
             status,
             serviceCategoryId,
+            technicianId,
             dateFrom,
             dateTo,
         }, req.user);
@@ -111,16 +112,23 @@ __decorate([
         description: 'List of service reports successfully retrieved',
     }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized access' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'technicianId',
+        required: false,
+        type: String,
+        description: 'Filter by technician/service engineer ID',
+    }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('skip')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('search')),
     __param(4, (0, common_1.Query)('status')),
     __param(5, (0, common_1.Query)('serviceCategoryId')),
-    __param(6, (0, common_1.Query)('dateFrom')),
-    __param(7, (0, common_1.Query)('dateTo')),
+    __param(6, (0, common_1.Query)('technicianId')),
+    __param(7, (0, common_1.Query)('dateFrom')),
+    __param(8, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ServiceReportsController.prototype, "findAll", null);
 __decorate([

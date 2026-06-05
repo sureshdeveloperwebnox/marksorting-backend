@@ -49,6 +49,7 @@ export class ServiceReportsService {
       search?: string;
       status?: string;
       serviceCategoryId?: string;
+      technicianId?: string;
       dateFrom?: string;
       dateTo?: string;
     },
@@ -58,7 +59,7 @@ export class ServiceReportsService {
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
-    const { skip, take, search, status, serviceCategoryId, dateFrom, dateTo } =
+    const { skip, take, search, status, serviceCategoryId, technicianId, dateFrom, dateTo } =
       params;
 
     const where: any = { deleted_at: null };
@@ -89,6 +90,22 @@ export class ServiceReportsService {
 
     if (serviceCategoryId) {
       where.service_category_id = serviceCategoryId;
+    }
+
+    if (technicianId) {
+      if (user && user.role === 'Service Engineer') {
+        where.technicians = {
+          some: {
+            technician_id: user.userId,
+          },
+        };
+      } else {
+        where.technicians = {
+          some: {
+            technician_id: technicianId,
+          },
+        };
+      }
     }
 
     if (dateFrom || dateTo) {

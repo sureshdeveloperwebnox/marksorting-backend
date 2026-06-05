@@ -5,7 +5,7 @@ export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
     getRoles(): Promise<any>;
-    findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, status?: string, roleId?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateUserDto): Promise<any>;
     update(id: string, dto: UpdateUserDto): Promise<{

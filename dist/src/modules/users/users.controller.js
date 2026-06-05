@@ -32,7 +32,7 @@ let UsersController = class UsersController {
     getRoles() {
         return this.usersService.getRoles();
     }
-    findAll(skip, take, search, status) {
+    findAll(skip, take, search, status, roleId) {
         const where = {};
         if (search) {
             const orConditions = [
@@ -50,6 +50,9 @@ let UsersController = class UsersController {
         }
         if (status) {
             where.account_status = status;
+        }
+        if (roleId) {
+            where.role_id = roleId;
         }
         return this.usersService.findAll({
             skip: skip ? parseInt(skip) : undefined,
@@ -108,12 +111,19 @@ __decorate([
         type: String,
         description: 'Filter by status',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'roleId',
+        required: false,
+        type: String,
+        description: 'Filter by role ID',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('status')),
+    __param(4, (0, common_1.Query)('roleId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
 __decorate([
