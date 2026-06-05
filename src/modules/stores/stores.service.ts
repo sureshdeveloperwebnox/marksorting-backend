@@ -177,6 +177,67 @@ export class StoresService {
     return store;
   }
 
+  async findByTechnician(
+    technicianId: string,
+    params: {
+      skip?: number;
+      take?: number;
+      search?: string;
+      return_status?: string;
+      inflow_status?: string;
+      warranty_status?: string;
+    },
+  ) {
+    const { skip, take, search, return_status, inflow_status, warranty_status } = params;
+    const where: Prisma.StoreWhereInput = {
+      service_engineer_id: technicianId,
+      deleted_at: null,
+    };
+
+    if (return_status) {
+      where.return_status = return_status;
+    }
+    if (inflow_status) {
+      where.inflow_status = inflow_status;
+    }
+    if (warranty_status) {
+      where.warranty_status = warranty_status;
+    }
+
+    if (search) {
+      where.OR = [
+        { frame_number: { contains: search, mode: 'insensitive' } },
+        { barcode: { contains: search, mode: 'insensitive' } },
+        {
+          customer: {
+            name: { contains: search, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
+
+    const [stores, total] = await Promise.all([
+      this.prisma.store.findMany({
+        skip,
+        take,
+        where,
+        include: {
+          service_engineer: { select: { id: true, full_name: true } },
+          customer: { select: { id: true, name: true } },
+          materials: {
+            include: {
+              material: { select: { id: true, name: true } },
+            },
+          },
+        },
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.store.count({ where }),
+    ]);
+
+    return { stores, total };
+  }
+
   async findPendingByTechnician(
     technicianId: string,
     params: { skip?: number; take?: number; search?: string },
