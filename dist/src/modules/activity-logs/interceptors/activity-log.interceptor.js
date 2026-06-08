@@ -59,6 +59,7 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
                 (result === null || result === undefined)) {
                 return;
             }
+            const logResult = request.logData || result;
             const logContext = {
                 user: {
                     id: userId,
@@ -68,7 +69,7 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
                 body: request.body,
                 params: request.params,
                 query: request.query,
-                result: result,
+                result: logResult,
                 ip_address: ipAddress,
                 user_agent: userAgent,
                 device_name: deviceName,
@@ -101,7 +102,7 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
                     method: request.method,
                     path: request.path,
                     body: this.sanitizeBody(request.body),
-                    result: this.sanitizeResult(result),
+                    result: this.sanitizeResult(logResult),
                 },
                 ip_address: ipAddress,
                 user_agent: userAgent,

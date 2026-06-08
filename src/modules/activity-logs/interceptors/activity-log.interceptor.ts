@@ -119,6 +119,9 @@ export class ActivityLogInterceptor implements NestInterceptor {
         return;
       }
 
+      // Check if there is pre-saved log data on the request object (e.g. to allow response transformations)
+      const logResult = (request as any).logData || result;
+
       // Build context for description generation
       const logContext: LogActivityContext = {
         user: {
@@ -129,7 +132,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
         body: request.body,
         params: request.params,
         query: request.query,
-        result: result,
+        result: logResult,
         ip_address: ipAddress,
         user_agent: userAgent,
         device_name: deviceName,
@@ -166,7 +169,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
           method: request.method,
           path: request.path,
           body: this.sanitizeBody(request.body),
-          result: this.sanitizeResult(result),
+          result: this.sanitizeResult(logResult),
         },
         ip_address: ipAddress,
         user_agent: userAgent,

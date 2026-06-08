@@ -176,12 +176,14 @@ export class UsersController {
         : `${who} User "${name}" (no changes detected)`;
     },
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() dto: UpdateUserDto,
     @Request() req: any,
   ) {
-    return this.usersService.update(id, dto, req.user);
+    const result = await this.usersService.update(id, dto, req.user);
+    req.logData = result;
+    return result.after;
   }
 
   @Delete(':id')

@@ -67,8 +67,10 @@ let UsersController = class UsersController {
     create(dto) {
         return this.usersService.create(dto);
     }
-    update(id, dto, req) {
-        return this.usersService.update(id, dto, req.user);
+    async update(id, dto, req) {
+        const result = await this.usersService.update(id, dto, req.user);
+        req.logData = result;
+        return result.after;
     }
     remove(id) {
         return this.usersService.remove(id);
@@ -190,7 +192,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
