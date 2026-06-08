@@ -24,9 +24,9 @@ async function test() {
           select: {
             email: true,
             full_name: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
     console.log('Latest password resets:', JSON.stringify(resets, null, 2));
 
@@ -40,14 +40,18 @@ async function test() {
       if (key.match(/^bull:mail:\d+$/)) {
         const hdata = await redisConn.hgetall(key);
         const jobId = key.split(':').pop();
-        
+
         // get status
         // BullMQ stores status in separate sets/zsets e.g., bull:mail:wait, bull:mail:completed, bull:mail:failed
         let status = 'unknown';
-        if (await redisConn.sismember('bull:mail:completed', jobId!)) status = 'completed';
-        else if (await redisConn.sismember('bull:mail:failed', jobId!)) status = 'failed';
-        else if (await redisConn.zscore('bull:mail:wait', jobId!) !== null) status = 'waiting';
-        else if (await redisConn.zscore('bull:mail:active', jobId!) !== null) status = 'active';
+        if (await redisConn.sismember('bull:mail:completed', jobId!))
+          status = 'completed';
+        else if (await redisConn.sismember('bull:mail:failed', jobId!))
+          status = 'failed';
+        else if ((await redisConn.zscore('bull:mail:wait', jobId!)) !== null)
+          status = 'waiting';
+        else if ((await redisConn.zscore('bull:mail:active', jobId!)) !== null)
+          status = 'active';
 
         const dataParsed = hdata.data ? JSON.parse(hdata.data) : null;
         jobs.push({
@@ -61,7 +65,6 @@ async function test() {
       }
     }
     console.log('Queue Mail Jobs:', JSON.stringify(jobs, null, 2));
-
   } catch (error) {
     console.error('Error occurred:', error);
   } finally {

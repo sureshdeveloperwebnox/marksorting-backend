@@ -26,7 +26,7 @@ export class ActivityLogProcessor extends WorkerHost {
   async process(job: Job<any>): Promise<any> {
     try {
       const logData = job.data;
-      
+
       this.batchBuffer.push({
         user_id: logData.userId,
         action: logData.action,
@@ -50,15 +50,21 @@ export class ActivityLogProcessor extends WorkerHost {
         await this.flushBuffer();
       }
 
-      await this.redis.publish('activity-logs', JSON.stringify({
-        type: 'NEW_ACTIVITY_LOG',
-        data: logData,
-        timestamp: new Date().toISOString(),
-      }));
+      await this.redis.publish(
+        'activity-logs',
+        JSON.stringify({
+          type: 'NEW_ACTIVITY_LOG',
+          data: logData,
+          timestamp: new Date().toISOString(),
+        }),
+      );
 
       return { success: true, buffered: this.batchBuffer.length };
     } catch (error) {
-      this.logger.error(`Failed to process activity log: ${(error as Error).message}`, (error as Error).stack);
+      this.logger.error(
+        `Failed to process activity log: ${(error as Error).message}`,
+        (error as Error).stack,
+      );
       throw error;
     }
   }
@@ -79,7 +85,9 @@ export class ActivityLogProcessor extends WorkerHost {
 
       this.logger.debug(`Flushed ${logs.length} activity logs to database`);
     } catch (error) {
-      this.logger.error(`Failed to flush activity logs: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to flush activity logs: ${(error as Error).message}`,
+      );
       this.batchBuffer.unshift(...logs);
     }
   }

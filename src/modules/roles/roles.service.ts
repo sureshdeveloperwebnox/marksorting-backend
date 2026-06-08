@@ -168,7 +168,10 @@ export class RolesService {
     return { message: 'Role deleted successfully' };
   }
 
-  private async invalidateCache(id?: string, invalidateUserPermissions = false) {
+  private async invalidateCache(
+    id?: string,
+    invalidateUserPermissions = false,
+  ) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),
     ];

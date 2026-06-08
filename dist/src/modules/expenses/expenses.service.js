@@ -16,7 +16,13 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const s3_service_1 = require("../../shared/services/s3.service");
 const INCLUDE_SHAPE = {
-    mill: { select: { id: true, name: true } },
+    mill: {
+        select: {
+            id: true,
+            name: true,
+            customer: { select: { id: true, name: true } },
+        },
+    },
     expenseCategory: { select: { id: true, name: true } },
     technicians: {
         include: { technician: { select: { id: true, full_name: true } } },
@@ -48,7 +54,7 @@ let ExpensesService = class ExpensesService {
         };
     }
     mapExpensesImageUrls(expenses) {
-        return expenses.map(expense => this.mapExpenseImageUrls(expense));
+        return expenses.map((expense) => this.mapExpenseImageUrls(expense));
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -146,7 +152,8 @@ let ExpensesService = class ExpensesService {
         delete expenseData.customer_id;
         delete expenseData.technician_id;
         const finalTechnicianIds = [...(technician_ids || [])];
-        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+        if (rawDto.technician_id &&
+            !finalTechnicianIds.includes(rawDto.technician_id)) {
             finalTechnicianIds.push(rawDto.technician_id);
         }
         if (user &&
@@ -236,7 +243,8 @@ let ExpensesService = class ExpensesService {
         let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
         if (rawDto.technician_id !== undefined) {
             if (finalTechnicianIds !== undefined) {
-                if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+                if (rawDto.technician_id &&
+                    !finalTechnicianIds.includes(rawDto.technician_id)) {
                     finalTechnicianIds.push(rawDto.technician_id);
                 }
             }

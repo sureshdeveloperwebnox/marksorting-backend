@@ -55,7 +55,7 @@ async function main() {
     try {
         console.log('1. Triggering forgot password via HTTP...');
         await axios_1.default.post(`${backendUrl}/auth/forgot-password`, { email });
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         console.log('2. Fetching token from Redis...');
         const keys = await redisConn.keys('bull:mail:*');
         let rawToken = null;

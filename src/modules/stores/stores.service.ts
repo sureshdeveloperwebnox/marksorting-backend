@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -188,7 +193,14 @@ export class StoresService {
       warranty_status?: string;
     },
   ) {
-    const { skip, take, search, return_status, inflow_status, warranty_status } = params;
+    const {
+      skip,
+      take,
+      search,
+      return_status,
+      inflow_status,
+      warranty_status,
+    } = params;
     const where: Prisma.StoreWhereInput = {
       service_engineer_id: technicianId,
       deleted_at: null,
@@ -297,11 +309,15 @@ export class StoresService {
     }
 
     if (existing.service_engineer_id !== technicianId) {
-      throw new ForbiddenException('You are not authorized to update this store record');
+      throw new ForbiddenException(
+        'You are not authorized to update this store record',
+      );
     }
 
     if (existing.return_status !== 'Pending') {
-      throw new ConflictException(`Store return status is already ${existing.return_status}`);
+      throw new ConflictException(
+        `Store return status is already ${existing.return_status}`,
+      );
     }
 
     const store = await this.prisma.store.update({

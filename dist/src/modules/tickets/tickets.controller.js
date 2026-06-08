@@ -116,11 +116,19 @@ __decorate([
         entityType: 'tickets',
         description: (ctx) => {
             const ticket = ctx.result;
-            const title = ticket?.title || ticket?.subject || ctx.body.title || ctx.body.subject || 'Unknown';
+            const title = ticket?.title ||
+                ticket?.subject ||
+                ctx.body.title ||
+                ctx.body.subject ||
+                'Unknown';
             const details = [
-                ticket?.priority || ctx.body.priority ? `Priority: ${ticket?.priority || ctx.body.priority}` : null,
+                ticket?.priority || ctx.body.priority
+                    ? `Priority: ${ticket?.priority || ctx.body.priority}`
+                    : null,
                 ticket?.status ? `Status: ${ticket.status}` : null,
-            ].filter(Boolean).join(', ');
+            ]
+                .filter(Boolean)
+                .join(', ');
             return (0, description_helper_1.createDescription)('Support Ticket', title, details || undefined, ctx.user.full_name);
         },
     }),
@@ -140,9 +148,15 @@ __decorate([
         description: (ctx) => {
             const before = ctx.result?.before;
             const after = ctx.result?.after;
-            const title = after?.title || after?.subject || before?.title || before?.subject || ctx.params.id;
+            const title = after?.title ||
+                after?.subject ||
+                before?.title ||
+                before?.subject ||
+                ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Support Ticket "${title}" — ${diff}`
                 : `${who} Support Ticket "${title}" (no changes detected)`;

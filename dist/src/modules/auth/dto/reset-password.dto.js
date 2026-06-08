@@ -18,13 +18,19 @@ class ResetPasswordDto {
 }
 exports.ResetPasswordDto = ResetPasswordDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'a5d93b3c-df8b-491c-99a3-5eb76db7a2f1', description: 'The secure reset token' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'a5d93b3c-df8b-491c-99a3-5eb76db7a2f1',
+        description: 'The secure reset token',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], ResetPasswordDto.prototype, "token", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'newPassword123', description: 'The new secure password (minimum 8 characters)' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'newPassword123',
+        description: 'The new secure password (minimum 8 characters)',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MinLength)(8),
     __metadata("design:type", String)

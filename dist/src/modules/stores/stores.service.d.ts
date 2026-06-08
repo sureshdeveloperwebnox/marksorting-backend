@@ -48,8 +48,8 @@ export declare class StoresService {
         inflow_status: string;
         invoice_number: string | null;
         service_engineer_id: string;
-        quantity: number;
         provider_name: string | null;
+        quantity: number;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
         before: {
@@ -65,8 +65,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
         after: {
             customer: {
@@ -99,8 +99,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
     }>;
     remove(id: string): Promise<{
@@ -116,8 +116,8 @@ export declare class StoresService {
         inflow_status: string;
         invoice_number: string | null;
         service_engineer_id: string;
-        quantity: number;
         provider_name: string | null;
+        quantity: number;
     }>;
     findByTechnician(technicianId: string, params: {
         skip?: number;
@@ -158,8 +158,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         })[];
         total: number;
     }>;
@@ -199,8 +199,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         })[];
         total: number;
     }>;
@@ -218,8 +218,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
         after: {
             customer: {
@@ -252,8 +252,8 @@ export declare class StoresService {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
     }>;
     private invalidateCache;

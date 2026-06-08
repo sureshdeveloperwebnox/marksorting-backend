@@ -91,7 +91,12 @@ export class TechniciansController {
       const technician = ctx.result;
       const name = technician?.full_name || ctx.params.id;
       const email = technician?.email ? ` (${technician.email})` : '';
-      return updateDescription('Technician', `${name}${email}`, ctx.body, ctx.user.full_name);
+      return updateDescription(
+        'Technician',
+        `${name}${email}`,
+        ctx.body,
+        ctx.user.full_name,
+      );
     },
   })
   updateStatus(@Param('id') id: string, @Body('status') status: string) {

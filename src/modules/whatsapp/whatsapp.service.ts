@@ -23,9 +23,7 @@ export interface WhatsAppMessageJob {
 export class WhatsAppService {
   private readonly logger = new Logger(WhatsAppService.name);
 
-  constructor(
-    @InjectQueue('whatsapp') private readonly whatsappQueue: Queue,
-  ) {}
+  constructor(@InjectQueue('whatsapp') private readonly whatsappQueue: Queue) {}
 
   /**
    * Queue a WhatsApp document message to be sent via BullMQ
@@ -59,10 +57,15 @@ export class WhatsAppService {
         delay: 0,
       });
 
-      this.logger.log(`Queued WhatsApp document to ${jobData.to}: ${message.fileName}`);
+      this.logger.log(
+        `Queued WhatsApp document to ${jobData.to}: ${message.fileName}`,
+      );
       return true;
     } catch (error) {
-      this.logger.error(`Failed to queue WhatsApp message to ${message.to}`, error);
+      this.logger.error(
+        `Failed to queue WhatsApp message to ${message.to}`,
+        error,
+      );
       return false;
     }
   }
@@ -109,10 +112,15 @@ export class WhatsAppService {
         },
       });
 
-      this.logger.log(`Queued ${reportType} report PDF to ${jobData.to} for mill: ${millName}`);
+      this.logger.log(
+        `Queued ${reportType} report PDF to ${jobData.to} for mill: ${millName}`,
+      );
       return true;
     } catch (error) {
-      this.logger.error(`Failed to queue ${reportType} report PDF to ${to}`, error);
+      this.logger.error(
+        `Failed to queue ${reportType} report PDF to ${to}`,
+        error,
+      );
       return false;
     }
   }
@@ -124,20 +132,20 @@ export class WhatsAppService {
   private formatPhoneNumber(phone: string): string {
     // Remove all non-digit characters
     let cleaned = phone.replace(/\D/g, '');
-    
+
     // Remove leading zeros
     cleaned = cleaned.replace(/^0+/, '');
-    
+
     // Ensure it starts with country code (assuming India +91 if no country code)
     if (cleaned.length === 10) {
       cleaned = '91' + cleaned;
     }
-    
+
     // If it doesn't start with +, add it
     if (!cleaned.startsWith('+')) {
       cleaned = '+' + cleaned;
     }
-    
+
     return cleaned;
   }
 

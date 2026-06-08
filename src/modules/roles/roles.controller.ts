@@ -19,7 +19,12 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('roles')
 @Controller('roles')
@@ -95,9 +100,18 @@ export class RolesController {
       const name = role?.name || ctx.body.name || 'Unknown';
       const details = [
         ctx.body.description ? `Description: ${ctx.body.description}` : null,
-        Array.isArray(ctx.body.permissions) ? `Permissions: ${ctx.body.permissions.length} assigned` : null,
-      ].filter(Boolean).join(', ');
-      return createDescription('Role', name, details || undefined, ctx.user.full_name);
+        Array.isArray(ctx.body.permissions)
+          ? `Permissions: ${ctx.body.permissions.length} assigned`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription(
+        'Role',
+        name,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateRoleDto) {
@@ -115,9 +129,14 @@ export class RolesController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.name || before?.name || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const permNote = Array.isArray(ctx.body.permission_ids) ? ` | Permissions: ${ctx.body.permission_ids.length} assigned` : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const permNote = Array.isArray(ctx.body.permission_ids)
+        ? ` | Permissions: ${ctx.body.permission_ids.length} assigned`
+        : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Role "${name}" — ${diff}${permNote}`
         : `${who} Role "${name}"${permNote || ' (no changes detected)'}`;

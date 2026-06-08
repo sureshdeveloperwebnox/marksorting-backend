@@ -16,7 +16,9 @@ async function runTest() {
     console.log(`Starting password reset test for ${email}...`);
     try {
         console.log('1. Calling forgot-password endpoint...');
-        const forgotRes = await axios_1.default.post(`${backendUrl}/auth/forgot-password`, { email });
+        const forgotRes = await axios_1.default.post(`${backendUrl}/auth/forgot-password`, {
+            email,
+        });
         console.log('Forgot password response:', forgotRes.data);
     }
     catch (error) {

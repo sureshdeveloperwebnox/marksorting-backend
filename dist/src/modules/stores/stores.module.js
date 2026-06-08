@@ -19,7 +19,11 @@ exports.StoresModule = StoresModule;
 exports.StoresModule = StoresModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule],
-        controllers: [stores_controller_1.StoresController, mobile_stores_controller_1.MobileStoresController, mobile_stores_controller_1.MobileStoreReturnsController],
+        controllers: [
+            stores_controller_1.StoresController,
+            mobile_stores_controller_1.MobileStoresController,
+            mobile_stores_controller_1.MobileStoreReturnsController,
+        ],
         providers: [stores_service_1.StoresService],
         exports: [stores_service_1.StoresService],
     })

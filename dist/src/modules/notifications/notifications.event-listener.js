@@ -78,7 +78,7 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
     }
     async onTicketCreated(payload) {
         try {
-            const { ticketNumber, subject, assignedTechnicianUserIds, creatorUserId } = payload;
+            const { ticketNumber, subject, assignedTechnicianUserIds, creatorUserId, } = payload;
             const title = 'New Support Ticket Created';
             const message = `Ticket ${ticketNumber}: "${subject}" has been created.`;
             const adminIds = await this.notificationsService.getAdminUserIds();

@@ -10,6 +10,10 @@ export declare class ExpensesController {
         mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         } | null;
         technicians: ({
             technician: {
@@ -31,10 +35,10 @@ export declare class ExpensesController {
         deleted_at: Date | null;
         status: string;
         mill_id: string | null;
+        amount: import("@prisma/client/runtime/client").Decimal;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
         expense_images: string[];
@@ -46,6 +50,10 @@ export declare class ExpensesController {
             mill: {
                 id: string;
                 name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
             } | null;
             technicians: ({
                 technician: {
@@ -67,10 +75,10 @@ export declare class ExpensesController {
             deleted_at: Date | null;
             status: string;
             mill_id: string | null;
+            amount: import("@prisma/client/runtime/client").Decimal;
             place: string | null;
             visit_date: Date;
             visit_time: string;
-            amount: import("@prisma/client/runtime/client").Decimal;
             expense_category_id: string;
             others: string | null;
             expense_images: string[];
@@ -81,6 +89,10 @@ export declare class ExpensesController {
         mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         } | null;
         technicians: ({
             technician: {
@@ -102,10 +114,10 @@ export declare class ExpensesController {
         deleted_at: Date | null;
         status: string;
         mill_id: string | null;
+        amount: import("@prisma/client/runtime/client").Decimal;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        amount: import("@prisma/client/runtime/client").Decimal;
         expense_category_id: string;
         others: string | null;
         expense_images: string[];

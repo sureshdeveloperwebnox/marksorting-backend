@@ -14,7 +14,12 @@ import { CreateServiceCategoryDto } from './dto/create-service-category.dto';
 import { UpdateServiceCategoryDto } from './dto/update-service-category.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('service-categories')
 @Controller('service-categories')
@@ -79,8 +84,15 @@ export class ServiceCategoriesController {
     description: (ctx) => {
       const cat = ctx.result;
       const name = cat?.name || ctx.body.name || 'Unknown';
-      const details = ctx.body.description ? `Description: ${ctx.body.description}` : undefined;
-      return createDescription('Service Category', name, details, ctx.user.full_name);
+      const details = ctx.body.description
+        ? `Description: ${ctx.body.description}`
+        : undefined;
+      return createDescription(
+        'Service Category',
+        name,
+        details,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateServiceCategoryDto) {
@@ -97,8 +109,11 @@ export class ServiceCategoriesController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.name || before?.name || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Service Category "${name}" — ${diff}`
         : `${who} Service Category "${name}" (no changes detected)`;

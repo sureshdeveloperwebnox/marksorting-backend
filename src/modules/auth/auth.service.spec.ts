@@ -222,12 +222,14 @@ describe('AuthService', () => {
         role: { name: 'Service Engineer' },
         account_status: 'ACTIVE',
       };
-      
+
       mockJwtService.verify.mockReturnValue({ sub: 'user-id' });
       mockRedisService.get.mockResolvedValue('old-refresh-token');
       mockUsersService.findById.mockResolvedValue(mockUser);
-      mockPermissionsService.getUserPermissions.mockResolvedValue(['some.permission']);
-      
+      mockPermissionsService.getUserPermissions.mockResolvedValue([
+        'some.permission',
+      ]);
+
       mockJwtService.sign.mockImplementation((payload) => {
         if (payload.sub && !payload.email) return 'new-refresh-token';
         return 'new-access-token';

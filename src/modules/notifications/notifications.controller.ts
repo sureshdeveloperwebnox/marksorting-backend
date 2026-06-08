@@ -67,7 +67,9 @@ export class NotificationsController {
   }
 
   @Patch('read-all')
-  @ApiOperation({ summary: 'Mark all notifications as read for the current user' })
+  @ApiOperation({
+    summary: 'Mark all notifications as read for the current user',
+  })
   markAllAsRead(@Request() req: any) {
     return this.notificationsService.markAllAsRead(req.user.userId);
   }
@@ -89,7 +91,10 @@ export class NotificationsController {
     },
   })
   async broadcast(@Body() dto: BroadcastNotificationDto) {
-    if (dto.target === NotificationTarget.ROLE && (dto.role_names?.length || dto.role_name)) {
+    if (
+      dto.target === NotificationTarget.ROLE &&
+      (dto.role_names?.length || dto.role_name)
+    ) {
       const roleNames = dto.role_names?.length
         ? dto.role_names
         : [dto.role_name!];
@@ -100,7 +105,10 @@ export class NotificationsController {
         dto.type!,
         dto.meta_data,
       );
-    } else if (dto.target === NotificationTarget.USERS && dto.user_ids?.length) {
+    } else if (
+      dto.target === NotificationTarget.USERS &&
+      dto.user_ids?.length
+    ) {
       await this.notificationsService.sendToUsers(
         dto.user_ids,
         dto.title,

@@ -45,7 +45,8 @@ export class ReportNotificationsService {
     try {
       // Generate PDF
       this.logger.log(`Generating PDF for Service Report ${reportId}...`);
-      const { buffer: pdfBuffer, fileName } = await this.serviceReportsService.generatePdf(reportId);
+      const { buffer: pdfBuffer, fileName } =
+        await this.serviceReportsService.generatePdf(reportId);
 
       // Send WhatsApp (PDF only, no text)
       if (millWhatsappNumber) {
@@ -58,10 +59,16 @@ export class ReportNotificationsService {
             'SERVICE',
             millName,
           );
-          this.logger.log(`WhatsApp queued for Service Report ${reportId} to ${millWhatsappNumber}`);
+          this.logger.log(
+            `WhatsApp queued for Service Report ${reportId} to ${millWhatsappNumber}`,
+          );
         } catch (error) {
-          result.whatsappError = error instanceof Error ? error.message : 'WhatsApp sending failed';
-          this.logger.error(`WhatsApp failed for Service Report ${reportId}`, error);
+          result.whatsappError =
+            error instanceof Error ? error.message : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Service Report ${reportId}`,
+            error,
+          );
         }
       } else {
         this.logger.warn(`No WhatsApp number for Service Report ${reportId}`);
@@ -72,10 +79,10 @@ export class ReportNotificationsService {
         try {
           const subject = `${millName} Service Report`;
           const html = this.getServiceReportEmailTemplate(millName);
-          
+
           // Convert buffer to base64 for email attachment
           const base64Content = pdfBuffer.toString('base64');
-          
+
           // Queue email with attachment - using the mail service
           // Since the existing mail service doesn't support attachments directly,
           // we'll need to add a new method or use a direct approach
@@ -86,11 +93,17 @@ export class ReportNotificationsService {
             fileName,
             pdfBuffer,
           );
-          
-          this.logger.log(`Email queued for Service Report ${reportId} to ${millEmail}`);
+
+          this.logger.log(
+            `Email queued for Service Report ${reportId} to ${millEmail}`,
+          );
         } catch (error) {
-          result.emailError = error instanceof Error ? error.message : 'Email sending failed';
-          this.logger.error(`Email failed for Service Report ${reportId}`, error);
+          result.emailError =
+            error instanceof Error ? error.message : 'Email sending failed';
+          this.logger.error(
+            `Email failed for Service Report ${reportId}`,
+            error,
+          );
         }
       } else {
         this.logger.warn(`No email for Service Report ${reportId}`);
@@ -99,7 +112,10 @@ export class ReportNotificationsService {
       return result;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to send Service Report ${reportId}: ${errorMsg}`, error);
+      this.logger.error(
+        `Failed to send Service Report ${reportId}: ${errorMsg}`,
+        error,
+      );
       result.emailError = result.emailError || errorMsg;
       result.whatsappError = result.whatsappError || errorMsg;
       return result;
@@ -126,7 +142,8 @@ export class ReportNotificationsService {
     try {
       // Generate PDF
       this.logger.log(`Generating PDF for Installation Report ${reportId}...`);
-      const { buffer: pdfBuffer, fileName } = await this.installationReportsService.generatePdf(reportId);
+      const { buffer: pdfBuffer, fileName } =
+        await this.installationReportsService.generatePdf(reportId);
 
       // Send WhatsApp (PDF only, no text)
       if (millWhatsappNumber) {
@@ -139,13 +156,21 @@ export class ReportNotificationsService {
             'INSTALLATION',
             millName,
           );
-          this.logger.log(`WhatsApp queued for Installation Report ${reportId} to ${millWhatsappNumber}`);
+          this.logger.log(
+            `WhatsApp queued for Installation Report ${reportId} to ${millWhatsappNumber}`,
+          );
         } catch (error) {
-          result.whatsappError = error instanceof Error ? error.message : 'WhatsApp sending failed';
-          this.logger.error(`WhatsApp failed for Installation Report ${reportId}`, error);
+          result.whatsappError =
+            error instanceof Error ? error.message : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Installation Report ${reportId}`,
+            error,
+          );
         }
       } else {
-        this.logger.warn(`No WhatsApp number for Installation Report ${reportId}`);
+        this.logger.warn(
+          `No WhatsApp number for Installation Report ${reportId}`,
+        );
       }
 
       // Send Email with attachment
@@ -153,7 +178,7 @@ export class ReportNotificationsService {
         try {
           const subject = `${millName} Installation Report`;
           const html = this.getInstallationReportEmailTemplate(millName);
-          
+
           result.emailSent = await this.sendEmailWithAttachment(
             millEmail,
             subject,
@@ -161,11 +186,17 @@ export class ReportNotificationsService {
             fileName,
             pdfBuffer,
           );
-          
-          this.logger.log(`Email queued for Installation Report ${reportId} to ${millEmail}`);
+
+          this.logger.log(
+            `Email queued for Installation Report ${reportId} to ${millEmail}`,
+          );
         } catch (error) {
-          result.emailError = error instanceof Error ? error.message : 'Email sending failed';
-          this.logger.error(`Email failed for Installation Report ${reportId}`, error);
+          result.emailError =
+            error instanceof Error ? error.message : 'Email sending failed';
+          this.logger.error(
+            `Email failed for Installation Report ${reportId}`,
+            error,
+          );
         }
       } else {
         this.logger.warn(`No email for Installation Report ${reportId}`);
@@ -174,7 +205,10 @@ export class ReportNotificationsService {
       return result;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      this.logger.error(`Failed to send Installation Report ${reportId}: ${errorMsg}`, error);
+      this.logger.error(
+        `Failed to send Installation Report ${reportId}: ${errorMsg}`,
+        error,
+      );
       result.emailError = result.emailError || errorMsg;
       result.whatsappError = result.whatsappError || errorMsg;
       return result;
@@ -217,7 +251,7 @@ export class ReportNotificationsService {
           removeOnFail: false,
         },
       );
-      
+
       return true;
     } catch (error) {
       throw error;

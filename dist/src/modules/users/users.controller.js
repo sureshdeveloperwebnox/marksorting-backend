@@ -146,10 +146,16 @@ __decorate([
             const user = ctx.result;
             const name = user?.full_name || ctx.body.full_name || 'Unknown';
             const details = [
-                user?.email ? `Email: ${user.email}` : (ctx.body.email ? `Email: ${ctx.body.email}` : null),
+                user?.email
+                    ? `Email: ${user.email}`
+                    : ctx.body.email
+                        ? `Email: ${ctx.body.email}`
+                        : null,
                 user?.role?.name ? `Role: ${user.role.name}` : null,
                 user?.account_status ? `Status: ${user.account_status}` : null,
-            ].filter(Boolean).join(', ');
+            ]
+                .filter(Boolean)
+                .join(', ');
             return (0, description_helper_1.createDescription)('User', name, details || undefined, ctx.user.full_name);
         },
     }),
@@ -171,7 +177,9 @@ __decorate([
             const after = ctx.result?.after;
             const name = after?.full_name || before?.full_name || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} User "${name}" — ${diff}`
                 : `${who} User "${name}" (no changes detected)`;

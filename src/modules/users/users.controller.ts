@@ -19,7 +19,12 @@ import { PermissionsGuard } from '../../common/guards/permissions.guard';
 import { Permissions } from '../../common/decorators/permissions.decorator';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('users')
 @Controller('users')
@@ -127,11 +132,22 @@ export class UsersController {
       const user = ctx.result;
       const name = user?.full_name || ctx.body.full_name || 'Unknown';
       const details = [
-        user?.email ? `Email: ${user.email}` : (ctx.body.email ? `Email: ${ctx.body.email}` : null),
+        user?.email
+          ? `Email: ${user.email}`
+          : ctx.body.email
+            ? `Email: ${ctx.body.email}`
+            : null,
         user?.role?.name ? `Role: ${user.role.name}` : null,
         user?.account_status ? `Status: ${user.account_status}` : null,
-      ].filter(Boolean).join(', ');
-      return createDescription('User', name, details || undefined, ctx.user.full_name);
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription(
+        'User',
+        name,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateUserDto) {
@@ -149,8 +165,11 @@ export class UsersController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.full_name || before?.full_name || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} User "${name}" — ${diff}`
         : `${who} User "${name}" (no changes detected)`;

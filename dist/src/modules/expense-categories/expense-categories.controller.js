@@ -102,7 +102,9 @@ __decorate([
         description: (ctx) => {
             const cat = ctx.result;
             const name = cat?.name || ctx.body.name || 'Unknown';
-            const details = ctx.body.description ? `Description: ${ctx.body.description}` : undefined;
+            const details = ctx.body.description
+                ? `Description: ${ctx.body.description}`
+                : undefined;
             return (0, description_helper_1.createDescription)('Expense Category', name, details, ctx.user.full_name);
         },
     }),
@@ -123,7 +125,9 @@ __decorate([
             const after = ctx.result?.after;
             const name = after?.name || before?.name || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Expense Category "${name}" — ${diff}`
                 : `${who} Expense Category "${name}" (no changes detected)`;

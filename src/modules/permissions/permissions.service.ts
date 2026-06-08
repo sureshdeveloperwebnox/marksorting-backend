@@ -17,7 +17,7 @@ export class PermissionsService {
    */
   async getUserPermissions(userId: string): Promise<string[]> {
     const cacheKey = `${this.CACHE_PREFIX}${userId}`;
-    
+
     // Try to get from cache first
     const cachedPermissions = await this.redis.getJson<string[]>(cacheKey);
     if (cachedPermissions) {
@@ -44,11 +44,11 @@ export class PermissionsService {
       return [];
     }
 
-    const permissions = user.role.permissions.map(rp => rp.permission.name);
-    
+    const permissions = user.role.permissions.map((rp) => rp.permission.name);
+
     // Cache the permissions
     await this.redis.setJson(cacheKey, permissions, this.CACHE_TTL);
-    
+
     return permissions;
   }
 
@@ -63,17 +63,27 @@ export class PermissionsService {
   /**
    * Check if user has any of the specified permissions
    */
-  async hasAnyPermission(userId: string, permissions: string[]): Promise<boolean> {
+  async hasAnyPermission(
+    userId: string,
+    permissions: string[],
+  ): Promise<boolean> {
     const userPermissions = await this.getUserPermissions(userId);
-    return permissions.some(permission => userPermissions.includes(permission));
+    return permissions.some((permission) =>
+      userPermissions.includes(permission),
+    );
   }
 
   /**
    * Check if user has all of the specified permissions
    */
-  async hasAllPermissions(userId: string, permissions: string[]): Promise<boolean> {
+  async hasAllPermissions(
+    userId: string,
+    permissions: string[],
+  ): Promise<boolean> {
     const userPermissions = await this.getUserPermissions(userId);
-    return permissions.every(permission => userPermissions.includes(permission));
+    return permissions.every((permission) =>
+      userPermissions.includes(permission),
+    );
   }
 
   /**

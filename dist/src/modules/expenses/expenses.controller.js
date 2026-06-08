@@ -125,13 +125,19 @@ __decorate([
             const expense = ctx.result;
             const expNo = expense?.expense_number || 'N/A';
             const parts = [
-                expense?.expenseCategory?.name ? `Category: ${expense.expenseCategory.name}` : null,
+                expense?.expenseCategory?.name
+                    ? `Category: ${expense.expenseCategory.name}`
+                    : null,
                 expense?.amount ? `Amount: ₹${expense.amount}` : null,
                 expense?.mill?.name ? `Mill: ${expense.mill.name}` : null,
                 expense?.place ? `Place: ${expense.place}` : null,
                 expense?.status ? `Status: ${expense.status}` : null,
-            ].filter(Boolean).join(', ');
-            const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+            ]
+                .filter(Boolean)
+                .join(', ');
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} created`
+                : 'Created';
             return `${who} Expense "${expNo}"` + (parts ? ` — ${parts}` : '');
         },
     }),
@@ -152,7 +158,9 @@ __decorate([
             const after = ctx.result?.after;
             const expNo = after?.expense_number || before?.expense_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Expense "${expNo}" — ${diff}`
                 : `${who} Expense "${expNo}" (no changes detected)`;

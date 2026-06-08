@@ -130,12 +130,16 @@ export function buildDiffSummary(
     const newVal = after[key];
 
     // Only include if value actually changed
-    const oldStr = oldVal === null || oldVal === undefined ? '' : String(oldVal);
-    const newStr = newVal === null || newVal === undefined ? '' : String(newVal);
+    const oldStr =
+      oldVal === null || oldVal === undefined ? '' : String(oldVal);
+    const newStr =
+      newVal === null || newVal === undefined ? '' : String(newVal);
     if (oldStr === newStr) continue;
 
     const label = FIELD_LABELS[key] ?? key.replace(/_/g, ' ');
-    parts.push(`${label}: ${formatValue(key, oldVal)} → ${formatValue(key, newVal)}`);
+    parts.push(
+      `${label}: ${formatValue(key, oldVal)} → ${formatValue(key, newVal)}`,
+    );
   }
 
   return parts.join(', ');
@@ -176,7 +180,11 @@ export function createDescription(
  * Produces a complete DELETE description with actor name.
  * Format: <Actor> deleted <entity> "<name>"
  */
-export function deleteDescription(entityLabel: string, name: string, actor?: string): string {
+export function deleteDescription(
+  entityLabel: string,
+  name: string,
+  actor?: string,
+): string {
   const who = actor ? `${actor} deleted` : 'Deleted';
   return `${who} ${entityLabel} "${name}"`;
 }

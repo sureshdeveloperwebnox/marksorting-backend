@@ -151,7 +151,10 @@ export class UsersService {
     });
 
     await this.invalidateCache(id, user.email);
-    return { before: existingUser ? this.formatUser(existingUser) : null, after: this.formatUser(user) };
+    return {
+      before: existingUser ? this.formatUser(existingUser) : null,
+      after: this.formatUser(user),
+    };
   }
 
   async remove(id: string) {

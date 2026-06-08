@@ -21,13 +21,31 @@ const register_push_token_dto_1 = require("./dto/register-push-token.dto");
 const notificationSchema = {
     type: 'object',
     properties: {
-        id: { type: 'string', format: 'uuid', example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-        user_id: { type: 'string', format: 'uuid', nullable: true, example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        },
+        user_id: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+            example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        },
         title: { type: 'string', example: 'New Service Report Created' },
-        message: { type: 'string', example: 'Service Report SR-20260528-1 has been created for mill "ABC Mill".' },
+        message: {
+            type: 'string',
+            example: 'Service Report SR-20260528-1 has been created for mill "ABC Mill".',
+        },
         type: {
             type: 'string',
-            enum: ['SERVICE_REPORT', 'INSTALLATION', 'EXPENSE', 'TICKET', 'BROADCAST'],
+            enum: [
+                'SERVICE_REPORT',
+                'INSTALLATION',
+                'EXPENSE',
+                'TICKET',
+                'BROADCAST',
+            ],
             example: 'SERVICE_REPORT',
         },
         status: { type: 'string', enum: ['UNREAD', 'READ'], example: 'UNREAD' },
@@ -37,7 +55,11 @@ const notificationSchema = {
             additionalProperties: true,
             example: { reportNumber: 'SR-20260528-1', millName: 'ABC Mill' },
         },
-        created_at: { type: 'string', format: 'date-time', example: '2026-05-28T04:00:00.000Z' },
+        created_at: {
+            type: 'string',
+            format: 'date-time',
+            example: '2026-05-28T04:00:00.000Z',
+        },
     },
 };
 const paginatedNotificationsSchema = {
@@ -95,14 +117,26 @@ __decorate([
                 id: { type: 'string', format: 'uuid' },
                 user_id: { type: 'string', format: 'uuid' },
                 token: { type: 'string', example: 'fcm_token_string_here' },
-                device_type: { type: 'string', enum: ['WEB', 'ANDROID', 'IOS'], example: 'ANDROID' },
+                device_type: {
+                    type: 'string',
+                    enum: ['WEB', 'ANDROID', 'IOS'],
+                    example: 'ANDROID',
+                },
                 created_at: { type: 'string', format: 'date-time' },
                 updated_at: { type: 'string', format: 'date-time' },
             },
         },
     }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error — missing or invalid token', schema: errorSchema('token should not be empty') }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Validation error — missing or invalid token',
+        schema: errorSchema('token should not be empty'),
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Missing or invalid JWT bearer token',
+        schema: errorSchema('Unauthorized'),
+    }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -137,7 +171,11 @@ __decorate([
         description: 'Paginated notification list with unread count',
         schema: paginatedNotificationsSchema,
     }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Missing or invalid JWT bearer token',
+        schema: errorSchema('Unauthorized'),
+    }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('skip')),
     __param(2, (0, common_1.Query)('take')),
@@ -160,11 +198,19 @@ __decorate([
         schema: {
             type: 'object',
             properties: {
-                count: { type: 'integer', example: 5, description: 'Number of notifications updated' },
+                count: {
+                    type: 'integer',
+                    example: 5,
+                    description: 'Number of notifications updated',
+                },
             },
         },
     }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Missing or invalid JWT bearer token',
+        schema: errorSchema('Unauthorized'),
+    }),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -177,16 +223,29 @@ __decorate([
         summary: '[Mobile] Mark a single notification as read',
         description: 'Sets `status = READ` on the specified notification.\n\n' +
             'Returns **404** if the notification does not exist or does not belong to the authenticated user ' +
-            '(ownership is strictly enforced — a user cannot mark another user\'s notification as read).',
+            "(ownership is strictly enforced — a user cannot mark another user's notification as read).",
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: String, format: 'uuid', description: 'Notification UUID' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        type: String,
+        format: 'uuid',
+        description: 'Notification UUID',
+    }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Notification marked as read — returns the updated notification object',
         schema: notificationSchema,
     }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Notification not found or does not belong to this user', schema: errorSchema('Notification not found') }),
+    (0, swagger_1.ApiResponse)({
+        status: 401,
+        description: 'Missing or invalid JWT bearer token',
+        schema: errorSchema('Unauthorized'),
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Notification not found or does not belong to this user',
+        schema: errorSchema('Notification not found'),
+    }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

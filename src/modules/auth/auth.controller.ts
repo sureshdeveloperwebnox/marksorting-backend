@@ -25,7 +25,10 @@ import { MobileLoginResponseDto } from './dto/mobile-login-response.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ChangePasswordDto, ChangePasswordResponseDto } from './dto/change-password.dto';
+import {
+  ChangePasswordDto,
+  ChangePasswordResponseDto,
+} from './dto/change-password.dto';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import { Public } from '../../common/decorators/public.decorator';
@@ -41,19 +44,15 @@ export class AuthController {
     private activityLogsService: ActivityLogsService,
   ) {}
 
-  private setTokens(
-    req: express.Request,
-    res: express.Response,
-    result: any,
-  ) {
+  private setTokens(req: express.Request, res: express.Response, result: any) {
     const isProduction = process.env.NODE_ENV === 'production';
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
-    
+
     // Detect ngrok tunnels or cross-site contexts for sameSite: 'none'
     const host = (req.headers.host || '').toLowerCase();
     const origin = (req.headers.origin || '').toLowerCase();
     const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
-    
+
     const cookieSecure = isProduction || isSecure;
     const cookieSameSite = isNgrok ? 'none' : 'lax';
 
@@ -91,7 +90,8 @@ export class AuthController {
     // Log successful login
     const userAgent = req.headers['user-agent'] as string | undefined;
     const deviceName = this.getDeviceName(userAgent);
-    const roleName = result.user.role?.name || result.user.role || 'Unknown Role';
+    const roleName =
+      result.user.role?.name || result.user.role || 'Unknown Role';
     await this.activityLogsService.create({
       user_id: result.user.id,
       action: ActivityAction.LOGIN,
@@ -106,7 +106,7 @@ export class AuthController {
       device_name: deviceName,
     });
 
-    return { 
+    return {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
       user: result.user,
@@ -134,7 +134,7 @@ export class AuthController {
   ) {
     const result = await this.authService.register(registerDto);
     this.setTokens(req, res, result);
-    return { 
+    return {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
       user: result.user,
@@ -194,7 +194,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: express.Response,
   ) {
     let refreshToken = req.cookies?.['refresh_token'];
-    
+
     // Check Authorization header for Bearer token if not in cookies (for mobile clients)
     if (!refreshToken && req.headers.authorization) {
       const parts = req.headers.authorization.split(' ');
@@ -208,7 +208,7 @@ export class AuthController {
     }
     const result = await this.authService.refresh(refreshToken);
     this.setTokens(req, res, result);
-    return { 
+    return {
       access_token: result.access_token,
       refresh_token: result.refresh_token,
       user: result.user,
@@ -264,7 +264,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Reset email queued successfully' })
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
     await this.authService.forgotPassword(forgotPasswordDto.email);
-    return { message: 'If the email exists, a password reset link has been sent' };
+    return {
+      message: 'If the email exists, a password reset link has been sent',
+    };
   }
 
   @Public()
@@ -287,7 +289,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Change password for service engineers (mobile app)',
-    description: 'Allows authenticated service engineers to change their password. Requires current password verification. All existing sessions will be invalidated after password change.',
+    description:
+      'Allows authenticated service engineers to change their password. Requires current password verification. All existing sessions will be invalidated after password change.',
   })
   @ApiBody({ type: ChangePasswordDto })
   @ApiResponse({
@@ -297,11 +300,13 @@ export class AuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized - Invalid current password or user is not a service engineer',
+    description:
+      'Unauthorized - Invalid current password or user is not a service engineer',
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad Request - New password validation failed or same as current password',
+    description:
+      'Bad Request - New password validation failed or same as current password',
   })
   async changePassword(
     @Request() req: any,
@@ -326,6 +331,9 @@ export class AuthController {
       user_agent: req.headers['user-agent'] as string,
     });
 
-    return { message: 'Password changed successfully. Please login again with your new password.' };
+    return {
+      message:
+        'Password changed successfully. Please login again with your new password.',
+    };
   }
 }

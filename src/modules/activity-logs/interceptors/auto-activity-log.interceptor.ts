@@ -8,17 +8,21 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable, tap } from 'rxjs';
 import { ActivityLogsService } from '../activity-logs.service';
-import { LOG_ACTIVITY_KEY, LogActivityOptions, LogActivityContext } from '../decorators/log-activity.decorator';
+import {
+  LOG_ACTIVITY_KEY,
+  LogActivityOptions,
+  LogActivityContext,
+} from '../decorators/log-activity.decorator';
 import { Request } from 'express';
 import { ActivityAction } from '../enums/activity-action.enum';
 
 /**
  * Auto Activity Log Interceptor
- * 
+ *
  * This interceptor automatically logs ALL mutating HTTP requests (POST, PUT, DELETE, PATCH)
  * unless they have an explicit @LogActivity decorator (which takes precedence).
  * Auth endpoints are excluded since they handle their own logging manually.
- * 
+ *
  * This ensures comprehensive activity logging without needing to add decorators to every endpoint.
  */
 @Injectable()
@@ -37,16 +41,18 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     private reflector: Reflector,
     private activityLogsService: ActivityLogsService,
   ) {
-    console.log('>>> AutoActivityLogInterceptor CONSTRUCTOR CALLED - Interceptor registered!');
+    console.log(
+      '>>> AutoActivityLogInterceptor CONSTRUCTOR CALLED - Interceptor registered!',
+    );
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     console.log('[AutoActivityLogInterceptor] intercept() called - START');
-    
+
     const request = context.switchToHttp().getRequest<Request>();
     const method = request.method;
     const path = request.path;
-    
+
     // Only intercept mutating methods
     if (!this.isMutatingMethod(method)) {
       return next.handle();
@@ -58,10 +64,11 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     }
 
     // Check if there's an explicit @LogActivity decorator
-    const explicitOptions = this.reflector.getAllAndOverride<LogActivityOptions>(LOG_ACTIVITY_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const explicitOptions =
+      this.reflector.getAllAndOverride<LogActivityOptions>(LOG_ACTIVITY_KEY, [
+        context.getHandler(),
+        context.getClass(),
+      ]);
 
     // If explicit decorator exists, let the other interceptor handle it
     if (explicitOptions) {
@@ -71,11 +78,15 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     const user = (request as any).user;
 
     // Debug logging
-    this.logger.log(`Auto-interceptor: ${method} ${path} - User: ${user?.email || 'none'}`);
+    this.logger.log(
+      `Auto-interceptor: ${method} ${path} - User: ${user?.email || 'none'}`,
+    );
 
     // Skip if no user
     if (!user) {
-      this.logger.warn(`Auto-logging SKIPPED for ${method} ${path}: No user in request`);
+      this.logger.warn(
+        `Auto-logging SKIPPED for ${method} ${path}: No user in request`,
+      );
       return next.handle();
     }
 
@@ -84,7 +95,7 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
 
     // Extract request context
     const ipAddress = this.getClientIp(request);
-    const userAgent = request.headers['user-agent'] as string | undefined;
+    const userAgent = request.headers['user-agent'];
     const deviceName = this.getDeviceName(userAgent);
     const startTime = Date.now();
 
@@ -95,11 +106,22 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
       tap({
         next: (result) => {
           // Fire-and-forget logging - don't block the response
-          this.logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path);
+          this.logActivityAsync(
+            result,
+            action,
+            entityType,
+            userId,
+            request,
+            startTime,
+            ipAddress,
+            userAgent,
+            deviceName,
+            path,
+          );
         },
         error: () => {
           // Error already handled by exception filters
-        }
+        },
       }),
     );
   }
@@ -127,7 +149,14 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
       const entityId = this.extractEntityId(request.params, result);
 
       // Build description
-      const description = this.buildDescription(action, entityType, entityName, entityId, path, result);
+      const description = this.buildDescription(
+        action,
+        entityType,
+        entityName,
+        entityId,
+        path,
+        result,
+      );
 
       // Create the activity log
       await this.activityLogsService.create({
@@ -152,7 +181,10 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
       this.logger.log(`AUTO-LOGGED: ${action} ${entityType} - ${description}`);
     } catch (error: any) {
       // Don't let logging errors break the main flow
-      this.logger.error(`Failed to auto-log activity: ${error?.message}`, error?.stack);
+      this.logger.error(
+        `Failed to auto-log activity: ${error?.message}`,
+        error?.stack,
+      );
     }
   }
 
@@ -160,12 +192,15 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     return ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
   }
 
-  private detectActionAndEntity(method: string, path: string): { action: ActivityAction; entityType: string } {
+  private detectActionAndEntity(
+    method: string,
+    path: string,
+  ): { action: ActivityAction; entityType: string } {
     // Extract entity from path (e.g., /api/v1/customers/123 -> customers)
     // Remove query strings and split
     const cleanPath = path.split('?')[0];
-    const pathParts = cleanPath.split('/').filter(p => p && p !== 'api');
-    
+    const pathParts = cleanPath.split('/').filter((p) => p && p !== 'api');
+
     // Find the entity part (skip version numbers like v1, v2)
     let entityType = 'unknown';
     for (let i = 0; i < pathParts.length; i++) {
@@ -173,7 +208,7 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
       // Skip if it's a version (v1, v2) or numeric ID
       if (part.match(/^v\d+$/)) continue;
       if (part.match(/^\d+$/) || part.match(/^[0-9a-f-]{36}$/)) continue; // Skip IDs
-      
+
       // This is likely the entity
       entityType = part;
       break;
@@ -233,7 +268,8 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     if (result.machine_model) parts.push(`Machine: ${result.machine_model}`);
     if (result.place) parts.push(`Place: ${result.place}`);
     if (result.mill?.name) parts.push(`Mill: ${result.mill.name}`);
-    if (result.expenseCategory?.name) parts.push(`Category: ${result.expenseCategory.name}`);
+    if (result.expenseCategory?.name)
+      parts.push(`Category: ${result.expenseCategory.name}`);
     if (result.amount) parts.push(`Amount: ₹${result.amount}`);
     if (result.status) parts.push(`Status: ${result.status}`);
     if (result.priority) parts.push(`Priority: ${result.priority}`);
@@ -249,8 +285,8 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
   }
 
   private buildDescription(
-    action: ActivityAction, 
-    entityType: string, 
+    action: ActivityAction,
+    entityType: string,
     entityName: string | undefined,
     entityId: string | undefined,
     path: string,
@@ -289,7 +325,9 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
   private getClientIp(request: Request): string | undefined {
     const forwarded = request.headers['x-forwarded-for'];
     if (forwarded) {
-      return (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim();
+      return (typeof forwarded === 'string' ? forwarded : forwarded[0])
+        .split(',')[0]
+        .trim();
     }
     return request.ip || request.socket.remoteAddress;
   }
@@ -309,7 +347,14 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     if (!body || typeof body !== 'object') return body;
 
     const sanitized = { ...body };
-    const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret', 'api_key'];
+    const sensitiveFields = [
+      'password',
+      'password_hash',
+      'token',
+      'refresh_token',
+      'secret',
+      'api_key',
+    ];
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         sanitized[field] = '***REDACTED***';
@@ -326,7 +371,13 @@ export class AutoActivityLogInterceptor implements NestInterceptor {
     }
 
     const sanitized = { ...result };
-    const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret'];
+    const sensitiveFields = [
+      'password',
+      'password_hash',
+      'token',
+      'refresh_token',
+      'secret',
+    ];
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         sanitized[field] = '***REDACTED***';

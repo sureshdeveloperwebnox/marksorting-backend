@@ -47,7 +47,8 @@ let MailService = MailService_1 = class MailService {
         }
     }
     async sendPasswordResetMail(to, name, token) {
-        const frontendUrl = this.configService.get('app.frontendUrl') || 'http://localhost:3000';
+        const frontendUrl = this.configService.get('app.frontendUrl') ||
+            'http://localhost:3000';
         const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
         const emailHtml = (0, mail_templates_1.getForgotPasswordTemplate)(name, resetUrl, 60, frontendUrl);
         const subject = 'Reset Password - Mark Sorting System';

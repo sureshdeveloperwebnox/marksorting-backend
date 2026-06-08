@@ -121,7 +121,9 @@ __decorate([
                 customer?.email ? `Email: ${customer.email}` : null,
                 customer?.phone ? `Phone: ${customer.phone}` : null,
                 customer?.status ? `Status: ${customer.status}` : null,
-            ].filter(Boolean).join(', ');
+            ]
+                .filter(Boolean)
+                .join(', ');
             return (0, description_helper_1.createDescription)('Customer', name, details || undefined, ctx.user.full_name);
         },
     }),
@@ -142,7 +144,9 @@ __decorate([
             const after = ctx.result?.after;
             const name = after?.name || before?.name || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Customer "${name}" — ${diff}`
                 : `${who} Customer "${name}" (no changes detected)`;

@@ -89,7 +89,9 @@ let StoresController = class StoresController {
 exports.StoresController = StoresController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all store records with pagination and filtering' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all store records with pagination and filtering',
+    }),
     (0, swagger_1.ApiQuery)({
         name: 'skip',
         required: false,
@@ -175,11 +177,15 @@ __decorate([
             const store = ctx.result;
             const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
             const details = [
-                store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+                store?.barcode || ctx.body.barcode
+                    ? `Barcode: ${store?.barcode || ctx.body.barcode}`
+                    : null,
                 store?.material?.name ? `Material: ${store.material.name}` : null,
                 store?.customer?.name ? `Customer: ${store.customer.name}` : null,
                 store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
-            ].filter(Boolean).join(', ');
+            ]
+                .filter(Boolean)
+                .join(', ');
             return (0, description_helper_1.createDescription)('Store Record', `Frame ${frame}`, details || undefined, ctx.user.full_name);
         },
     }),
@@ -200,7 +206,9 @@ __decorate([
             const after = ctx.result?.after;
             const frame = after?.frame_number || before?.frame_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Store Record "Frame ${frame}" — ${diff}`
                 : `${who} Store Record "Frame ${frame}" (no changes detected)`;

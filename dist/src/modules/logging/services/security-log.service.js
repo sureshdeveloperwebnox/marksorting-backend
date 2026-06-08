@@ -46,7 +46,7 @@ let SecurityLogService = SecurityLogService_1 = class SecurityLogService {
     }
     async create(options) {
         try {
-            const isSuspicious = options.isSuspicious || await this.detectSuspiciousActivity(options);
+            const isSuspicious = options.isSuspicious || (await this.detectSuspiciousActivity(options));
             if (isSuspicious) {
                 this.eventEmitter.emit('security.alert', {
                     type: 'SUSPICIOUS_ACTIVITY',
@@ -133,8 +133,10 @@ let SecurityLogService = SecurityLogService_1 = class SecurityLogService {
         const dLat = this.deg2rad(loc2.lat - loc1.lat);
         const dLon = this.deg2rad(loc2.lng - loc1.lng);
         const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(this.deg2rad(loc1.lat)) * Math.cos(this.deg2rad(loc2.lat)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            Math.cos(this.deg2rad(loc1.lat)) *
+                Math.cos(this.deg2rad(loc2.lat)) *
+                Math.sin(dLon / 2) *
+                Math.sin(dLon / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
     }
@@ -173,7 +175,7 @@ let SecurityLogService = SecurityLogService_1 = class SecurityLogService {
             if (endDate)
                 dateFilter.created_at.lte = endDate;
         }
-        const [totalEvents, bySeverity, byType, suspiciousCount,] = await Promise.all([
+        const [totalEvents, bySeverity, byType, suspiciousCount] = await Promise.all([
             this.prisma.securityLog.count({ where: dateFilter }),
             this.prisma.securityLog.groupBy({
                 by: ['severity'],

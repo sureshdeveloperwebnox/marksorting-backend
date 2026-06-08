@@ -41,6 +41,10 @@ export declare class InstallationReportsService {
         mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         };
         technicians: ({
             technician: {
@@ -57,17 +61,18 @@ export declare class InstallationReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
-        call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        customer_signature: string;
+        report_number: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
+        call_registered_date: Date;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -82,7 +87,6 @@ export declare class InstallationReportsService {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -102,6 +106,10 @@ export declare class InstallationReportsService {
             mill: {
                 id: string;
                 name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
             };
             technicians: ({
                 technician: {
@@ -118,17 +126,18 @@ export declare class InstallationReportsService {
             updated_at: Date;
             deleted_at: Date | null;
             status: string;
-            report_number: string;
             mill_id: string;
             place: string;
-            mill_whatsapp_number: string;
-            mill_email: string | null;
             visit_date: Date;
             visit_time: string;
-            call_registered_date: Date;
             machine_model: string;
             serial_or_frame_no: string;
             authorized_person: string;
+            customer_signature: string;
+            report_number: string;
+            mill_whatsapp_number: string;
+            mill_email: string | null;
+            call_registered_date: Date;
             commodity: string | null;
             contamination: string | null;
             output_capacity_per_hour: string | null;
@@ -143,7 +152,6 @@ export declare class InstallationReportsService {
             engineer_remarks: string;
             engineer_signature: string;
             customer_remarks: string | null;
-            customer_signature: string;
             invoice_number: string | null;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
@@ -162,6 +170,10 @@ export declare class InstallationReportsService {
         mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         };
         technicians: ({
             technician: {
@@ -178,17 +190,18 @@ export declare class InstallationReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
-        call_registered_date: Date;
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        customer_signature: string;
+        report_number: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
+        call_registered_date: Date;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -203,7 +216,6 @@ export declare class InstallationReportsService {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;

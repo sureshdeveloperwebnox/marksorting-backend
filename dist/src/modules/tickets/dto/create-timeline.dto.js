@@ -20,7 +20,9 @@ class CreateTimelineDto {
 }
 exports.CreateTimelineDto = CreateTimelineDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Discussed the sorting machine printer issue with the customer. Order placed for spare parts.' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'Discussed the sorting machine printer issue with the customer. Order placed for spare parts.',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -38,7 +40,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTimelineDto.prototype, "timeline_date", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'IN_PROGRESS', enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'], required: false }),
+    (0, swagger_1.ApiProperty)({
+        example: 'IN_PROGRESS',
+        enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'],
+        required: false,
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

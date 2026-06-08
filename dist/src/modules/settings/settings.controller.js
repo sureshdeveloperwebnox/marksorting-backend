@@ -101,8 +101,12 @@ __decorate([
             const setting = ctx.result;
             const key = setting?.key || ctx.body.key || 'Unknown';
             const value = setting?.value !== undefined ? setting.value : ctx.body.value;
-            const group = setting?.group || ctx.body.group ? ` [Group: ${setting?.group || ctx.body.group}]` : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+            const group = setting?.group || ctx.body.group
+                ? ` [Group: ${setting?.group || ctx.body.group}]`
+                : '';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} created`
+                : 'Created';
             return `${who} Setting "${key}" = "${value}"${group}`;
         },
     }),
@@ -124,7 +128,9 @@ __decorate([
             const key = after?.key || before?.key || ctx.params.id;
             const group = after?.group ? ` [Group: ${after.group}]` : '';
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Setting "${key}${group}" — ${diff}`
                 : `${who} Setting "${key}${group}" (no changes detected)`;

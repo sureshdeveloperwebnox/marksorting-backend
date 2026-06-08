@@ -112,7 +112,7 @@ let AuthService = class AuthService {
             sub: user.id,
             full_name: user.full_name,
             role: user.role.name,
-            permissions: permissions
+            permissions: permissions,
         };
         return {
             access_token: this.jwtService.sign(payload),
@@ -137,7 +137,7 @@ let AuthService = class AuthService {
             sub: user.id,
             full_name: user.full_name,
             role: user.role.name,
-            permissions: permissions
+            permissions: permissions,
         };
         return {
             access_token: this.jwtService.sign(payload),

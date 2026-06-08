@@ -15,7 +15,12 @@ import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('materials')
 @Controller('materials')
@@ -87,10 +92,19 @@ export class MaterialsController {
       const material = ctx.result;
       const name = material?.name || ctx.body.name || 'Unknown';
       const details = [
-        material?.unit || ctx.body.unit ? `Unit: ${material?.unit || ctx.body.unit}` : null,
+        material?.unit || ctx.body.unit
+          ? `Unit: ${material?.unit || ctx.body.unit}`
+          : null,
         material?.status ? `Status: ${material.status}` : null,
-      ].filter(Boolean).join(', ');
-      return createDescription('Material', name, details || undefined, ctx.user.full_name);
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription(
+        'Material',
+        name,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateMaterialDto) {
@@ -107,8 +121,11 @@ export class MaterialsController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.name || before?.name || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Material "${name}" — ${diff}`
         : `${who} Material "${name}" (no changes detected)`;

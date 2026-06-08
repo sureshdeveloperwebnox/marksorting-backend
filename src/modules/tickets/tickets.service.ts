@@ -421,7 +421,9 @@ export class TicketsService {
       where: { id: ticketId },
     });
     if (!ticket) {
-      throw new NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+      throw new NotFoundException(
+        `Support ticket with ID "${ticketId}" not found`,
+      );
     }
 
     // Update parent ticket status if status is provided in request
@@ -438,8 +440,12 @@ export class TicketsService {
         user_id: user.userId,
         notes: dto.notes,
         status: dto.status || null,
-        timeline_date: dto.timeline_date ? new Date(dto.timeline_date) : new Date(),
-        next_follow_up_date: dto.next_follow_up_date ? new Date(dto.next_follow_up_date) : null,
+        timeline_date: dto.timeline_date
+          ? new Date(dto.timeline_date)
+          : new Date(),
+        next_follow_up_date: dto.next_follow_up_date
+          ? new Date(dto.next_follow_up_date)
+          : null,
       },
       include: {
         user: {
@@ -462,7 +468,9 @@ export class TicketsService {
       where: { id: ticketId },
     });
     if (!ticket) {
-      throw new NotFoundException(`Support ticket with ID "${ticketId}" not found`);
+      throw new NotFoundException(
+        `Support ticket with ID "${ticketId}" not found`,
+      );
     }
 
     return this.prisma.ticketTimeline.findMany({

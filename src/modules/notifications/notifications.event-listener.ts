@@ -17,7 +17,8 @@ export class NotificationsEventListener {
     creatorUserId?: string;
   }) {
     try {
-      const { reportNumber, millName, technicianUserIds, creatorUserId } = payload;
+      const { reportNumber, millName, technicianUserIds, creatorUserId } =
+        payload;
       const title = 'New Service Report Created';
       const message = `Service Report ${reportNumber} has been created for mill "${millName}".`;
 
@@ -45,7 +46,8 @@ export class NotificationsEventListener {
     creatorUserId?: string;
   }) {
     try {
-      const { reportNumber, millName, technicianUserIds, creatorUserId } = payload;
+      const { reportNumber, millName, technicianUserIds, creatorUserId } =
+        payload;
       const title = 'New Installation Report Created';
       const message = `Installation Report ${reportNumber} has been created for mill "${millName}".`;
 
@@ -61,7 +63,10 @@ export class NotificationsEventListener {
         { reportNumber, millName },
       );
     } catch (err) {
-      this.logger.error('Error handling installation-report.created event', err);
+      this.logger.error(
+        'Error handling installation-report.created event',
+        err,
+      );
     }
   }
 
@@ -100,7 +105,8 @@ export class NotificationsEventListener {
   }) {
     try {
       const { expenseNumber, status, technicianUserIds } = payload;
-      const statusLabel = status === 'COMPLETED' ? 'approved' : status.toLowerCase();
+      const statusLabel =
+        status === 'COMPLETED' ? 'approved' : status.toLowerCase();
       const title = 'Expense Status Updated';
       const message = `Your expense ${expenseNumber} has been ${statusLabel}.`;
 
@@ -124,7 +130,12 @@ export class NotificationsEventListener {
     creatorUserId?: string;
   }) {
     try {
-      const { ticketNumber, subject, assignedTechnicianUserIds, creatorUserId } = payload;
+      const {
+        ticketNumber,
+        subject,
+        assignedTechnicianUserIds,
+        creatorUserId,
+      } = payload;
       const title = 'New Support Ticket Created';
       const message = `Ticket ${ticketNumber}: "${subject}" has been created.`;
 

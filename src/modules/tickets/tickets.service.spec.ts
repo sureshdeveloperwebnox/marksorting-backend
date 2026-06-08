@@ -1,4 +1,8 @@
-import { BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 
 describe('TicketsService', () => {
@@ -45,7 +49,11 @@ describe('TicketsService', () => {
       id: 'mill-id',
       customer_id: 'customer-id',
     });
-    service = new TicketsService(prisma as any, redis as any, { emit: jest.fn() } as any);
+    service = new TicketsService(
+      prisma as any,
+      redis as any,
+      { emit: jest.fn() } as any,
+    );
   });
 
   it('creates a ticket with service engineer, customer, and mill relations', async () => {
@@ -197,7 +205,9 @@ describe('TicketsService', () => {
         const ticket = { id: 'ticket-1', service_engineer_id: 'engineer-id' };
         prisma.supportTicket.findUnique.mockResolvedValue(ticket);
 
-        await expect(service.findById('ticket-1', mockServiceEngineerUser)).resolves.toEqual(ticket);
+        await expect(
+          service.findById('ticket-1', mockServiceEngineerUser),
+        ).resolves.toEqual(ticket);
       });
 
       it('should block access to unassigned ticket for Service Engineer', async () => {
@@ -213,7 +223,9 @@ describe('TicketsService', () => {
         const ticket = { id: 'ticket-1', service_engineer_id: 'engineer-id' };
         prisma.supportTicket.findUnique.mockResolvedValue(ticket);
 
-        await expect(service.findById('ticket-1', mockAdminUser)).resolves.toEqual(ticket);
+        await expect(
+          service.findById('ticket-1', mockAdminUser),
+        ).resolves.toEqual(ticket);
       });
     });
 
@@ -244,7 +256,8 @@ describe('TicketsService', () => {
             data: expect.objectContaining({
               ticket_id: 'ticket-1',
               user_id: 'engineer-id',
-              notes: 'Ticket created: Printer issue\n\nDescription: Printer is not responding',
+              notes:
+                'Ticket created: Printer issue\n\nDescription: Printer is not responding',
               status: 'OPEN',
             }),
           }),
@@ -331,7 +344,9 @@ describe('TicketsService', () => {
             data: expect.objectContaining({
               ticket_id: 'ticket-1',
               user_id: 'admin-id',
-              notes: expect.stringContaining('Subject: "Old Subject" → "New Subject"'),
+              notes: expect.stringContaining(
+                'Subject: "Old Subject" → "New Subject"',
+              ),
               status: 'IN_PROGRESS',
             }),
           }),
@@ -339,7 +354,9 @@ describe('TicketsService', () => {
         expect(prisma.ticketTimeline.create).toHaveBeenCalledWith(
           expect.objectContaining({
             data: expect.objectContaining({
-              notes: expect.stringContaining('Service Engineer: "Engineer One" → "Engineer Two"'),
+              notes: expect.stringContaining(
+                'Service Engineer: "Engineer One" → "Engineer Two"',
+              ),
             }),
           }),
         );

@@ -16,7 +16,7 @@ async function run() {
     try {
         console.log('Triggering forgot password...');
         await axios_1.default.post(`${backendUrl}/auth/forgot-password`, { email });
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise((resolve) => setTimeout(resolve, 1500));
         const keys = await redisConn.keys('bull:mail:*');
         for (const key of keys) {
             if (key.match(/^bull:mail:\d+$/)) {

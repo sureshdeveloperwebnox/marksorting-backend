@@ -347,8 +347,12 @@ let TicketsService = class TicketsService {
                 user_id: user.userId,
                 notes: dto.notes,
                 status: dto.status || null,
-                timeline_date: dto.timeline_date ? new Date(dto.timeline_date) : new Date(),
-                next_follow_up_date: dto.next_follow_up_date ? new Date(dto.next_follow_up_date) : null,
+                timeline_date: dto.timeline_date
+                    ? new Date(dto.timeline_date)
+                    : new Date(),
+                next_follow_up_date: dto.next_follow_up_date
+                    ? new Date(dto.next_follow_up_date)
+                    : null,
             },
             include: {
                 user: {

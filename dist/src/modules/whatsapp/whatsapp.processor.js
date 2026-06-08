@@ -32,8 +32,11 @@ let WhatsAppProcessor = WhatsAppProcessor_1 = class WhatsAppProcessor extends bu
         this.httpService = httpService;
         this.prisma = prisma;
         this.apiToken = this.configService.get('whatsapp.apiToken') || '';
-        this.instanceId = this.configService.get('whatsapp.instanceId') || '';
-        this.baseUrl = this.configService.get('whatsapp.baseUrl') || 'https://api.ultramsg.com';
+        this.instanceId =
+            this.configService.get('whatsapp.instanceId') || '';
+        this.baseUrl =
+            this.configService.get('whatsapp.baseUrl') ||
+                'https://api.ultramsg.com';
         this.isMockMode = !this.apiToken || !this.instanceId;
         if (this.isMockMode) {
             this.logger.warn('WhatsApp credentials not configured. Running in MOCK MODE.');

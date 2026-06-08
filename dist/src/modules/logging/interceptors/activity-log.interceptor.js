@@ -25,10 +25,7 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
         this.activityLogService = activityLogService;
     }
     intercept(context, next) {
-        const options = this.reflector.getAllAndOverride(log_activity_decorator_1.LOG_ACTIVITY_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
+        const options = this.reflector.getAllAndOverride(log_activity_decorator_1.LOG_ACTIVITY_KEY, [context.getHandler(), context.getClass()]);
         if (!options) {
             return next.handle();
         }
@@ -47,7 +44,8 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
         const startTime = Date.now();
         return next.handle().pipe((0, rxjs_1.tap)(async (result) => {
             try {
-                if (options.ignoreNullEntity && (result === null || result === undefined)) {
+                if (options.ignoreNullEntity &&
+                    (result === null || result === undefined)) {
                     return;
                 }
                 const logContext = {
@@ -73,7 +71,9 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
                 }
                 let entityId;
                 if (options.entityIdParam) {
-                    const paramKey = Array.isArray(options.entityIdParam) ? options.entityIdParam[0] : options.entityIdParam;
+                    const paramKey = Array.isArray(options.entityIdParam)
+                        ? options.entityIdParam[0]
+                        : options.entityIdParam;
                     entityId = request.params[paramKey];
                 }
                 else if (result && typeof result === 'object' && 'id' in result) {
@@ -107,7 +107,9 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
     getClientIp(request) {
         const forwarded = request.headers['x-forwarded-for'];
         if (forwarded) {
-            return (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim();
+            return (typeof forwarded === 'string' ? forwarded : forwarded[0])
+                .split(',')[0]
+                .trim();
         }
         return request.ip || request.socket?.remoteAddress;
     }
@@ -130,7 +132,14 @@ let ActivityLogInterceptor = ActivityLogInterceptor_1 = class ActivityLogInterce
         if (!body || typeof body !== 'object')
             return body;
         const sanitized = { ...body };
-        const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret', 'credit_card'];
+        const sensitiveFields = [
+            'password',
+            'password_hash',
+            'token',
+            'refresh_token',
+            'secret',
+            'credit_card',
+        ];
         for (const field of sensitiveFields) {
             if (field in sanitized) {
                 sanitized[field] = '***REDACTED***';

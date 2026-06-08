@@ -21,7 +21,7 @@ async function main() {
     // 1. Trigger forgot password via API to queue email
     console.log('1. Triggering forgot password via HTTP...');
     await axios.post(`${backendUrl}/auth/forgot-password`, { email });
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     // 2. Fetch the raw token from Redis
     console.log('2. Fetching token from Redis...');
@@ -71,7 +71,9 @@ async function main() {
 
     console.log('Updated user hash in database:', user.password_hash);
     const matches = await bcrypt.compare(targetPassword, user.password_hash);
-    console.log(`Bcrypt check for password "${targetPassword}" vs DB hash: ${matches ? 'MATCHES' : 'does NOT match'}`);
+    console.log(
+      `Bcrypt check for password "${targetPassword}" vs DB hash: ${matches ? 'MATCHES' : 'does NOT match'}`,
+    );
 
     await app.close();
   } catch (error: any) {

@@ -66,7 +66,7 @@ let ReportsService = class ReportsService {
         this.documentTemplateService = documentTemplateService;
     }
     getServicesWhereClause(params, user) {
-        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId } = params;
+        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -137,9 +137,15 @@ let ReportsService = class ReportsService {
             this.prisma.serviceReport.count({ where }),
         ]);
         const [pendingCount, inProgressCount, completedCount] = await Promise.all([
-            this.prisma.serviceReport.count({ where: { ...where, status: 'PENDING' } }),
-            this.prisma.serviceReport.count({ where: { ...where, status: 'IN_PROGRESS' } }),
-            this.prisma.serviceReport.count({ where: { ...where, status: 'COMPLETED' } }),
+            this.prisma.serviceReport.count({
+                where: { ...where, status: 'PENDING' },
+            }),
+            this.prisma.serviceReport.count({
+                where: { ...where, status: 'IN_PROGRESS' },
+            }),
+            this.prisma.serviceReport.count({
+                where: { ...where, status: 'COMPLETED' },
+            }),
         ]);
         const result = {
             reports,
@@ -177,14 +183,17 @@ let ReportsService = class ReportsService {
             'Technicians',
             'Status',
         ];
-        const data = reports.map(r => [
+        const data = reports.map((r) => [
             r.report_number,
             r.mill?.name || '-',
             r.place || '-',
             r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
             r.serviceCategory?.name || '-',
             r.nature_of_complaint || '-',
-            r.technicians.map(t => t.technician?.full_name).filter(Boolean).join(', ') || '-',
+            r.technicians
+                .map((t) => t.technician?.full_name)
+                .filter(Boolean)
+                .join(', ') || '-',
             r.status,
         ]);
         if (formatType === 'csv') {
@@ -204,27 +213,43 @@ let ReportsService = class ReportsService {
             };
         }
         if (formatType === 'pdf') {
-            const pending = reports.filter(r => r.status === 'PENDING').length;
-            const inProgress = reports.filter(r => r.status === 'IN_PROGRESS').length;
-            const completed = reports.filter(r => r.status === 'COMPLETED').length;
+            const pending = reports.filter((r) => r.status === 'PENDING').length;
+            const inProgress = reports.filter((r) => r.status === 'IN_PROGRESS').length;
+            const completed = reports.filter((r) => r.status === 'COMPLETED').length;
             const pdfData = {
                 title: 'Service Reports Log',
                 filters: this.getFiltersSummary(params),
                 metrics: [
-                    { label: 'Total Reports', value: String(reports.length), colorClass: 'text-primary' },
-                    { label: 'Completed', value: String(completed), colorClass: 'text-success' },
-                    { label: 'In Progress', value: String(inProgress), colorClass: 'text-info' },
-                    { label: 'Pending', value: String(pending), colorClass: 'text-warning' },
+                    {
+                        label: 'Total Reports',
+                        value: String(reports.length),
+                        colorClass: 'text-primary',
+                    },
+                    {
+                        label: 'Completed',
+                        value: String(completed),
+                        colorClass: 'text-success',
+                    },
+                    {
+                        label: 'In Progress',
+                        value: String(inProgress),
+                        colorClass: 'text-info',
+                    },
+                    {
+                        label: 'Pending',
+                        value: String(pending),
+                        colorClass: 'text-warning',
+                    },
                 ],
                 headers,
-                rows: reports.map(r => [
+                rows: reports.map((r) => [
                     `<span class="font-semibold">${this.documentTemplateService.escape(r.report_number)}</span>`,
                     this.documentTemplateService.escape(r.mill?.name),
                     this.documentTemplateService.escape(r.place),
                     this.documentTemplateService.date(r.visit_date),
                     `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.serviceCategory?.name)}</span>`,
                     this.documentTemplateService.escape(r.nature_of_complaint),
-                    this.documentTemplateService.escape(r.technicians.map(t => t.technician?.full_name).join(', ')),
+                    this.documentTemplateService.escape(r.technicians.map((t) => t.technician?.full_name).join(', ')),
                     `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
                 ]),
                 company: await this.getCompanyPdfSettings(),
@@ -307,9 +332,15 @@ let ReportsService = class ReportsService {
             this.prisma.installationReport.count({ where }),
         ]);
         const [pendingCount, inProgressCount, completedCount] = await Promise.all([
-            this.prisma.installationReport.count({ where: { ...where, status: 'PENDING' } }),
-            this.prisma.installationReport.count({ where: { ...where, status: 'IN_PROGRESS' } }),
-            this.prisma.installationReport.count({ where: { ...where, status: 'COMPLETED' } }),
+            this.prisma.installationReport.count({
+                where: { ...where, status: 'PENDING' },
+            }),
+            this.prisma.installationReport.count({
+                where: { ...where, status: 'IN_PROGRESS' },
+            }),
+            this.prisma.installationReport.count({
+                where: { ...where, status: 'COMPLETED' },
+            }),
         ]);
         const result = {
             reports,
@@ -346,14 +377,17 @@ let ReportsService = class ReportsService {
             'Technicians',
             'Status',
         ];
-        const data = reports.map(r => [
+        const data = reports.map((r) => [
             r.report_number,
             r.mill?.name || '-',
             r.place || '-',
             r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
             r.machine_model || '-',
             r.serial_or_frame_no || '-',
-            r.technicians.map(t => t.technician?.full_name).filter(Boolean).join(', ') || '-',
+            r.technicians
+                .map((t) => t.technician?.full_name)
+                .filter(Boolean)
+                .join(', ') || '-',
             r.status,
         ]);
         if (formatType === 'csv') {
@@ -373,27 +407,43 @@ let ReportsService = class ReportsService {
             };
         }
         if (formatType === 'pdf') {
-            const pending = reports.filter(r => r.status === 'PENDING').length;
-            const inProgress = reports.filter(r => r.status === 'IN_PROGRESS').length;
-            const completed = reports.filter(r => r.status === 'COMPLETED').length;
+            const pending = reports.filter((r) => r.status === 'PENDING').length;
+            const inProgress = reports.filter((r) => r.status === 'IN_PROGRESS').length;
+            const completed = reports.filter((r) => r.status === 'COMPLETED').length;
             const pdfData = {
                 title: 'Installation Reports Log',
                 filters: this.getFiltersSummary(params),
                 metrics: [
-                    { label: 'Total Installations', value: String(reports.length), colorClass: 'text-primary' },
-                    { label: 'Completed', value: String(completed), colorClass: 'text-success' },
-                    { label: 'In Progress', value: String(inProgress), colorClass: 'text-info' },
-                    { label: 'Pending', value: String(pending), colorClass: 'text-warning' },
+                    {
+                        label: 'Total Installations',
+                        value: String(reports.length),
+                        colorClass: 'text-primary',
+                    },
+                    {
+                        label: 'Completed',
+                        value: String(completed),
+                        colorClass: 'text-success',
+                    },
+                    {
+                        label: 'In Progress',
+                        value: String(inProgress),
+                        colorClass: 'text-info',
+                    },
+                    {
+                        label: 'Pending',
+                        value: String(pending),
+                        colorClass: 'text-warning',
+                    },
                 ],
                 headers,
-                rows: reports.map(r => [
+                rows: reports.map((r) => [
                     `<span class="font-semibold">${this.documentTemplateService.escape(r.report_number)}</span>`,
                     this.documentTemplateService.escape(r.mill?.name),
                     this.documentTemplateService.escape(r.place),
                     this.documentTemplateService.date(r.visit_date),
                     this.documentTemplateService.escape(r.machine_model),
                     this.documentTemplateService.escape(r.serial_or_frame_no),
-                    this.documentTemplateService.escape(r.technicians.map(t => t.technician?.full_name).join(', ')),
+                    this.documentTemplateService.escape(r.technicians.map((t) => t.technician?.full_name).join(', ')),
                     `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
                 ]),
                 company: await this.getCompanyPdfSettings(),
@@ -410,7 +460,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getExpensesWhereClause(params, user) {
-        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId } = params;
+        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -425,7 +475,9 @@ let ReportsService = class ReportsService {
                 { place: { contains: search, mode: 'insensitive' } },
                 { others: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
-                { expenseCategory: { name: { contains: search, mode: 'insensitive' } } },
+                {
+                    expenseCategory: { name: { contains: search, mode: 'insensitive' } },
+                },
             ];
         }
         if (status) {
@@ -536,14 +588,17 @@ let ReportsService = class ReportsService {
             'Technicians',
             'Status',
         ];
-        const data = reports.map(r => [
+        const data = reports.map((r) => [
             r.expense_number,
             r.mill?.name || r.others || '-',
             r.place || '-',
             r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
             r.expenseCategory?.name || '-',
             Number(r.amount || 0).toFixed(2),
-            r.technicians.map(t => t.technician?.full_name).filter(Boolean).join(', ') || '-',
+            r.technicians
+                .map((t) => t.technician?.full_name)
+                .filter(Boolean)
+                .join(', ') || '-',
             r.status,
         ]);
         if (formatType === 'csv') {
@@ -567,7 +622,7 @@ let ReportsService = class ReportsService {
             let pending = 0;
             let inProgress = 0;
             let completed = 0;
-            reports.forEach(r => {
+            reports.forEach((r) => {
                 totalAmount += parseFloat(r.amount ? String(r.amount) : '0');
                 if (r.status === 'PENDING')
                     pending++;
@@ -581,20 +636,36 @@ let ReportsService = class ReportsService {
                 title: 'Expense Reports Log',
                 filters: this.getFiltersSummary(params),
                 metrics: [
-                    { label: 'Total Expenses', value: String(reports.length), colorClass: 'text-primary' },
-                    { label: 'Total Amount', value: formattedTotalAmount, colorClass: 'text-success font-bold' },
-                    { label: 'Completed', value: String(completed), colorClass: 'text-success' },
-                    { label: 'Pending Approval', value: String(pending + inProgress), colorClass: 'text-warning' },
+                    {
+                        label: 'Total Expenses',
+                        value: String(reports.length),
+                        colorClass: 'text-primary',
+                    },
+                    {
+                        label: 'Total Amount',
+                        value: formattedTotalAmount,
+                        colorClass: 'text-success font-bold',
+                    },
+                    {
+                        label: 'Completed',
+                        value: String(completed),
+                        colorClass: 'text-success',
+                    },
+                    {
+                        label: 'Pending Approval',
+                        value: String(pending + inProgress),
+                        colorClass: 'text-warning',
+                    },
                 ],
                 headers,
-                rows: reports.map(r => [
+                rows: reports.map((r) => [
                     `<span class="font-semibold">${this.documentTemplateService.escape(r.expense_number)}</span>`,
                     this.documentTemplateService.escape(r.mill?.name || r.others),
                     this.documentTemplateService.escape(r.place),
                     this.documentTemplateService.date(r.visit_date),
                     `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.expenseCategory?.name)}</span>`,
                     `<span class="font-semibold">₹${Number(r.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
-                    this.documentTemplateService.escape(r.technicians.map(t => t.technician?.full_name).join(', ')),
+                    this.documentTemplateService.escape(r.technicians.map((t) => t.technician?.full_name).join(', ')),
                     `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
                 ]),
                 company: await this.getCompanyPdfSettings(),
@@ -619,7 +690,7 @@ let ReportsService = class ReportsService {
             return str;
         };
         const headerLine = headers.map(escapeCsvCell).join(',');
-        const bodyLines = rows.map(r => r.map(escapeCsvCell).join(','));
+        const bodyLines = rows.map((r) => r.map(escapeCsvCell).join(','));
         const csvContent = [headerLine, ...bodyLines].join('\n');
         return Buffer.from(csvContent, 'utf-8');
     }
@@ -628,12 +699,15 @@ let ReportsService = class ReportsService {
         const sheetData = [headers, ...rows];
         const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
         const colWidths = headers.map((h, i) => {
-            const maxLength = Math.max(h.length, ...rows.map(row => (row[i] ? String(row[i]).length : 0)));
+            const maxLength = Math.max(h.length, ...rows.map((row) => (row[i] ? String(row[i]).length : 0)));
             return { wch: Math.min(maxLength + 3, 50) };
         });
         worksheet['!cols'] = colWidths;
         XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-        const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const excelBuffer = XLSX.write(workbook, {
+            type: 'buffer',
+            bookType: 'xlsx',
+        });
         return excelBuffer;
     }
     getFiltersSummary(params) {

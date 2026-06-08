@@ -53,8 +53,9 @@ export class SecurityLogService {
 
   async create(options: CreateSecurityLogOptions): Promise<void> {
     try {
-      const isSuspicious = options.isSuspicious || await this.detectSuspiciousActivity(options);
-      
+      const isSuspicious =
+        options.isSuspicious || (await this.detectSuspiciousActivity(options));
+
       if (isSuspicious) {
         this.eventEmitter.emit('security.alert', {
           type: 'SUSPICIOUS_ACTIVITY',
@@ -86,13 +87,17 @@ export class SecurityLogService {
       if (options.severity === 'CRITICAL') {
         this.eventEmitter.emit('security.critical', logData);
       }
-
     } catch (error) {
-      this.logger.error(`Failed to create security log: ${(error as Error).message}`, (error as Error).stack);
+      this.logger.error(
+        `Failed to create security log: ${(error as Error).message}`,
+        (error as Error).stack,
+      );
     }
   }
 
-  async detectSuspiciousActivity(options: CreateSecurityLogOptions): Promise<boolean> {
+  async detectSuspiciousActivity(
+    options: CreateSecurityLogOptions,
+  ): Promise<boolean> {
     if (options.eventType === SecurityEventType.LOGIN_FAILED) {
       const recentFailures = await this.prisma.securityLog.count({
         where: {
@@ -125,7 +130,7 @@ export class SecurityLogService {
           lastLogin.geolocation as any,
           options.geolocation,
         );
-        
+
         if (distance > 500 && timeDiff < 2 * 60 * 60 * 1000) {
           return true;
         }
@@ -147,14 +152,19 @@ export class SecurityLogService {
     return Math.min(score, 100);
   }
 
-  private calculateDistance(loc1: { lat: number; lng: number }, loc2: { lat: number; lng: number }): number {
+  private calculateDistance(
+    loc1: { lat: number; lng: number },
+    loc2: { lat: number; lng: number },
+  ): number {
     const R = 6371;
     const dLat = this.deg2rad(loc2.lat - loc1.lat);
     const dLon = this.deg2rad(loc2.lng - loc1.lng);
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(loc1.lat)) * Math.cos(this.deg2rad(loc2.lat)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos(this.deg2rad(loc1.lat)) *
+        Math.cos(this.deg2rad(loc2.lat)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }
@@ -163,7 +173,10 @@ export class SecurityLogService {
     return deg * (Math.PI / 180);
   }
 
-  async getFailedLoginAttempts(email: string, minutes: number = 15): Promise<number> {
+  async getFailedLoginAttempts(
+    email: string,
+    minutes: number = 15,
+  ): Promise<number> {
     return this.prisma.securityLog.count({
       where: {
         email_attempted: email,
@@ -196,27 +209,23 @@ export class SecurityLogService {
       if (endDate) dateFilter.created_at.lte = endDate;
     }
 
-    const [
-      totalEvents,
-      bySeverity,
-      byType,
-      suspiciousCount,
-    ] = await Promise.all([
-      this.prisma.securityLog.count({ where: dateFilter }),
-      this.prisma.securityLog.groupBy({
-        by: ['severity'],
-        where: dateFilter,
-        _count: { id: true },
-      }),
-      this.prisma.securityLog.groupBy({
-        by: ['event_type'],
-        where: dateFilter,
-        _count: { id: true },
-      }),
-      this.prisma.securityLog.count({
-        where: { ...dateFilter, is_suspicious: true },
-      }),
-    ]);
+    const [totalEvents, bySeverity, byType, suspiciousCount] =
+      await Promise.all([
+        this.prisma.securityLog.count({ where: dateFilter }),
+        this.prisma.securityLog.groupBy({
+          by: ['severity'],
+          where: dateFilter,
+          _count: { id: true },
+        }),
+        this.prisma.securityLog.groupBy({
+          by: ['event_type'],
+          where: dateFilter,
+          _count: { id: true },
+        }),
+        this.prisma.securityLog.count({
+          where: { ...dateFilter, is_suspicious: true },
+        }),
+      ]);
 
     return {
       total_events: totalEvents,

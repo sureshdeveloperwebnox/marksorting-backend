@@ -64,7 +64,7 @@ async function main() {
             `user:email:${email}`,
             `user:id:${user.id}`,
             `users:email:${email}`,
-            `user_permissions:${user.id}`
+            `user_permissions:${user.id}`,
         ];
         for (const key of keysToDelete) {
             const deleted = await redisConn.del(key);

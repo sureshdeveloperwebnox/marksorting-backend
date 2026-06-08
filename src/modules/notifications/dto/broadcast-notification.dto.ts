@@ -51,7 +51,8 @@ export class BroadcastNotificationDto {
   target?: NotificationTarget = NotificationTarget.ALL;
 
   @ApiPropertyOptional({
-    description: 'Role name to target when target=ROLE (e.g. "Service Engineer")',
+    description:
+      'Role name to target when target=ROLE (e.g. "Service Engineer")',
   })
   @IsString()
   @IsOptional()

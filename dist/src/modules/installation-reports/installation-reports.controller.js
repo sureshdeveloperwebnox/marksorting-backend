@@ -181,13 +181,21 @@ __decorate([
             const report = ctx.result;
             const repNo = report?.report_number || 'N/A';
             const parts = [
-                report?.machine_model || ctx.body.machine_model ? `Machine: ${report?.machine_model || ctx.body.machine_model}` : null,
-                report?.place || ctx.body.place ? `Place: ${report?.place || ctx.body.place}` : null,
+                report?.machine_model || ctx.body.machine_model
+                    ? `Machine: ${report?.machine_model || ctx.body.machine_model}`
+                    : null,
+                report?.place || ctx.body.place
+                    ? `Place: ${report?.place || ctx.body.place}`
+                    : null,
                 report?.mill?.name ? `Mill: ${report.mill.name}` : null,
                 report?.status ? `Status: ${report.status}` : null,
-            ].filter(Boolean).join(', ');
-            const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
-            return `${who} Installation Report "${repNo}"` + (parts ? ` — ${parts}` : '');
+            ]
+                .filter(Boolean)
+                .join(', ');
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} created`
+                : 'Created';
+            return (`${who} Installation Report "${repNo}"` + (parts ? ` — ${parts}` : ''));
         },
     }),
     __param(0, (0, common_1.Body)()),
@@ -219,7 +227,9 @@ __decorate([
             const after = ctx.result?.after;
             const repNo = after?.report_number || before?.report_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Installation Report "${repNo}" — ${diff}`
                 : `${who} Installation Report "${repNo}" (no changes detected)`;

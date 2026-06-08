@@ -73,9 +73,14 @@ exports.ReportNotificationsController = ReportNotificationsController;
 __decorate([
     (0, common_1.Post)('service-reports/:id/send-pdf'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, swagger_1.ApiOperation)({ summary: 'Send Service Report PDF manually via WhatsApp and Email' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Send Service Report PDF manually via WhatsApp and Email',
+    }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'Service Report ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'PDF send request queued successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'PDF send request queued successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Service report not found' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Insufficient permissions' }),
     __param(0, (0, common_1.Param)('id')),
@@ -88,9 +93,14 @@ __decorate([
 __decorate([
     (0, common_1.Post)('installation-reports/:id/send-pdf'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, swagger_1.ApiOperation)({ summary: 'Send Installation Report PDF manually via WhatsApp and Email' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Send Installation Report PDF manually via WhatsApp and Email',
+    }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'Installation Report ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'PDF send request queued successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'PDF send request queued successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Installation report not found' }),
     (0, swagger_1.ApiResponse)({ status: 403, description: 'Insufficient permissions' }),
     __param(0, (0, common_1.Param)('id')),
@@ -104,7 +114,10 @@ __decorate([
     (0, common_1.Post)('whatsapp/stats'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, swagger_1.ApiOperation)({ summary: 'Get WhatsApp queue statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Queue statistics retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Queue statistics retrieved successfully',
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

@@ -62,7 +62,10 @@ __decorate([
         type: String,
         description: 'Search by frame number, barcode or customer name',
     }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of pending store returns' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Paginated list of pending store returns',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('skip')),
@@ -79,10 +82,19 @@ __decorate([
         description: 'Submits courier/provider name and invoice/receipt number to complete a store return. The status transitions to completed.',
     }),
     (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store return completed successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error or status is not Pending' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Validation error or status is not Pending',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from updating another engineer\'s store record' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: "Forbidden from updating another engineer's store record",
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.UPDATE,
@@ -93,7 +105,9 @@ __decorate([
             const after = ctx.result?.after;
             const frame = after?.frame_number || before?.frame_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} completed return`
+                : 'Completed return';
             return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
         },
     }),
@@ -196,10 +210,19 @@ __decorate([
         description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
     }),
     (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store return completed successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error or status is not Pending' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Validation error or status is not Pending',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from updating another engineer\'s store record' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: "Forbidden from updating another engineer's store record",
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.UPDATE,
@@ -210,7 +233,9 @@ __decorate([
             const after = ctx.result?.after;
             const frame = after?.frame_number || before?.frame_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} completed return`
+                : 'Completed return';
             return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
         },
     }),
@@ -228,10 +253,19 @@ __decorate([
         description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
     }),
     (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store return completed successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error or status is not Pending' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Validation error or status is not Pending',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from updating another engineer\'s store record' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: "Forbidden from updating another engineer's store record",
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.UPDATE,
@@ -242,7 +276,9 @@ __decorate([
             const after = ctx.result?.after;
             const frame = after?.frame_number || before?.frame_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} completed return`
+                : 'Completed return';
             return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
         },
     }),

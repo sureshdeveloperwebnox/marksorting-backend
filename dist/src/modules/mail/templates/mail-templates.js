@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBaseTemplate = getBaseTemplate;
 exports.getForgotPasswordTemplate = getForgotPasswordTemplate;
-function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl }) {
+function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl, }) {
     const currentYear = new Date().getFullYear();
     return `<!DOCTYPE html>
 <html lang="en">

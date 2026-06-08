@@ -14,7 +14,11 @@ import { CreateSettingDto } from './dto/create-setting.dto';
 import { UpdateSettingDto } from './dto/update-setting.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('settings')
 @Controller('settings')
@@ -75,9 +79,15 @@ export class SettingsController {
     description: (ctx) => {
       const setting = ctx.result;
       const key = setting?.key || ctx.body.key || 'Unknown';
-      const value = setting?.value !== undefined ? setting.value : ctx.body.value;
-      const group = setting?.group || ctx.body.group ? ` [Group: ${setting?.group || ctx.body.group}]` : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+      const value =
+        setting?.value !== undefined ? setting.value : ctx.body.value;
+      const group =
+        setting?.group || ctx.body.group
+          ? ` [Group: ${setting?.group || ctx.body.group}]`
+          : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} created`
+        : 'Created';
       return `${who} Setting "${key}" = "${value}"${group}`;
     },
   })
@@ -96,8 +106,11 @@ export class SettingsController {
       const after = ctx.result?.after;
       const key = after?.key || before?.key || ctx.params.id;
       const group = after?.group ? ` [Group: ${after.group}]` : '';
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Setting "${key}${group}" — ${diff}`
         : `${who} Setting "${key}${group}" (no changes detected)`;

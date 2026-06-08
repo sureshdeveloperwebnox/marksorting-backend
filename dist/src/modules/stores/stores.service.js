@@ -161,7 +161,7 @@ let StoresService = class StoresService {
         return store;
     }
     async findByTechnician(technicianId, params) {
-        const { skip, take, search, return_status, inflow_status, warranty_status } = params;
+        const { skip, take, search, return_status, inflow_status, warranty_status, } = params;
         const where = {
             service_engineer_id: technicianId,
             deleted_at: null,

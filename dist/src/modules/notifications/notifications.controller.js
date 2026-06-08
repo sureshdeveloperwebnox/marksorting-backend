@@ -39,13 +39,15 @@ let NotificationsController = class NotificationsController {
         return this.notificationsService.markAllAsRead(req.user.userId);
     }
     async broadcast(dto) {
-        if (dto.target === broadcast_notification_dto_1.NotificationTarget.ROLE && (dto.role_names?.length || dto.role_name)) {
+        if (dto.target === broadcast_notification_dto_1.NotificationTarget.ROLE &&
+            (dto.role_names?.length || dto.role_name)) {
             const roleNames = dto.role_names?.length
                 ? dto.role_names
                 : [dto.role_name];
             await this.notificationsService.broadcastToRoles(roleNames, dto.title, dto.message, dto.type, dto.meta_data);
         }
-        else if (dto.target === broadcast_notification_dto_1.NotificationTarget.USERS && dto.user_ids?.length) {
+        else if (dto.target === broadcast_notification_dto_1.NotificationTarget.USERS &&
+            dto.user_ids?.length) {
             await this.notificationsService.sendToUsers(dto.user_ids, dto.title, dto.message, dto.type, dto.meta_data);
         }
         else {
@@ -88,7 +90,9 @@ __decorate([
 ], NotificationsController.prototype, "markAsRead", null);
 __decorate([
     (0, common_1.Patch)('read-all'),
-    (0, swagger_1.ApiOperation)({ summary: 'Mark all notifications as read for the current user' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Mark all notifications as read for the current user',
+    }),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),

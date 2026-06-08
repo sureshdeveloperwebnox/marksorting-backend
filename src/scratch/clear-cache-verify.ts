@@ -32,7 +32,7 @@ async function main() {
       `user:email:${email}`,
       `user:id:${user.id}`,
       `users:email:${email}`,
-      `user_permissions:${user.id}`
+      `user_permissions:${user.id}`,
     ];
     for (const key of keysToDelete) {
       const deleted = await redisConn.del(key);
@@ -43,9 +43,10 @@ async function main() {
     const candidates = ['Vetri@123', 'NewVetri@123', 'admin123', 'vetri@123'];
     for (const cand of candidates) {
       const match = await bcrypt.compare(cand, user.password_hash);
-      console.log(`Candidate "${cand}" vs DB hash: ${match ? 'MATCHES' : 'does NOT match'}`);
+      console.log(
+        `Candidate "${cand}" vs DB hash: ${match ? 'MATCHES' : 'does NOT match'}`,
+      );
     }
-
   } catch (error: any) {
     console.error('Error:', error.message);
   } finally {

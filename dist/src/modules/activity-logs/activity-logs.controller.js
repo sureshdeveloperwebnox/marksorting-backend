@@ -48,8 +48,13 @@ let ActivityLogsController = class ActivityLogsController {
 exports.ActivityLogsController = ActivityLogsController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all activity logs with filtering and pagination' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Activity logs retrieved successfully' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all activity logs with filtering and pagination',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Activity logs retrieved successfully',
+    }),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [query_activity_logs_dto_1.QueryActivityLogsDto]),
@@ -58,7 +63,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('stats'),
     (0, swagger_1.ApiOperation)({ summary: 'Get activity log statistics' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Statistics retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Statistics retrieved successfully',
+    }),
     __param(0, (0, common_1.Query)('start_date')),
     __param(1, (0, common_1.Query)('end_date')),
     __metadata("design:type", Function),
@@ -68,7 +76,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('user/:userId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get activity logs for specific user' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User activity retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'User activity retrieved successfully',
+    }),
     __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Query)('limit')),
     __metadata("design:type", Function),
@@ -78,7 +89,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('entity/:entityType/:entityId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get activity logs for specific entity' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Entity activity retrieved successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Entity activity retrieved successfully',
+    }),
     __param(0, (0, common_1.Param)('entityType')),
     __param(1, (0, common_1.Param)('entityId')),
     __param(2, (0, common_1.Query)('limit')),
@@ -89,7 +103,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('export/excel'),
     (0, swagger_1.ApiOperation)({ summary: 'Export activity logs to Excel' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Excel file downloaded successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Excel file downloaded successfully',
+    }),
     (0, common_1.Header)('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
     __param(0, (0, common_1.Query)()),
     __param(1, (0, common_1.Res)()),

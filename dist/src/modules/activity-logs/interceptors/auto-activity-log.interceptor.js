@@ -68,7 +68,7 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
                 this.logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path);
             },
             error: () => {
-            }
+            },
         }));
     }
     async logActivityAsync(result, action, entityType, userId, request, startTime, ipAddress, userAgent, deviceName, path) {
@@ -108,7 +108,7 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
     }
     detectActionAndEntity(method, path) {
         const cleanPath = path.split('?')[0];
-        const pathParts = cleanPath.split('/').filter(p => p && p !== 'api');
+        const pathParts = cleanPath.split('/').filter((p) => p && p !== 'api');
         let entityType = 'unknown';
         for (let i = 0; i < pathParts.length; i++) {
             const part = pathParts[i];
@@ -217,7 +217,9 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
     getClientIp(request) {
         const forwarded = request.headers['x-forwarded-for'];
         if (forwarded) {
-            return (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim();
+            return (typeof forwarded === 'string' ? forwarded : forwarded[0])
+                .split(',')[0]
+                .trim();
         }
         return request.ip || request.socket.remoteAddress;
     }
@@ -240,7 +242,14 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
         if (!body || typeof body !== 'object')
             return body;
         const sanitized = { ...body };
-        const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret', 'api_key'];
+        const sensitiveFields = [
+            'password',
+            'password_hash',
+            'token',
+            'refresh_token',
+            'secret',
+            'api_key',
+        ];
         for (const field of sensitiveFields) {
             if (field in sanitized) {
                 sanitized[field] = '***REDACTED***';
@@ -255,7 +264,13 @@ let AutoActivityLogInterceptor = AutoActivityLogInterceptor_1 = class AutoActivi
             return { count: result.length, truncated: true };
         }
         const sanitized = { ...result };
-        const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret'];
+        const sensitiveFields = [
+            'password',
+            'password_hash',
+            'token',
+            'refresh_token',
+            'secret',
+        ];
         for (const field of sensitiveFields) {
             if (field in sanitized) {
                 sanitized[field] = '***REDACTED***';

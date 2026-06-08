@@ -8,48 +8,48 @@ export declare class CustomersController {
     findOne(id: string): Promise<any>;
     create(dto: CreateCustomerDto): Promise<{
         id: string;
-        created_at: Date;
         email: string | null;
+        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
         phone: string | null;
-        status: string;
         address: string | null;
+        status: string;
     }>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
         before: {
             id: string;
-            created_at: Date;
             email: string | null;
+            created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
             phone: string | null;
-            status: string;
             address: string | null;
+            status: string;
         };
         after: {
             id: string;
-            created_at: Date;
             email: string | null;
+            created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
             phone: string | null;
-            status: string;
             address: string | null;
+            status: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        created_at: Date;
         email: string | null;
+        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
         phone: string | null;
-        status: string;
         address: string | null;
+        status: string;
     }>;
 }

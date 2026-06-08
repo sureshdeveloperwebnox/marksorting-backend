@@ -25,7 +25,11 @@ import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('service-reports')
 @ApiBearerAuth()
@@ -130,7 +134,8 @@ export class ServiceReportsController {
     action: ActivityAction.EXPORT,
     entityType: 'service_reports',
     entityIdParam: 'id',
-    description: (ctx) => `Downloaded PDF for service report ${ctx.params.id} — file exported`,
+    description: (ctx) =>
+      `Downloaded PDF for service report ${ctx.params.id} — file exported`,
   })
   async downloadPdf(
     @Param('id') id: string,
@@ -178,12 +183,20 @@ export class ServiceReportsController {
       const report = ctx.result;
       const repNo = report?.report_number || 'N/A';
       const parts = [
-        report?.machine_model || ctx.body.machine_model ? `Machine: ${report?.machine_model || ctx.body.machine_model}` : null,
-        report?.place || ctx.body.place ? `Place: ${report?.place || ctx.body.place}` : null,
+        report?.machine_model || ctx.body.machine_model
+          ? `Machine: ${report?.machine_model || ctx.body.machine_model}`
+          : null,
+        report?.place || ctx.body.place
+          ? `Place: ${report?.place || ctx.body.place}`
+          : null,
         report?.mill?.name ? `Mill: ${report.mill.name}` : null,
         report?.status ? `Status: ${report.status}` : null,
-      ].filter(Boolean).join(', ');
-      const who = ctx.user.full_name ? `${ctx.user.full_name} created` : 'Created';
+      ]
+        .filter(Boolean)
+        .join(', ');
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} created`
+        : 'Created';
       return `${who} Service Report "${repNo}"` + (parts ? ` — ${parts}` : '');
     },
   })
@@ -211,9 +224,13 @@ export class ServiceReportsController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const repNo = after?.report_number || before?.report_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const repNo =
+        after?.report_number || before?.report_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Service Report "${repNo}" — ${diff}`
         : `${who} Service Report "${repNo}" (no changes detected)`;

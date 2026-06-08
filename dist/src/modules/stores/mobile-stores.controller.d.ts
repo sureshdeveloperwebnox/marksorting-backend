@@ -35,8 +35,8 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         })[];
         total: number;
     }>;
@@ -54,8 +54,8 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
         after: {
             customer: {
@@ -88,8 +88,8 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
     }>;
 }
@@ -128,8 +128,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         })[];
         total: number;
     }>;
@@ -147,8 +147,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
         after: {
             customer: {
@@ -181,8 +181,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
     }>;
     submitReturnAlias(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
@@ -199,8 +199,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
         after: {
             customer: {
@@ -233,8 +233,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            quantity: number;
             provider_name: string | null;
+            quantity: number;
         };
     }>;
 }

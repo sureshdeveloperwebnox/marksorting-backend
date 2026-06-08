@@ -18,7 +18,9 @@ async function runTest() {
   try {
     // 1. Call forgot-password
     console.log('1. Calling forgot-password endpoint...');
-    const forgotRes = await axios.post(`${backendUrl}/auth/forgot-password`, { email });
+    const forgotRes = await axios.post(`${backendUrl}/auth/forgot-password`, {
+      email,
+    });
     console.log('Forgot password response:', forgotRes.data);
 
     // 2. Fetch the latest reset record from DB to get the raw token if we had it?

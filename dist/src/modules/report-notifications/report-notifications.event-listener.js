@@ -25,7 +25,7 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
     }
     async onServiceReportCreatedForPdf(payload) {
         try {
-            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail } = payload;
+            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, } = payload;
             this.logger.log(`Processing service-report.created.send-pdf event for report ${reportNumber}`);
             let whatsappNumber = millWhatsappNumber;
             let email = millEmail;
@@ -38,7 +38,8 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
                     },
                 });
                 if (report) {
-                    whatsappNumber = whatsappNumber || report.mill_whatsapp_number || undefined;
+                    whatsappNumber =
+                        whatsappNumber || report.mill_whatsapp_number || undefined;
                     email = email || report.mill_email || undefined;
                 }
             }
@@ -63,7 +64,7 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
     }
     async onInstallationReportCreatedForPdf(payload) {
         try {
-            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail } = payload;
+            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, } = payload;
             this.logger.log(`Processing installation-report.created.send-pdf event for report ${reportNumber}`);
             let whatsappNumber = millWhatsappNumber;
             let email = millEmail;
@@ -76,7 +77,8 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
                     },
                 });
                 if (report) {
-                    whatsappNumber = whatsappNumber || report.mill_whatsapp_number || undefined;
+                    whatsappNumber =
+                        whatsappNumber || report.mill_whatsapp_number || undefined;
                     email = email || report.mill_email || undefined;
                 }
             }

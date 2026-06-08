@@ -32,7 +32,7 @@ __decorate([
         type: [String],
         required: false,
         description: 'List of technician UUIDs assigned to this expense. ' +
-            'On the mobile endpoint a Service Engineer\'s own ID is automatically appended, ' +
+            "On the mobile endpoint a Service Engineer's own ID is automatically appended, " +
             'so this field may be omitted from the mobile request body.',
     }),
     (0, class_validator_1.IsArray)(),
@@ -64,7 +64,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'Coimbatore',
         required: false,
-        description: 'Free-text location where the expense was incurred. Auto-populated from the selected mill\'s address if available.',
+        description: "Free-text location where the expense was incurred. Auto-populated from the selected mill's address if available.",
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),

@@ -25,9 +25,9 @@ async function test() {
                     select: {
                         email: true,
                         full_name: true,
-                    }
-                }
-            }
+                    },
+                },
+            },
         });
         console.log('Latest password resets:', JSON.stringify(resets, null, 2));
         const keys = await redisConn.keys('bull:mail:*');
@@ -42,9 +42,9 @@ async function test() {
                     status = 'completed';
                 else if (await redisConn.sismember('bull:mail:failed', jobId))
                     status = 'failed';
-                else if (await redisConn.zscore('bull:mail:wait', jobId) !== null)
+                else if ((await redisConn.zscore('bull:mail:wait', jobId)) !== null)
                     status = 'waiting';
-                else if (await redisConn.zscore('bull:mail:active', jobId) !== null)
+                else if ((await redisConn.zscore('bull:mail:active', jobId)) !== null)
                     status = 'active';
                 const dataParsed = hdata.data ? JSON.parse(hdata.data) : null;
                 jobs.push({

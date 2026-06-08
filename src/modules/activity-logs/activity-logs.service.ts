@@ -39,14 +39,27 @@ export class ActivityLogsService {
       this.logger.debug(`Activity logged: ${dto.action} - ${dto.description}`);
       return log;
     } catch (error) {
-      this.logger.error(`Failed to create activity log: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create activity log: ${error.message}`,
+        error.stack,
+      );
       // Don't throw - logging should not break the main flow
       return null;
     }
   }
 
   async findAll(dto: QueryActivityLogsDto) {
-    const { skip, take, user_id, action, entity_type, entity_id, start_date, end_date, search } = dto;
+    const {
+      skip,
+      take,
+      user_id,
+      action,
+      entity_type,
+      entity_id,
+      start_date,
+      end_date,
+      search,
+    } = dto;
 
     const where: Prisma.ActivityLogWhereInput = {};
 
@@ -131,7 +144,11 @@ export class ActivityLogsService {
     });
   }
 
-  async getEntityActivity(entityType: string, entityId: string, limit: number = 100) {
+  async getEntityActivity(
+    entityType: string,
+    entityId: string,
+    limit: number = 100,
+  ) {
     return this.prisma.activityLog.findMany({
       where: {
         entity_type: entityType,
@@ -206,15 +223,21 @@ export class ActivityLogsService {
     }
 
     // Calculate login/logout counts
-    const loginCount = loginLogoutStats.find(s => s.action === 'LOGIN')?._count.id || 0;
-    const logoutCount = loginLogoutStats.find(s => s.action === 'LOGOUT')?._count.id || 0;
+    const loginCount =
+      loginLogoutStats.find((s) => s.action === 'LOGIN')?._count.id || 0;
+    const logoutCount =
+      loginLogoutStats.find((s) => s.action === 'LOGOUT')?._count.id || 0;
 
     return {
       total_activities: totalActivities,
       most_active_user: mostActiveUserDetails,
-      most_common_action: mostCommonAction.length > 0
-        ? { action: mostCommonAction[0].action, count: mostCommonAction[0]._count.id }
-        : null,
+      most_common_action:
+        mostCommonAction.length > 0
+          ? {
+              action: mostCommonAction[0].action,
+              count: mostCommonAction[0]._count.id,
+            }
+          : null,
       login_count: loginCount,
       logout_count: logoutCount,
     };
@@ -232,7 +255,9 @@ export class ActivityLogsService {
       },
     });
 
-    this.logger.log(`Cleaned up ${result.count} activity logs older than ${olderThanDays} days`);
+    this.logger.log(
+      `Cleaned up ${result.count} activity logs older than ${olderThanDays} days`,
+    );
     return { deleted_count: result.count };
   }
 
@@ -256,14 +281,14 @@ export class ActivityLogsService {
       'User Name': log.user?.full_name || 'Unknown',
       'User Email': log.user?.email || '-',
       'User ID': log.user_id,
-      'Action': log.action,
+      Action: log.action,
       'Entity Type': log.entity_type || '-',
       'Entity ID': log.entity_id || '-',
-      'Description': log.description,
+      Description: log.description,
       'IP Address': log.ip_address || '-',
       'User Agent': log.user_agent || '-',
       'Device Name': log.device_name || '-',
-      'Metadata': log.metadata ? JSON.stringify(log.metadata) : '-',
+      Metadata: log.metadata ? JSON.stringify(log.metadata) : '-',
     }));
 
     // Create worksheet
@@ -271,19 +296,19 @@ export class ActivityLogsService {
 
     // Set column widths
     const colWidths = [
-      { wch: 8 },   // Sr. No.
-      { wch: 22 },  // Date & Time
-      { wch: 25 },  // User Name
-      { wch: 30 },  // User Email
-      { wch: 36 },  // User ID
-      { wch: 12 },  // Action
-      { wch: 20 },  // Entity Type
-      { wch: 36 },  // Entity ID
-      { wch: 50 },  // Description
-      { wch: 15 },  // IP Address
-      { wch: 40 },  // User Agent
-      { wch: 20 },  // Device Name
-      { wch: 50 },  // Metadata
+      { wch: 8 }, // Sr. No.
+      { wch: 22 }, // Date & Time
+      { wch: 25 }, // User Name
+      { wch: 30 }, // User Email
+      { wch: 36 }, // User ID
+      { wch: 12 }, // Action
+      { wch: 20 }, // Entity Type
+      { wch: 36 }, // Entity ID
+      { wch: 50 }, // Description
+      { wch: 15 }, // IP Address
+      { wch: 40 }, // User Agent
+      { wch: 20 }, // Device Name
+      { wch: 50 }, // Metadata
     ];
     ws['!cols'] = colWidths;
 

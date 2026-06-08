@@ -15,7 +15,12 @@ import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('stores')
 @Controller('stores')
@@ -23,7 +28,9 @@ export class StoresController {
   constructor(private readonly storesService: StoresService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all store records with pagination and filtering' })
+  @ApiOperation({
+    summary: 'Get all store records with pagination and filtering',
+  })
   @ApiQuery({
     name: 'skip',
     required: false,
@@ -159,12 +166,21 @@ export class StoresController {
       const store = ctx.result;
       const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
       const details = [
-        store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+        store?.barcode || ctx.body.barcode
+          ? `Barcode: ${store?.barcode || ctx.body.barcode}`
+          : null,
         store?.material?.name ? `Material: ${store.material.name}` : null,
         store?.customer?.name ? `Customer: ${store.customer.name}` : null,
         store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
-      ].filter(Boolean).join(', ');
-      return createDescription('Store Record', `Frame ${frame}`, details || undefined, ctx.user.full_name);
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription(
+        'Store Record',
+        `Frame ${frame}`,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateStoreDto) {
@@ -180,9 +196,13 @@ export class StoresController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Store Record "Frame ${frame}" — ${diff}`
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
@@ -201,7 +221,11 @@ export class StoresController {
     description: (ctx) => {
       const store = ctx.result;
       const frame = store?.frame_number || ctx.params.id;
-      return deleteDescription('Store Record', `Frame ${frame}`, ctx.user.full_name);
+      return deleteDescription(
+        'Store Record',
+        `Frame ${frame}`,
+        ctx.user.full_name,
+      );
     },
   })
   remove(@Param('id') id: string) {

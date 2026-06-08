@@ -33,7 +33,8 @@ export class MobileStoreReturnsController {
   @Get()
   @ApiOperation({
     summary: '[Mobile] List pending store returns for the logged-in engineer',
-    description: 'Returns a list of store records with "Pending" return status assigned to the logged-in technician.',
+    description:
+      'Returns a list of store records with "Pending" return status assigned to the logged-in technician.',
   })
   @ApiQuery({
     name: 'skip',
@@ -53,7 +54,10 @@ export class MobileStoreReturnsController {
     type: String,
     description: 'Search by frame number, barcode or customer name',
   })
-  @ApiResponse({ status: 200, description: 'Paginated list of pending store returns' })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of pending store returns',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   findAll(
     @Request() req: any,
@@ -71,13 +75,23 @@ export class MobileStoreReturnsController {
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',
-    description: 'Submits courier/provider name and invoice/receipt number to complete a store return. The status transitions to completed.',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return. The status transitions to completed.',
   })
   @ApiBody({ type: UpdateStoreReturnDto })
-  @ApiResponse({ status: 200, description: 'Store return completed successfully' })
-  @ApiResponse({ status: 400, description: 'Validation error or status is not Pending' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or status is not Pending',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from updating another engineer\'s store record' })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden from updating another engineer's store record",
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.UPDATE,
@@ -86,9 +100,13 @@ export class MobileStoreReturnsController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} completed return`
+        : 'Completed return';
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
@@ -111,7 +129,8 @@ export class MobileStoresController {
   @Get()
   @ApiOperation({
     summary: '[Mobile] List store records assigned to the logged-in engineer',
-    description: 'Returns a paginated list of store records assigned to the logged-in technician/service engineer, with optional search and status filters.',
+    description:
+      'Returns a paginated list of store records assigned to the logged-in technician/service engineer, with optional search and status filters.',
   })
   @ApiQuery({
     name: 'skip',
@@ -141,7 +160,8 @@ export class MobileStoresController {
     name: 'inflow_status',
     required: false,
     type: String,
-    description: 'Filter by inflow status (Inflow, Outflow, Available, Damaged)',
+    description:
+      'Filter by inflow status (Inflow, Outflow, Available, Damaged)',
   })
   @ApiQuery({
     name: 'warranty_status',
@@ -173,13 +193,23 @@ export class MobileStoresController {
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',
-    description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
   })
   @ApiBody({ type: UpdateStoreReturnDto })
-  @ApiResponse({ status: 200, description: 'Store return completed successfully' })
-  @ApiResponse({ status: 400, description: 'Validation error or status is not Pending' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or status is not Pending',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from updating another engineer\'s store record' })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden from updating another engineer's store record",
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.UPDATE,
@@ -188,9 +218,13 @@ export class MobileStoresController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} completed return`
+        : 'Completed return';
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
@@ -205,13 +239,23 @@ export class MobileStoresController {
   @Put(':id/return')
   @ApiOperation({
     summary: '[Mobile] Submit store return details (nested route)',
-    description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
   })
   @ApiBody({ type: UpdateStoreReturnDto })
-  @ApiResponse({ status: 200, description: 'Store return completed successfully' })
-  @ApiResponse({ status: 400, description: 'Validation error or status is not Pending' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or status is not Pending',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from updating another engineer\'s store record' })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden from updating another engineer's store record",
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.UPDATE,
@@ -220,9 +264,13 @@ export class MobileStoresController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} completed return` : 'Completed return';
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} completed return`
+        : 'Completed return';
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })

@@ -215,7 +215,9 @@ let AuthController = AuthController_1 = class AuthController {
     }
     async forgotPassword(forgotPasswordDto) {
         await this.authService.forgotPassword(forgotPasswordDto.email);
-        return { message: 'If the email exists, a password reset link has been sent' };
+        return {
+            message: 'If the email exists, a password reset link has been sent',
+        };
     }
     async resetPassword(resetPasswordDto) {
         await this.authService.resetPassword(resetPasswordDto.token, resetPasswordDto.password);
@@ -234,7 +236,9 @@ let AuthController = AuthController_1 = class AuthController {
             ip_address: req.ip,
             user_agent: req.headers['user-agent'],
         });
-        return { message: 'Password changed successfully. Please login again with your new password.' };
+        return {
+            message: 'Password changed successfully. Please login again with your new password.',
+        };
     }
 };
 exports.AuthController = AuthController;

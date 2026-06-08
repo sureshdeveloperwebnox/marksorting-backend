@@ -29,16 +29,46 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 const ticketSchema = {
   type: 'object',
   properties: {
-    id: { type: 'string', format: 'uuid', example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+    id: {
+      type: 'string',
+      format: 'uuid',
+      example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    },
     ticket_number: { type: 'string', example: 'TKT-20260601-ABCDEF' },
     user_id: { type: 'string', format: 'uuid', nullable: true, example: null },
-    service_engineer_id: { type: 'string', format: 'uuid', nullable: true, example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-    customer_id: { type: 'string', format: 'uuid', nullable: true, example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
-    mill_id: { type: 'string', format: 'uuid', nullable: true, example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+    service_engineer_id: {
+      type: 'string',
+      format: 'uuid',
+      nullable: true,
+      example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    },
+    customer_id: {
+      type: 'string',
+      format: 'uuid',
+      nullable: true,
+      example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    },
+    mill_id: {
+      type: 'string',
+      format: 'uuid',
+      nullable: true,
+      example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    },
     subject: { type: 'string', example: 'Printer issue' },
-    description: { type: 'string', example: 'Sorting machine printer is offline.' },
-    status: { type: 'string', enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'], example: 'OPEN' },
-    priority: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'], example: 'MEDIUM' },
+    description: {
+      type: 'string',
+      example: 'Sorting machine printer is offline.',
+    },
+    status: {
+      type: 'string',
+      enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'],
+      example: 'OPEN',
+    },
+    priority: {
+      type: 'string',
+      enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
+      example: 'MEDIUM',
+    },
     created_at: { type: 'string', format: 'date-time' },
     updated_at: { type: 'string', format: 'date-time' },
     service_engineer: {
@@ -107,13 +137,24 @@ export class MobileTicketsController {
       '- **Other roles** (Admin, Manager…) – all tickets are returned.\n\n' +
       'Results are paginated and ordered by `created_at DESC`.',
   })
-  @ApiQuery({ name: 'skip', required: false, type: Number, description: 'Offset — number of records to skip (default `0`)' })
-  @ApiQuery({ name: 'take', required: false, type: Number, description: 'Page size — number of records to return (default `10`)' })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Offset — number of records to skip (default `0`)',
+  })
+  @ApiQuery({
+    name: 'take',
+    required: false,
+    type: Number,
+    description: 'Page size — number of records to return (default `10`)',
+  })
   @ApiQuery({
     name: 'search',
     required: false,
     type: String,
-    description: 'Full-text search across ticket number, subject, description, customer name, and mill name',
+    description:
+      'Full-text search across ticket number, subject, description, customer name, and mill name',
   })
   @ApiQuery({
     name: 'status',
@@ -127,8 +168,16 @@ export class MobileTicketsController {
     enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
     description: 'Filter by ticket priority',
   })
-  @ApiResponse({ status: 200, description: 'Paginated list of support tickets', schema: paginatedTicketsSchema })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of support tickets',
+    schema: paginatedTicketsSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
   findAll(
     @Request() req: any,
     @Query('skip') skip?: string,
@@ -156,11 +205,32 @@ export class MobileTicketsController {
       'Returns full support ticket details including assigned service engineer, customer, and mill.\n\n' +
       'Service Engineers receive **403** if they are not assigned to the ticket.',
   })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'Ticket UUID' })
-  @ApiResponse({ status: 200, description: 'Support ticket details', schema: ticketSchema })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') })
-  @ApiResponse({ status: 403, description: 'Not assigned to this ticket', schema: errorSchema('You do not have permission to access this ticket') })
-  @ApiResponse({ status: 404, description: 'Ticket not found', schema: errorSchema('Support ticket with ID "..." not found') })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Ticket UUID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Support ticket details',
+    schema: ticketSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Not assigned to this ticket',
+    schema: errorSchema('You do not have permission to access this ticket'),
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+    schema: errorSchema('Support ticket with ID "..." not found'),
+  })
   findOne(@Param('id') id: string, @Request() req: any) {
     return this.ticketsService.findById(id, req.user);
   }
@@ -176,9 +246,21 @@ export class MobileTicketsController {
       'Also validates that the selected mill belongs to the selected customer.',
   })
   @ApiBody({ type: CreateMobileTicketDto })
-  @ApiResponse({ status: 201, description: 'Support ticket created successfully', schema: ticketSchema })
-  @ApiResponse({ status: 400, description: 'Validation error or relation validation failed', schema: errorSchema('Service engineer not found') })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') })
+  @ApiResponse({
+    status: 201,
+    description: 'Support ticket created successfully',
+    schema: ticketSchema,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or relation validation failed',
+    schema: errorSchema('Service engineer not found'),
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
   create(@Body() dto: CreateMobileTicketDto, @Request() req: any) {
     return this.ticketsService.create(dto, req.user);
   }
@@ -191,13 +273,43 @@ export class MobileTicketsController {
       'Service Engineers receive **403** if they are not assigned to the ticket. ' +
       'They cannot reassign the ticket to another engineer (assignment is forced to their own ID).',
   })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'Ticket UUID to update' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Ticket UUID to update',
+  })
   @ApiBody({ type: UpdateMobileTicketDto })
-  @ApiResponse({ status: 200, description: 'Support ticket updated successfully', schema: { type: 'object', properties: { before: ticketSchema, after: ticketSchema } } })
-  @ApiResponse({ status: 400, description: 'Validation error or relation validation failed', schema: errorSchema('Selected mill does not belong to the selected customer') })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') })
-  @ApiResponse({ status: 403, description: 'Not assigned to this ticket', schema: errorSchema('You do not have permission to access this ticket') })
-  @ApiResponse({ status: 404, description: 'Ticket not found', schema: errorSchema('Support ticket with ID "..." not found') })
+  @ApiResponse({
+    status: 200,
+    description: 'Support ticket updated successfully',
+    schema: {
+      type: 'object',
+      properties: { before: ticketSchema, after: ticketSchema },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error or relation validation failed',
+    schema: errorSchema(
+      'Selected mill does not belong to the selected customer',
+    ),
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Not assigned to this ticket',
+    schema: errorSchema('You do not have permission to access this ticket'),
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+    schema: errorSchema('Support ticket with ID "..." not found'),
+  })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateMobileTicketDto,
@@ -213,11 +325,32 @@ export class MobileTicketsController {
       'Deletes a support ticket record.\n\n' +
       'Service Engineers receive **403** if they are not assigned to the ticket.',
   })
-  @ApiParam({ name: 'id', type: String, format: 'uuid', description: 'Ticket UUID to delete' })
-  @ApiResponse({ status: 200, description: 'Support ticket deleted successfully', schema: ticketSchema })
-  @ApiResponse({ status: 401, description: 'Missing or invalid JWT bearer token', schema: errorSchema('Unauthorized') })
-  @ApiResponse({ status: 403, description: 'Not assigned to this ticket', schema: errorSchema('You do not have permission to access this ticket') })
-  @ApiResponse({ status: 404, description: 'Ticket not found', schema: errorSchema('Support ticket with ID "..." not found') })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    format: 'uuid',
+    description: 'Ticket UUID to delete',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Support ticket deleted successfully',
+    schema: ticketSchema,
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Not assigned to this ticket',
+    schema: errorSchema('You do not have permission to access this ticket'),
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Ticket not found',
+    schema: errorSchema('Support ticket with ID "..." not found'),
+  })
   remove(@Param('id') id: string, @Request() req: any) {
     return this.ticketsService.remove(id, req.user);
   }

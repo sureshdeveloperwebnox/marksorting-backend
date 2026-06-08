@@ -9,7 +9,13 @@ import {
   Logger,
   Body,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WhatsAppService } from '../whatsapp/whatsapp.service';
@@ -37,9 +43,14 @@ export class ReportNotificationsController {
    */
   @Post('service-reports/:id/send-pdf')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send Service Report PDF manually via WhatsApp and Email' })
+  @ApiOperation({
+    summary: 'Send Service Report PDF manually via WhatsApp and Email',
+  })
   @ApiParam({ name: 'id', description: 'Service Report ID' })
-  @ApiResponse({ status: 200, description: 'PDF send request queued successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'PDF send request queued successfully',
+  })
   @ApiResponse({ status: 404, description: 'Service report not found' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   async sendServiceReportPdf(
@@ -49,7 +60,9 @@ export class ReportNotificationsController {
   ) {
     const userId = req.user?.userId;
 
-    this.logger.log(`Manual PDF send requested for Service Report ${reportId} by user ${userId}`);
+    this.logger.log(
+      `Manual PDF send requested for Service Report ${reportId} by user ${userId}`,
+    );
 
     // Emit event for manual PDF delivery
     this.eventEmitter.emit('service-report.send-pdf', {
@@ -72,9 +85,14 @@ export class ReportNotificationsController {
    */
   @Post('installation-reports/:id/send-pdf')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send Installation Report PDF manually via WhatsApp and Email' })
+  @ApiOperation({
+    summary: 'Send Installation Report PDF manually via WhatsApp and Email',
+  })
   @ApiParam({ name: 'id', description: 'Installation Report ID' })
-  @ApiResponse({ status: 200, description: 'PDF send request queued successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'PDF send request queued successfully',
+  })
   @ApiResponse({ status: 404, description: 'Installation report not found' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
   async sendInstallationReportPdf(
@@ -84,7 +102,9 @@ export class ReportNotificationsController {
   ) {
     const userId = req.user?.userId;
 
-    this.logger.log(`Manual PDF send requested for Installation Report ${reportId} by user ${userId}`);
+    this.logger.log(
+      `Manual PDF send requested for Installation Report ${reportId} by user ${userId}`,
+    );
 
     // Emit event for manual PDF delivery
     this.eventEmitter.emit('installation-report.send-pdf', {
@@ -107,7 +127,10 @@ export class ReportNotificationsController {
   @Post('whatsapp/stats')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get WhatsApp queue statistics' })
-  @ApiResponse({ status: 200, description: 'Queue statistics retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Queue statistics retrieved successfully',
+  })
   async getWhatsAppQueueStats() {
     const stats = await this.whatsAppService.getQueueStats();
     return {

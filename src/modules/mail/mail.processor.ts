@@ -41,7 +41,10 @@ export class MailProcessor extends WorkerHost {
       });
       this.logger.log('Nodemailer SMTP Transporter initialized successfully.');
     } catch (error) {
-      this.logger.error('Failed to initialize Nodemailer SMTP Transporter. Falling back to Mock Mode.', error);
+      this.logger.error(
+        'Failed to initialize Nodemailer SMTP Transporter. Falling back to Mock Mode.',
+        error,
+      );
       this.isMockMode = true;
     }
   }
@@ -56,16 +59,18 @@ export class MailProcessor extends WorkerHost {
 
   private async handleSendMail(job: Job<any>) {
     const { to, subject, html } = job.data;
-    const fromName = this.configService.get<string>('mail.fromName') || 'Mark Sorting System';
-    const fromUser = this.configService.get<string>('mail.user') || 'no-reply@marksorting.com';
+    const fromName =
+      this.configService.get<string>('mail.fromName') || 'Mark Sorting System';
+    const fromUser =
+      this.configService.get<string>('mail.user') || 'no-reply@marksorting.com';
 
     if (this.isMockMode || !this.transporter) {
       this.logger.log(
         `[Mock Email] Sending Email:\n` +
-        `  To: ${to}\n` +
-        `  From: "${fromName}" <${fromUser}>\n` +
-        `  Subject: ${subject}\n` +
-        `  HTML Length: ${html?.length || 0} characters`,
+          `  To: ${to}\n` +
+          `  From: "${fromName}" <${fromUser}>\n` +
+          `  Subject: ${subject}\n` +
+          `  HTML Length: ${html?.length || 0} characters`,
       );
       return;
     }
@@ -75,7 +80,14 @@ export class MailProcessor extends WorkerHost {
       let logoPath = path.join(__dirname, 'assets', 'logo.png');
       if (!fs.existsSync(logoPath)) {
         // Fallback for ts-node development mode
-        logoPath = path.join(process.cwd(), 'src', 'modules', 'mail', 'assets', 'logo.png');
+        logoPath = path.join(
+          process.cwd(),
+          'src',
+          'modules',
+          'mail',
+          'assets',
+          'logo.png',
+        );
       }
 
       const attachments: any[] = [];
@@ -86,7 +98,9 @@ export class MailProcessor extends WorkerHost {
           cid: 'logo',
         });
       } else {
-        this.logger.warn(`Logo image not found at ${logoPath}. Sending email without logo attachment.`);
+        this.logger.warn(
+          `Logo image not found at ${logoPath}. Sending email without logo attachment.`,
+        );
       }
 
       const info = await this.transporter.sendMail({
@@ -97,26 +111,33 @@ export class MailProcessor extends WorkerHost {
         attachments,
       });
 
-      this.logger.log(`Email successfully sent to ${to}. MessageId: ${info.messageId}`);
+      this.logger.log(
+        `Email successfully sent to ${to}. MessageId: ${info.messageId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to send email to ${to} for job ${job.id}`, error);
+      this.logger.error(
+        `Failed to send email to ${to} for job ${job.id}`,
+        error,
+      );
       throw error; // Let BullMQ handle retries and backoff
     }
   }
 
   private async handleSendMailWithAttachment(job: Job<any>) {
     const { to, subject, html, attachments } = job.data;
-    const fromName = this.configService.get<string>('mail.fromName') || 'Mark Sorting System';
-    const fromUser = this.configService.get<string>('mail.user') || 'no-reply@marksorting.com';
+    const fromName =
+      this.configService.get<string>('mail.fromName') || 'Mark Sorting System';
+    const fromUser =
+      this.configService.get<string>('mail.user') || 'no-reply@marksorting.com';
 
     if (this.isMockMode || !this.transporter) {
       this.logger.log(
         `[Mock Email with Attachment] Sending Email:\n` +
-        `  To: ${to}\n` +
-        `  From: "${fromName}" <${fromUser}>\n` +
-        `  Subject: ${subject}\n` +
-        `  HTML Length: ${html?.length || 0} characters\n` +
-        `  Attachments: ${attachments?.length || 0} files`,
+          `  To: ${to}\n` +
+          `  From: "${fromName}" <${fromUser}>\n` +
+          `  Subject: ${subject}\n` +
+          `  HTML Length: ${html?.length || 0} characters\n` +
+          `  Attachments: ${attachments?.length || 0} files`,
       );
       return;
     }
@@ -126,11 +147,18 @@ export class MailProcessor extends WorkerHost {
       let logoPath = path.join(__dirname, 'assets', 'logo.png');
       if (!fs.existsSync(logoPath)) {
         // Fallback for ts-node development mode
-        logoPath = path.join(process.cwd(), 'src', 'modules', 'mail', 'assets', 'logo.png');
+        logoPath = path.join(
+          process.cwd(),
+          'src',
+          'modules',
+          'mail',
+          'assets',
+          'logo.png',
+        );
       }
 
       const emailAttachments: any[] = [];
-      
+
       // Add logo if exists
       if (fs.existsSync(logoPath)) {
         emailAttachments.push({
@@ -145,7 +173,10 @@ export class MailProcessor extends WorkerHost {
         for (const attachment of attachments) {
           emailAttachments.push({
             filename: attachment.filename,
-            content: Buffer.from(attachment.content, attachment.encoding || 'base64'),
+            content: Buffer.from(
+              attachment.content,
+              attachment.encoding || 'base64',
+            ),
             contentType: attachment.contentType || 'application/octet-stream',
           });
         }
@@ -159,9 +190,14 @@ export class MailProcessor extends WorkerHost {
         attachments: emailAttachments,
       });
 
-      this.logger.log(`Email with attachment successfully sent to ${to}. MessageId: ${info.messageId}`);
+      this.logger.log(
+        `Email with attachment successfully sent to ${to}. MessageId: ${info.messageId}`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to send email with attachment to ${to} for job ${job.id}`, error);
+      this.logger.error(
+        `Failed to send email with attachment to ${to} for job ${job.id}`,
+        error,
+      );
       throw error; // Let BullMQ handle retries and backoff
     }
   }

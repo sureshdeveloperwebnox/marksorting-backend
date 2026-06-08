@@ -26,13 +26,13 @@ export class ReportNotificationsEventListener {
     millEmail?: string;
   }) {
     try {
-      const { 
-        reportId, 
-        reportNumber, 
-        millId, 
-        millName, 
-        millWhatsappNumber, 
-        millEmail 
+      const {
+        reportId,
+        reportNumber,
+        millId,
+        millName,
+        millWhatsappNumber,
+        millEmail,
       } = payload;
 
       this.logger.log(
@@ -53,7 +53,8 @@ export class ReportNotificationsEventListener {
         });
 
         if (report) {
-          whatsappNumber = whatsappNumber || report.mill_whatsapp_number || undefined;
+          whatsappNumber =
+            whatsappNumber || report.mill_whatsapp_number || undefined;
           email = email || report.mill_email || undefined;
         }
       }
@@ -76,13 +77,13 @@ export class ReportNotificationsEventListener {
       if (result.whatsappSent || result.emailSent) {
         this.logger.log(
           `Service Report ${reportNumber} PDF delivery initiated. ` +
-          `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
+            `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
         );
       } else {
         this.logger.error(
           `Failed to deliver Service Report ${reportNumber} PDF. ` +
-          `WhatsApp Error: ${result.whatsappError || 'N/A'}, ` +
-          `Email Error: ${result.emailError || 'N/A'}`,
+            `WhatsApp Error: ${result.whatsappError || 'N/A'}, ` +
+            `Email Error: ${result.emailError || 'N/A'}`,
         );
       }
     } catch (error) {
@@ -107,13 +108,13 @@ export class ReportNotificationsEventListener {
     millEmail?: string;
   }) {
     try {
-      const { 
-        reportId, 
-        reportNumber, 
-        millId, 
-        millName, 
-        millWhatsappNumber, 
-        millEmail 
+      const {
+        reportId,
+        reportNumber,
+        millId,
+        millName,
+        millWhatsappNumber,
+        millEmail,
       } = payload;
 
       this.logger.log(
@@ -134,7 +135,8 @@ export class ReportNotificationsEventListener {
         });
 
         if (report) {
-          whatsappNumber = whatsappNumber || report.mill_whatsapp_number || undefined;
+          whatsappNumber =
+            whatsappNumber || report.mill_whatsapp_number || undefined;
           email = email || report.mill_email || undefined;
         }
       }
@@ -147,23 +149,24 @@ export class ReportNotificationsEventListener {
       }
 
       // Send the report
-      const result = await this.reportNotificationsService.sendInstallationReport(
-        reportId,
-        millName,
-        email,
-        whatsappNumber || '',
-      );
+      const result =
+        await this.reportNotificationsService.sendInstallationReport(
+          reportId,
+          millName,
+          email,
+          whatsappNumber || '',
+        );
 
       if (result.whatsappSent || result.emailSent) {
         this.logger.log(
           `Installation Report ${reportNumber} PDF delivery initiated. ` +
-          `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
+            `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
         );
       } else {
         this.logger.error(
           `Failed to deliver Installation Report ${reportNumber} PDF. ` +
-          `WhatsApp Error: ${result.whatsappError || 'N/A'}, ` +
-          `Email Error: ${result.emailError || 'N/A'}`,
+            `WhatsApp Error: ${result.whatsappError || 'N/A'}, ` +
+            `Email Error: ${result.emailError || 'N/A'}`,
         );
       }
     } catch (error) {
@@ -214,7 +217,7 @@ export class ReportNotificationsEventListener {
 
       this.logger.log(
         `Manual Service Report PDF send completed. ` +
-        `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
+          `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
       );
     } catch (error) {
       this.logger.error('Error handling service-report.send-pdf event', error);
@@ -252,19 +255,23 @@ export class ReportNotificationsEventListener {
 
       const millName = report.mill?.name || 'Unknown Mill';
 
-      const result = await this.reportNotificationsService.sendInstallationReport(
-        reportId,
-        millName,
-        report.mill_email,
-        report.mill_whatsapp_number,
-      );
+      const result =
+        await this.reportNotificationsService.sendInstallationReport(
+          reportId,
+          millName,
+          report.mill_email,
+          report.mill_whatsapp_number,
+        );
 
       this.logger.log(
         `Manual Installation Report PDF send completed. ` +
-        `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
+          `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`,
       );
     } catch (error) {
-      this.logger.error('Error handling installation-report.send-pdf event', error);
+      this.logger.error(
+        'Error handling installation-report.send-pdf event',
+        error,
+      );
     }
   }
 }

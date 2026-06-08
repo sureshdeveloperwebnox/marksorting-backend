@@ -18,7 +18,7 @@ export class CreateExpenseDto {
     required: false,
     description:
       'List of technician UUIDs assigned to this expense. ' +
-      'On the mobile endpoint a Service Engineer\'s own ID is automatically appended, ' +
+      "On the mobile endpoint a Service Engineer's own ID is automatically appended, " +
       'so this field may be omitted from the mobile request body.',
   })
   @IsArray()
@@ -29,7 +29,8 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
     required: false,
-    description: 'UUID of the customer associated with this expense (optional). Used for client payload compatibility and stripped before DB insert.',
+    description:
+      'UUID of the customer associated with this expense (optional). Used for client payload compatibility and stripped before DB insert.',
   })
   @IsUUID()
   @IsOptional()
@@ -47,7 +48,8 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'Coimbatore',
     required: false,
-    description: 'Free-text location where the expense was incurred. Auto-populated from the selected mill\'s address if available.',
+    description:
+      "Free-text location where the expense was incurred. Auto-populated from the selected mill's address if available.",
   })
   @IsString()
   @IsOptional()
@@ -55,14 +57,16 @@ export class CreateExpenseDto {
 
   @ApiProperty({
     example: '2026-05-26',
-    description: 'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
+    description:
+      'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
   })
   @IsDateString()
   visit_date: string;
 
   @ApiProperty({
     example: '10:30',
-    description: 'Time of the site visit in HH:MM 24-hour format. **Required.**',
+    description:
+      'Time of the site visit in HH:MM 24-hour format. **Required.**',
   })
   @IsString()
   @IsNotEmpty()
@@ -81,7 +85,8 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: 'Taxi from railway station to mill site',
     required: false,
-    description: 'Additional remarks or description about the expense (e.g. vendor name, hotel details).',
+    description:
+      'Additional remarks or description about the expense (e.g. vendor name, hotel details).',
   })
   @IsString()
   @IsOptional()
@@ -91,7 +96,8 @@ export class CreateExpenseDto {
     example: 1500,
     required: false,
     minimum: 0,
-    description: 'Expense amount in INR (₹). Defaults to `0` if omitted. Must be ≥ 0.',
+    description:
+      'Expense amount in INR (₹). Defaults to `0` if omitted. Must be ≥ 0.',
   })
   @IsNumber()
   @Min(0)

@@ -108,9 +108,13 @@ __decorate([
             const material = ctx.result;
             const name = material?.name || ctx.body.name || 'Unknown';
             const details = [
-                material?.unit || ctx.body.unit ? `Unit: ${material?.unit || ctx.body.unit}` : null,
+                material?.unit || ctx.body.unit
+                    ? `Unit: ${material?.unit || ctx.body.unit}`
+                    : null,
                 material?.status ? `Status: ${material.status}` : null,
-            ].filter(Boolean).join(', ');
+            ]
+                .filter(Boolean)
+                .join(', ');
             return (0, description_helper_1.createDescription)('Material', name, details || undefined, ctx.user.full_name);
         },
     }),
@@ -131,7 +135,9 @@ __decorate([
             const after = ctx.result?.after;
             const name = after?.name || before?.name || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Material "${name}" — ${diff}`
                 : `${who} Material "${name}" (no changes detected)`;

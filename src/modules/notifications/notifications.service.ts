@@ -53,7 +53,9 @@ export class NotificationsService {
     metaData?: Record<string, any>,
   ) {
     await Promise.all(
-      userIds.map((uid) => this.createNotification(uid, title, message, type, metaData)),
+      userIds.map((uid) =>
+        this.createNotification(uid, title, message, type, metaData),
+      ),
     );
   }
 
@@ -122,11 +124,7 @@ export class NotificationsService {
     return admins.map((a) => a.id);
   }
 
-  async getUserNotifications(
-    userId: string,
-    skip = 0,
-    take = 20,
-  ) {
+  async getUserNotifications(userId: string, skip = 0, take = 20) {
     const [notifications, total, unreadCount] = await Promise.all([
       this.prisma.notification.findMany({
         where: { user_id: userId },
@@ -135,7 +133,9 @@ export class NotificationsService {
         take,
       }),
       this.prisma.notification.count({ where: { user_id: userId } }),
-      this.prisma.notification.count({ where: { user_id: userId, status: 'UNREAD' } }),
+      this.prisma.notification.count({
+        where: { user_id: userId, status: 'UNREAD' },
+      }),
     ]);
     return { notifications, total, unreadCount };
   }
@@ -160,7 +160,11 @@ export class NotificationsService {
     });
   }
 
-  async registerPushToken(userId: string, token: string, deviceType: DeviceType) {
+  async registerPushToken(
+    userId: string,
+    token: string,
+    deviceType: DeviceType,
+  ) {
     return this.prisma.pushToken.upsert({
       where: { user_id_token: { user_id: userId, token } },
       create: { user_id: userId, token, device_type: deviceType },

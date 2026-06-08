@@ -49,7 +49,8 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     this.logger.log(`WhatsApp queued for Service Report ${reportId} to ${millWhatsappNumber}`);
                 }
                 catch (error) {
-                    result.whatsappError = error instanceof Error ? error.message : 'WhatsApp sending failed';
+                    result.whatsappError =
+                        error instanceof Error ? error.message : 'WhatsApp sending failed';
                     this.logger.error(`WhatsApp failed for Service Report ${reportId}`, error);
                 }
             }
@@ -65,7 +66,8 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     this.logger.log(`Email queued for Service Report ${reportId} to ${millEmail}`);
                 }
                 catch (error) {
-                    result.emailError = error instanceof Error ? error.message : 'Email sending failed';
+                    result.emailError =
+                        error instanceof Error ? error.message : 'Email sending failed';
                     this.logger.error(`Email failed for Service Report ${reportId}`, error);
                 }
             }
@@ -96,7 +98,8 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     this.logger.log(`WhatsApp queued for Installation Report ${reportId} to ${millWhatsappNumber}`);
                 }
                 catch (error) {
-                    result.whatsappError = error instanceof Error ? error.message : 'WhatsApp sending failed';
+                    result.whatsappError =
+                        error instanceof Error ? error.message : 'WhatsApp sending failed';
                     this.logger.error(`WhatsApp failed for Installation Report ${reportId}`, error);
                 }
             }
@@ -111,7 +114,8 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     this.logger.log(`Email queued for Installation Report ${reportId} to ${millEmail}`);
                 }
                 catch (error) {
-                    result.emailError = error instanceof Error ? error.message : 'Email sending failed';
+                    result.emailError =
+                        error instanceof Error ? error.message : 'Email sending failed';
                     this.logger.error(`Email failed for Installation Report ${reportId}`, error);
                 }
             }

@@ -8,7 +8,11 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable, tap } from 'rxjs';
 import { ActivityLogService } from '../services/activity-log.service';
-import { LOG_ACTIVITY_KEY, LogActivityOptions, LogActivityContext } from '../../activity-logs/decorators/log-activity.decorator';
+import {
+  LOG_ACTIVITY_KEY,
+  LogActivityOptions,
+  LogActivityContext,
+} from '../../activity-logs/decorators/log-activity.decorator';
 import { Request } from 'express';
 
 @Injectable()
@@ -21,10 +25,10 @@ export class ActivityLogInterceptor implements NestInterceptor {
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const options = this.reflector.getAllAndOverride<LogActivityOptions>(LOG_ACTIVITY_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const options = this.reflector.getAllAndOverride<LogActivityOptions>(
+      LOG_ACTIVITY_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!options) {
       return next.handle();
@@ -42,7 +46,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
     const userId = user.id ?? user.userId;
 
     const ipAddress = this.getClientIp(request);
-    const userAgent = request.headers['user-agent'] as string | undefined;
+    const userAgent = request.headers['user-agent'];
     const correlationId = request['correlationId'];
     const requestId = request['requestId'];
     const sessionId = request.cookies?.['session_id'];
@@ -52,7 +56,10 @@ export class ActivityLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       tap(async (result) => {
         try {
-          if (options.ignoreNullEntity && (result === null || result === undefined)) {
+          if (
+            options.ignoreNullEntity &&
+            (result === null || result === undefined)
+          ) {
             return;
           }
 
@@ -80,7 +87,9 @@ export class ActivityLogInterceptor implements NestInterceptor {
 
           let entityId: string | undefined;
           if (options.entityIdParam) {
-            const paramKey = Array.isArray(options.entityIdParam) ? options.entityIdParam[0] : options.entityIdParam;
+            const paramKey = Array.isArray(options.entityIdParam)
+              ? options.entityIdParam[0]
+              : options.entityIdParam;
             entityId = request.params[paramKey];
           } else if (result && typeof result === 'object' && 'id' in result) {
             entityId = result.id;
@@ -105,9 +114,11 @@ export class ActivityLogInterceptor implements NestInterceptor {
             sessionId,
             executionTimeMs: Date.now() - startTime,
           });
-
         } catch (error) {
-          this.logger.error(`Failed to log activity: ${(error as Error).message}`, (error as Error).stack);
+          this.logger.error(
+            `Failed to log activity: ${(error as Error).message}`,
+            (error as Error).stack,
+          );
         }
       }),
     );
@@ -116,7 +127,9 @@ export class ActivityLogInterceptor implements NestInterceptor {
   private getClientIp(request: Request): string | undefined {
     const forwarded = request.headers['x-forwarded-for'];
     if (forwarded) {
-      return (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim();
+      return (typeof forwarded === 'string' ? forwarded : forwarded[0])
+        .split(',')[0]
+        .trim();
     }
     return request.ip || request.socket?.remoteAddress;
   }
@@ -134,7 +147,14 @@ export class ActivityLogInterceptor implements NestInterceptor {
   private sanitizeBody(body: any): any {
     if (!body || typeof body !== 'object') return body;
     const sanitized = { ...body };
-    const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret', 'credit_card'];
+    const sensitiveFields = [
+      'password',
+      'password_hash',
+      'token',
+      'refresh_token',
+      'secret',
+      'credit_card',
+    ];
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         sanitized[field] = '***REDACTED***';

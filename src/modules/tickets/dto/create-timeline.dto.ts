@@ -7,7 +7,10 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTimelineDto {
-  @ApiProperty({ example: 'Discussed the sorting machine printer issue with the customer. Order placed for spare parts.' })
+  @ApiProperty({
+    example:
+      'Discussed the sorting machine printer issue with the customer. Order placed for spare parts.',
+  })
   @IsString()
   @IsNotEmpty()
   notes: string;
@@ -22,7 +25,11 @@ export class CreateTimelineDto {
   @IsOptional()
   timeline_date?: string;
 
-  @ApiProperty({ example: 'IN_PROGRESS', enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'], required: false })
+  @ApiProperty({
+    example: 'IN_PROGRESS',
+    enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'ESCALATED'],
+    required: false,
+  })
   @IsString()
   @IsOptional()
   status?: string;

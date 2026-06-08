@@ -15,7 +15,7 @@ async function testUpdate() {
         const token = loginRes.data.access_token;
         console.log('Logged in successfully, token retrieved.');
         const usersRes = await axios_1.default.get(`${backendUrl}/users`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
         });
         const userToUpdate = usersRes.data.users[0];
         if (!userToUpdate) {
@@ -31,7 +31,7 @@ async function testUpdate() {
                 role_id: userToUpdate.role.id,
                 account_status: userToUpdate.account_status,
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             console.log('Scenario 1 Success:', updateRes.data.after ? 'User updated successfully' : 'Failed');
         }
@@ -48,9 +48,11 @@ async function testUpdate() {
                 role_id: userToUpdate.role.id,
                 account_status: userToUpdate.account_status,
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
-            console.log('Scenario 2 Success:', updateRes.data.after ? 'User updated successfully (password changed)' : 'Failed');
+            console.log('Scenario 2 Success:', updateRes.data.after
+                ? 'User updated successfully (password changed)'
+                : 'Failed');
         }
         catch (err) {
             console.error('Scenario 2 Failed with status:', err.response?.status);

@@ -94,7 +94,7 @@ let WhatsAppRabbitMQProcessor = WhatsAppRabbitMQProcessor_1 = class WhatsAppRabb
         return cleaned;
     }
     delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 };
 exports.WhatsAppRabbitMQProcessor = WhatsAppRabbitMQProcessor;

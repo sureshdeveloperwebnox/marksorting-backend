@@ -14,7 +14,12 @@ import { CreateExpenseCategoryDto } from './dto/create-expense-category.dto';
 import { UpdateExpenseCategoryDto } from './dto/update-expense-category.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { createDescription, updateDescription, deleteDescription, buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('expense-categories')
 @Controller('expense-categories')
@@ -79,8 +84,15 @@ export class ExpenseCategoriesController {
     description: (ctx) => {
       const cat = ctx.result;
       const name = cat?.name || ctx.body.name || 'Unknown';
-      const details = ctx.body.description ? `Description: ${ctx.body.description}` : undefined;
-      return createDescription('Expense Category', name, details, ctx.user.full_name);
+      const details = ctx.body.description
+        ? `Description: ${ctx.body.description}`
+        : undefined;
+      return createDescription(
+        'Expense Category',
+        name,
+        details,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateExpenseCategoryDto) {
@@ -97,8 +109,11 @@ export class ExpenseCategoriesController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.name || before?.name || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Expense Category "${name}" — ${diff}`
         : `${who} Expense Category "${name}" (no changes detected)`;

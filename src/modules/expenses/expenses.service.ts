@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -8,9 +13,14 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
 import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
 
-
 const INCLUDE_SHAPE = {
-  mill: { select: { id: true, name: true } },
+  mill: {
+    select: {
+      id: true,
+      name: true,
+      customer: { select: { id: true, name: true } },
+    },
+  },
   expenseCategory: { select: { id: true, name: true } },
   technicians: {
     include: { technician: { select: { id: true, full_name: true } } },
@@ -36,7 +46,7 @@ export class ExpensesService {
    */
   private mapExpenseImageUrls(expense: any): any {
     if (!expense) return expense;
-    
+
     return {
       ...expense,
       expense_images: (expense.expense_images || []).map((key: string) => {
@@ -52,7 +62,7 @@ export class ExpensesService {
    * Transform array of expenses with image URLs
    */
   private mapExpensesImageUrls(expenses: any[]): any[] {
-    return expenses.map(expense => this.mapExpenseImageUrls(expense));
+    return expenses.map((expense) => this.mapExpenseImageUrls(expense));
   }
 
   async findAll(
@@ -71,7 +81,8 @@ export class ExpensesService {
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
-    const { skip, take, search, status, technicianId, dateFrom, dateTo } = params;
+    const { skip, take, search, status, technicianId, dateFrom, dateTo } =
+      params;
 
     const where: any = { deleted_at: null };
 
@@ -174,14 +185,20 @@ export class ExpensesService {
     return expenseWithUrls;
   }
 
-  async create(dto: CreateExpenseDto | CreateMobileExpenseDto, user?: { userId: string; role: string }) {
+  async create(
+    dto: CreateExpenseDto | CreateMobileExpenseDto,
+    user?: { userId: string; role: string },
+  ) {
     const rawDto = dto as any;
     const { technician_ids, ...expenseData } = rawDto;
     delete expenseData.customer_id;
     delete expenseData.technician_id;
 
     const finalTechnicianIds = [...(technician_ids || [])];
-    if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+    if (
+      rawDto.technician_id &&
+      !finalTechnicianIds.includes(rawDto.technician_id)
+    ) {
       finalTechnicianIds.push(rawDto.technician_id);
     }
 
@@ -302,10 +319,14 @@ export class ExpensesService {
     delete expenseData.customer_id;
     delete expenseData.technician_id;
 
-    let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
+    let finalTechnicianIds =
+      technician_ids !== undefined ? [...technician_ids] : undefined;
     if (rawDto.technician_id !== undefined) {
       if (finalTechnicianIds !== undefined) {
-        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+        if (
+          rawDto.technician_id &&
+          !finalTechnicianIds.includes(rawDto.technician_id)
+        ) {
           finalTechnicianIds.push(rawDto.technician_id);
         }
       } else {
@@ -399,9 +420,8 @@ export class ExpensesService {
     await this.invalidateCache(id);
 
     if ((dto as any).status && expense) {
-      const technicianUserIds: string[] = (expense as any).technicians?.map(
-        (t: any) => t.technician_id,
-      ) ?? [];
+      const technicianUserIds: string[] =
+        (expense as any).technicians?.map((t: any) => t.technician_id) ?? [];
       this.eventEmitter.emit('expense.status_updated', {
         expenseNumber: expense.expense_number,
         status: expense.status,

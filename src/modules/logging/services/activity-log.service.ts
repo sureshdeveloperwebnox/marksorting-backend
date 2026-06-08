@@ -35,7 +35,7 @@ export class ActivityLogService {
   async create(options: CreateActivityLogOptions): Promise<void> {
     try {
       const deviceInfo = this.parseUserAgent(options.userAgent);
-      
+
       const logData = {
         userId: options.userId,
         action: options.action,
@@ -75,23 +75,27 @@ export class ActivityLogService {
           },
         });
       } else {
-        await this.logQueue.addActivityLog(logData, { priority: options.priority });
+        await this.logQueue.addActivityLog(logData, {
+          priority: options.priority,
+        });
       }
 
       this.eventEmitter.emit('activity-log.created', logData);
-
     } catch (error) {
-      this.logger.error(`Failed to create activity log: ${(error as Error).message}`, (error as Error).stack);
+      this.logger.error(
+        `Failed to create activity log: ${(error as Error).message}`,
+        (error as Error).stack,
+      );
     }
   }
 
   async findAll(query: any) {
-    const { 
-      skip = 0, 
-      take = 25, 
-      userId, 
-      action, 
-      entityType, 
+    const {
+      skip = 0,
+      take = 25,
+      userId,
+      action,
+      entityType,
       entityId,
       startDate,
       endDate,
@@ -202,15 +206,21 @@ export class ActivityLogService {
       }
     }
 
-    const loginCount = loginLogoutStats.find(s => s.action === 'LOGIN')?._count.id || 0;
-    const logoutCount = loginLogoutStats.find(s => s.action === 'LOGOUT')?._count.id || 0;
+    const loginCount =
+      loginLogoutStats.find((s) => s.action === 'LOGIN')?._count.id || 0;
+    const logoutCount =
+      loginLogoutStats.find((s) => s.action === 'LOGOUT')?._count.id || 0;
 
     return {
       total_activities: totalActivities,
       most_active_user: mostActiveUserDetails,
-      most_common_action: mostCommonAction.length > 0
-        ? { action: mostCommonAction[0].action, count: mostCommonAction[0]._count.id }
-        : null,
+      most_common_action:
+        mostCommonAction.length > 0
+          ? {
+              action: mostCommonAction[0].action,
+              count: mostCommonAction[0]._count.id,
+            }
+          : null,
       login_count: loginCount,
       logout_count: logoutCount,
     };
@@ -229,7 +239,11 @@ export class ActivityLogService {
     });
   }
 
-  async getEntityActivity(entityType: string, entityId: string, limit: number = 100) {
+  async getEntityActivity(
+    entityType: string,
+    entityId: string,
+    limit: number = 100,
+  ) {
     return this.prisma.activityLog.findMany({
       where: { entity_type: entityType, entity_id: entityId },
       orderBy: { created_at: 'desc' },
@@ -253,11 +267,17 @@ export class ActivityLogService {
       },
     });
 
-    this.logger.log(`Cleaned up ${result.count} activity logs older than ${olderThanDays} days`);
+    this.logger.log(
+      `Cleaned up ${result.count} activity logs older than ${olderThanDays} days`,
+    );
     return { deleted: result.count };
   }
 
-  private parseUserAgent(userAgent?: string): { deviceName: string; browser: string; os: string } {
+  private parseUserAgent(userAgent?: string): {
+    deviceName: string;
+    browser: string;
+    os: string;
+  } {
     if (!userAgent) {
       return { deviceName: 'Unknown', browser: 'Unknown', os: 'Unknown' };
     }

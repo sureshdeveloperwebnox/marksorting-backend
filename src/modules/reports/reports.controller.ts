@@ -6,7 +6,13 @@ import {
   Request,
   Res,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiResponse,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -27,7 +33,7 @@ export class ReportsController {
     entityType: 'reports',
     description: (ctx) => {
       const exportType = ctx.query.export;
-      return exportType 
+      return exportType
         ? `Exported service reports as ${exportType.toUpperCase()}`
         : 'Viewed service reports list';
     },
@@ -42,7 +48,12 @@ export class ReportsController {
   @ApiQuery({ name: 'dateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
-  @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
+  @ApiQuery({
+    name: 'export',
+    required: false,
+    type: String,
+    description: 'pdf, csv, excel',
+  })
   async getServices(
     @Request() req: any,
     @Res() res: Response,
@@ -70,9 +81,13 @@ export class ReportsController {
     };
 
     if (exportType) {
-      const { buffer, fileName, contentType } = await this.reportsService.exportServices(params, req.user, exportType);
+      const { buffer, fileName, contentType } =
+        await this.reportsService.exportServices(params, req.user, exportType);
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName}"`,
+      );
       res.setHeader('Content-Length', buffer.length);
       return res.end(buffer);
     }
@@ -88,7 +103,7 @@ export class ReportsController {
     entityType: 'reports',
     description: (ctx) => {
       const exportType = ctx.query.export;
-      return exportType 
+      return exportType
         ? `Exported installation reports as ${exportType.toUpperCase()}`
         : 'Viewed installation reports list';
     },
@@ -102,7 +117,12 @@ export class ReportsController {
   @ApiQuery({ name: 'dateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
-  @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
+  @ApiQuery({
+    name: 'export',
+    required: false,
+    type: String,
+    description: 'pdf, csv, excel',
+  })
   async getInstallations(
     @Request() req: any,
     @Res() res: Response,
@@ -128,9 +148,17 @@ export class ReportsController {
     };
 
     if (exportType) {
-      const { buffer, fileName, contentType } = await this.reportsService.exportInstallations(params, req.user, exportType);
+      const { buffer, fileName, contentType } =
+        await this.reportsService.exportInstallations(
+          params,
+          req.user,
+          exportType,
+        );
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName}"`,
+      );
       res.setHeader('Content-Length', buffer.length);
       return res.end(buffer);
     }
@@ -146,7 +174,7 @@ export class ReportsController {
     entityType: 'reports',
     description: (ctx) => {
       const exportType = ctx.query.export;
-      return exportType 
+      return exportType
         ? `Exported expense reports as ${exportType.toUpperCase()}`
         : 'Viewed expense reports list';
     },
@@ -161,7 +189,12 @@ export class ReportsController {
   @ApiQuery({ name: 'dateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
-  @ApiQuery({ name: 'export', required: false, type: String, description: 'pdf, csv, excel' })
+  @ApiQuery({
+    name: 'export',
+    required: false,
+    type: String,
+    description: 'pdf, csv, excel',
+  })
   async getExpenses(
     @Request() req: any,
     @Res() res: Response,
@@ -189,9 +222,13 @@ export class ReportsController {
     };
 
     if (exportType) {
-      const { buffer, fileName, contentType } = await this.reportsService.exportExpenses(params, req.user, exportType);
+      const { buffer, fileName, contentType } =
+        await this.reportsService.exportExpenses(params, req.user, exportType);
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName}"`,
+      );
       res.setHeader('Content-Length', buffer.length);
       return res.end(buffer);
     }

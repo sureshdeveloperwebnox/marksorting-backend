@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ChannelModel, Channel, connect, ConsumeMessage } from 'amqplib';
 
@@ -32,14 +37,24 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
 
   private async connect(): Promise<void> {
     try {
-      const host = this.configService.get<string>('rabbitmq.host') || this.configService.get<string>('RABBITMQ_HOST', 'localhost');
-      const port = this.configService.get<number>('rabbitmq.port') || this.configService.get<number>('RABBITMQ_PORT', 5672);
-      const user = this.configService.get<string>('rabbitmq.user') || this.configService.get<string>('RABBITMQ_USER', 'admin');
-      const pass = this.configService.get<string>('rabbitmq.pass') || this.configService.get<string>('RABBITMQ_PASS', 'admin');
-      const vhost = this.configService.get<string>('rabbitmq.vhost') || this.configService.get<string>('RABBITMQ_VHOST', '');
+      const host =
+        this.configService.get<string>('rabbitmq.host') ||
+        this.configService.get<string>('RABBITMQ_HOST', 'localhost');
+      const port =
+        this.configService.get<number>('rabbitmq.port') ||
+        this.configService.get<number>('RABBITMQ_PORT', 5672);
+      const user =
+        this.configService.get<string>('rabbitmq.user') ||
+        this.configService.get<string>('RABBITMQ_USER', 'admin');
+      const pass =
+        this.configService.get<string>('rabbitmq.pass') ||
+        this.configService.get<string>('RABBITMQ_PASS', 'admin');
+      const vhost =
+        this.configService.get<string>('rabbitmq.vhost') ||
+        this.configService.get<string>('RABBITMQ_VHOST', '');
 
       const amqpUrl = `amqp://${user}:${pass}@${host}:${port}${vhost ? `/${vhost}` : ''}`;
-      
+
       this.connection = await connect(amqpUrl);
       if (!this.connection) {
         throw new Error('Failed to establish RabbitMQ connection');
@@ -104,12 +119,17 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
       );
 
       if (sent) {
-        this.logger.log(`WhatsApp message queued to ${message.to}: ${message.fileName}`);
+        this.logger.log(
+          `WhatsApp message queued to ${message.to}: ${message.fileName}`,
+        );
       }
 
       return sent;
     } catch (error) {
-      this.logger.error(`Failed to publish WhatsApp message to ${message.to}`, error);
+      this.logger.error(
+        `Failed to publish WhatsApp message to ${message.to}`,
+        error,
+      );
       return false;
     }
   }
@@ -124,43 +144,58 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
       throw new Error('RabbitMQ channel not available');
     }
 
-    await this.channel.consume(this.QUEUE_NAME, async (msg: ConsumeMessage | null) => {
-      if (!msg) return;
+    await this.channel.consume(
+      this.QUEUE_NAME,
+      async (msg: ConsumeMessage | null) => {
+        if (!msg) return;
 
-      try {
-        const content: WhatsAppQueueMessage = JSON.parse(msg.content.toString());
-        this.logger.log(`Processing WhatsApp message to ${content.to}`);
+        try {
+          const content: WhatsAppQueueMessage = JSON.parse(
+            msg.content.toString(),
+          );
+          this.logger.log(`Processing WhatsApp message to ${content.to}`);
 
-        const success = await handler(content);
+          const success = await handler(content);
 
-        if (success) {
-          this.channel!.ack(msg);
-          this.logger.log(`WhatsApp message to ${content.to} processed successfully`);
-        } else {
-          // Requeue with retry logic
-          if ((content.retryCount || 0) < 5) {
-            this.channel!.nack(msg, false, true);
+          if (success) {
+            this.channel!.ack(msg);
+            this.logger.log(
+              `WhatsApp message to ${content.to} processed successfully`,
+            );
           } else {
-            this.channel!.nack(msg, false, false); // Send to DLQ
-            this.logger.warn(`WhatsApp message to ${content.to} moved to DLQ after max retries`);
+            // Requeue with retry logic
+            if ((content.retryCount || 0) < 5) {
+              this.channel!.nack(msg, false, true);
+            } else {
+              this.channel!.nack(msg, false, false); // Send to DLQ
+              this.logger.warn(
+                `WhatsApp message to ${content.to} moved to DLQ after max retries`,
+              );
+            }
           }
+        } catch (error) {
+          this.logger.error('Error processing WhatsApp message', error);
+          this.channel!.nack(msg, false, false); // Send to DLQ
         }
-      } catch (error) {
-        this.logger.error('Error processing WhatsApp message', error);
-        this.channel!.nack(msg, false, false); // Send to DLQ
-      }
-    });
+      },
+    );
   }
 
   /**
    * Get queue statistics
    */
-  async getQueueStats(): Promise<{ ready: number; unacked: number; total: number }> {
+  async getQueueStats(): Promise<{
+    ready: number;
+    unacked: number;
+    total: number;
+  }> {
     if (!this.channel) {
       throw new Error('RabbitMQ channel not available');
     }
 
-    const { messageCount, consumerCount } = await this.channel.checkQueue(this.QUEUE_NAME);
+    const { messageCount, consumerCount } = await this.channel.checkQueue(
+      this.QUEUE_NAME,
+    );
     return {
       ready: messageCount,
       unacked: 0, // Would need management API for this

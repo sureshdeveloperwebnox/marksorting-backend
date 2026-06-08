@@ -8,7 +8,11 @@ import {
 import { Reflector } from '@nestjs/core';
 import { Observable, tap } from 'rxjs';
 import { ActivityLogsService } from '../activity-logs.service';
-import { LOG_ACTIVITY_KEY, LogActivityOptions, LogActivityContext } from '../decorators/log-activity.decorator';
+import {
+  LOG_ACTIVITY_KEY,
+  LogActivityOptions,
+  LogActivityContext,
+} from '../decorators/log-activity.decorator';
 import { Request } from 'express';
 
 @Injectable()
@@ -19,36 +23,46 @@ export class ActivityLogInterceptor implements NestInterceptor {
     private reflector: Reflector,
     private activityLogsService: ActivityLogsService,
   ) {
-    console.log('>>> ActivityLogInterceptor CONSTRUCTOR CALLED - Interceptor registered!');
+    console.log(
+      '>>> ActivityLogInterceptor CONSTRUCTOR CALLED - Interceptor registered!',
+    );
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     console.log('[ActivityLogInterceptor] intercept() called - START');
-    
+
     const request = context.switchToHttp().getRequest<Request>();
-    
+
     // Log ALL requests for debugging
-    console.log(`[INTERCEPTOR] ${request?.method} ${request?.path} - Checking for @LogActivity...`);
-    
-    const options = this.reflector.getAllAndOverride<LogActivityOptions>(LOG_ACTIVITY_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    console.log(
+      `[INTERCEPTOR] ${request?.method} ${request?.path} - Checking for @LogActivity...`,
+    );
+
+    const options = this.reflector.getAllAndOverride<LogActivityOptions>(
+      LOG_ACTIVITY_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     // If no @LogActivity decorator, skip logging
     if (!options) {
-      console.log(`[INTERCEPTOR] ${request.method} ${request.path} - No @LogActivity decorator found`);
+      console.log(
+        `[INTERCEPTOR] ${request.method} ${request.path} - No @LogActivity decorator found`,
+      );
       return next.handle();
     }
 
     const user = (request as any).user;
-    
+
     // Debug logging - using console.log to guarantee visibility
-    console.log(`[ActivityLogInterceptor] ${request.method} ${request.path} - @LogActivity found`);
+    console.log(
+      `[ActivityLogInterceptor] ${request.method} ${request.path} - @LogActivity found`,
+    );
 
     // Skip if no user (shouldn't happen with JwtAuthGuard, but just in case)
     if (!user) {
-      this.logger.warn(`Activity logging SKIPPED for ${request.method} ${request.path}: No user in request`);
+      this.logger.warn(
+        `Activity logging SKIPPED for ${request.method} ${request.path}: No user in request`,
+      );
       return next.handle();
     }
 
@@ -57,7 +71,7 @@ export class ActivityLogInterceptor implements NestInterceptor {
 
     // Extract request context
     const ipAddress = this.getClientIp(request);
-    const userAgent = request.headers['user-agent'] as string | undefined;
+    const userAgent = request.headers['user-agent'];
     const deviceName = this.getDeviceName(userAgent);
 
     const startTime = Date.now();
@@ -66,11 +80,21 @@ export class ActivityLogInterceptor implements NestInterceptor {
       tap({
         next: (result) => {
           // Fire-and-forget logging - don't block the response
-          this.logActivityAsync(result, options, user, userId, request, startTime, ipAddress, userAgent, deviceName);
+          this.logActivityAsync(
+            result,
+            options,
+            user,
+            userId,
+            request,
+            startTime,
+            ipAddress,
+            userAgent,
+            deviceName,
+          );
         },
         error: () => {
           // Error already handled by exception filters, no need to log here
-        }
+        },
       }),
     );
   }
@@ -88,7 +112,10 @@ export class ActivityLogInterceptor implements NestInterceptor {
   ): Promise<void> {
     try {
       // Don't log if result is null/undefined and ignoreNullEntity is true
-      if (options.ignoreNullEntity && (result === null || result === undefined)) {
+      if (
+        options.ignoreNullEntity &&
+        (result === null || result === undefined)
+      ) {
         return;
       }
 
@@ -145,11 +172,16 @@ export class ActivityLogInterceptor implements NestInterceptor {
         user_agent: userAgent,
         device_name: deviceName,
       });
-      
-      console.log(`[ActivityLogInterceptor] LOG CREATED: ${log?.id || 'FAILED'} - ${description}`);
+
+      console.log(
+        `[ActivityLogInterceptor] LOG CREATED: ${log?.id || 'FAILED'} - ${description}`,
+      );
     } catch (error: any) {
       // Don't let logging errors break the main flow
-      this.logger.error(`Failed to log activity: ${error?.message}`, error?.stack);
+      this.logger.error(
+        `Failed to log activity: ${error?.message}`,
+        error?.stack,
+      );
     }
   }
 
@@ -157,7 +189,9 @@ export class ActivityLogInterceptor implements NestInterceptor {
     const forwarded = request.headers['x-forwarded-for'];
     let ip: string | undefined;
     if (forwarded) {
-      ip = (typeof forwarded === 'string' ? forwarded : forwarded[0]).split(',')[0].trim();
+      ip = (typeof forwarded === 'string' ? forwarded : forwarded[0])
+        .split(',')[0]
+        .trim();
     } else {
       ip = request.ip || request.socket?.remoteAddress;
     }
@@ -185,7 +219,13 @@ export class ActivityLogInterceptor implements NestInterceptor {
 
     const sanitized = { ...body };
     // Remove sensitive fields
-    const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret'];
+    const sensitiveFields = [
+      'password',
+      'password_hash',
+      'token',
+      'refresh_token',
+      'secret',
+    ];
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         sanitized[field] = '***REDACTED***';
@@ -203,7 +243,13 @@ export class ActivityLogInterceptor implements NestInterceptor {
     }
 
     const sanitized = { ...result };
-    const sensitiveFields = ['password', 'password_hash', 'token', 'refresh_token', 'secret'];
+    const sensitiveFields = [
+      'password',
+      'password_hash',
+      'token',
+      'refresh_token',
+      'secret',
+    ];
     for (const field of sensitiveFields) {
       if (field in sanitized) {
         sanitized[field] = '***REDACTED***';

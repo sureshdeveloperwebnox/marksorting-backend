@@ -45,7 +45,7 @@ let PermissionsService = class PermissionsService {
         if (!user) {
             return [];
         }
-        const permissions = user.role.permissions.map(rp => rp.permission.name);
+        const permissions = user.role.permissions.map((rp) => rp.permission.name);
         await this.redis.setJson(cacheKey, permissions, this.CACHE_TTL);
         return permissions;
     }
@@ -55,11 +55,11 @@ let PermissionsService = class PermissionsService {
     }
     async hasAnyPermission(userId, permissions) {
         const userPermissions = await this.getUserPermissions(userId);
-        return permissions.some(permission => userPermissions.includes(permission));
+        return permissions.some((permission) => userPermissions.includes(permission));
     }
     async hasAllPermissions(userId, permissions) {
         const userPermissions = await this.getUserPermissions(userId);
-        return permissions.every(permission => userPermissions.includes(permission));
+        return permissions.every((permission) => userPermissions.includes(permission));
     }
     async invalidateUserPermissionsCache(userId) {
         const cacheKey = `${this.CACHE_PREFIX}${userId}`;

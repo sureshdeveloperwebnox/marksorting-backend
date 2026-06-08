@@ -39,11 +39,15 @@ export declare class ServiceReportsService {
         userId: string;
         role: string;
     }): Promise<({
-        serviceCategory: {
+        mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         };
-        mill: {
+        serviceCategory: {
             id: string;
             name: string;
         };
@@ -62,22 +66,23 @@ export declare class ServiceReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
-        service_category_id: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
-        call_registered_date: Date;
         machine_model: string;
+        serial_or_frame_no: string;
+        service_category_id: string;
+        nature_of_complaint: string;
+        authorized_person: string;
+        customer_signature: string;
+        report_number: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
+        call_registered_date: Date;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
-        authorized_person: string;
         previous_visit_engineer: string | null;
-        nature_of_complaint: string;
         problem_observed: string | null;
         action_taken: string;
         commodity: string | null;
@@ -95,7 +100,6 @@ export declare class ServiceReportsService {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto | UpdateMobileServiceReportDto, user?: {
         userId: string;
@@ -103,11 +107,15 @@ export declare class ServiceReportsService {
     }): Promise<{
         before: any;
         after: {
-            serviceCategory: {
+            mill: {
                 id: string;
                 name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
             };
-            mill: {
+            serviceCategory: {
                 id: string;
                 name: string;
             };
@@ -126,22 +134,23 @@ export declare class ServiceReportsService {
             updated_at: Date;
             deleted_at: Date | null;
             status: string;
-            report_number: string;
-            service_category_id: string;
             mill_id: string;
             place: string;
-            mill_whatsapp_number: string;
-            mill_email: string | null;
             visit_date: Date;
             visit_time: string;
-            call_registered_date: Date;
             machine_model: string;
+            serial_or_frame_no: string;
+            service_category_id: string;
+            nature_of_complaint: string;
+            authorized_person: string;
+            customer_signature: string;
+            report_number: string;
+            mill_whatsapp_number: string;
+            mill_email: string | null;
+            call_registered_date: Date;
             machine_mfg_date: Date | null;
             machine_installation_date: Date | null;
-            serial_or_frame_no: string;
-            authorized_person: string;
             previous_visit_engineer: string | null;
-            nature_of_complaint: string;
             problem_observed: string | null;
             action_taken: string;
             commodity: string | null;
@@ -159,18 +168,21 @@ export declare class ServiceReportsService {
             engineer_remarks: string;
             engineer_signature: string;
             customer_remarks: string | null;
-            customer_signature: string;
         };
     }>;
     remove(id: string, user?: {
         userId: string;
         role: string;
     }): Promise<{
-        serviceCategory: {
+        mill: {
             id: string;
             name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
         };
-        mill: {
+        serviceCategory: {
             id: string;
             name: string;
         };
@@ -189,22 +201,23 @@ export declare class ServiceReportsService {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
-        report_number: string;
-        service_category_id: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
-        call_registered_date: Date;
         machine_model: string;
+        serial_or_frame_no: string;
+        service_category_id: string;
+        nature_of_complaint: string;
+        authorized_person: string;
+        customer_signature: string;
+        report_number: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
+        call_registered_date: Date;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
-        authorized_person: string;
         previous_visit_engineer: string | null;
-        nature_of_complaint: string;
         problem_observed: string | null;
         action_taken: string;
         commodity: string | null;
@@ -222,7 +235,6 @@ export declare class ServiceReportsService {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
-        customer_signature: string;
     }>;
     generatePdf(id: string, user?: {
         userId: string;

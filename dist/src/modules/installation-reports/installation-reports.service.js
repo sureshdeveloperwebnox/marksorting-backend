@@ -19,7 +19,13 @@ const pdf_service_1 = require("../pdf/pdf.service");
 const document_template_service_1 = require("../pdf/templates/document-template.service");
 const installation_report_template_1 = require("../pdf/templates/installation-report.template");
 const INCLUDE_SHAPE = {
-    mill: { select: { id: true, name: true } },
+    mill: {
+        select: {
+            id: true,
+            name: true,
+            customer: { select: { id: true, name: true } },
+        },
+    },
     technicians: {
         include: { technician: { select: { id: true, full_name: true } } },
     },
@@ -134,7 +140,8 @@ let InstallationReportsService = class InstallationReportsService {
         delete reportData.customer_id;
         delete reportData.technician_id;
         const finalTechnicianIds = [...(technician_ids || [])];
-        if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+        if (rawDto.technician_id &&
+            !finalTechnicianIds.includes(rawDto.technician_id)) {
             finalTechnicianIds.push(rawDto.technician_id);
         }
         if (user &&
@@ -210,7 +217,8 @@ let InstallationReportsService = class InstallationReportsService {
         let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
         if (rawDto.technician_id !== undefined) {
             if (finalTechnicianIds !== undefined) {
-                if (rawDto.technician_id && !finalTechnicianIds.includes(rawDto.technician_id)) {
+                if (rawDto.technician_id &&
+                    !finalTechnicianIds.includes(rawDto.technician_id)) {
                     finalTechnicianIds.push(rawDto.technician_id);
                 }
             }

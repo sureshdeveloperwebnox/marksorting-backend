@@ -27,17 +27,24 @@ export class WhatsAppProcessor extends WorkerHost {
     private prisma: PrismaService,
   ) {
     super();
-    
+
     this.apiToken = this.configService.get<string>('whatsapp.apiToken') || '';
-    this.instanceId = this.configService.get<string>('whatsapp.instanceId') || '';
-    this.baseUrl = this.configService.get<string>('whatsapp.baseUrl') || 'https://api.ultramsg.com';
-    
+    this.instanceId =
+      this.configService.get<string>('whatsapp.instanceId') || '';
+    this.baseUrl =
+      this.configService.get<string>('whatsapp.baseUrl') ||
+      'https://api.ultramsg.com';
+
     this.isMockMode = !this.apiToken || !this.instanceId;
-    
+
     if (this.isMockMode) {
-      this.logger.warn('WhatsApp credentials not configured. Running in MOCK MODE.');
+      this.logger.warn(
+        'WhatsApp credentials not configured. Running in MOCK MODE.',
+      );
     } else {
-      this.logger.log(`WhatsApp processor initialized for instance: ${this.instanceId}`);
+      this.logger.log(
+        `WhatsApp processor initialized for instance: ${this.instanceId}`,
+      );
     }
   }
 
@@ -60,9 +67,9 @@ export class WhatsAppProcessor extends WorkerHost {
     if (this.isMockMode) {
       this.logger.log(
         `[Mock WhatsApp] Would send document:\n` +
-        `  To: ${to}\n` +
-        `  File: ${fileName}\n` +
-        `  Caption: ${caption || '(none)'}`,
+          `  To: ${to}\n` +
+          `  File: ${fileName}\n` +
+          `  Caption: ${caption || '(none)'}`,
       );
       return;
     }
@@ -73,7 +80,13 @@ export class WhatsAppProcessor extends WorkerHost {
 
     const phoneNumber: string = to;
     const docCaption: string = caption || '';
-    await this.sendDocumentViaUltramsg(phoneNumber, documentUrl, fileName || '', docCaption, job);
+    await this.sendDocumentViaUltramsg(
+      phoneNumber,
+      documentUrl,
+      fileName || '',
+      docCaption,
+      job,
+    );
   }
 
   private async handleSendReportPdf(job: Job<WhatsAppMessageJob>) {
@@ -82,13 +95,19 @@ export class WhatsAppProcessor extends WorkerHost {
     if (this.isMockMode) {
       this.logger.log(
         `[Mock WhatsApp] Would send ${reportType} report PDF:\n` +
-        `  To: ${to}\n` +
-        `  File: ${fileName}\n` +
-        `  Report ID: ${reportId}`,
+          `  To: ${to}\n` +
+          `  File: ${fileName}\n` +
+          `  Report ID: ${reportId}`,
       );
-      
+
       // Log to notification logs even in mock mode for testing
-      await this.logNotificationAttempt(reportId || '', reportType || 'SERVICE', to || '', 'FAILED', 'Mock mode - not sent');
+      await this.logNotificationAttempt(
+        reportId || '',
+        reportType || 'SERVICE',
+        to || '',
+        'FAILED',
+        'Mock mode - not sent',
+      );
       return;
     }
 
@@ -102,21 +121,28 @@ export class WhatsAppProcessor extends WorkerHost {
 
     try {
       await this.sendDocumentViaUltramsg(phoneNumber, docUrl, docName, '', job);
-      
+
       // Log successful notification
       if (reportId) {
-        await this.logNotificationAttempt(reportId, reportType || 'SERVICE', phoneNumber, 'SENT');
+        await this.logNotificationAttempt(
+          reportId,
+          reportType || 'SERVICE',
+          phoneNumber,
+          'SENT',
+        );
       }
-      
-      this.logger.log(`Successfully sent ${reportType} report PDF to ${phoneNumber}`);
+
+      this.logger.log(
+        `Successfully sent ${reportType} report PDF to ${phoneNumber}`,
+      );
     } catch (error) {
       // Log failed notification
       if (reportId) {
         await this.logNotificationAttempt(
-          reportId, 
-          reportType || 'SERVICE', 
-          phoneNumber, 
-          'FAILED', 
+          reportId,
+          reportType || 'SERVICE',
+          phoneNumber,
+          'FAILED',
           error instanceof Error ? error.message : 'Unknown error',
         );
       }
@@ -153,19 +179,20 @@ export class WhatsAppProcessor extends WorkerHost {
 
       // Check Ultramsg response
       const responseData = response.data;
-      
+
       if (responseData.error) {
         throw new Error(`Ultramsg API error: ${responseData.error}`);
       }
 
       this.logger.log(
         `WhatsApp document sent successfully to ${to}. ` +
-        `Message ID: ${responseData.id || 'N/A'}`,
+          `Message ID: ${responseData.id || 'N/A'}`,
       );
 
       return responseData;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(
         `Failed to send WhatsApp document to ${to} (Attempt ${job.attemptsMade + 1}/${job.opts.attempts}): ${errorMessage}`,
         error,
@@ -188,7 +215,8 @@ export class WhatsAppProcessor extends WorkerHost {
       await this.prisma.notificationLog.create({
         data: {
           notification_type: 'WHATSAPP',
-          channel: reportType === 'SERVICE' ? 'Service Report' : 'Installation Report',
+          channel:
+            reportType === 'SERVICE' ? 'Service Report' : 'Installation Report',
           status,
           provider: 'Ultramsg',
           provider_message_id: reportId,

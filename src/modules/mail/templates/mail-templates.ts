@@ -13,9 +13,14 @@ interface BaseTemplateOptions {
 /**
  * Wraps content in the standard branding layout of Mark Sorting System
  */
-export function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl }: BaseTemplateOptions): string {
+export function getBaseTemplate({
+  title,
+  previewText = '',
+  bodyHtml,
+  frontendUrl,
+}: BaseTemplateOptions): string {
   const currentYear = new Date().getFullYear();
-  
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +104,12 @@ export function getBaseTemplate({ title, previewText = '', bodyHtml, frontendUrl
 /**
  * Returns HTML for the password reset email template
  */
-export function getForgotPasswordTemplate(name: string, resetUrl: string, expiresInMinutes = 60, frontendUrl?: string): string {
+export function getForgotPasswordTemplate(
+  name: string,
+  resetUrl: string,
+  expiresInMinutes = 60,
+  frontendUrl?: string,
+): string {
   const bodyHtml = `
     <h1>Password Reset Request</h1>
     <p>Hello <strong>${name}</strong>,</p>

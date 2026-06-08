@@ -70,7 +70,9 @@ let ActivityLogService = ActivityLogService_1 = class ActivityLogService {
                 });
             }
             else {
-                await this.logQueue.addActivityLog(logData, { priority: options.priority });
+                await this.logQueue.addActivityLog(logData, {
+                    priority: options.priority,
+                });
             }
             this.eventEmitter.emit('activity-log.created', logData);
         }
@@ -178,13 +180,16 @@ let ActivityLogService = ActivityLogService_1 = class ActivityLogService {
                 };
             }
         }
-        const loginCount = loginLogoutStats.find(s => s.action === 'LOGIN')?._count.id || 0;
-        const logoutCount = loginLogoutStats.find(s => s.action === 'LOGOUT')?._count.id || 0;
+        const loginCount = loginLogoutStats.find((s) => s.action === 'LOGIN')?._count.id || 0;
+        const logoutCount = loginLogoutStats.find((s) => s.action === 'LOGOUT')?._count.id || 0;
         return {
             total_activities: totalActivities,
             most_active_user: mostActiveUserDetails,
             most_common_action: mostCommonAction.length > 0
-                ? { action: mostCommonAction[0].action, count: mostCommonAction[0]._count.id }
+                ? {
+                    action: mostCommonAction[0].action,
+                    count: mostCommonAction[0]._count.id,
+                }
                 : null,
             login_count: loginCount,
             logout_count: logoutCount,

@@ -42,12 +42,23 @@ export class MailService {
   /**
    * Formats and queues a password reset email
    */
-  async sendPasswordResetMail(to: string, name: string, token: string): Promise<boolean> {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl') || 'http://localhost:3000';
+  async sendPasswordResetMail(
+    to: string,
+    name: string,
+    token: string,
+  ): Promise<boolean> {
+    const frontendUrl =
+      this.configService.get<string>('app.frontendUrl') ||
+      'http://localhost:3000';
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
-    const emailHtml = getForgotPasswordTemplate(name, resetUrl, 60, frontendUrl);
+    const emailHtml = getForgotPasswordTemplate(
+      name,
+      resetUrl,
+      60,
+      frontendUrl,
+    );
     const subject = 'Reset Password - Mark Sorting System';
-    
+
     return this.sendMail(to, subject, emailHtml);
   }
 }

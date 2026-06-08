@@ -65,7 +65,9 @@ async function main() {
         invoice_number: null,
       },
     });
-    console.log(`Reset store ${storeId} return_status back to 'Pending' for testing.`);
+    console.log(
+      `Reset store ${storeId} return_status back to 'Pending' for testing.`,
+    );
   } else {
     console.error(`Store ${storeId} not found in database.`);
   }

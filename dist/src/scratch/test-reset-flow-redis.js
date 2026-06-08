@@ -30,7 +30,9 @@ async function runTest() {
         const oldHash = userBefore.password_hash;
         console.log('Initial password hash:', oldHash);
         console.log('1. Calling forgot-password endpoint...');
-        const forgotRes = await axios_1.default.post(`${backendUrl}/auth/forgot-password`, { email });
+        const forgotRes = await axios_1.default.post(`${backendUrl}/auth/forgot-password`, {
+            email,
+        });
         console.log('Forgot password response:', forgotRes.data);
         await new Promise((resolve) => setTimeout(resolve, 1500));
         console.log('2. Querying Redis for queued mail job...');

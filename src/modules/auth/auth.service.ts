@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -49,7 +54,8 @@ export class AuthService {
   async register(registerDto: any) {
     // Find default role (Super Admin)
     const roles = await this.usersService.getRoles();
-    const defaultRole = roles.find((r: any) => r.name === 'Super Admin') || roles[0];
+    const defaultRole =
+      roles.find((r: any) => r.name === 'Super Admin') || roles[0];
 
     if (!defaultRole) {
       throw new UnauthorizedException('No default roles defined in the system');
@@ -68,16 +74,18 @@ export class AuthService {
 
   async login(user: any) {
     // Get user permissions
-    const permissions = await this.permissionsService.getUserPermissions(user.id);
-    
-    const payload = { 
-      email: user.email, 
+    const permissions = await this.permissionsService.getUserPermissions(
+      user.id,
+    );
+
+    const payload = {
+      email: user.email,
       sub: user.id,
       full_name: user.full_name,
       role: user.role.name,
-      permissions: permissions
+      permissions: permissions,
     };
-    
+
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user.id),
@@ -97,16 +105,18 @@ export class AuthService {
 
   async mobileLogin(user: any) {
     // Get user permissions
-    const permissions = await this.permissionsService.getUserPermissions(user.id);
-    
-    const payload = { 
-      email: user.email, 
+    const permissions = await this.permissionsService.getUserPermissions(
+      user.id,
+    );
+
+    const payload = {
+      email: user.email,
       sub: user.id,
       full_name: user.full_name,
       role: user.role.name,
-      permissions: permissions
+      permissions: permissions,
     };
-    
+
     return {
       access_token: this.jwtService.sign(payload),
       refresh_token: await this.generateRefreshToken(user.id),
@@ -118,7 +128,8 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    const permissions = await this.permissionsService.getUserPermissions(userId);
+    const permissions =
+      await this.permissionsService.getUserPermissions(userId);
     return {
       id: user.id,
       email: user.email,
@@ -138,7 +149,8 @@ export class AuthService {
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
     const { after: user } = await this.usersService.update(userId, dto);
-    const permissions = await this.permissionsService.getUserPermissions(userId);
+    const permissions =
+      await this.permissionsService.getUserPermissions(userId);
     return {
       id: user.id,
       email: user.email,
@@ -199,7 +211,8 @@ export class AuthService {
       }
 
       // Get fresh permissions
-      const permissions = await this.permissionsService.getUserPermissions(userId);
+      const permissions =
+        await this.permissionsService.getUserPermissions(userId);
 
       // Generate new refresh token for rotation
       const newRefreshToken = await this.generateRefreshToken(userId);
@@ -241,7 +254,7 @@ export class AuthService {
     const token = crypto.randomBytes(32).toString('hex');
     // Store hashed version of the token in database for security
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-    
+
     // Set token expiration (1 hour from now)
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 1);
@@ -256,7 +269,11 @@ export class AuthService {
     });
 
     // Queue email sending asynchronously
-    await this.mailService.sendPasswordResetMail(user.email, user.full_name, token);
+    await this.mailService.sendPasswordResetMail(
+      user.email,
+      user.full_name,
+      token,
+    );
   }
 
   async resetPassword(token: string, newPass: string): Promise<void> {
@@ -304,7 +321,11 @@ export class AuthService {
     await this.redisService.del(`user:id:${resetRecord.user_id}`);
   }
 
-  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
     // Get user with role information
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -317,19 +338,29 @@ export class AuthService {
 
     // Verify user is a Service Engineer
     if (user.role?.name !== 'Service Engineer') {
-      throw new UnauthorizedException('Only service engineers can change password via this endpoint');
+      throw new UnauthorizedException(
+        'Only service engineers can change password via this endpoint',
+      );
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password_hash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect');
     }
 
     // Ensure new password is different from current
-    const isSamePassword = await bcrypt.compare(newPassword, user.password_hash);
+    const isSamePassword = await bcrypt.compare(
+      newPassword,
+      user.password_hash,
+    );
     if (isSamePassword) {
-      throw new BadRequestException('New password must be different from the current password');
+      throw new BadRequestException(
+        'New password must be different from the current password',
+      );
     }
 
     // Hash the new password

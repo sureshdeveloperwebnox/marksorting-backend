@@ -88,7 +88,9 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 take,
             }),
             this.prisma.notification.count({ where: { user_id: userId } }),
-            this.prisma.notification.count({ where: { user_id: userId, status: 'UNREAD' } }),
+            this.prisma.notification.count({
+                where: { user_id: userId, status: 'UNREAD' },
+            }),
         ]);
         return { notifications, total, unreadCount };
     }

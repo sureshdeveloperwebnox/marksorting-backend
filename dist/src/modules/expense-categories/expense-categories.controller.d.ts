@@ -8,32 +8,32 @@ export declare class ExpenseCategoriesController {
     findOne(id: string): Promise<any>;
     create(dto: CreateExpenseCategoryDto): Promise<{
         id: string;
-        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
+        description: string | null;
         status: string;
     }>;
     update(id: string, dto: UpdateExpenseCategoryDto): Promise<{
         before: any;
         after: {
             id: string;
-            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
+            description: string | null;
             status: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
+        description: string | null;
         status: string;
     }>;
 }

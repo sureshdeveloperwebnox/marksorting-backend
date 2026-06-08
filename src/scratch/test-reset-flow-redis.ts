@@ -33,7 +33,9 @@ async function runTest() {
 
     // 2. Call forgot-password
     console.log('1. Calling forgot-password endpoint...');
-    const forgotRes = await axios.post(`${backendUrl}/auth/forgot-password`, { email });
+    const forgotRes = await axios.post(`${backendUrl}/auth/forgot-password`, {
+      email,
+    });
     console.log('Forgot password response:', forgotRes.data);
 
     // Wait a brief moment for the job to be placed in Redis queue
@@ -47,7 +49,7 @@ async function runTest() {
     // Let's query jobs using redis keys or scans
     // BullMQ stores jobs under hash keys: bull:mail:<id>
     let rawToken: string | null = null;
-    
+
     for (const key of jobKeys) {
       if (key.match(/^bull:mail:\d+$/)) {
         const jobData = await redisConn.hgetall(key);
@@ -90,7 +92,6 @@ async function runTest() {
     } else {
       console.error('FAILURE: Password hash in database remains unchanged!');
     }
-
   } catch (error: any) {
     console.error('Error during test:', error.response?.data || error.message);
   } finally {

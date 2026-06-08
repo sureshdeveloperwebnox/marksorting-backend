@@ -112,11 +112,16 @@ let DashboardService = class DashboardService {
             this.prisma.customer.count({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { created_at: { gte: currentStartDate, lte: currentEndDate } } : {})
-                }
+                    ...(startDate && endDate
+                        ? { created_at: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
+                },
             }),
             this.prisma.customer.count({
-                where: { deleted_at: null, created_at: { gte: currentStartDate, lte: currentEndDate } },
+                where: {
+                    deleted_at: null,
+                    created_at: { gte: currentStartDate, lte: currentEndDate },
+                },
             }),
             this.prisma.customer.count({
                 where: {
@@ -127,23 +132,33 @@ let DashboardService = class DashboardService {
             this.prisma.customer.findMany({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { created_at: { gte: currentStartDate, lte: currentEndDate } } : {})
+                    ...(startDate && endDate
+                        ? { created_at: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
                 },
                 orderBy: { created_at: 'desc' },
                 take: 4,
             }),
             this.prisma.customer.findMany({
-                where: { deleted_at: null, created_at: { gte: trendStartDate, lte: trendEndDate } },
+                where: {
+                    deleted_at: null,
+                    created_at: { gte: trendStartDate, lte: trendEndDate },
+                },
                 select: { created_at: true, status: true },
             }),
             this.prisma.installationReport.count({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
-                }
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
+                },
             }),
             this.prisma.installationReport.count({
-                where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: currentStartDate, lte: currentEndDate },
+                },
             }),
             this.prisma.installationReport.count({
                 where: {
@@ -154,24 +169,34 @@ let DashboardService = class DashboardService {
             this.prisma.installationReport.findMany({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
                 },
                 include: { mill: true },
                 orderBy: { created_at: 'desc' },
                 take: 4,
             }),
             this.prisma.installationReport.findMany({
-                where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: trendStartDate, lte: trendEndDate },
+                },
                 select: { visit_date: true, status: true },
             }),
             this.prisma.serviceReport.count({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
-                }
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
+                },
             }),
             this.prisma.serviceReport.count({
-                where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: currentStartDate, lte: currentEndDate },
+                },
             }),
             this.prisma.serviceReport.count({
                 where: {
@@ -182,31 +207,43 @@ let DashboardService = class DashboardService {
             this.prisma.serviceReport.findMany({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
                 },
                 include: { mill: true },
                 orderBy: { created_at: 'desc' },
                 take: 4,
             }),
             this.prisma.serviceReport.findMany({
-                where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: trendStartDate, lte: trendEndDate },
+                },
                 select: { visit_date: true, status: true },
             }),
             this.prisma.expense.count({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
-                }
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
+                },
             }),
             this.prisma.expense.aggregate({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
                 },
                 _sum: { amount: true },
             }),
             this.prisma.expense.aggregate({
-                where: { deleted_at: null, visit_date: { gte: currentStartDate, lte: currentEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: currentStartDate, lte: currentEndDate },
+                },
                 _sum: { amount: true },
             }),
             this.prisma.expense.aggregate({
@@ -219,18 +256,28 @@ let DashboardService = class DashboardService {
             this.prisma.expense.findMany({
                 where: {
                     deleted_at: null,
-                    ...(startDate && endDate ? { visit_date: { gte: currentStartDate, lte: currentEndDate } } : {})
+                    ...(startDate && endDate
+                        ? { visit_date: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
                 },
                 include: { mill: true, expenseCategory: true },
                 orderBy: { created_at: 'desc' },
                 take: 4,
             }),
             this.prisma.expense.findMany({
-                where: { deleted_at: null, visit_date: { gte: trendStartDate, lte: trendEndDate } },
+                where: {
+                    deleted_at: null,
+                    visit_date: { gte: trendStartDate, lte: trendEndDate },
+                },
                 select: { visit_date: true, amount: true, status: true },
             }),
             this.prisma.expense.findMany({
-                where: { deleted_at: null, visit_date: { gte: startDate && endDate ? currentStartDate : twelveMonthsAgo } },
+                where: {
+                    deleted_at: null,
+                    visit_date: {
+                        gte: startDate && endDate ? currentStartDate : twelveMonthsAgo,
+                    },
+                },
                 select: {
                     visit_date: true,
                     amount: true,
@@ -430,7 +477,9 @@ let DashboardService = class DashboardService {
                 change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
                 trend: expensesCount > 0 ? expenseTrend.trend : 'up',
                 variant: 'amber',
-                subtitle: startDate && endDate ? `${expensesCount} transactions` : `${expensesCount > 0 ? expensesCount : 1} transactions`,
+                subtitle: startDate && endDate
+                    ? `${expensesCount} transactions`
+                    : `${expensesCount > 0 ? expensesCount : 1} transactions`,
             },
         ];
         const hasData = (arr, key = 'total') => arr.some((item) => Number(item[key]) > 0);
@@ -701,7 +750,7 @@ let DashboardService = class DashboardService {
         const servicesWeeklyTrend = aggregateWeeklyTrend(allServices6Months, 'visit_date');
         const expensesThisMonthTrend = aggregateThisMonthTrend(allExpenses6Months, 'visit_date', 'amount');
         const expensesWeeklyTrend = aggregateWeeklyTrend(allExpenses6Months, 'visit_date', 'amount');
-        const hasThisMonthData = (arr) => arr.some(item => Number(item.total) > 0);
+        const hasThisMonthData = (arr) => arr.some((item) => Number(item.total) > 0);
         const finalContexts = {
             customers: {
                 performance: hasData(customersPerformance)
@@ -714,10 +763,16 @@ let DashboardService = class DashboardService {
                     })),
                 thisMonthTrend: hasThisMonthData(customersThisMonthTrend)
                     ? customersThisMonthTrend
-                    : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [12, 15, 18, 14, 22, 25, 30][idx] || 20 })),
+                    : getThisMonthIntervals().map((inv, idx) => ({
+                        name: inv.name,
+                        total: [12, 15, 18, 14, 22, 25, 30][idx] || 20,
+                    })),
                 weeklyTrend: hasThisMonthData(customersWeeklyTrend)
                     ? customersWeeklyTrend
-                    : getPast7Days().map((d, idx) => ({ name: d.name, total: [2, 4, 3, 5, 4, 6, 5][idx] || 3 })),
+                    : getPast7Days().map((d, idx) => ({
+                        name: d.name,
+                        total: [2, 4, 3, 5, 4, 6, 5][idx] || 3,
+                    })),
                 production: hasData(customersProduction, 'value')
                     ? customersProductionWithPct
                     : [
@@ -812,10 +867,16 @@ let DashboardService = class DashboardService {
                     })),
                 thisMonthTrend: hasThisMonthData(installationsThisMonthTrend)
                     ? installationsThisMonthTrend
-                    : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [45, 55, 80, 98, 70, 110, 128][idx] || 80 })),
+                    : getThisMonthIntervals().map((inv, idx) => ({
+                        name: inv.name,
+                        total: [45, 55, 80, 98, 70, 110, 128][idx] || 80,
+                    })),
                 weeklyTrend: hasThisMonthData(installationsWeeklyTrend)
                     ? installationsWeeklyTrend
-                    : getPast7Days().map((d, idx) => ({ name: d.name, total: [6, 10, 12, 8, 15, 11, 4][idx] || 8 })),
+                    : getPast7Days().map((d, idx) => ({
+                        name: d.name,
+                        total: [6, 10, 12, 8, 15, 11, 4][idx] || 8,
+                    })),
                 production: hasData(installationsProduction, 'value')
                     ? installationsProductionWithPct
                     : [
@@ -873,10 +934,16 @@ let DashboardService = class DashboardService {
                     })),
                 thisMonthTrend: hasThisMonthData(servicesThisMonthTrend)
                     ? servicesThisMonthTrend
-                    : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [50, 65, 55, 74, 60, 85, 96][idx] || 60 })),
+                    : getThisMonthIntervals().map((inv, idx) => ({
+                        name: inv.name,
+                        total: [50, 65, 55, 74, 60, 85, 96][idx] || 60,
+                    })),
                 weeklyTrend: hasThisMonthData(servicesWeeklyTrend)
                     ? servicesWeeklyTrend
-                    : getPast7Days().map((d, idx) => ({ name: d.name, total: [8, 12, 15, 10, 18, 14, 6][idx] || 10 })),
+                    : getPast7Days().map((d, idx) => ({
+                        name: d.name,
+                        total: [8, 12, 15, 10, 18, 14, 6][idx] || 10,
+                    })),
                 production: hasData(servicesProduction, 'value')
                     ? servicesProductionWithPct
                     : [
@@ -954,10 +1021,16 @@ let DashboardService = class DashboardService {
                     })),
                 thisMonthTrend: hasThisMonthData(expensesThisMonthTrend)
                     ? expensesThisMonthTrend
-                    : getThisMonthIntervals().map((inv, idx) => ({ name: inv.name, total: [950, 1400, 1100, 1240, 1050, 1650, 2200][idx] || 1200 })),
+                    : getThisMonthIntervals().map((inv, idx) => ({
+                        name: inv.name,
+                        total: [950, 1400, 1100, 1240, 1050, 1650, 2200][idx] || 1200,
+                    })),
                 weeklyTrend: hasThisMonthData(expensesWeeklyTrend)
                     ? expensesWeeklyTrend
-                    : getPast7Days().map((d, idx) => ({ name: d.name, total: [850, 1200, 1100, 950, 1600, 1300, 500][idx] || 1000 })),
+                    : getPast7Days().map((d, idx) => ({
+                        name: d.name,
+                        total: [850, 1200, 1100, 950, 1600, 1300, 500][idx] || 1000,
+                    })),
                 production: hasData(expensesProduction, 'value')
                     ? expensesProductionWithPct
                     : [

@@ -29,10 +29,10 @@ function renderTabularReportTemplate(data, template) {
         company.region,
     ].filter(Boolean);
     const formattedFilters = filters
-        .map(f => `<div class="filter-item"><span class="filter-label">${template.escape(f.label)}:</span> <span class="filter-val">${template.escape(f.value)}</span></div>`)
+        .map((f) => `<div class="filter-item"><span class="filter-label">${template.escape(f.label)}:</span> <span class="filter-val">${template.escape(f.value)}</span></div>`)
         .join('');
     const formattedMetrics = metrics
-        .map(m => `
+        .map((m) => `
       <div class="metric-card">
         <div class="metric-val ${m.colorClass || ''}">${template.escape(m.value)}</div>
         <div class="metric-label">${template.escape(m.label)}</div>
@@ -40,12 +40,12 @@ function renderTabularReportTemplate(data, template) {
     `)
         .join('');
     const tableHeaders = headers
-        .map(h => `<th>${template.escape(h)}</th>`)
+        .map((h) => `<th>${template.escape(h)}</th>`)
         .join('');
     const tableRows = rows
-        .map(row => `
+        .map((row) => `
       <tr>
-        ${row.map(cell => `<td>${cell}</td>`).join('')}
+        ${row.map((cell) => `<td>${cell}</td>`).join('')}
       </tr>
     `)
         .join('');
@@ -293,7 +293,7 @@ function renderTabularReportTemplate(data, template) {
             <div class="company-details">
               <div class="company-name">${template.text(company.name, 'MENDO CONTROLS')}</div>
               ${company.partnerDescription ? `<div class="partner-tag">(${template.text(company.partnerDescription)})</div>` : ''}
-              <div>${companyLines.map(line => template.escape(line)).join('<br />')}</div>
+              <div>${companyLines.map((line) => template.escape(line)).join('<br />')}</div>
               <div>${company.email ? `Email: ${template.escape(company.email)}` : ''}</div>
               <div>
                 ${company.tollFree ? `Toll Free: ${template.escape(company.tollFree)}` : ''}

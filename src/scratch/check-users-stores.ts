@@ -15,8 +15,8 @@ async function main() {
       service_engineer_id: true,
       return_status: true,
       frame_number: true,
-      barcode: true
-    }
+      barcode: true,
+    },
   });
   console.log('Stores:', JSON.stringify(stores, null, 2));
 

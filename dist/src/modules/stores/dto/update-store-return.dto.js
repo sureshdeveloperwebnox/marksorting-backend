@@ -18,13 +18,19 @@ class UpdateStoreReturnDto {
 }
 exports.UpdateStoreReturnDto = UpdateStoreReturnDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Express Logistics', description: 'Name of the provider/courier' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'Express Logistics',
+        description: 'Name of the provider/courier',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateStoreReturnDto.prototype, "provider_name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'INV-987654', description: 'Return shipment invoice number' }),
+    (0, swagger_1.ApiProperty)({
+        example: 'INV-987654',
+        description: 'Return shipment invoice number',
+    }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

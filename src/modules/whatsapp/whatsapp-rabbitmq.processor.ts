@@ -2,7 +2,10 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
-import { WhatsAppRabbitMQService, WhatsAppQueueMessage } from './whatsapp-rabbitmq.service';
+import {
+  WhatsAppRabbitMQService,
+  WhatsAppQueueMessage,
+} from './whatsapp-rabbitmq.service';
 
 @Injectable()
 export class WhatsAppRabbitMQProcessor implements OnModuleInit {
@@ -16,9 +19,15 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.ultramsgApiUrl = this.configService.get<string>('ULTRAMSG_API_URL', 'https://api.ultramsg.com');
+    this.ultramsgApiUrl = this.configService.get<string>(
+      'ULTRAMSG_API_URL',
+      'https://api.ultramsg.com',
+    );
     this.ultramsgToken = this.configService.get<string>('ULTRAMSG_TOKEN', '');
-    this.ultramsgInstance = this.configService.get<string>('ULTRAMSG_INSTANCE', '');
+    this.ultramsgInstance = this.configService.get<string>(
+      'ULTRAMSG_INSTANCE',
+      '',
+    );
   }
 
   async onModuleInit() {
@@ -29,16 +38,20 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
 
   private async startConsuming(): Promise<void> {
     this.logger.log('Starting WhatsApp RabbitMQ consumer...');
-    
-    await this.rabbitMQService.consumeMessages(async (message: WhatsAppQueueMessage) => {
-      return this.processMessage(message);
-    });
+
+    await this.rabbitMQService.consumeMessages(
+      async (message: WhatsAppQueueMessage) => {
+        return this.processMessage(message);
+      },
+    );
   }
 
   /**
    * Process WhatsApp message from queue
    */
-  private async processMessage(message: WhatsAppQueueMessage): Promise<boolean> {
+  private async processMessage(
+    message: WhatsAppQueueMessage,
+  ): Promise<boolean> {
     try {
       this.logger.log(`Sending WhatsApp document to ${message.to}`);
 
@@ -108,7 +121,9 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
 
       this.logger.log(`Document sent successfully to ${to}`);
     } catch (error) {
-      throw new Error(`Ultramsg API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Ultramsg API error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -118,19 +133,19 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
   private formatPhoneNumber(phone: string): string {
     let cleaned = phone.replace(/\D/g, '');
     cleaned = cleaned.replace(/^0+/, '');
-    
+
     if (cleaned.length === 10) {
       cleaned = '91' + cleaned;
     }
-    
+
     if (!cleaned.startsWith('+')) {
       cleaned = '+' + cleaned;
     }
-    
+
     return cleaned;
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

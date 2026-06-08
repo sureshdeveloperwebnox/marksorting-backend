@@ -7,7 +7,9 @@ export interface LogActivityOptions {
   action: ActivityAction | string;
   entityType: string;
   entityIdParam?: string; // Parameter name containing the entity ID
-  description: string | ((context: LogActivityContext) => string | Promise<string>);
+  description:
+    | string
+    | ((context: LogActivityContext) => string | Promise<string>);
   ignoreNullEntity?: boolean; // Don't log if entity is null/undefined
 }
 
