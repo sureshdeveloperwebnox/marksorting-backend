@@ -168,6 +168,18 @@ export class TicketsService {
 
     await this.invalidateCache();
 
+    if (user?.userId) {
+      await this.prisma.ticketTimeline.create({
+        data: {
+          ticket_id: ticket.id,
+          user_id: user.userId,
+          notes: `Ticket created: ${dto.subject}\n\nDescription: ${dto.description}`,
+          status: dto.status || 'OPEN',
+          timeline_date: new Date(),
+        },
+      });
+    }
+
     const assignedIds = service_engineer_id ? [service_engineer_id] : [];
     this.eventEmitter.emit('ticket.created', {
       ticketNumber: ticket.ticket_number,
@@ -213,6 +225,52 @@ export class TicketsService {
     });
 
     await this.invalidateCache(id);
+
+    const changes: string[] = [];
+    const fieldsToCompare = [
+      { key: 'subject', label: 'Subject' },
+      { key: 'description', label: 'Description' },
+      { key: 'priority', label: 'Priority' },
+      { key: 'status', label: 'Status' },
+    ];
+
+    for (const field of fieldsToCompare) {
+      const oldVal = existing[field.key];
+      const newVal = ticket[field.key];
+      if (oldVal !== newVal) {
+        changes.push(`${field.label}: "${oldVal ?? ''}" → "${newVal ?? ''}"`);
+      }
+    }
+
+    if (existing.service_engineer_id !== ticket.service_engineer_id) {
+      const oldName = existing.service_engineer?.full_name || 'None';
+      const newName = ticket.service_engineer?.full_name || 'None';
+      changes.push(`Service Engineer: "${oldName}" → "${newName}"`);
+    }
+
+    if (existing.customer_id !== ticket.customer_id) {
+      const oldName = existing.customer?.name || 'None';
+      const newName = ticket.customer?.name || 'None';
+      changes.push(`Customer: "${oldName}" → "${newName}"`);
+    }
+
+    if (existing.mill_id !== ticket.mill_id) {
+      const oldName = existing.mill?.name || 'None';
+      const newName = ticket.mill?.name || 'None';
+      changes.push(`Mill: "${oldName}" → "${newName}"`);
+    }
+
+    if (user?.userId && changes.length > 0) {
+      await this.prisma.ticketTimeline.create({
+        data: {
+          ticket_id: ticket.id,
+          user_id: user.userId,
+          notes: `Ticket details updated:\n${changes.join('\n')}`,
+          status: ticket.status,
+          timeline_date: new Date(),
+        },
+      });
+    }
 
     if (
       nextServiceEngineerId &&

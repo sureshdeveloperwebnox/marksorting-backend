@@ -94,8 +94,8 @@ export class TicketsController {
       return createDescription('Support Ticket', title, details || undefined, ctx.user.full_name);
     },
   })
-  create(@Body() dto: CreateTicketDto) {
-    return this.ticketsService.create(dto);
+  create(@Body() dto: CreateTicketDto, @Request() req: any) {
+    return this.ticketsService.create(dto, req.user);
   }
 
   @Put(':id')
@@ -115,8 +115,12 @@ export class TicketsController {
         : `${who} Support Ticket "${title}" (no changes detected)`;
     },
   })
-  update(@Param('id') id: string, @Body() dto: UpdateTicketDto) {
-    return this.ticketsService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateTicketDto,
+    @Request() req: any,
+  ) {
+    return this.ticketsService.update(id, dto, req.user);
   }
 
   @Delete(':id')

@@ -39,11 +39,11 @@ let TicketsController = class TicketsController {
     findOne(id) {
         return this.ticketsService.findById(id);
     }
-    create(dto) {
-        return this.ticketsService.create(dto);
+    create(dto, req) {
+        return this.ticketsService.create(dto, req.user);
     }
-    update(id, dto) {
-        return this.ticketsService.update(id, dto);
+    update(id, dto, req) {
+        return this.ticketsService.update(id, dto, req.user);
     }
     remove(id) {
         return this.ticketsService.remove(id);
@@ -125,8 +125,9 @@ __decorate([
         },
     }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_ticket_dto_1.CreateTicketDto]),
+    __metadata("design:paramtypes", [create_ticket_dto_1.CreateTicketDto, Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "create", null);
 __decorate([
@@ -149,8 +150,9 @@ __decorate([
     }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_ticket_dto_1.UpdateTicketDto]),
+    __metadata("design:paramtypes", [String, update_ticket_dto_1.UpdateTicketDto, Object]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "update", null);
 __decorate([

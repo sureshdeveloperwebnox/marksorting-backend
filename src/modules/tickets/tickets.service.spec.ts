@@ -17,6 +17,9 @@ describe('TicketsService', () => {
       findMany: jest.fn(),
       count: jest.fn(),
     },
+    ticketTimeline: {
+      create: jest.fn(),
+    },
     technician: {
       findFirst: jest.fn(),
     },
@@ -74,6 +77,7 @@ describe('TicketsService', () => {
         }),
       }),
     );
+    expect(prisma.ticketTimeline.create).not.toHaveBeenCalled();
   });
 
   it('rejects a mill that does not belong to the selected customer', async () => {
@@ -235,6 +239,16 @@ describe('TicketsService', () => {
             }),
           }),
         );
+        expect(prisma.ticketTimeline.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              ticket_id: 'ticket-1',
+              user_id: 'engineer-id',
+              notes: 'Ticket created: Printer issue\n\nDescription: Printer is not responding',
+              status: 'OPEN',
+            }),
+          }),
+        );
       });
     });
 
@@ -273,6 +287,59 @@ describe('TicketsService', () => {
           expect.objectContaining({
             data: expect.objectContaining({
               service_engineer_id: 'engineer-id',
+            }),
+          }),
+        );
+      });
+
+      it('should create a TicketTimeline entry with compiled changes', async () => {
+        const existing = {
+          id: 'ticket-1',
+          service_engineer_id: 'engineer-1',
+          customer_id: 'customer-id',
+          mill_id: 'mill-id',
+          subject: 'Old Subject',
+          description: 'Old Description',
+          priority: 'MEDIUM',
+          status: 'OPEN',
+          service_engineer: { full_name: 'Engineer One' },
+          customer: { name: 'Customer One' },
+          mill: { name: 'Mill One' },
+        };
+        const updated = {
+          ...existing,
+          service_engineer_id: 'engineer-2',
+          subject: 'New Subject',
+          status: 'IN_PROGRESS',
+          service_engineer: { full_name: 'Engineer Two' },
+        };
+        prisma.supportTicket.findUnique.mockResolvedValue(existing);
+        prisma.supportTicket.update.mockResolvedValue(updated);
+
+        await service.update(
+          'ticket-1',
+          {
+            subject: 'New Subject',
+            status: 'IN_PROGRESS',
+            service_engineer_id: 'engineer-2',
+          },
+          mockAdminUser,
+        );
+
+        expect(prisma.ticketTimeline.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              ticket_id: 'ticket-1',
+              user_id: 'admin-id',
+              notes: expect.stringContaining('Subject: "Old Subject" → "New Subject"'),
+              status: 'IN_PROGRESS',
+            }),
+          }),
+        );
+        expect(prisma.ticketTimeline.create).toHaveBeenCalledWith(
+          expect.objectContaining({
+            data: expect.objectContaining({
+              notes: expect.stringContaining('Service Engineer: "Engineer One" → "Engineer Two"'),
             }),
           }),
         );
