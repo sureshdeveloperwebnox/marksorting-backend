@@ -8,103 +8,103 @@ export declare class TicketsController {
     findAll(skip?: string, take?: string, search?: string, status?: string, priority?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateTicketDto, req: any): Promise<{
-        mill: {
+        service_engineer: {
             id: string;
-            name: string;
+            status: string;
+            full_name: string;
+            email: string | null;
+            phone: string | null;
         } | null;
         customer: {
             id: string;
             email: string | null;
+            phone: string | null;
             name: string;
-            phone: string | null;
         } | null;
-        service_engineer: {
+        mill: {
             id: string;
-            full_name: string;
-            email: string | null;
-            phone: string | null;
-            status: string;
+            name: string;
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        description: string;
+        ticket_number: string | null;
         user_id: string | null;
-        status: string;
+        service_engineer_id: string | null;
         customer_id: string | null;
         mill_id: string | null;
-        priority: string;
         subject: string;
-        ticket_number: string | null;
-        service_engineer_id: string | null;
+        description: string;
+        status: string;
+        priority: string;
+        created_at: Date;
+        updated_at: Date;
     }>;
     update(id: string, dto: UpdateTicketDto, req: any): Promise<{
         before: any;
         after: {
-            mill: {
+            service_engineer: {
                 id: string;
-                name: string;
+                status: string;
+                full_name: string;
+                email: string | null;
+                phone: string | null;
             } | null;
             customer: {
                 id: string;
                 email: string | null;
+                phone: string | null;
                 name: string;
-                phone: string | null;
             } | null;
-            service_engineer: {
+            mill: {
                 id: string;
-                full_name: string;
-                email: string | null;
-                phone: string | null;
-                status: string;
+                name: string;
             } | null;
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
-            description: string;
+            ticket_number: string | null;
             user_id: string | null;
-            status: string;
+            service_engineer_id: string | null;
             customer_id: string | null;
             mill_id: string | null;
-            priority: string;
             subject: string;
-            ticket_number: string | null;
-            service_engineer_id: string | null;
+            description: string;
+            status: string;
+            priority: string;
+            created_at: Date;
+            updated_at: Date;
         };
     }>;
     remove(id: string): Promise<{
-        mill: {
+        service_engineer: {
             id: string;
-            name: string;
+            status: string;
+            full_name: string;
+            email: string | null;
+            phone: string | null;
         } | null;
         customer: {
             id: string;
             email: string | null;
+            phone: string | null;
             name: string;
-            phone: string | null;
         } | null;
-        service_engineer: {
+        mill: {
             id: string;
-            full_name: string;
-            email: string | null;
-            phone: string | null;
-            status: string;
+            name: string;
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        description: string;
+        ticket_number: string | null;
         user_id: string | null;
-        status: string;
+        service_engineer_id: string | null;
         customer_id: string | null;
         mill_id: string | null;
-        priority: string;
         subject: string;
-        ticket_number: string | null;
-        service_engineer_id: string | null;
+        description: string;
+        status: string;
+        priority: string;
+        created_at: Date;
+        updated_at: Date;
     }>;
     createTimeline(ticketId: string, dto: CreateTimelineDto, req: any): Promise<{
         user: {
@@ -114,13 +114,13 @@ export declare class TicketsController {
         };
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
         user_id: string;
         status: string | null;
+        created_at: Date;
+        updated_at: Date;
         notes: string;
-        next_follow_up_date: Date | null;
         timeline_date: Date;
+        next_follow_up_date: Date | null;
         ticket_id: string;
     }>;
     getTimelines(ticketId: string): Promise<({
@@ -131,13 +131,13 @@ export declare class TicketsController {
         };
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
         user_id: string;
         status: string | null;
+        created_at: Date;
+        updated_at: Date;
         notes: string;
-        next_follow_up_date: Date | null;
         timeline_date: Date;
+        next_follow_up_date: Date | null;
         ticket_id: string;
     })[]>;
 }

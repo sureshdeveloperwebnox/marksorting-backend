@@ -235,8 +235,8 @@ export class TicketsService {
     ];
 
     for (const field of fieldsToCompare) {
-      const oldVal = existing[field.key];
-      const newVal = ticket[field.key];
+      const oldVal = (existing as any)[field.key];
+      const newVal = (ticket as any)[field.key];
       if (oldVal !== newVal) {
         changes.push(`${field.label}: "${oldVal ?? ''}" → "${newVal ?? ''}"`);
       }
