@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   ObjectCannedACL,
+  PutObjectAclCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -130,6 +131,47 @@ export class S3Service {
     } catch (error) {
       this.logger.error(`Error uploading file to S3: ${error.message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Programmatically sets the ACL of an object to public-read
+   * @param key The file path in the bucket or full URL
+   */
+  async makeObjectPublic(key: string | null | undefined): Promise<void> {
+    if (!key) return;
+
+    let actualKey = key;
+    if (key.startsWith('http')) {
+      try {
+        const url = new URL(key);
+        let pathname = url.pathname;
+        if (pathname.startsWith('/')) {
+          pathname = pathname.substring(1);
+        }
+        if (pathname.startsWith(`${this.bucketName}/`)) {
+          pathname = pathname.substring(this.bucketName.length + 1);
+        }
+        actualKey = pathname;
+      } catch (error) {
+        this.logger.error(`Error parsing URL to key: ${key} - ${error.message}`);
+        return;
+      }
+    }
+
+    try {
+      const command = new PutObjectAclCommand({
+        Bucket: this.bucketName,
+        Key: actualKey,
+        ACL: ObjectCannedACL.public_read,
+      });
+
+      await this.s3Client.send(command);
+      this.logger.log(`Successfully made object public: ${actualKey}`);
+    } catch (error) {
+      this.logger.error(
+        `Error making object public (${actualKey}): ${error.message}`,
+      );
     }
   }
 

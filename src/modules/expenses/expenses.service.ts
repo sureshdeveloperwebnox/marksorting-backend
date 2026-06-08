@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -31,6 +32,7 @@ const INCLUDE_SHAPE = {
 export class ExpensesService {
   private readonly CACHE_PREFIX = 'expense:';
   private readonly LIST_CACHE_KEY = 'expenses:list:';
+  private readonly logger = new Logger(ExpensesService.name);
 
   constructor(
     private prisma: PrismaService,
@@ -295,6 +297,15 @@ export class ExpensesService {
 
     await this.invalidateCache();
 
+    if (expense?.expense_images && expense.expense_images.length > 0) {
+      const imageAclPromises = expense.expense_images.map((img: string) =>
+        this.s3Service.makeObjectPublic(img),
+      );
+      await Promise.all(imageAclPromises).catch((err) => {
+        this.logger.error(`Error making expense images public: ${err.message}`);
+      });
+    }
+
     if (expense) {
       this.eventEmitter.emit('expense.created', {
         expenseNumber: expense.expense_number,
@@ -418,6 +429,15 @@ export class ExpensesService {
     }
 
     await this.invalidateCache(id);
+
+    if (expense?.expense_images && expense.expense_images.length > 0) {
+      const imageAclPromises = expense.expense_images.map((img: string) =>
+        this.s3Service.makeObjectPublic(img),
+      );
+      await Promise.all(imageAclPromises).catch((err) => {
+        this.logger.error(`Error making expense images public: ${err.message}`);
+      });
+    }
 
     if ((dto as any).status && expense) {
       const technicianUserIds: string[] =

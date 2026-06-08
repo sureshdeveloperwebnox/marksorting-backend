@@ -115,6 +115,17 @@ export class UsersService {
       include: { role: true },
     });
 
+    const imageAclPromises: Promise<void>[] = [];
+    if (user.profile_image) {
+      imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
+    }
+    if (user.background_image) {
+      imageAclPromises.push(this.s3Service.makeObjectPublic(user.background_image));
+    }
+    if (imageAclPromises.length > 0) {
+      await Promise.all(imageAclPromises);
+    }
+
     await this.invalidateCache();
     return this.formatUser(user);
   }
@@ -162,6 +173,17 @@ export class UsersService {
       data: updateData,
       include: { role: true },
     });
+
+    const imageAclPromises: Promise<void>[] = [];
+    if (user.profile_image && user.profile_image !== existingUser.profile_image) {
+      imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
+    }
+    if (user.background_image && user.background_image !== existingUser.background_image) {
+      imageAclPromises.push(this.s3Service.makeObjectPublic(user.background_image));
+    }
+    if (imageAclPromises.length > 0) {
+      await Promise.all(imageAclPromises);
+    }
 
     await this.invalidateCache(id, user.email);
     return {

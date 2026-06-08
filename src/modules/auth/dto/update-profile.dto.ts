@@ -27,4 +27,9 @@ export class UpdateProfileDto {
   @IsString()
   @IsOptional()
   profile_image?: string;
+
+  @ApiProperty({ example: 'background-image-key.jpg', required: false })
+  @IsString()
+  @IsOptional()
+  background_image?: string;
 }
