@@ -43,6 +43,7 @@ let S3Service = S3Service_1 = class S3Service {
                 Bucket: this.bucketName,
                 Key: key,
                 ContentType: contentType,
+                ACL: client_s3_1.ObjectCannedACL.public_read,
             });
             return await (0, s3_request_presigner_1.getSignedUrl)(this.s3Client, command, { expiresIn });
         }

@@ -49,8 +49,7 @@ export class S3Service {
         Bucket: this.bucketName,
         Key: key,
         ContentType: contentType,
-        // NOTE: ACL is NOT included here to avoid SignatureDoesNotMatch errors
-        // The bucket policy must allow public read access instead
+        ACL: ObjectCannedACL.public_read,
       });
 
       return await getSignedUrl(this.s3Client, command, { expiresIn });
