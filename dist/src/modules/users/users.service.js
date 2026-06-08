@@ -136,12 +136,21 @@ let UsersService = class UsersService {
         await this.invalidateCache();
         return this.formatUser(user);
     }
-    async update(id, dto) {
+    async update(id, dto, requestingUser) {
         const existingUser = await this.prisma.user.findUnique({
             where: { id },
             include: { role: true },
         });
+        if (!existingUser) {
+            throw new common_1.NotFoundException('User not found');
+        }
         const { password, ...data } = dto;
+        const hasUpdatePermission = requestingUser?.permissions?.includes('users.update');
+        const isSelfUpdate = requestingUser?.userId === id;
+        if (isSelfUpdate && !hasUpdatePermission) {
+            delete data.role_id;
+            delete data.account_status;
+        }
         if (data.email) {
             const emailConflict = await this.prisma.user.findUnique({
                 where: { email: data.email },

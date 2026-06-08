@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -175,8 +176,12 @@ export class UsersController {
         : `${who} User "${name}" (no changes detected)`;
     },
   })
-  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(id, dto);
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserDto,
+    @Request() req: any,
+  ) {
+    return this.usersService.update(id, dto, req.user);
   }
 
   @Delete(':id')

@@ -119,13 +119,26 @@ export class UsersService {
     return this.formatUser(user);
   }
 
-  async update(id: string, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto, requestingUser?: any) {
     const existingUser = await this.prisma.user.findUnique({
       where: { id },
       include: { role: true },
     });
 
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
     const { password, ...data } = dto;
+
+    // Security: restrict self-update from elevating privileges or modifying status
+    const hasUpdatePermission = requestingUser?.permissions?.includes('users.update');
+    const isSelfUpdate = requestingUser?.userId === id;
+
+    if (isSelfUpdate && !hasUpdatePermission) {
+      delete data.role_id;
+      delete data.account_status;
+    }
 
     if (data.email) {
       const emailConflict = await this.prisma.user.findUnique({

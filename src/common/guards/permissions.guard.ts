@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator.js';
+import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -19,6 +19,17 @@ export class PermissionsGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
+
+    // Allow users to view or update their own user profile/details
+    const { method, params } = request;
+    if (
+      user &&
+      params.id &&
+      params.id === user.userId &&
+      (method === 'GET' || method === 'PUT' || method === 'PATCH')
+    ) {
+      return true;
+    }
 
     // Check if user exists and has permissions
     if (!user || !user.permissions) {

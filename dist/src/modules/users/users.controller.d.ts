@@ -8,7 +8,7 @@ export declare class UsersController {
     findAll(skip?: string, take?: string, search?: string, status?: string, roleId?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateUserDto): Promise<any>;
-    update(id: string, dto: UpdateUserDto): Promise<{
+    update(id: string, dto: UpdateUserDto, req: any): Promise<{
         before: any;
         after: any;
     }>;
