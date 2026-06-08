@@ -4,7 +4,7 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 export declare class StoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
-    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, customerId?: string, materialId?: string, warrantyStatus?: string, returnStatus?: string, inflowStatus?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, serviceEngineerIdCamel?: string, customerId?: string, customerIdCamel?: string, materialId?: string, materialIdCamel?: string, warrantyStatus?: string, warrantyStatusCamel?: string, returnStatus?: string, returnStatusCamel?: string, inflowStatus?: string, inflowStatusCamel?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
         customer: {
@@ -37,8 +37,8 @@ export declare class StoresController {
         inflow_status: string;
         invoice_number: string | null;
         service_engineer_id: string;
-        provider_name: string | null;
         quantity: number;
+        provider_name: string | null;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
         before: {
@@ -54,8 +54,8 @@ export declare class StoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
         after: {
             customer: {
@@ -88,8 +88,8 @@ export declare class StoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
     }>;
     remove(id: string): Promise<{
@@ -105,7 +105,7 @@ export declare class StoresController {
         inflow_status: string;
         invoice_number: string | null;
         service_engineer_id: string;
-        provider_name: string | null;
         quantity: number;
+        provider_name: string | null;
     }>;
 }

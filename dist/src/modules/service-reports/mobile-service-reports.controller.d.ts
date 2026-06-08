@@ -8,6 +8,10 @@ export declare class MobileServiceReportsController {
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileServiceReportDto, req: any): Promise<({
+        serviceCategory: {
+            id: string;
+            name: string;
+        };
         mill: {
             id: string;
             name: string;
@@ -15,10 +19,6 @@ export declare class MobileServiceReportsController {
                 id: string;
                 name: string;
             } | null;
-        };
-        serviceCategory: {
-            id: string;
-            name: string;
         };
         technicians: ({
             technician: {
@@ -35,23 +35,22 @@ export declare class MobileServiceReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
+        report_number: string;
+        service_category_id: string;
         mill_id: string;
         place: string;
-        visit_date: Date;
-        visit_time: string;
-        machine_model: string;
-        serial_or_frame_no: string;
-        service_category_id: string;
-        nature_of_complaint: string;
-        authorized_person: string;
-        customer_signature: string;
-        report_number: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
+        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
+        serial_or_frame_no: string;
+        authorized_person: string;
         previous_visit_engineer: string | null;
+        nature_of_complaint: string;
         problem_observed: string | null;
         action_taken: string;
         commodity: string | null;
@@ -69,10 +68,15 @@ export declare class MobileServiceReportsController {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
+        customer_signature: string;
     }) | null>;
     update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         before: any;
         after: {
+            serviceCategory: {
+                id: string;
+                name: string;
+            };
             mill: {
                 id: string;
                 name: string;
@@ -80,10 +84,6 @@ export declare class MobileServiceReportsController {
                     id: string;
                     name: string;
                 } | null;
-            };
-            serviceCategory: {
-                id: string;
-                name: string;
             };
             technicians: ({
                 technician: {
@@ -100,23 +100,22 @@ export declare class MobileServiceReportsController {
             updated_at: Date;
             deleted_at: Date | null;
             status: string;
+            report_number: string;
+            service_category_id: string;
             mill_id: string;
             place: string;
-            visit_date: Date;
-            visit_time: string;
-            machine_model: string;
-            serial_or_frame_no: string;
-            service_category_id: string;
-            nature_of_complaint: string;
-            authorized_person: string;
-            customer_signature: string;
-            report_number: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
+            visit_date: Date;
+            visit_time: string;
             call_registered_date: Date;
+            machine_model: string;
             machine_mfg_date: Date | null;
             machine_installation_date: Date | null;
+            serial_or_frame_no: string;
+            authorized_person: string;
             previous_visit_engineer: string | null;
+            nature_of_complaint: string;
             problem_observed: string | null;
             action_taken: string;
             commodity: string | null;
@@ -134,9 +133,14 @@ export declare class MobileServiceReportsController {
             engineer_remarks: string;
             engineer_signature: string;
             customer_remarks: string | null;
+            customer_signature: string;
         };
     }>;
     remove(id: string, req: any): Promise<{
+        serviceCategory: {
+            id: string;
+            name: string;
+        };
         mill: {
             id: string;
             name: string;
@@ -144,10 +148,6 @@ export declare class MobileServiceReportsController {
                 id: string;
                 name: string;
             } | null;
-        };
-        serviceCategory: {
-            id: string;
-            name: string;
         };
         technicians: ({
             technician: {
@@ -164,23 +164,22 @@ export declare class MobileServiceReportsController {
         updated_at: Date;
         deleted_at: Date | null;
         status: string;
+        report_number: string;
+        service_category_id: string;
         mill_id: string;
         place: string;
-        visit_date: Date;
-        visit_time: string;
-        machine_model: string;
-        serial_or_frame_no: string;
-        service_category_id: string;
-        nature_of_complaint: string;
-        authorized_person: string;
-        customer_signature: string;
-        report_number: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
+        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
+        serial_or_frame_no: string;
+        authorized_person: string;
         previous_visit_engineer: string | null;
+        nature_of_complaint: string;
         problem_observed: string | null;
         action_taken: string;
         commodity: string | null;
@@ -198,6 +197,7 @@ export declare class MobileServiceReportsController {
         engineer_remarks: string;
         engineer_signature: string;
         customer_remarks: string | null;
+        customer_signature: string;
     }>;
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
 }

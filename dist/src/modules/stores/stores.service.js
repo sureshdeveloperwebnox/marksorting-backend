@@ -167,13 +167,25 @@ let StoresService = class StoresService {
             deleted_at: null,
         };
         if (return_status) {
-            where.return_status = return_status;
+            const lower = return_status.toLowerCase();
+            if (lower === 'returned' || lower === 'completed') {
+                where.return_status = { in: ['Returned', 'Completed'] };
+            }
+            else if (lower === 'pending') {
+                where.return_status = 'Pending';
+            }
+            else if (lower === 'not returned' || lower === 'not_returned') {
+                where.return_status = 'Not Returned';
+            }
+            else {
+                where.return_status = { equals: return_status, mode: 'insensitive' };
+            }
         }
         if (inflow_status) {
-            where.inflow_status = inflow_status;
+            where.inflow_status = { equals: inflow_status, mode: 'insensitive' };
         }
         if (warranty_status) {
-            where.warranty_status = warranty_status;
+            where.warranty_status = { equals: warranty_status, mode: 'insensitive' };
         }
         if (search) {
             where.OR = [

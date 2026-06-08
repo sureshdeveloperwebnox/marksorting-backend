@@ -13,12 +13,11 @@ export declare class ActivityLogsController {
             };
         } & {
             id: string;
-            created_at: Date;
-            description: string;
             user_id: string;
             action: string;
             entity_type: string | null;
             entity_id: string | null;
+            description: string;
             metadata: import("@prisma/client/runtime/client").JsonValue | null;
             ip_address: string | null;
             user_agent: string | null;
@@ -30,6 +29,7 @@ export declare class ActivityLogsController {
             session_id: string | null;
             execution_time_ms: number | null;
             archived: boolean;
+            created_at: Date;
         })[];
         meta: {
             total: number;
@@ -61,12 +61,11 @@ export declare class ActivityLogsController {
         };
     } & {
         id: string;
-        created_at: Date;
-        description: string;
         user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
+        description: string;
         metadata: import("@prisma/client/runtime/client").JsonValue | null;
         ip_address: string | null;
         user_agent: string | null;
@@ -78,6 +77,7 @@ export declare class ActivityLogsController {
         session_id: string | null;
         execution_time_ms: number | null;
         archived: boolean;
+        created_at: Date;
     })[]>;
     getEntityActivity(entityType: string, entityId: string, limit?: string): Promise<({
         user: {
@@ -87,12 +87,11 @@ export declare class ActivityLogsController {
         };
     } & {
         id: string;
-        created_at: Date;
-        description: string;
         user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
+        description: string;
         metadata: import("@prisma/client/runtime/client").JsonValue | null;
         ip_address: string | null;
         user_agent: string | null;
@@ -104,6 +103,7 @@ export declare class ActivityLogsController {
         session_id: string | null;
         execution_time_ms: number | null;
         archived: boolean;
+        created_at: Date;
     })[]>;
     exportToExcel(dto: QueryActivityLogsDto, res: Response): Promise<void>;
 }

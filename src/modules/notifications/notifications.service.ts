@@ -160,6 +160,28 @@ export class NotificationsService {
     });
   }
 
+  async notifyStakeholders(
+    technicianUserIds: string[],
+    creatorUserId: string | undefined,
+    title: string,
+    message: string,
+    type: NotificationType,
+    metaData?: Record<string, any>,
+  ) {
+    const adminIds = await this.getAdminUserIds();
+    const recipientIds = new Set([...adminIds, ...technicianUserIds]);
+    if (creatorUserId) {
+      recipientIds.delete(creatorUserId);
+    }
+    await this.sendToUsers(
+      Array.from(recipientIds),
+      title,
+      message,
+      type,
+      metaData,
+    );
+  }
+
   async registerPushToken(
     userId: string,
     token: string,

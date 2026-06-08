@@ -8,40 +8,40 @@ export declare class MaterialsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateMaterialDto): Promise<{
         id: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
-        description: string | null;
         status: string;
     }>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
         before: {
             id: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            description: string | null;
             status: string;
         };
         after: {
             id: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            description: string | null;
             status: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
-        description: string | null;
         status: string;
     }>;
 }

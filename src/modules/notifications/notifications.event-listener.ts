@@ -22,12 +22,9 @@ export class NotificationsEventListener {
       const title = 'New Service Report Created';
       const message = `Service Report ${reportNumber} has been created for mill "${millName}".`;
 
-      const adminIds = await this.notificationsService.getAdminUserIds();
-      const recipientIds = new Set([...adminIds, ...technicianUserIds]);
-      if (creatorUserId) recipientIds.delete(creatorUserId);
-
-      await this.notificationsService.sendToUsers(
-        Array.from(recipientIds),
+      await this.notificationsService.notifyStakeholders(
+        technicianUserIds,
+        creatorUserId,
         title,
         message,
         NotificationType.SERVICE_REPORT,
@@ -51,12 +48,9 @@ export class NotificationsEventListener {
       const title = 'New Installation Report Created';
       const message = `Installation Report ${reportNumber} has been created for mill "${millName}".`;
 
-      const adminIds = await this.notificationsService.getAdminUserIds();
-      const recipientIds = new Set([...adminIds, ...technicianUserIds]);
-      if (creatorUserId) recipientIds.delete(creatorUserId);
-
-      await this.notificationsService.sendToUsers(
-        Array.from(recipientIds),
+      await this.notificationsService.notifyStakeholders(
+        technicianUserIds,
+        creatorUserId,
         title,
         message,
         NotificationType.INSTALLATION,
@@ -78,15 +72,13 @@ export class NotificationsEventListener {
     technicianUserIds?: string[];
   }) {
     try {
-      const { expenseNumber, amount, creatorUserId } = payload;
+      const { expenseNumber, amount, creatorUserId, technicianUserIds } = payload;
       const title = 'New Expense Submitted';
       const message = `Expense ${expenseNumber} of ₹${amount} has been submitted for approval.`;
 
-      const adminIds = await this.notificationsService.getAdminUserIds();
-      const recipientIds = adminIds.filter((id) => id !== creatorUserId);
-
-      await this.notificationsService.sendToUsers(
-        recipientIds,
+      await this.notificationsService.notifyStakeholders(
+        technicianUserIds || [],
+        creatorUserId,
         title,
         message,
         NotificationType.EXPENSE,
@@ -139,12 +131,9 @@ export class NotificationsEventListener {
       const title = 'New Support Ticket Created';
       const message = `Ticket ${ticketNumber}: "${subject}" has been created.`;
 
-      const adminIds = await this.notificationsService.getAdminUserIds();
-      const recipientIds = new Set([...adminIds, ...assignedTechnicianUserIds]);
-      if (creatorUserId) recipientIds.delete(creatorUserId);
-
-      await this.notificationsService.sendToUsers(
-        Array.from(recipientIds),
+      await this.notificationsService.notifyStakeholders(
+        assignedTechnicianUserIds,
+        creatorUserId,
         title,
         message,
         NotificationType.TICKET,

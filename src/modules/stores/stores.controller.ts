@@ -90,13 +90,26 @@ export class StoresController {
     @Query('take') take?: string,
     @Query('search') search?: string,
     @Query('service_engineer_id') serviceEngineerId?: string,
+    @Query('serviceEngineerId') serviceEngineerIdCamel?: string,
     @Query('customer_id') customerId?: string,
+    @Query('customerId') customerIdCamel?: string,
     @Query('material_id') materialId?: string,
+    @Query('materialId') materialIdCamel?: string,
     @Query('warranty_status') warrantyStatus?: string,
+    @Query('warrantyStatus') warrantyStatusCamel?: string,
     @Query('return_status') returnStatus?: string,
+    @Query('returnStatus') returnStatusCamel?: string,
     @Query('inflow_status') inflowStatus?: string,
+    @Query('inflowStatus') inflowStatusCamel?: string,
   ) {
     const where: Prisma.StoreWhereInput = {};
+
+    const engId = serviceEngineerId || serviceEngineerIdCamel;
+    const custId = customerId || customerIdCamel;
+    const matId = materialId || materialIdCamel;
+    const warStatus = warrantyStatus || warrantyStatusCamel;
+    const retStatus = returnStatus || returnStatusCamel;
+    const infStatus = inflowStatus || inflowStatusCamel;
 
     if (search) {
       where.OR = [
@@ -115,24 +128,33 @@ export class StoresController {
       ];
     }
 
-    if (serviceEngineerId) {
-      where.service_engineer_id = serviceEngineerId;
+    if (engId) {
+      where.service_engineer_id = engId;
     }
 
-    if (customerId) {
-      where.customer_id = customerId;
+    if (custId) {
+      where.customer_id = custId;
     }
 
-    if (warrantyStatus) {
-      where.warranty_status = warrantyStatus;
+    if (warStatus) {
+      where.warranty_status = { equals: warStatus, mode: 'insensitive' };
     }
 
-    if (returnStatus) {
-      where.return_status = returnStatus;
+    if (retStatus) {
+      const lower = retStatus.toLowerCase();
+      if (lower === 'returned' || lower === 'completed') {
+        where.return_status = { in: ['Returned', 'Completed'] };
+      } else if (lower === 'pending') {
+        where.return_status = 'Pending';
+      } else if (lower === 'not returned' || lower === 'not_returned') {
+        where.return_status = 'Not Returned';
+      } else {
+        where.return_status = { equals: retStatus, mode: 'insensitive' };
+      }
     }
 
-    if (inflowStatus) {
-      where.inflow_status = inflowStatus;
+    if (infStatus) {
+      where.inflow_status = { equals: infStatus, mode: 'insensitive' };
     }
 
     if (materialId) {

@@ -26,11 +26,7 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { reportNumber, millName, technicianUserIds, creatorUserId } = payload;
             const title = 'New Service Report Created';
             const message = `Service Report ${reportNumber} has been created for mill "${millName}".`;
-            const adminIds = await this.notificationsService.getAdminUserIds();
-            const recipientIds = new Set([...adminIds, ...technicianUserIds]);
-            if (creatorUserId)
-                recipientIds.delete(creatorUserId);
-            await this.notificationsService.sendToUsers(Array.from(recipientIds), title, message, broadcast_notification_dto_1.NotificationType.SERVICE_REPORT, { reportNumber, millName });
+            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.SERVICE_REPORT, { reportNumber, millName });
         }
         catch (err) {
             this.logger.error('Error handling service-report.created event', err);
@@ -41,11 +37,7 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { reportNumber, millName, technicianUserIds, creatorUserId } = payload;
             const title = 'New Installation Report Created';
             const message = `Installation Report ${reportNumber} has been created for mill "${millName}".`;
-            const adminIds = await this.notificationsService.getAdminUserIds();
-            const recipientIds = new Set([...adminIds, ...technicianUserIds]);
-            if (creatorUserId)
-                recipientIds.delete(creatorUserId);
-            await this.notificationsService.sendToUsers(Array.from(recipientIds), title, message, broadcast_notification_dto_1.NotificationType.INSTALLATION, { reportNumber, millName });
+            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.INSTALLATION, { reportNumber, millName });
         }
         catch (err) {
             this.logger.error('Error handling installation-report.created event', err);
@@ -53,12 +45,10 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
     }
     async onExpenseCreated(payload) {
         try {
-            const { expenseNumber, amount, creatorUserId } = payload;
+            const { expenseNumber, amount, creatorUserId, technicianUserIds } = payload;
             const title = 'New Expense Submitted';
             const message = `Expense ${expenseNumber} of ₹${amount} has been submitted for approval.`;
-            const adminIds = await this.notificationsService.getAdminUserIds();
-            const recipientIds = adminIds.filter((id) => id !== creatorUserId);
-            await this.notificationsService.sendToUsers(recipientIds, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, { expenseNumber, amount });
+            await this.notificationsService.notifyStakeholders(technicianUserIds || [], creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, { expenseNumber, amount });
         }
         catch (err) {
             this.logger.error('Error handling expense.created event', err);
@@ -81,11 +71,7 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { ticketNumber, subject, assignedTechnicianUserIds, creatorUserId, } = payload;
             const title = 'New Support Ticket Created';
             const message = `Ticket ${ticketNumber}: "${subject}" has been created.`;
-            const adminIds = await this.notificationsService.getAdminUserIds();
-            const recipientIds = new Set([...adminIds, ...assignedTechnicianUserIds]);
-            if (creatorUserId)
-                recipientIds.delete(creatorUserId);
-            await this.notificationsService.sendToUsers(Array.from(recipientIds), title, message, broadcast_notification_dto_1.NotificationType.TICKET, { ticketNumber, subject });
+            await this.notificationsService.notifyStakeholders(assignedTechnicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.TICKET, { ticketNumber, subject });
         }
         catch (err) {
             this.logger.error('Error handling ticket.created event', err);

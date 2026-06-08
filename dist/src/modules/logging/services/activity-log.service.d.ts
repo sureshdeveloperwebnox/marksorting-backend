@@ -50,12 +50,11 @@ export declare class ActivityLogService {
         };
     } & {
         id: string;
-        created_at: Date;
-        description: string;
         user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
+        description: string;
         metadata: import("@prisma/client/runtime/client").JsonValue | null;
         ip_address: string | null;
         user_agent: string | null;
@@ -67,6 +66,7 @@ export declare class ActivityLogService {
         session_id: string | null;
         execution_time_ms: number | null;
         archived: boolean;
+        created_at: Date;
     })[]>;
     getEntityActivity(entityType: string, entityId: string, limit?: number): Promise<({
         user: {
@@ -76,12 +76,11 @@ export declare class ActivityLogService {
         };
     } & {
         id: string;
-        created_at: Date;
-        description: string;
         user_id: string;
         action: string;
         entity_type: string | null;
         entity_id: string | null;
+        description: string;
         metadata: import("@prisma/client/runtime/client").JsonValue | null;
         ip_address: string | null;
         user_agent: string | null;
@@ -93,6 +92,7 @@ export declare class ActivityLogService {
         session_id: string | null;
         execution_time_ms: number | null;
         archived: boolean;
+        created_at: Date;
     })[]>;
     cleanup(olderThanDays?: number): Promise<{
         deleted: number;

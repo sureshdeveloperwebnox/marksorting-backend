@@ -62,13 +62,13 @@ export declare class SecurityLogService {
         } | null;
     } & {
         id: string;
-        created_at: Date;
-        description: string;
         user_id: string | null;
+        description: string;
         ip_address: string;
         user_agent: string | null;
         correlation_id: string | null;
         session_id: string | null;
+        created_at: Date;
         event_type: string;
         severity: string;
         email_attempted: string | null;

@@ -130,14 +130,14 @@ let MobileStoresController = class MobileStoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(req, skip, take, search, returnStatus, inflowStatus, warrantyStatus) {
+    findAll(req, skip, take, search, return_status, returnStatus, inflow_status, inflowStatus, warranty_status, warrantyStatus) {
         return this.storesService.findByTechnician(req.user.userId, {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
-            return_status: returnStatus,
-            inflow_status: inflowStatus,
-            warranty_status: warrantyStatus,
+            return_status: return_status || returnStatus,
+            inflow_status: inflow_status || inflowStatus,
+            warranty_status: warranty_status || warrantyStatus,
         });
     }
     submitReturn(id, dto, req) {
@@ -197,10 +197,13 @@ __decorate([
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('search')),
     __param(4, (0, common_1.Query)('return_status')),
-    __param(5, (0, common_1.Query)('inflow_status')),
-    __param(6, (0, common_1.Query)('warranty_status')),
+    __param(5, (0, common_1.Query)('returnStatus')),
+    __param(6, (0, common_1.Query)('inflow_status')),
+    __param(7, (0, common_1.Query)('inflowStatus')),
+    __param(8, (0, common_1.Query)('warranty_status')),
+    __param(9, (0, common_1.Query)('warrantyStatus')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileStoresController.prototype, "findAll", null);
 __decorate([

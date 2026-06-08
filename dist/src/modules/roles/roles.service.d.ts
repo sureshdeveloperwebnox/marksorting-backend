@@ -20,10 +20,10 @@ export declare class RolesService {
     update(id: string, dto: UpdateRoleDto): Promise<{
         before: {
             id: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             name: string;
-            description: string | null;
         };
         after: any;
     }>;
@@ -33,8 +33,8 @@ export declare class RolesService {
     private invalidateCache;
     getAllPermissions(): Promise<{
         id: string;
-        name: string;
         description: string | null;
+        name: string;
     }[]>;
     private formatRole;
 }

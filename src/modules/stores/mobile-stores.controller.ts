@@ -176,17 +176,20 @@ export class MobileStoresController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
-    @Query('return_status') returnStatus?: string,
-    @Query('inflow_status') inflowStatus?: string,
-    @Query('warranty_status') warrantyStatus?: string,
+    @Query('return_status') return_status?: string,
+    @Query('returnStatus') returnStatus?: string,
+    @Query('inflow_status') inflow_status?: string,
+    @Query('inflowStatus') inflowStatus?: string,
+    @Query('warranty_status') warranty_status?: string,
+    @Query('warrantyStatus') warrantyStatus?: string,
   ) {
     return this.storesService.findByTechnician(req.user.userId, {
       skip: skip ? parseInt(skip, 10) : 0,
       take: take ? parseInt(take, 10) : 10,
       search,
-      return_status: returnStatus,
-      inflow_status: inflowStatus,
-      warranty_status: warrantyStatus,
+      return_status: return_status || returnStatus,
+      inflow_status: inflow_status || inflowStatus,
+      warranty_status: warranty_status || warrantyStatus,
     });
   }
 

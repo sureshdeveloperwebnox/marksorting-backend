@@ -26,8 +26,14 @@ let StoresController = class StoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(skip, take, search, serviceEngineerId, customerId, materialId, warrantyStatus, returnStatus, inflowStatus) {
+    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel) {
         const where = {};
+        const engId = serviceEngineerId || serviceEngineerIdCamel;
+        const custId = customerId || customerIdCamel;
+        const matId = materialId || materialIdCamel;
+        const warStatus = warrantyStatus || warrantyStatusCamel;
+        const retStatus = returnStatus || returnStatusCamel;
+        const infStatus = inflowStatus || inflowStatusCamel;
         if (search) {
             where.OR = [
                 { frame_number: { contains: search, mode: 'insensitive' } },
@@ -44,20 +50,32 @@ let StoresController = class StoresController {
                 },
             ];
         }
-        if (serviceEngineerId) {
-            where.service_engineer_id = serviceEngineerId;
+        if (engId) {
+            where.service_engineer_id = engId;
         }
-        if (customerId) {
-            where.customer_id = customerId;
+        if (custId) {
+            where.customer_id = custId;
         }
-        if (warrantyStatus) {
-            where.warranty_status = warrantyStatus;
+        if (warStatus) {
+            where.warranty_status = { equals: warStatus, mode: 'insensitive' };
         }
-        if (returnStatus) {
-            where.return_status = returnStatus;
+        if (retStatus) {
+            const lower = retStatus.toLowerCase();
+            if (lower === 'returned' || lower === 'completed') {
+                where.return_status = { in: ['Returned', 'Completed'] };
+            }
+            else if (lower === 'pending') {
+                where.return_status = 'Pending';
+            }
+            else if (lower === 'not returned' || lower === 'not_returned') {
+                where.return_status = 'Not Returned';
+            }
+            else {
+                where.return_status = { equals: retStatus, mode: 'insensitive' };
+            }
         }
-        if (inflowStatus) {
-            where.inflow_status = inflowStatus;
+        if (infStatus) {
+            where.inflow_status = { equals: infStatus, mode: 'insensitive' };
         }
         if (materialId) {
             where.materials = {
@@ -150,13 +168,19 @@ __decorate([
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('service_engineer_id')),
-    __param(4, (0, common_1.Query)('customer_id')),
-    __param(5, (0, common_1.Query)('material_id')),
-    __param(6, (0, common_1.Query)('warranty_status')),
-    __param(7, (0, common_1.Query)('return_status')),
-    __param(8, (0, common_1.Query)('inflow_status')),
+    __param(4, (0, common_1.Query)('serviceEngineerId')),
+    __param(5, (0, common_1.Query)('customer_id')),
+    __param(6, (0, common_1.Query)('customerId')),
+    __param(7, (0, common_1.Query)('material_id')),
+    __param(8, (0, common_1.Query)('materialId')),
+    __param(9, (0, common_1.Query)('warranty_status')),
+    __param(10, (0, common_1.Query)('warrantyStatus')),
+    __param(11, (0, common_1.Query)('return_status')),
+    __param(12, (0, common_1.Query)('returnStatus')),
+    __param(13, (0, common_1.Query)('inflow_status')),
+    __param(14, (0, common_1.Query)('inflowStatus')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "findAll", null);
 __decorate([

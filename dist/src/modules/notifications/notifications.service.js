@@ -112,6 +112,14 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             data: { status: 'READ' },
         });
     }
+    async notifyStakeholders(technicianUserIds, creatorUserId, title, message, type, metaData) {
+        const adminIds = await this.getAdminUserIds();
+        const recipientIds = new Set([...adminIds, ...technicianUserIds]);
+        if (creatorUserId) {
+            recipientIds.delete(creatorUserId);
+        }
+        await this.sendToUsers(Array.from(recipientIds), title, message, type, metaData);
+    }
     async registerPushToken(userId, token, deviceType) {
         return this.prisma.pushToken.upsert({
             where: { user_id_token: { user_id: userId, token } },

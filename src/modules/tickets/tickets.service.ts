@@ -185,6 +185,7 @@ export class TicketsService {
       ticketNumber: ticket.ticket_number,
       subject: ticket.subject,
       assignedTechnicianUserIds: assignedIds,
+      creatorUserId: user?.userId,
     });
 
     return ticket;

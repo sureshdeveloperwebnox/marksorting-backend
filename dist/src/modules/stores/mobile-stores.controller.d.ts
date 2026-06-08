@@ -35,8 +35,8 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         })[];
         total: number;
     }>;
@@ -54,8 +54,8 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
         after: {
             customer: {
@@ -88,15 +88,15 @@ export declare class MobileStoreReturnsController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
     }>;
 }
 export declare class MobileStoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
-    findAll(req: any, skip?: string, take?: string, search?: string, returnStatus?: string, inflowStatus?: string, warrantyStatus?: string): Promise<{
+    findAll(req: any, skip?: string, take?: string, search?: string, return_status?: string, returnStatus?: string, inflow_status?: string, inflowStatus?: string, warranty_status?: string, warrantyStatus?: string): Promise<{
         stores: ({
             customer: {
                 id: string;
@@ -128,8 +128,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         })[];
         total: number;
     }>;
@@ -147,8 +147,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
         after: {
             customer: {
@@ -181,8 +181,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
     }>;
     submitReturnAlias(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
@@ -199,8 +199,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
         after: {
             customer: {
@@ -233,8 +233,8 @@ export declare class MobileStoresController {
             inflow_status: string;
             invoice_number: string | null;
             service_engineer_id: string;
-            provider_name: string | null;
             quantity: number;
+            provider_name: string | null;
         };
     }>;
 }
