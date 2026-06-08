@@ -17,7 +17,7 @@ let PermissionsService = class PermissionsService {
     prisma;
     redis;
     CACHE_PREFIX = 'user_permissions:';
-    CACHE_TTL = 3600;
+    CACHE_TTL = 300;
     constructor(prisma, redis) {
         this.prisma = prisma;
         this.redis = redis;

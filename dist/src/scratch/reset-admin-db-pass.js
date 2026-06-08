@@ -42,7 +42,7 @@ const adapter = new adapter_pg_1.PrismaPg(pool);
 const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
     const email = 'admin@marksorting.com';
-    const newPassword = 'NewVetri@123';
+    const newPassword = 'Admin@1234';
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         const user = await prisma.user.update({

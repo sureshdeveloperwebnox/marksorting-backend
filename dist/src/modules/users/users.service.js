@@ -95,7 +95,7 @@ let UsersService = class UsersService {
         });
         const formattedUser = user ? this.formatUser(user) : null;
         if (formattedUser)
-            await this.redis.setJson(cacheKey, formattedUser, 3600);
+            await this.redis.setJson(cacheKey, formattedUser, 300);
         return formattedUser;
     }
     async findById(id) {
@@ -111,7 +111,7 @@ let UsersService = class UsersService {
         });
         const formattedUser = user ? this.formatUser(user) : null;
         if (formattedUser)
-            await this.redis.setJson(cacheKey, formattedUser, 3600);
+            await this.redis.setJson(cacheKey, formattedUser, 300);
         return formattedUser;
     }
     async create(dto) {

@@ -50,7 +50,7 @@ async function verify() {
         }
         console.log('User found:', user.email);
         console.log('Password hash:', user.password_hash);
-        const candidates = ['password123', 'Vetri@123', 'NewVetri@123', 'admin123', 'undefined', 'null', '', 'kator18328@mtupu.com', 'vetri@123'];
+        const candidates = ['password123', 'Admin@1234', 'Vetri@123', 'NewVetri@123', 'admin123', 'undefined', 'null', '', 'kator18328@mtupu.com', 'vetri@123'];
         for (const cand of candidates) {
             const match = await bcrypt.compare(cand, user.password_hash);
             console.log(`Candidate "${cand}": ${match ? 'MATCHES' : 'does NOT match'}`);

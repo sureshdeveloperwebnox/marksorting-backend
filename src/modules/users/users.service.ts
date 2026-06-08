@@ -68,7 +68,7 @@ export class UsersService {
     });
 
     const formattedUser = user ? this.formatUser(user) : null;
-    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
+    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 300);
     return formattedUser;
   }
 
@@ -85,7 +85,7 @@ export class UsersService {
     });
 
     const formattedUser = user ? this.formatUser(user) : null;
-    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 3600);
+    if (formattedUser) await this.redis.setJson(cacheKey, formattedUser, 300);
     return formattedUser;
   }
 

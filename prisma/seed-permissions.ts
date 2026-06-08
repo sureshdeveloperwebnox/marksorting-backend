@@ -247,11 +247,13 @@ async function seedPermissions() {
   });
 
   if (superAdminRole) {
-    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const hashedPassword = await bcrypt.hash('Admin@1234', 10);
     
     await prisma.user.upsert({
       where: { email: 'admin@marksorting.com' },
-      update: {},
+      update: {
+        password_hash: hashedPassword,
+      },
       create: {
         email: 'admin@marksorting.com',
         full_name: 'Super Admin',
@@ -262,7 +264,7 @@ async function seedPermissions() {
       },
     });
 
-    console.log('✅ Created default super admin user (admin@marksorting.com / admin123)');
+    console.log('✅ Created default super admin user (admin@marksorting.com / Admin@1234)');
   }
 
   console.log('🎉 Permission seeding completed!');

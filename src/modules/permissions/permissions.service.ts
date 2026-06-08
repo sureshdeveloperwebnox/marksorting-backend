@@ -5,7 +5,7 @@ import { RedisService } from '../../redis/redis.service';
 @Injectable()
 export class PermissionsService {
   private readonly CACHE_PREFIX = 'user_permissions:';
-  private readonly CACHE_TTL = 3600; // 1 hour
+  private readonly CACHE_TTL = 300; // 5 minutes
 
   constructor(
     private prisma: PrismaService,
