@@ -256,6 +256,8 @@ describe('AuthService', () => {
           full_name: 'Test Engineer',
           role: 'Service Engineer',
           permissions: ['some.permission'],
+          phone_number: undefined,
+          mobile_no: undefined,
           profile_image: undefined,
           profile_image_url: undefined,
           background_image: undefined,
