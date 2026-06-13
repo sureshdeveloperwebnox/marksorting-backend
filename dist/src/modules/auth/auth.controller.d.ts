@@ -22,6 +22,8 @@ export declare class AuthController {
             full_name: any;
             role: any;
             permissions: string[];
+            phone_number: any;
+            mobile_no: any;
             profile_image: any;
             profile_image_url: any;
             background_image: any;
@@ -38,6 +40,8 @@ export declare class AuthController {
             full_name: any;
             role: any;
             permissions: string[];
+            phone_number: any;
+            mobile_no: any;
             profile_image: any;
             profile_image_url: any;
             background_image: any;
@@ -56,6 +60,8 @@ export declare class AuthController {
             full_name: any;
             role: any;
             permissions: string[];
+            phone_number: any;
+            mobile_no: any;
             profile_image: any;
             profile_image_url: any;
             background_image: any;
@@ -68,6 +74,8 @@ export declare class AuthController {
         full_name: any;
         role: any;
         permissions: string[];
+        phone_number: any;
+        mobile_no: any;
         profile_image: any;
         profile_image_url: any;
         background_image: any;
@@ -79,6 +87,8 @@ export declare class AuthController {
         full_name: any;
         role: any;
         permissions: string[];
+        phone_number: any;
+        mobile_no: any;
         profile_image: any;
         profile_image_url: any;
         background_image: any;

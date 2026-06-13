@@ -533,7 +533,7 @@ export class DashboardService {
       name: re.mill?.name || 'General Expense',
       type: re.expenseCategory?.name || 'Others',
       rate: re.status === 'APPROVED' ? 100 : 70,
-      profit: `₹${Number(re.amount).toLocaleString('en-IN')}`,
+      profit: `₹${Number(re.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
       icon: '💰',
       color: 'bg-amber-500',
     }));
@@ -573,8 +573,8 @@ export class DashboardService {
         id: 'expenses',
         title: 'Total Expenses',
         value: expensesSumResult._sum.amount
-          ? `₹ ${Number(expensesSumResult._sum.amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
-          : '₹ 5,222',
+          ? `₹ ${Number(expensesSumResult._sum.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : '₹ 5,222.00',
         change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
         trend: expensesCount > 0 ? expenseTrend.trend : 'up',
         variant: 'amber' as const,
