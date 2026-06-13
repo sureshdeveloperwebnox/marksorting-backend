@@ -240,10 +240,10 @@ export class ServiceReportsService {
           visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : getAutoVisitTime(),
           visit_date: new Date(reportData.visit_date),
           call_registered_date: new Date(reportData.call_registered_date),
-          machine_mfg_date: reportData.machine_mfg_date
+          machine_mfg_date: (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
             ? new Date(reportData.machine_mfg_date)
             : undefined,
-          machine_installation_date: reportData.machine_installation_date
+          machine_installation_date: (reportData.machine_installation_date && reportData.machine_installation_date.trim())
             ? new Date(reportData.machine_installation_date)
             : undefined,
         },
@@ -332,6 +332,11 @@ export class ServiceReportsService {
 
     const updateData: any = { ...reportData };
 
+    if (reportData.visit_time !== undefined) {
+      updateData.visit_time = (reportData.visit_time && reportData.visit_time.trim())
+        ? reportData.visit_time
+        : getAutoVisitTime();
+    }
     if (reportData.visit_date !== undefined) {
       updateData.visit_date = new Date(reportData.visit_date);
     }
@@ -341,13 +346,13 @@ export class ServiceReportsService {
       );
     }
     if (reportData.machine_mfg_date !== undefined) {
-      updateData.machine_mfg_date = reportData.machine_mfg_date
+      updateData.machine_mfg_date = (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
         ? new Date(reportData.machine_mfg_date)
         : null;
     }
     if (reportData.machine_installation_date !== undefined) {
       updateData.machine_installation_date =
-        reportData.machine_installation_date
+        (reportData.machine_installation_date && reportData.machine_installation_date.trim())
           ? new Date(reportData.machine_installation_date)
           : null;
     }

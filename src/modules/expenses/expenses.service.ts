@@ -386,7 +386,9 @@ export class ExpensesService {
       updateData.visit_date = new Date(expenseData.visit_date);
     }
     if (expenseData.visit_time !== undefined) {
-      updateData.visit_time = expenseData.visit_time;
+      updateData.visit_time = (expenseData.visit_time && expenseData.visit_time.trim())
+        ? expenseData.visit_time
+        : getAutoVisitTime();
     }
     if (expenseData.expense_category_id !== undefined) {
       updateData.expense_category_id = expenseData.expense_category_id;

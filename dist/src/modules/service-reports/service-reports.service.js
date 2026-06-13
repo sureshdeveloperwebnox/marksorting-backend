@@ -184,10 +184,10 @@ let ServiceReportsService = class ServiceReportsService {
                     visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : (0, date_time_1.getAutoVisitTime)(),
                     visit_date: new Date(reportData.visit_date),
                     call_registered_date: new Date(reportData.call_registered_date),
-                    machine_mfg_date: reportData.machine_mfg_date
+                    machine_mfg_date: (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
                         ? new Date(reportData.machine_mfg_date)
                         : undefined,
-                    machine_installation_date: reportData.machine_installation_date
+                    machine_installation_date: (reportData.machine_installation_date && reportData.machine_installation_date.trim())
                         ? new Date(reportData.machine_installation_date)
                         : undefined,
                 },
@@ -254,6 +254,11 @@ let ServiceReportsService = class ServiceReportsService {
             }
         }
         const updateData = { ...reportData };
+        if (reportData.visit_time !== undefined) {
+            updateData.visit_time = (reportData.visit_time && reportData.visit_time.trim())
+                ? reportData.visit_time
+                : (0, date_time_1.getAutoVisitTime)();
+        }
         if (reportData.visit_date !== undefined) {
             updateData.visit_date = new Date(reportData.visit_date);
         }
@@ -261,13 +266,13 @@ let ServiceReportsService = class ServiceReportsService {
             updateData.call_registered_date = new Date(reportData.call_registered_date);
         }
         if (reportData.machine_mfg_date !== undefined) {
-            updateData.machine_mfg_date = reportData.machine_mfg_date
+            updateData.machine_mfg_date = (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
                 ? new Date(reportData.machine_mfg_date)
                 : null;
         }
         if (reportData.machine_installation_date !== undefined) {
             updateData.machine_installation_date =
-                reportData.machine_installation_date
+                (reportData.machine_installation_date && reportData.machine_installation_date.trim())
                     ? new Date(reportData.machine_installation_date)
                     : null;
         }
