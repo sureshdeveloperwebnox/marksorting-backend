@@ -4,7 +4,7 @@ export declare class CreateExpenseDto {
     mill_id?: string;
     place?: string;
     visit_date: string;
-    visit_time: string;
+    visit_time?: string;
     expense_category_id: string;
     others?: string;
     amount?: number;

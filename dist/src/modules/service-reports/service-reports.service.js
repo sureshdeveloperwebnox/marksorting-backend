@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
+const date_time_1 = require("../../common/utils/date-time");
 const settings_service_1 = require("../settings/settings.service");
 const pdf_service_1 = require("../pdf/pdf.service");
 const document_template_service_1 = require("../pdf/templates/document-template.service");
@@ -168,6 +169,7 @@ let ServiceReportsService = class ServiceReportsService {
                 data: {
                     ...reportData,
                     report_number,
+                    visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : (0, date_time_1.getAutoVisitTime)(),
                     visit_date: new Date(reportData.visit_date),
                     call_registered_date: new Date(reportData.call_registered_date),
                     machine_mfg_date: reportData.machine_mfg_date

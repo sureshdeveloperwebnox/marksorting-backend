@@ -16,6 +16,7 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const s3_service_1 = require("../../shared/services/s3.service");
+const date_time_1 = require("../../common/utils/date-time");
 const INCLUDE_SHAPE = {
     mill: {
         select: {
@@ -203,7 +204,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 data: {
                     expense_number,
                     visit_date: new Date(expenseData.visit_date),
-                    visit_time: expenseData.visit_time,
+                    visit_time: (expenseData.visit_time && expenseData.visit_time.trim()) ? expenseData.visit_time : (0, date_time_1.getAutoVisitTime)(),
                     expense_category_id: expenseData.expense_category_id,
                     place: expenseData.place || null,
                     others: expenseData.others || null,

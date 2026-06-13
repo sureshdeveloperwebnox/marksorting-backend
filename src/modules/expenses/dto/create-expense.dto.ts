@@ -66,11 +66,12 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: '10:30',
     description:
-      'Time of the site visit in HH:MM 24-hour format. **Required.**',
+      'Time of the site visit in HH:MM 24-hour format. **Optional.**',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
-  visit_time: string;
+  @IsOptional()
+  visit_time?: string;
 
   @ApiProperty({
     example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',

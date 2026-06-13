@@ -47,10 +47,10 @@ export class CreateInstallationReportDto {
   @IsDateString()
   visit_date: string;
 
-  @ApiProperty({ example: '10:30' })
+  @ApiProperty({ example: '10:30', required: false })
   @IsString()
-  @IsNotEmpty()
-  visit_time: string;
+  @IsOptional()
+  visit_time?: string;
 
   @ApiProperty({ example: '2026-05-20' })
   @IsDateString()

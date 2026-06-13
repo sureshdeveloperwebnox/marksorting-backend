@@ -10,6 +10,7 @@ import { CreateInstallationReportDto } from './dto/create-installation-report.dt
 import { UpdateInstallationReportDto } from './dto/update-installation-report.dto';
 import { CreateMobileInstallationReportDto } from './dto/create-mobile-installation-report.dto';
 import { UpdateMobileInstallationReportDto } from './dto/update-mobile-installation-report.dto';
+import { getAutoVisitTime } from '../../common/utils/date-time';
 
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
@@ -210,6 +211,7 @@ export class InstallationReportsService {
         data: {
           ...reportData,
           report_number,
+          visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : getAutoVisitTime(),
           visit_date: new Date(reportData.visit_date),
           call_registered_date: new Date(reportData.call_registered_date),
           invoice_date: reportData.invoice_date

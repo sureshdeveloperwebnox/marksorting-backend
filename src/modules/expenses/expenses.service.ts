@@ -13,6 +13,7 @@ import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
 import { CreateMobileExpenseDto } from './dto/create-mobile-expense.dto';
 import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
+import { getAutoVisitTime } from '../../common/utils/date-time';
 
 const INCLUDE_SHAPE = {
   mill: {
@@ -268,7 +269,7 @@ export class ExpensesService {
         data: {
           expense_number,
           visit_date: new Date(expenseData.visit_date),
-          visit_time: expenseData.visit_time,
+          visit_time: (expenseData.visit_time && expenseData.visit_time.trim()) ? expenseData.visit_time : getAutoVisitTime(),
           expense_category_id: expenseData.expense_category_id,
           place: expenseData.place || null,
           others: expenseData.others || null,

@@ -96,9 +96,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "visit_date", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '10:30' }),
+    (0, swagger_1.ApiProperty)({ example: '10:30', required: false }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "visit_time", void 0);
 __decorate([

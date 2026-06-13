@@ -5,7 +5,7 @@ export declare class CreateInstallationReportDto {
     place: string;
     mill_whatsapp_number: string;
     visit_date: string;
-    visit_time: string;
+    visit_time?: string;
     call_registered_date: string;
     machine_model: string;
     serial_or_frame_no: string;

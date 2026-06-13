@@ -81,10 +81,11 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: '10:30',
-        description: 'Time of the site visit in HH:MM 24-hour format. **Required.**',
+        description: 'Time of the site visit in HH:MM 24-hour format. **Optional.**',
+        required: false,
     }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "visit_time", void 0);
 __decorate([

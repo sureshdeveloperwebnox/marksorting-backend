@@ -10,6 +10,7 @@ import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
 import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
+import { getAutoVisitTime } from '../../common/utils/date-time';
 
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
@@ -222,6 +223,7 @@ export class ServiceReportsService {
         data: {
           ...reportData,
           report_number,
+          visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : getAutoVisitTime(),
           visit_date: new Date(reportData.visit_date),
           call_registered_date: new Date(reportData.call_registered_date),
           machine_mfg_date: reportData.machine_mfg_date
