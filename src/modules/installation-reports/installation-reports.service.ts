@@ -171,12 +171,17 @@ export class InstallationReportsService {
   ) {
     const rawDto = dto as any;
 
-    if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+    if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
       const mill = await this.prisma.mill.findUnique({
         where: { id: rawDto.mill_id },
-        select: { phone: true },
+        select: { phone: true, email: true },
       });
-      rawDto.mill_whatsapp_number = mill?.phone || '';
+      if (!rawDto.mill_whatsapp_number) {
+        rawDto.mill_whatsapp_number = mill?.phone || '';
+      }
+      if (!rawDto.mill_email) {
+        rawDto.mill_email = mill?.email || '';
+      }
     }
 
     const { technician_ids, ...reportData } = rawDto;
@@ -284,12 +289,17 @@ export class InstallationReportsService {
 
     const rawDto = dto as any;
 
-    if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+    if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
       const mill = await this.prisma.mill.findUnique({
         where: { id: rawDto.mill_id },
-        select: { phone: true },
+        select: { phone: true, email: true },
       });
-      rawDto.mill_whatsapp_number = mill?.phone || '';
+      if (!rawDto.mill_whatsapp_number) {
+        rawDto.mill_whatsapp_number = mill?.phone || '';
+      }
+      if (!rawDto.mill_email) {
+        rawDto.mill_email = mill?.email || '';
+      }
     }
 
     const { technician_ids, ...reportData } = rawDto;

@@ -137,12 +137,17 @@ let InstallationReportsService = class InstallationReportsService {
     }
     async create(dto, user) {
         const rawDto = dto;
-        if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
-                select: { phone: true },
+                select: { phone: true, email: true },
             });
-            rawDto.mill_whatsapp_number = mill?.phone || '';
+            if (!rawDto.mill_whatsapp_number) {
+                rawDto.mill_whatsapp_number = mill?.phone || '';
+            }
+            if (!rawDto.mill_email) {
+                rawDto.mill_email = mill?.email || '';
+            }
         }
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
@@ -220,12 +225,17 @@ let InstallationReportsService = class InstallationReportsService {
     async update(id, dto, user) {
         const existingReport = await this.findById(id, user);
         const rawDto = dto;
-        if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
-                select: { phone: true },
+                select: { phone: true, email: true },
             });
-            rawDto.mill_whatsapp_number = mill?.phone || '';
+            if (!rawDto.mill_whatsapp_number) {
+                rawDto.mill_whatsapp_number = mill?.phone || '';
+            }
+            if (!rawDto.mill_email) {
+                rawDto.mill_email = mill?.email || '';
+            }
         }
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
