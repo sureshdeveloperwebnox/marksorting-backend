@@ -4,7 +4,7 @@ export declare class CreateServiceReportDto {
     customer_id?: string;
     mill_id: string;
     place: string;
-    mill_whatsapp_number: string;
+    mill_whatsapp_number?: string;
     visit_date: string;
     visit_time?: string;
     call_registered_date: string;

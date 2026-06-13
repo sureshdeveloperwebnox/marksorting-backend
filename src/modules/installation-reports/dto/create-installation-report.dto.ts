@@ -38,10 +38,10 @@ export class CreateInstallationReportDto {
   @IsNotEmpty()
   place: string;
 
-  @ApiProperty({ example: '+919876543210' })
+  @ApiProperty({ example: '+919876543210', required: false })
   @IsString()
-  @IsNotEmpty()
-  mill_whatsapp_number: string;
+  @IsOptional()
+  mill_whatsapp_number?: string;
 
   @ApiProperty({ example: '2026-05-23' })
   @IsDateString()

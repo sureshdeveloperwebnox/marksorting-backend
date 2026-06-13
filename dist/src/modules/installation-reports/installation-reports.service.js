@@ -137,6 +137,13 @@ let InstallationReportsService = class InstallationReportsService {
     }
     async create(dto, user) {
         const rawDto = dto;
+        if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: rawDto.mill_id },
+                select: { phone: true },
+            });
+            rawDto.mill_whatsapp_number = mill?.phone || '';
+        }
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
         delete reportData.technician_id;
@@ -213,6 +220,13 @@ let InstallationReportsService = class InstallationReportsService {
     async update(id, dto, user) {
         const existingReport = await this.findById(id, user);
         const rawDto = dto;
+        if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: rawDto.mill_id },
+                select: { phone: true },
+            });
+            rawDto.mill_whatsapp_number = mill?.phone || '';
+        }
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
         delete reportData.technician_id;

@@ -80,9 +80,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "place", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '+919876543210' }),
+    (0, swagger_1.ApiProperty)({ example: '+919876543210', required: false }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "mill_whatsapp_number", void 0);
 __decorate([

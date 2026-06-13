@@ -170,6 +170,15 @@ export class InstallationReportsService {
     user?: { userId: string; role: string },
   ) {
     const rawDto = dto as any;
+
+    if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+      const mill = await this.prisma.mill.findUnique({
+        where: { id: rawDto.mill_id },
+        select: { phone: true },
+      });
+      rawDto.mill_whatsapp_number = mill?.phone || '';
+    }
+
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
@@ -274,6 +283,15 @@ export class InstallationReportsService {
     const existingReport = await this.findById(id, user);
 
     const rawDto = dto as any;
+
+    if (!rawDto.mill_whatsapp_number && rawDto.mill_id) {
+      const mill = await this.prisma.mill.findUnique({
+        where: { id: rawDto.mill_id },
+        select: { phone: true },
+      });
+      rawDto.mill_whatsapp_number = mill?.phone || '';
+    }
+
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
