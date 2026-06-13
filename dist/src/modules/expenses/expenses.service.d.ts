@@ -68,11 +68,11 @@ export declare class ExpensesService {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        amount: import("@prisma/client/runtime/client").Decimal;
+        expense_number: string;
         expense_category_id: string;
         others: string | null;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        expense_number: string;
     }) | null>;
     update(id: string, dto: UpdateExpenseDto | UpdateMobileExpenseDto, user?: {
         userId: string;
@@ -111,11 +111,11 @@ export declare class ExpensesService {
             place: string | null;
             visit_date: Date;
             visit_time: string;
-            amount: import("@prisma/client/runtime/client").Decimal;
+            expense_number: string;
             expense_category_id: string;
             others: string | null;
+            amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
-            expense_number: string;
         };
     }>;
     remove(id: string, user?: {
@@ -153,11 +153,11 @@ export declare class ExpensesService {
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        amount: import("@prisma/client/runtime/client").Decimal;
+        expense_number: string;
         expense_category_id: string;
         others: string | null;
+        amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        expense_number: string;
     }>;
     private invalidateCache;
 }

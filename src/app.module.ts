@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { MillsModule } from './modules/mills/mills.module';
+import { MasterMillsModule } from './modules/master-mills/master-mills.module';
 import { ServiceCategoriesModule } from './modules/service-categories/service-categories.module';
 import { ServiceReportsModule } from './modules/service-reports/service-reports.module';
 import { InstallationReportsModule } from './modules/installation-reports/installation-reports.module';
@@ -71,6 +72,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     UsersModule,
     RolesModule,
     MillsModule,
+    MasterMillsModule,
     ServiceCategoriesModule,
     ServiceReportsModule,
     InstallationReportsModule,

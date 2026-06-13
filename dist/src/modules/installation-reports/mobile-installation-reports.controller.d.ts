@@ -58,8 +58,8 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        invoice_number: string | null;
         invoice_date: Date | null;
+        invoice_number: string | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
@@ -121,8 +121,8 @@ export declare class MobileInstallationReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
-            invoice_number: string | null;
             invoice_date: Date | null;
+            invoice_number: string | null;
             warranty_start_date: Date | null;
             warranty_end_date: Date | null;
             ground_earth_provided: boolean;
@@ -183,8 +183,8 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        invoice_number: string | null;
         invoice_date: Date | null;
+        invoice_number: string | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;

@@ -199,8 +199,43 @@ model Mill {
   installationReports InstallationReport[]
   expenses            Expense[]
   supportTickets      SupportTicket[]
+  masterMills         MasterMill[]
 
   @@map("mills")
+}
+
+model MasterMill {
+  id                    String    @id @default(uuid())
+  invoice_no            String
+  invoice_date          DateTime?
+  ref_no                String?
+  mill_id               String?
+  mill                  Mill?     @relation(fields: [mill_id], references: [id])
+  address               String?
+  place                 String?
+  state                 String?
+  phone_no              String?
+  mc_model              String?
+  frame_no              String?
+  warranty_years        Int?      @default(0)
+  warranty_months       Int?      @default(0)
+  installation_date     DateTime?
+  warranty_closing_date DateTime?
+  all_warranty          String?   @default("Non Warranty")
+  amc_starting_date     DateTime?
+  amc_period            Int?
+  amc_particular        String?
+  amc_closing_date      DateTime?
+  amc_amount            Decimal?  @default(0)
+  status                String    @default("ACTIVE")
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
+  deleted_at            DateTime?
+
+  @@index([mill_id])
+  @@index([invoice_no])
+  @@index([status, created_at])
+  @@map("master_mills")
 }
 
 model ServiceCategory {

@@ -32,6 +32,13 @@ const PERMISSIONS = [
   { name: 'mills.update', description: 'Update mill information' },
   { name: 'mills.delete', description: 'Delete mills' },
 
+  // Master Mill Management permissions
+  { name: 'master_mills.view', description: 'View master mills' },
+  { name: 'master_mills.create', description: 'Create master mills' },
+  { name: 'master_mills.update', description: 'Update master mills' },
+  { name: 'master_mills.delete', description: 'Delete master mills' },
+  { name: 'master_mills.export', description: 'Export master mills' },
+
   // Customer Management permissions
   { name: 'customers.view', description: 'View customers list' },
   { name: 'customers.create', description: 'Create new customers' },
@@ -137,6 +144,7 @@ const ROLES = [
     permissions: [
       'dashboard.view',
       'mills.view', 'mills.create', 'mills.update',
+      'master_mills.view', 'master_mills.create', 'master_mills.update', 'master_mills.export',
       'customers.view', 'customers.create', 'customers.update',
       'service_categories.view',
       'service_reports.view', 'service_reports.create', 'service_reports.update', 'service_reports.export',
@@ -158,6 +166,7 @@ const ROLES = [
     permissions: [
       'dashboard.view',
       'mills.view',
+      'master_mills.view',
       'customers.view',
       'service_categories.view',
       'service_reports.view', 'service_reports.create', 'service_reports.update',
@@ -176,6 +185,7 @@ const ROLES = [
     permissions: [
       'dashboard.view',
       'mills.view',
+      'master_mills.view',
       'customers.view',
       'service_categories.view',
       'service_reports.view',

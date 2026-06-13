@@ -24,6 +24,7 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const users_module_1 = require("./modules/users/users.module");
 const roles_module_1 = require("./modules/roles/roles.module");
 const mills_module_1 = require("./modules/mills/mills.module");
+const master_mills_module_1 = require("./modules/master-mills/master-mills.module");
 const service_categories_module_1 = require("./modules/service-categories/service-categories.module");
 const service_reports_module_1 = require("./modules/service-reports/service-reports.module");
 const installation_reports_module_1 = require("./modules/installation-reports/installation-reports.module");
@@ -85,6 +86,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             roles_module_1.RolesModule,
             mills_module_1.MillsModule,
+            master_mills_module_1.MasterMillsModule,
             service_categories_module_1.ServiceCategoriesModule,
             service_reports_module_1.ServiceReportsModule,
             installation_reports_module_1.InstallationReportsModule,
