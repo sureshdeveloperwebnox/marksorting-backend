@@ -68,14 +68,19 @@ export class MobileMillsController {
     if (search) {
       const orConditions: Prisma.MillWhereInput[] = [
         { name: { contains: search, mode: 'insensitive' } },
+        { ref_no: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
+        { place: { contains: search, mode: 'insensitive' } },
+        { city: { contains: search, mode: 'insensitive' } },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+') {
-        orConditions.push({
-          phone: { contains: cleanedPhone, mode: 'insensitive' },
-        });
+        orConditions.push(
+          { phone: { contains: cleanedPhone, mode: 'insensitive' } },
+          { phone_2: { contains: cleanedPhone, mode: 'insensitive' } },
+          { phone_3: { contains: cleanedPhone, mode: 'insensitive' } },
+        );
       }
       where.OR = orConditions;
     }
@@ -115,14 +120,19 @@ export class MobileMillsController {
     if (search) {
       const orConditions: Prisma.MillWhereInput[] = [
         { name: { contains: search, mode: 'insensitive' } },
+        { ref_no: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
+        { place: { contains: search, mode: 'insensitive' } },
+        { city: { contains: search, mode: 'insensitive' } },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+') {
-        orConditions.push({
-          phone: { contains: cleanedPhone, mode: 'insensitive' },
-        });
+        orConditions.push(
+          { phone: { contains: cleanedPhone, mode: 'insensitive' } },
+          { phone_2: { contains: cleanedPhone, mode: 'insensitive' } },
+          { phone_3: { contains: cleanedPhone, mode: 'insensitive' } },
+        );
       }
       where.OR = orConditions;
     }

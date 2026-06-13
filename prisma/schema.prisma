@@ -186,9 +186,14 @@ model ActivityLog {
 model Mill {
   id                  String               @id @default(uuid())
   name                String
+  ref_no              String?
   email               String?
   phone               String?
+  phone_2             String?
+  phone_3             String?
   address             String?
+  place               String?
+  city                String?
   status              String               @default("ACTIVE")
   created_at          DateTime             @default(now())
   updated_at          DateTime             @updatedAt

@@ -71,16 +71,21 @@ export class MillsController {
     if (search) {
       const orConditions: Prisma.MillWhereInput[] = [
         { name: { contains: search, mode: 'insensitive' } },
+        { ref_no: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
+        { place: { contains: search, mode: 'insensitive' } },
+        { city: { contains: search, mode: 'insensitive' } },
       ];
 
       // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
       const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
       if (cleanedPhoneSearch && cleanedPhoneSearch !== '+') {
-        orConditions.push({
-          phone: { contains: cleanedPhoneSearch, mode: 'insensitive' },
-        });
+        orConditions.push(
+          { phone: { contains: cleanedPhoneSearch, mode: 'insensitive' } },
+          { phone_2: { contains: cleanedPhoneSearch, mode: 'insensitive' } },
+          { phone_3: { contains: cleanedPhoneSearch, mode: 'insensitive' } },
+        );
       }
 
       where.OR = orConditions;
@@ -120,6 +125,8 @@ export class MillsController {
         mill?.customer?.name ? `Customer: ${mill.customer.name}` : null,
         mill?.email ? `Email: ${mill.email}` : null,
         mill?.phone ? `Phone: ${mill.phone}` : null,
+        mill?.phone_2 ? `Phone 2: ${mill.phone_2}` : null,
+        mill?.phone_3 ? `Phone 3: ${mill.phone_3}` : null,
         mill?.status ? `Status: ${mill.status}` : null,
       ]
         .filter(Boolean)
