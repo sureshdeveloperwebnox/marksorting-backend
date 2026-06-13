@@ -24,6 +24,7 @@ class CreateInstallationReportDto {
     machine_model;
     serial_or_frame_no;
     authorized_person;
+    authorized_person_phone;
     invoice_number;
     invoice_date;
     warranty_start_date;
@@ -119,6 +120,12 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "authorized_person", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '+919876543210', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInstallationReportDto.prototype, "authorized_person_phone", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'IR-INV-100234', required: false }),
     (0, class_validator_1.IsString)(),

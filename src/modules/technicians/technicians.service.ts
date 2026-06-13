@@ -1,10 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class TechniciansService {
+export class TechniciansService implements OnApplicationBootstrap {
   private readonly CACHE_PREFIX = 'technician:';
   private readonly LIST_CACHE_KEY = 'technicians:list:';
 
@@ -12,6 +12,11 @@ export class TechniciansService {
     private prisma: PrismaService,
     private redis: RedisService,
   ) {}
+
+  async onApplicationBootstrap() {
+    console.log('Synchronizing technicians on application bootstrap...');
+    await this.syncTechnicians();
+  }
 
   /**
    * Synchronizes users with the "Service Engineer" role into the Technician table.
@@ -83,15 +88,25 @@ export class TechniciansService {
     where?: Prisma.TechnicianWhereInput;
     orderBy?: Prisma.TechnicianOrderByWithRelationInput;
   }) {
-    // Run the sync process before querying to ensure up-to-date data
-    await this.syncTechnicians();
-
-    const { skip, take, where, orderBy } = params;
-
     // Build the query cache key based on params
     const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
+
+    // Run the sync process. If the database is empty, run synchronously.
+    // Otherwise run in the background to prevent blocking the query.
+    const activeCount = await this.prisma.technician.count({
+      where: { deleted_at: null },
+    });
+    if (activeCount === 0) {
+      await this.syncTechnicians();
+    } else {
+      this.syncTechnicians().catch((error) => {
+        console.error('Background technician sync failed:', error);
+      });
+    }
+
+    const { skip, take, where, orderBy } = params;
 
     const [technicians, total] = await Promise.all([
       this.prisma.technician.findMany({

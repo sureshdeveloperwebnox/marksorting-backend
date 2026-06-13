@@ -71,6 +71,11 @@ export class CreateInstallationReportDto {
   @IsNotEmpty()
   authorized_person: string;
 
+  @ApiProperty({ example: '+919876543210', required: false })
+  @IsString()
+  @IsOptional()
+  authorized_person_phone?: string;
+
   @ApiProperty({ example: 'IR-INV-100234', required: false })
   @IsString()
   @IsOptional()

@@ -72,6 +72,7 @@ export declare class InstallationReportsService {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -137,6 +138,7 @@ export declare class InstallationReportsService {
             machine_model: string;
             serial_or_frame_no: string;
             authorized_person: string;
+            authorized_person_phone: string | null;
             commodity: string | null;
             contamination: string | null;
             output_capacity_per_hour: string | null;
@@ -201,6 +203,7 @@ export declare class InstallationReportsService {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
+        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;

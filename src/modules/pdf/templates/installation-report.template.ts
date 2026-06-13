@@ -368,7 +368,7 @@ export function renderInstallationReportTemplate(
               ${row('Call Registered Date', template.date(report.call_registered_date))}
               ${row('Sl.No/Frame No', template.text(report.serial_or_frame_no))}
               ${row('Model', template.text(report.machine_model))}
-              ${row('Authorized Person', template.text(report.authorized_person))}
+              ${row('Authorized Person', template.text(report.authorized_person) + (report.authorized_person_phone ? ` (Contact: ${report.authorized_person_phone})` : ''))}
               ${row('Invoice Number', template.text(report.invoice_number))}
               ${row('Invoice Date', template.date(report.invoice_date))}
               ${row('Warranty Start Date', template.date(report.warranty_start_date))}

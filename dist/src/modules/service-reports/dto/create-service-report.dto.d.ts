@@ -11,6 +11,7 @@ export declare class CreateServiceReportDto {
     machine_model: string;
     serial_or_frame_no: string;
     authorized_person: string;
+    authorized_person_phone?: string;
     nature_of_complaint: string;
     action_taken: string;
     engineer_remarks: string;

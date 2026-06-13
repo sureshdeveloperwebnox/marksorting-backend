@@ -22,6 +22,10 @@ let TechniciansService = class TechniciansService {
         this.prisma = prisma;
         this.redis = redis;
     }
+    async onApplicationBootstrap() {
+        console.log('Synchronizing technicians on application bootstrap...');
+        await this.syncTechnicians();
+    }
     async syncTechnicians() {
         try {
             const role = await this.prisma.role.findUnique({
@@ -71,12 +75,22 @@ let TechniciansService = class TechniciansService {
         }
     }
     async findAll(params) {
-        await this.syncTechnicians();
-        const { skip, take, where, orderBy } = params;
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
+        const activeCount = await this.prisma.technician.count({
+            where: { deleted_at: null },
+        });
+        if (activeCount === 0) {
+            await this.syncTechnicians();
+        }
+        else {
+            this.syncTechnicians().catch((error) => {
+                console.error('Background technician sync failed:', error);
+            });
+        }
+        const { skip, take, where, orderBy } = params;
         const [technicians, total] = await Promise.all([
             this.prisma.technician.findMany({
                 skip,

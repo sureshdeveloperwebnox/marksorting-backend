@@ -241,6 +241,7 @@ export class ServiceReportsController {
     @Body() dto: UpdateServiceReportDto,
     @Request() req: any,
   ) {
+    // Reload trigger to compile latest DTO updates.
     return this.serviceReportsService.update(id, dto, req.user);
   }
 

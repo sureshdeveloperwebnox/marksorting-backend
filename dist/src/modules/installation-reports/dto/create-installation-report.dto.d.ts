@@ -10,6 +10,7 @@ export declare class CreateInstallationReportDto {
     machine_model: string;
     serial_or_frame_no: string;
     authorized_person: string;
+    authorized_person_phone?: string;
     invoice_number?: string;
     invoice_date?: string;
     warranty_start_date?: string;

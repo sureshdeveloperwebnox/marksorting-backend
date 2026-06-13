@@ -77,6 +77,11 @@ export class CreateServiceReportDto {
   @IsNotEmpty()
   authorized_person: string;
 
+  @ApiProperty({ example: '+919876543210', required: false })
+  @IsString()
+  @IsOptional()
+  authorized_person_phone?: string;
+
   @ApiProperty({ example: 'Machine not sorting correctly at high speed' })
   @IsString()
   @IsNotEmpty()

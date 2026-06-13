@@ -382,6 +382,7 @@ model ServiceReport {
   machine_installation_date DateTime?
   serial_or_frame_no        String
   authorized_person         String
+  authorized_person_phone   String?
   previous_visit_engineer   String?
   nature_of_complaint       String
   problem_observed          String?
@@ -437,6 +438,7 @@ model InstallationReport {
   machine_model            String
   serial_or_frame_no       String
   authorized_person        String
+  authorized_person_phone  String?
   invoice_number           String?
   invoice_date             DateTime?
   warranty_start_date      DateTime?

@@ -236,6 +236,7 @@ export class InstallationReportsController {
     @Body() dto: UpdateInstallationReportDto,
     @Request() req: any,
   ) {
+    // Reload trigger to compile latest DTO updates.
     return this.installationReportsService.update(id, dto, req.user);
   }
 

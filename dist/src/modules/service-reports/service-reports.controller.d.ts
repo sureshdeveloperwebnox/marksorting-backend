@@ -50,6 +50,7 @@ export declare class ServiceReportsController {
         machine_installation_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
+        authorized_person_phone: string | null;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;
         problem_observed: string | null;
@@ -115,6 +116,7 @@ export declare class ServiceReportsController {
             machine_installation_date: Date | null;
             serial_or_frame_no: string;
             authorized_person: string;
+            authorized_person_phone: string | null;
             previous_visit_engineer: string | null;
             nature_of_complaint: string;
             problem_observed: string | null;
@@ -179,6 +181,7 @@ export declare class ServiceReportsController {
         machine_installation_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
+        authorized_person_phone: string | null;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;
         problem_observed: string | null;

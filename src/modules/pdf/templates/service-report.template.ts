@@ -388,7 +388,7 @@ export function renderServiceReportTemplate(
         <tr>${labelCell('Mfg Date :')}${valueCell(template.date(report.machine_mfg_date), 'nowrap')}</tr>
         <tr>${labelCell('Installation Date :')}${valueCell(template.date(report.machine_installation_date), 'nowrap')}</tr>
         <tr>${labelCell('Sl.No/Frame No :')}${valueCell(template.text(report.serial_or_frame_no))}</tr>
-        ${fullRow('Authorized Person :', template.text(report.authorized_person), 20)}
+        ${fullRow('Authorized Person :', template.text(report.authorized_person) + (report.authorized_person_phone ? ` (Contact: ${report.authorized_person_phone})` : ''), 20)}
         ${fullRow('Previous Visited Engineer Name :', template.text(report.previous_visit_engineer), 20)}
         ${fullRow('Nature Of Complaint :', template.text(report.nature_of_complaint), 28)}
         ${fullRow('Problem Observed :', template.text(report.problem_observed), 28)}
