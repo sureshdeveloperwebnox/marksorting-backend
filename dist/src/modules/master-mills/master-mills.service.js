@@ -34,7 +34,7 @@ let MasterMillsService = class MasterMillsService {
                 take,
                 where: { ...where, deleted_at: null },
                 include: {
-                    mill: { select: { id: true, name: true } },
+                    mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
                 },
                 orderBy,
             }),
@@ -52,7 +52,7 @@ let MasterMillsService = class MasterMillsService {
         const masterMill = await this.prisma.masterMill.findFirst({
             where: { id, deleted_at: null },
             include: {
-                mill: { select: { id: true, name: true } },
+                mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
             },
         });
         if (!masterMill)

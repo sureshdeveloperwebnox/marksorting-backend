@@ -37,6 +37,7 @@ let MasterMillsController = class MasterMillsController {
                 { place: { contains: search, mode: 'insensitive' } },
                 { address: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+') {

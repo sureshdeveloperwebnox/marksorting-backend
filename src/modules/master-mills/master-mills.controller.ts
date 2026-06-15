@@ -57,7 +57,9 @@ export class MasterMillsController {
         { frame_no: { contains: search, mode: 'insensitive' } },
         { place: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
+        // Also search by the parent Mill's ref_no and name (handles cases where MasterMill.ref_no is empty)
         { mill: { name: { contains: search, mode: 'insensitive' } } },
+        { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
       ];
 
       const cleanedPhone = search.replace(/[^\d+]/g, '');

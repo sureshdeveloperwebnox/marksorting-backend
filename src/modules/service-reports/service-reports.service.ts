@@ -139,6 +139,7 @@ export class ServiceReportsService {
         take,
         where,
         include: INCLUDE_SHAPE,
+        orderBy: { created_at: 'desc' },
       }),
       this.prisma.serviceReport.count({ where }),
     ]);

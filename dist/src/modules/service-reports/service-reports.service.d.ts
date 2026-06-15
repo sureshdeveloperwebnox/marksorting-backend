@@ -62,10 +62,6 @@ export declare class ServiceReportsService {
         })[];
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -101,6 +97,10 @@ export declare class ServiceReportsService {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto | UpdateMobileServiceReportDto, user?: {
         userId: string;
@@ -131,10 +131,6 @@ export declare class ServiceReportsService {
             })[];
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            status: string;
             report_number: string;
             service_category_id: string;
             mill_id: string;
@@ -170,6 +166,10 @@ export declare class ServiceReportsService {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
+            status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
         };
     }>;
     remove(id: string, user?: {
@@ -199,10 +199,6 @@ export declare class ServiceReportsService {
         })[];
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -238,6 +234,10 @@ export declare class ServiceReportsService {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
     generatePdf(id: string, user?: {
         userId: string;
