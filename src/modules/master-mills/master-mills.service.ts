@@ -63,6 +63,26 @@ export class MasterMillsService {
   }
 
   async create(dto: CreateMasterMillDto) {
+    const cleanFrameNo = dto.frame_no?.trim();
+    const cleanRefNo = dto.ref_no?.trim();
+
+    if (cleanFrameNo || cleanRefNo) {
+      const orConditions: Prisma.MasterMillWhereInput[] = [];
+      if (cleanFrameNo) orConditions.push({ frame_no: cleanFrameNo });
+      if (cleanRefNo) orConditions.push({ ref_no: cleanRefNo });
+
+      const existing = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          OR: orConditions,
+        },
+      });
+
+      if (existing) {
+        return existing;
+      }
+    }
+
     const data: any = { ...dto };
 
     // Auto-calculate warranty_closing_date if not supplied

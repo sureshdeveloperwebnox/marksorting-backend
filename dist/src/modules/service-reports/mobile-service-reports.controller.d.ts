@@ -31,6 +31,10 @@ export declare class MobileServiceReportsController {
         })[];
     } & {
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -66,10 +70,6 @@ export declare class MobileServiceReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }) | null>;
     update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         before: any;
@@ -97,6 +97,10 @@ export declare class MobileServiceReportsController {
             })[];
         } & {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            status: string;
             report_number: string;
             service_category_id: string;
             mill_id: string;
@@ -132,10 +136,6 @@ export declare class MobileServiceReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
-            status: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -162,6 +162,10 @@ export declare class MobileServiceReportsController {
         })[];
     } & {
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -197,10 +201,6 @@ export declare class MobileServiceReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
 }

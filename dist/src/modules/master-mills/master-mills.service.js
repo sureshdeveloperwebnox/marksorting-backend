@@ -61,6 +61,24 @@ let MasterMillsService = class MasterMillsService {
         return masterMill;
     }
     async create(dto) {
+        const cleanFrameNo = dto.frame_no?.trim();
+        const cleanRefNo = dto.ref_no?.trim();
+        if (cleanFrameNo || cleanRefNo) {
+            const orConditions = [];
+            if (cleanFrameNo)
+                orConditions.push({ frame_no: cleanFrameNo });
+            if (cleanRefNo)
+                orConditions.push({ ref_no: cleanRefNo });
+            const existing = await this.prisma.masterMill.findFirst({
+                where: {
+                    deleted_at: null,
+                    OR: orConditions,
+                },
+            });
+            if (existing) {
+                return existing;
+            }
+        }
         const data = { ...dto };
         if (!data.warranty_closing_date && data.installation_date) {
             const installDate = new Date(data.installation_date);
