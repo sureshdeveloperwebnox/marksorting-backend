@@ -16,6 +16,7 @@ const class_transformer_1 = require("class-transformer");
 const class_validator_2 = require("class-validator");
 class CreateMasterMillDto {
     invoice_no;
+    type;
     invoice_date;
     ref_no;
     mill_id;
@@ -44,6 +45,12 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "invoice_no", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Installation', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMasterMillDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),

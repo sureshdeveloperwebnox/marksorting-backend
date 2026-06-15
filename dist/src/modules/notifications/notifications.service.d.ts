@@ -14,8 +14,8 @@ export declare class NotificationsService {
         user_id: string | null;
         created_at: Date;
         status: string;
-        message: string;
         type: string;
+        message: string;
         title: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
@@ -30,8 +30,8 @@ export declare class NotificationsService {
             user_id: string | null;
             created_at: Date;
             status: string;
-            message: string;
             type: string;
+            message: string;
             title: string;
             meta_data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
@@ -43,8 +43,8 @@ export declare class NotificationsService {
         user_id: string | null;
         created_at: Date;
         status: string;
-        message: string;
         type: string;
+        message: string;
         title: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;

@@ -82,6 +82,13 @@ export class MasterMillsService {
       data.amc_closing_date = amcStart.toISOString();
     }
 
+    // Convert date strings to Date objects for Prisma
+    if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
+    if (data.installation_date) data.installation_date = new Date(data.installation_date);
+    if (data.warranty_closing_date) data.warranty_closing_date = new Date(data.warranty_closing_date);
+    if (data.amc_starting_date) data.amc_starting_date = new Date(data.amc_starting_date);
+    if (data.amc_closing_date) data.amc_closing_date = new Date(data.amc_closing_date);
+
     const masterMill = await this.prisma.masterMill.create({ data });
     await this.invalidateCache();
     return masterMill;
@@ -125,6 +132,13 @@ export class MasterMillsService {
       data.amc_closing_date = amcClose.toISOString();
     }
 
+    // Convert date strings to Date objects for Prisma
+    if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
+    if (data.installation_date) data.installation_date = new Date(data.installation_date);
+    if (data.warranty_closing_date) data.warranty_closing_date = new Date(data.warranty_closing_date);
+    if (data.amc_starting_date) data.amc_starting_date = new Date(data.amc_starting_date);
+    if (data.amc_closing_date) data.amc_closing_date = new Date(data.amc_closing_date);
+
     const updated = await this.prisma.masterMill.update({
       where: { id },
       data,
@@ -156,7 +170,7 @@ export class MasterMillsService {
 
     const now = new Date();
 
-    const [total, underWarranty, underAmc, nonWarranty] = await Promise.all([
+    const [total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount] = await Promise.all([
       this.prisma.masterMill.count({ where: { deleted_at: null } }),
       this.prisma.masterMill.count({
         where: {
@@ -175,9 +189,15 @@ export class MasterMillsService {
       this.prisma.masterMill.count({
         where: { deleted_at: null, all_warranty: 'Non Warranty' },
       }),
+      this.prisma.masterMill.count({
+        where: { deleted_at: null, type: 'Installation' },
+      }),
+      this.prisma.masterMill.count({
+        where: { deleted_at: null, type: 'Service' },
+      }),
     ]);
 
-    const result = { total, underWarranty, underAmc, nonWarranty };
+    const result = { total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount };
     await this.redis.setJson(cacheKey, result, 120);
     return result;
   }

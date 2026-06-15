@@ -26,7 +26,7 @@ let MasterMillsController = class MasterMillsController {
     constructor(masterMillsService) {
         this.masterMillsService = masterMillsService;
     }
-    findAll(skip, take, search, status, state, allWarranty, millId) {
+    findAll(skip, take, search, status, state, allWarranty, millId, type) {
         const where = {};
         if (search) {
             const orConditions = [
@@ -48,10 +48,18 @@ let MasterMillsController = class MasterMillsController {
             where.status = status;
         if (state)
             where.state = state;
-        if (allWarranty)
+        if (allWarranty === 'Under AMC') {
+            const now = new Date();
+            where.amc_closing_date = { gte: now };
+            where.amc_starting_date = { not: null };
+        }
+        else if (allWarranty) {
             where.all_warranty = allWarranty;
+        }
         if (millId)
             where.mill_id = millId;
+        if (type)
+            where.type = type;
         return this.masterMillsService.findAll({
             skip: skip ? parseInt(skip) : undefined,
             take: take ? parseInt(take) : undefined,
@@ -86,6 +94,7 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'state', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'all_warranty', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'mill_id', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'type', required: false, type: String }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
@@ -93,8 +102,9 @@ __decorate([
     __param(4, (0, common_1.Query)('state')),
     __param(5, (0, common_1.Query)('all_warranty')),
     __param(6, (0, common_1.Query)('mill_id')),
+    __param(7, (0, common_1.Query)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MasterMillsController.prototype, "findAll", null);
 __decorate([

@@ -57,10 +57,10 @@ export declare class TicketsService {
         status: string;
         mill_id: string | null;
         customer_id: string | null;
-        priority: string;
-        subject: string;
-        service_engineer_id: string | null;
         ticket_number: string | null;
+        service_engineer_id: string | null;
+        subject: string;
+        priority: string;
     }>;
     update(id: string, dto: UpdateTicketDto | UpdateMobileTicketDto, user?: {
         userId: string;
@@ -94,10 +94,10 @@ export declare class TicketsService {
             status: string;
             mill_id: string | null;
             customer_id: string | null;
-            priority: string;
-            subject: string;
-            service_engineer_id: string | null;
             ticket_number: string | null;
+            service_engineer_id: string | null;
+            subject: string;
+            priority: string;
         };
     }>;
     remove(id: string, user?: {
@@ -130,10 +130,10 @@ export declare class TicketsService {
         status: string;
         mill_id: string | null;
         customer_id: string | null;
-        priority: string;
-        subject: string;
-        service_engineer_id: string | null;
         ticket_number: string | null;
+        service_engineer_id: string | null;
+        subject: string;
+        priority: string;
     }>;
     private invalidateCache;
     private normalizePayload;
@@ -157,10 +157,10 @@ export declare class TicketsService {
         created_at: Date;
         updated_at: Date;
         status: string | null;
-        notes: string;
-        next_follow_up_date: Date | null;
-        timeline_date: Date;
         ticket_id: string;
+        notes: string;
+        timeline_date: Date;
+        next_follow_up_date: Date | null;
     }>;
     getTimelines(ticketId: string): Promise<({
         user: {
@@ -174,9 +174,9 @@ export declare class TicketsService {
         created_at: Date;
         updated_at: Date;
         status: string | null;
-        notes: string;
-        next_follow_up_date: Date | null;
-        timeline_date: Date;
         ticket_id: string;
+        notes: string;
+        timeline_date: Date;
+        next_follow_up_date: Date | null;
     })[]>;
 }

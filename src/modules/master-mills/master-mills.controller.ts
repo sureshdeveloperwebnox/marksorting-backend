@@ -36,6 +36,7 @@ export class MasterMillsController {
   @ApiQuery({ name: 'state', required: false, type: String })
   @ApiQuery({ name: 'all_warranty', required: false, type: String })
   @ApiQuery({ name: 'mill_id', required: false, type: String })
+  @ApiQuery({ name: 'type', required: false, type: String })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -44,6 +45,7 @@ export class MasterMillsController {
     @Query('state') state?: string,
     @Query('all_warranty') allWarranty?: string,
     @Query('mill_id') millId?: string,
+    @Query('type') type?: string,
   ) {
     const where: Prisma.MasterMillWhereInput = {};
 
@@ -68,8 +70,17 @@ export class MasterMillsController {
 
     if (status) where.status = status;
     if (state) where.state = state;
-    if (allWarranty) where.all_warranty = allWarranty;
+    
+    if (allWarranty === 'Under AMC') {
+      const now = new Date();
+      where.amc_closing_date = { gte: now };
+      where.amc_starting_date = { not: null };
+    } else if (allWarranty) {
+      where.all_warranty = allWarranty;
+    }
+
     if (millId) where.mill_id = millId;
+    if (type) where.type = type;
 
     return this.masterMillsService.findAll({
       skip: skip ? parseInt(skip) : undefined,

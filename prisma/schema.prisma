@@ -211,6 +211,7 @@ model Mill {
 
 model MasterMill {
   id                    String    @id @default(uuid())
+  type                  String    @default("Installation") // Service or Installation
   invoice_no            String
   invoice_date          DateTime?
   ref_no                String?

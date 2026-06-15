@@ -5,7 +5,7 @@ import { UpdateMasterMillDto } from './dto/update-master-mill.dto';
 export declare class MasterMillsController {
     private readonly masterMillsService;
     constructor(masterMillsService: MasterMillsService);
-    findAll(skip?: string, take?: string, search?: string, status?: string, state?: string, allWarranty?: string, millId?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, status?: string, state?: string, allWarranty?: string, millId?: string, type?: string): Promise<any>;
     getStats(): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMasterMillDto): Promise<{
@@ -18,8 +18,9 @@ export declare class MasterMillsController {
         place: string | null;
         ref_no: string | null;
         address: string | null;
-        invoice_no: string;
+        type: string;
         invoice_date: Date | null;
+        invoice_no: string;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -46,8 +47,9 @@ export declare class MasterMillsController {
             place: string | null;
             ref_no: string | null;
             address: string | null;
-            invoice_no: string;
+            type: string;
             invoice_date: Date | null;
+            invoice_no: string;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -73,8 +75,9 @@ export declare class MasterMillsController {
             place: string | null;
             ref_no: string | null;
             address: string | null;
-            invoice_no: string;
+            type: string;
             invoice_date: Date | null;
+            invoice_no: string;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -101,8 +104,9 @@ export declare class MasterMillsController {
         place: string | null;
         ref_no: string | null;
         address: string | null;
-        invoice_no: string;
+        type: string;
         invoice_date: Date | null;
+        invoice_no: string;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;

@@ -26,8 +26,9 @@ export declare class MasterMillsService {
         place: string | null;
         ref_no: string | null;
         address: string | null;
-        invoice_no: string;
+        type: string;
         invoice_date: Date | null;
+        invoice_no: string;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -54,8 +55,9 @@ export declare class MasterMillsService {
             place: string | null;
             ref_no: string | null;
             address: string | null;
-            invoice_no: string;
+            type: string;
             invoice_date: Date | null;
+            invoice_no: string;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -81,8 +83,9 @@ export declare class MasterMillsService {
             place: string | null;
             ref_no: string | null;
             address: string | null;
-            invoice_no: string;
+            type: string;
             invoice_date: Date | null;
+            invoice_no: string;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -109,8 +112,9 @@ export declare class MasterMillsService {
         place: string | null;
         ref_no: string | null;
         address: string | null;
-        invoice_no: string;
+        type: string;
         invoice_date: Date | null;
+        invoice_no: string;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
