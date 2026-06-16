@@ -227,4 +227,22 @@ export class CreateExpenseDto {
   @IsIn(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
   @IsOptional()
   status?: string;
+
+  @ApiProperty({
+    example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    required: false,
+    description: 'UUID of the linked Service Report (optional).',
+  })
+  @IsUUID()
+  @IsOptional()
+  service_report_id?: string;
+
+  @ApiProperty({
+    example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    required: false,
+    description: 'UUID of the linked Installation Report (optional).',
+  })
+  @IsUUID()
+  @IsOptional()
+  installation_report_id?: string;
 }

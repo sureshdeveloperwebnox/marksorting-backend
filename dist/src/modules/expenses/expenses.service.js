@@ -34,6 +34,18 @@ const INCLUDE_SHAPE = {
     technicians: {
         include: { technician: { select: { id: true, full_name: true } } },
     },
+    serviceReport: {
+        select: {
+            id: true,
+            report_number: true,
+        },
+    },
+    installationReport: {
+        select: {
+            id: true,
+            report_number: true,
+        },
+    },
 };
 let ExpensesService = ExpensesService_1 = class ExpensesService {
     prisma;
@@ -220,6 +232,93 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         else {
             throw new common_1.BadRequestException('At least one technician ID is required');
         }
+        const isServiceEngineer = user && user.role === 'Service Engineer';
+        if (isServiceEngineer) {
+            if (!expenseData.service_report_id && !expenseData.installation_report_id) {
+                throw new common_1.BadRequestException('Service engineers must link the expense to either a service report or an installation report');
+            }
+            if (expenseData.service_report_id && expenseData.installation_report_id) {
+                throw new common_1.BadRequestException('An expense can only be linked to a service report OR an installation report, not both');
+            }
+            const reportsCount = await this.prisma.serviceReport.count({
+                where: {
+                    deleted_at: null,
+                    technicians: { some: { technician_id: user.userId } },
+                },
+            });
+            const installCount = await this.prisma.installationReport.count({
+                where: {
+                    deleted_at: null,
+                    technicians: { some: { technician_id: user.userId } },
+                },
+            });
+            if (reportsCount === 0 && installCount === 0) {
+                throw new common_1.ForbiddenException('You are not eligible to create expenses because you have no assigned service or installation reports.');
+            }
+        }
+        if (expenseData.service_report_id) {
+            const duplicateExpense = await this.prisma.expense.findFirst({
+                where: {
+                    service_report_id: expenseData.service_report_id,
+                    deleted_at: null,
+                },
+            });
+            if (duplicateExpense) {
+                throw new common_1.BadRequestException('An active expense has already been created for this service report');
+            }
+        }
+        if (expenseData.installation_report_id) {
+            const duplicateExpense = await this.prisma.expense.findFirst({
+                where: {
+                    installation_report_id: expenseData.installation_report_id,
+                    deleted_at: null,
+                },
+            });
+            if (duplicateExpense) {
+                throw new common_1.BadRequestException('An active expense has already been created for this installation report');
+            }
+        }
+        let linkedMillId = expenseData.mill_id;
+        let linkedPlace = expenseData.place;
+        let linkedVisitDate = expenseData.visit_date;
+        if (expenseData.service_report_id) {
+            const report = await this.prisma.serviceReport.findFirst({
+                where: {
+                    id: expenseData.service_report_id,
+                    deleted_at: null,
+                    ...(isServiceEngineer
+                        ? { technicians: { some: { technician_id: user.userId } } }
+                        : {}),
+                },
+            });
+            if (!report) {
+                throw new common_1.BadRequestException('Linked service report is invalid or not assigned to you');
+            }
+            linkedMillId = report.mill_id;
+            linkedPlace = report.place;
+            if (!linkedVisitDate) {
+                linkedVisitDate = report.visit_date.toISOString().split('T')[0];
+            }
+        }
+        else if (expenseData.installation_report_id) {
+            const report = await this.prisma.installationReport.findFirst({
+                where: {
+                    id: expenseData.installation_report_id,
+                    deleted_at: null,
+                    ...(isServiceEngineer
+                        ? { technicians: { some: { technician_id: user.userId } } }
+                        : {}),
+                },
+            });
+            if (!report) {
+                throw new common_1.BadRequestException('Linked installation report is invalid or not assigned to you');
+            }
+            linkedMillId = report.mill_id;
+            linkedPlace = report.place;
+            if (!linkedVisitDate) {
+                linkedVisitDate = report.visit_date.toISOString().split('T')[0];
+            }
+        }
         const expense = await this.prisma.$transaction(async (tx) => {
             const todayStart = new Date();
             todayStart.setUTCHours(0, 0, 0, 0);
@@ -244,23 +343,41 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             const rootImages = items.length
                 ? Array.from(new Set(items.flatMap((it) => it.expense_images || [])))
                 : (expenseData.expense_images || []);
+            const report_type = expenseData.service_report_id
+                ? 'SERVICE'
+                : (expenseData.installation_report_id ? 'INSTALLATION' : 'NONE');
             const created = await tx.expense.create({
                 data: {
                     expense_number,
                     expense_type: expenseData.expense_type || 'MILL',
-                    visit_date: new Date(expenseData.visit_date),
+                    report_type,
+                    visit_date: new Date(linkedVisitDate),
                     visit_time: (0, date_time_1.getAutoVisitTime)(),
                     expense_category_id: rootCategoryId,
-                    place: expenseData.place || null,
+                    place: linkedPlace || null,
                     others: expenseData.others || null,
                     remarks: rootRemarks,
                     amount: String(totalAmount),
                     admin_amount: String(totalAdminAmount),
                     status: expenseData.status || 'PENDING',
                     expense_images: rootImages,
-                    mill_id: expenseData.mill_id || null,
+                    mill_id: linkedMillId || null,
+                    service_report_id: expenseData.service_report_id || null,
+                    installation_report_id: expenseData.installation_report_id || null,
                 },
             });
+            if (expenseData.service_report_id) {
+                await tx.serviceReport.update({
+                    where: { id: expenseData.service_report_id },
+                    data: { expense_id: created.id },
+                });
+            }
+            else if (expenseData.installation_report_id) {
+                await tx.installationReport.update({
+                    where: { id: expenseData.installation_report_id },
+                    data: { expense_id: created.id },
+                });
+            }
             if (items.length > 0) {
                 await tx.expenseItem.createMany({
                     data: items.map((it) => ({
@@ -318,6 +435,45 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         const rawDto = dto;
         const { technician_ids, ...expenseData } = rawDto;
         delete expenseData.customer_id;
+        const isServiceEngineer = user && user.role === 'Service Engineer';
+        const finalServiceReportId = expenseData.service_report_id !== undefined
+            ? expenseData.service_report_id
+            : existingExpense.service_report_id;
+        const finalInstallationReportId = expenseData.installation_report_id !== undefined
+            ? expenseData.installation_report_id
+            : existingExpense.installation_report_id;
+        if (isServiceEngineer) {
+            if (!finalServiceReportId && !finalInstallationReportId) {
+                throw new common_1.BadRequestException('Service engineers must link the expense to either a service report or an installation report');
+            }
+            if (finalServiceReportId && finalInstallationReportId) {
+                throw new common_1.BadRequestException('An expense can only be linked to a service report OR an installation report, not both');
+            }
+        }
+        if (expenseData.service_report_id && typeof expenseData.service_report_id === 'string') {
+            const duplicateExpense = await this.prisma.expense.findFirst({
+                where: {
+                    service_report_id: expenseData.service_report_id,
+                    deleted_at: null,
+                    NOT: { id },
+                },
+            });
+            if (duplicateExpense) {
+                throw new common_1.BadRequestException('An active expense has already been created for this service report');
+            }
+        }
+        if (expenseData.installation_report_id && typeof expenseData.installation_report_id === 'string') {
+            const duplicateExpense = await this.prisma.expense.findFirst({
+                where: {
+                    installation_report_id: expenseData.installation_report_id,
+                    deleted_at: null,
+                    NOT: { id },
+                },
+            });
+            if (duplicateExpense) {
+                throw new common_1.BadRequestException('An active expense has already been created for this installation report');
+            }
+        }
         if (technician_ids === undefined) {
             delete rawDto.technician_id;
         }
@@ -385,6 +541,50 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         if (expenseData.expense_type !== undefined) {
             updateData.expense_type = expenseData.expense_type;
         }
+        if (expenseData.service_report_id !== undefined) {
+            if (expenseData.service_report_id === null) {
+                updateData.service_report_id = null;
+            }
+            else {
+                const report = await this.prisma.serviceReport.findFirst({
+                    where: {
+                        id: expenseData.service_report_id,
+                        deleted_at: null,
+                        ...(user && user.role === 'Service Engineer'
+                            ? { technicians: { some: { technician_id: user.userId } } }
+                            : {}),
+                    },
+                });
+                if (!report) {
+                    throw new common_1.BadRequestException('Linked service report is invalid or not assigned to you');
+                }
+                updateData.service_report_id = expenseData.service_report_id;
+                updateData.mill_id = report.mill_id;
+                updateData.place = report.place;
+            }
+        }
+        if (expenseData.installation_report_id !== undefined) {
+            if (expenseData.installation_report_id === null) {
+                updateData.installation_report_id = null;
+            }
+            else {
+                const report = await this.prisma.installationReport.findFirst({
+                    where: {
+                        id: expenseData.installation_report_id,
+                        deleted_at: null,
+                        ...(user && user.role === 'Service Engineer'
+                            ? { technicians: { some: { technician_id: user.userId } } }
+                            : {}),
+                    },
+                });
+                if (!report) {
+                    throw new common_1.BadRequestException('Linked installation report is invalid or not assigned to you');
+                }
+                updateData.installation_report_id = expenseData.installation_report_id;
+                updateData.mill_id = report.mill_id;
+                updateData.place = report.place;
+            }
+        }
         const hasItems = expenseData.expense_items !== undefined;
         if (hasItems) {
             const items = expenseData.expense_items || [];
@@ -414,12 +614,45 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 updateData.expense_images = expenseData.expense_images;
             }
         }
+        const currentServiceReportId = updateData.service_report_id !== undefined
+            ? updateData.service_report_id
+            : existingExpense.service_report_id;
+        const currentInstallationReportId = updateData.installation_report_id !== undefined
+            ? updateData.installation_report_id
+            : existingExpense.installation_report_id;
+        updateData.report_type = currentServiceReportId
+            ? 'SERVICE'
+            : (currentInstallationReportId ? 'INSTALLATION' : 'NONE');
         const expense = await this.prisma.$transaction(async (tx) => {
             const updated = await tx.expense.update({
                 where: { id },
                 data: updateData,
                 include: INCLUDE_SHAPE,
             });
+            if (existingExpense.service_report_id && existingExpense.service_report_id !== updated.service_report_id) {
+                await tx.serviceReport.update({
+                    where: { id: existingExpense.service_report_id },
+                    data: { expense_id: null },
+                });
+            }
+            if (existingExpense.installation_report_id && existingExpense.installation_report_id !== updated.installation_report_id) {
+                await tx.installationReport.update({
+                    where: { id: existingExpense.installation_report_id },
+                    data: { expense_id: null },
+                });
+            }
+            if (updated.service_report_id && updated.service_report_id !== existingExpense.service_report_id) {
+                await tx.serviceReport.update({
+                    where: { id: updated.service_report_id },
+                    data: { expense_id: updated.id },
+                });
+            }
+            if (updated.installation_report_id && updated.installation_report_id !== existingExpense.installation_report_id) {
+                await tx.installationReport.update({
+                    where: { id: updated.installation_report_id },
+                    data: { expense_id: updated.id },
+                });
+            }
             if (hasItems) {
                 await tx.expenseItem.deleteMany({
                     where: { expense_id: id },
@@ -501,13 +734,117 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
     }
     async remove(id, user) {
         await this.findById(id, user);
-        const expense = await this.prisma.expense.update({
-            where: { id },
-            data: { deleted_at: new Date() },
-            include: INCLUDE_SHAPE,
+        const expense = await this.prisma.$transaction(async (tx) => {
+            const deleted = await tx.expense.update({
+                where: { id },
+                data: { deleted_at: new Date() },
+                include: INCLUDE_SHAPE,
+            });
+            if (deleted.service_report_id) {
+                await tx.serviceReport.update({
+                    where: { id: deleted.service_report_id },
+                    data: { expense_id: null },
+                });
+            }
+            if (deleted.installation_report_id) {
+                await tx.installationReport.update({
+                    where: { id: deleted.installation_report_id },
+                    data: { expense_id: null },
+                });
+            }
+            return deleted;
         });
         await this.invalidateCache(id);
         return expense;
+    }
+    async checkEligibility(user, technicianId, excludeExpenseId) {
+        const isServiceEngineer = user.role === 'Service Engineer';
+        const targetUserId = isServiceEngineer ? user.userId : technicianId;
+        if (!targetUserId) {
+            return {
+                eligible: !isServiceEngineer,
+                serviceReports: [],
+                installationReports: [],
+            };
+        }
+        const serviceReports = await this.prisma.serviceReport.findMany({
+            where: {
+                deleted_at: null,
+                technicians: {
+                    some: {
+                        technician_id: targetUserId,
+                    },
+                },
+                expenses: {
+                    none: {
+                        deleted_at: null,
+                        ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+                    },
+                },
+            },
+            select: {
+                id: true,
+                report_number: true,
+                mill_id: true,
+                place: true,
+                visit_date: true,
+                mill: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+            orderBy: { created_at: 'desc' },
+        });
+        const installationReports = await this.prisma.installationReport.findMany({
+            where: {
+                deleted_at: null,
+                technicians: {
+                    some: {
+                        technician_id: targetUserId,
+                    },
+                },
+                expenses: {
+                    none: {
+                        deleted_at: null,
+                        ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+                    },
+                },
+            },
+            select: {
+                id: true,
+                report_number: true,
+                mill_id: true,
+                place: true,
+                visit_date: true,
+                mill: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+            orderBy: { created_at: 'desc' },
+        });
+        const eligible = serviceReports.length > 0 || installationReports.length > 0;
+        return {
+            eligible: isServiceEngineer ? eligible : true,
+            serviceReports: serviceReports.map((r) => ({
+                id: r.id,
+                report_number: r.report_number,
+                mill_id: r.mill_id,
+                place: r.place,
+                visit_date: r.visit_date,
+                mill_name: r.mill?.name || 'Unknown Mill',
+            })),
+            installationReports: installationReports.map((r) => ({
+                id: r.id,
+                report_number: r.report_number,
+                mill_id: r.mill_id,
+                place: r.place,
+                visit_date: r.visit_date,
+                mill_name: r.mill?.name || 'Unknown Mill',
+            })),
+        };
     }
     async invalidateCache(id) {
         const promises = [

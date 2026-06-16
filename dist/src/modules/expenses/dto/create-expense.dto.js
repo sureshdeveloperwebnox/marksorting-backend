@@ -90,6 +90,8 @@ class CreateExpenseDto {
     admin_amount;
     expense_images;
     status;
+    service_report_id;
+    installation_report_id;
 }
 exports.CreateExpenseDto = CreateExpenseDto;
 __decorate([
@@ -261,4 +263,24 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        required: false,
+        description: 'UUID of the linked Service Report (optional).',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseDto.prototype, "service_report_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        required: false,
+        description: 'UUID of the linked Installation Report (optional).',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseDto.prototype, "installation_report_id", void 0);
 //# sourceMappingURL=create-expense.dto.js.map

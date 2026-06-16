@@ -21,4 +21,6 @@ export declare class CreateExpenseDto {
     admin_amount?: number;
     expense_images?: string[];
     status?: string;
+    service_report_id?: string;
+    installation_report_id?: string;
 }

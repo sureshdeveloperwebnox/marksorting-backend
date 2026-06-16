@@ -89,6 +89,31 @@ export class ExpensesController {
     });
   }
 
+  @Get('eligibility')
+  @ApiOperation({ summary: 'Check report eligibility for a technician' })
+  @ApiQuery({
+    name: 'technicianId',
+    required: false,
+    type: String,
+    description: 'Technician/Service Engineer ID',
+  })
+  @ApiQuery({
+    name: 'excludeExpenseId',
+    required: false,
+    type: String,
+    description: 'Expense ID to exclude (when editing)',
+  })
+  checkEligibility(
+    @Query('technicianId') technicianId?: string,
+    @Query('excludeExpenseId') excludeExpenseId?: string,
+  ) {
+    return this.expensesService.checkEligibility(
+      { userId: '', role: 'Admin' },
+      technicianId,
+      excludeExpenseId,
+    );
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get expense by ID' })
   findOne(@Param('id') id: string) {

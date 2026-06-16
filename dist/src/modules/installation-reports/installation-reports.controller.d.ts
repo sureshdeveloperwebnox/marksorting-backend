@@ -15,8 +15,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             installation_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -59,6 +59,7 @@ export declare class InstallationReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;
@@ -78,8 +79,8 @@ export declare class InstallationReportsController {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 installation_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -122,6 +123,7 @@ export declare class InstallationReportsController {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
             invoice_date: Date | null;
             invoice_number: string | null;
             warranty_start_date: Date | null;
@@ -140,8 +142,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             installation_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -184,6 +186,7 @@ export declare class InstallationReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;

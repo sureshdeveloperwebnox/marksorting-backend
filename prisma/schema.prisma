@@ -424,9 +424,11 @@ model ServiceReport {
   updated_at                DateTime                  @updatedAt
   deleted_at                DateTime?
   authorized_person_phone   String?
+  expense_id                String?
   technicians               ServiceReportTechnician[]
   mill                      Mill                      @relation(fields: [mill_id], references: [id])
   serviceCategory           ServiceCategory           @relation(fields: [service_category_id], references: [id])
+  expenses                  Expense[]
 
   @@map("service_reports")
 }
@@ -483,8 +485,10 @@ model InstallationReport {
   updated_at               DateTime                       @updatedAt
   deleted_at               DateTime?
   authorized_person_phone  String?
+  expense_id               String?
   technicians              InstallationReportTechnician[]
   mill                     Mill                           @relation(fields: [mill_id], references: [id])
+  expenses                 Expense[]
 
   @@map("installation_reports")
 }
@@ -503,6 +507,7 @@ model Expense {
   id                  String              @id @default(uuid())
   expense_number      String              @unique
   expense_type        String              @default("MILL")
+  report_type         String              @default("NONE")
   mill_id             String?
   place               String?
   visit_date          DateTime
@@ -517,10 +522,14 @@ model Expense {
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
   deleted_at          DateTime?
-  technicians         ExpenseTechnician[]
-  expenseCategory     ExpenseCategory?    @relation(fields: [expense_category_id], references: [id])
-  mill                Mill?               @relation(fields: [mill_id], references: [id])
-  expense_items       ExpenseItem[]
+  technicians            ExpenseTechnician[]
+  expenseCategory        ExpenseCategory?    @relation(fields: [expense_category_id], references: [id])
+  mill                   Mill?               @relation(fields: [mill_id], references: [id])
+  expense_items          ExpenseItem[]
+  service_report_id      String?
+  installation_report_id String?
+  serviceReport          ServiceReport?      @relation(fields: [service_report_id], references: [id])
+  installationReport     InstallationReport? @relation(fields: [installation_report_id], references: [id])
 
   @@map("expenses")
 }

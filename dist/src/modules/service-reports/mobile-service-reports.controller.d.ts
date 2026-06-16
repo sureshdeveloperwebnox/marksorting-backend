@@ -14,8 +14,8 @@ export declare class MobileServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -70,6 +70,7 @@ export declare class MobileServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         before: any;
@@ -80,8 +81,8 @@ export declare class MobileServiceReportsController {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 service_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -136,6 +137,7 @@ export declare class MobileServiceReportsController {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -145,8 +147,8 @@ export declare class MobileServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -201,6 +203,7 @@ export declare class MobileServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }>;
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
 }

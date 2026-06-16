@@ -201,6 +201,38 @@ export class MobileExpensesController {
     );
   }
 
+  // ── GET /eligibility ──────────────────────────────────────────────────────
+
+  @Get('eligibility')
+  @ApiOperation({
+    summary: '[Mobile] Check expense creation eligibility and fetch assigned reports',
+    description:
+      'Checks if the logged-in service engineer is eligible to create expenses. ' +
+      'Eligible if they have at least one assigned Service Report or Installation Report. ' +
+      'Returns list of their assigned reports to populate dropdown selection.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Eligibility status and assigned reports list',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
+  @ApiQuery({
+    name: 'excludeExpenseId',
+    required: false,
+    type: String,
+    description: 'Expense ID to exclude from duplicate checks (when editing)',
+  })
+  checkEligibility(
+    @Request() req: any,
+    @Query('excludeExpenseId') excludeExpenseId?: string,
+  ) {
+    return this.expensesService.checkEligibility(req.user, undefined, excludeExpenseId);
+  }
+
   // ── GET /:id ──────────────────────────────────────────────────────────────
 
   @Get(':id')

@@ -5,6 +5,25 @@ export declare class ExpensesController {
     private readonly expensesService;
     constructor(expensesService: ExpensesService);
     findAll(skip?: string, take?: string, search?: string, status?: string, technicianId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    checkEligibility(technicianId?: string, excludeExpenseId?: string): Promise<{
+        eligible: boolean;
+        serviceReports: {
+            id: string;
+            report_number: string;
+            mill_id: string;
+            place: string;
+            visit_date: Date;
+            mill_name: string;
+        }[];
+        installationReports: {
+            id: string;
+            report_number: string;
+            mill_id: string;
+            place: string;
+            visit_date: Date;
+            mill_name: string;
+        }[];
+    }>;
     findOne(id: string): Promise<any>;
     create(dto: CreateExpenseDto): Promise<({
         technicians: ({
@@ -16,6 +35,10 @@ export declare class ExpensesController {
             expense_id: string;
             technician_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        } | null;
         mill: {
             id: string;
             name: string;
@@ -24,10 +47,6 @@ export declare class ExpensesController {
                 name: string;
             } | null;
         } | null;
-        expenseCategory: {
-            id: string;
-            name: string;
-        } | null;
         expense_items: ({
             expenseCategory: {
                 id: string;
@@ -35,33 +54,44 @@ export declare class ExpensesController {
             };
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
             expense_category_id: string;
             remarks: string | null;
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            created_at: Date;
+            updated_at: Date;
             expense_id: string;
         })[];
+        serviceReport: {
+            id: string;
+            report_number: string;
+        } | null;
+        installationReport: {
+            id: string;
+            report_number: string;
+        } | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        status: string;
+        expense_number: string;
+        expense_type: string;
+        report_type: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_number: string;
-        expense_type: string;
         expense_category_id: string | null;
         others: string | null;
         remarks: string | null;
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        service_report_id: string | null;
+        installation_report_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateExpenseDto): Promise<{
         before: any;
@@ -75,6 +105,10 @@ export declare class ExpensesController {
                 expense_id: string;
                 technician_id: string;
             })[];
+            expenseCategory: {
+                id: string;
+                name: string;
+            } | null;
             mill: {
                 id: string;
                 name: string;
@@ -83,10 +117,6 @@ export declare class ExpensesController {
                     name: string;
                 } | null;
             } | null;
-            expenseCategory: {
-                id: string;
-                name: string;
-            } | null;
             expense_items: ({
                 expenseCategory: {
                     id: string;
@@ -94,33 +124,44 @@ export declare class ExpensesController {
                 };
             } & {
                 id: string;
-                created_at: Date;
-                updated_at: Date;
                 expense_category_id: string;
                 remarks: string | null;
                 amount: import("@prisma/client/runtime/client").Decimal;
                 admin_amount: import("@prisma/client/runtime/client").Decimal;
                 expense_images: string[];
+                created_at: Date;
+                updated_at: Date;
                 expense_id: string;
             })[];
+            serviceReport: {
+                id: string;
+                report_number: string;
+            } | null;
+            installationReport: {
+                id: string;
+                report_number: string;
+            } | null;
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            status: string;
+            expense_number: string;
+            expense_type: string;
+            report_type: string;
             mill_id: string | null;
             place: string | null;
             visit_date: Date;
             visit_time: string;
-            expense_number: string;
-            expense_type: string;
             expense_category_id: string | null;
             others: string | null;
             remarks: string | null;
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            service_report_id: string | null;
+            installation_report_id: string | null;
         }) | null;
     }>;
     remove(id: string): Promise<{
@@ -133,6 +174,10 @@ export declare class ExpensesController {
             expense_id: string;
             technician_id: string;
         })[];
+        expenseCategory: {
+            id: string;
+            name: string;
+        } | null;
         mill: {
             id: string;
             name: string;
@@ -141,10 +186,6 @@ export declare class ExpensesController {
                 name: string;
             } | null;
         } | null;
-        expenseCategory: {
-            id: string;
-            name: string;
-        } | null;
         expense_items: ({
             expenseCategory: {
                 id: string;
@@ -152,32 +193,43 @@ export declare class ExpensesController {
             };
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
             expense_category_id: string;
             remarks: string | null;
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            created_at: Date;
+            updated_at: Date;
             expense_id: string;
         })[];
+        serviceReport: {
+            id: string;
+            report_number: string;
+        } | null;
+        installationReport: {
+            id: string;
+            report_number: string;
+        } | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        status: string;
+        expense_number: string;
+        expense_type: string;
+        report_type: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        expense_number: string;
-        expense_type: string;
         expense_category_id: string | null;
         others: string | null;
         remarks: string | null;
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        service_report_id: string | null;
+        installation_report_id: string | null;
     }>;
 }

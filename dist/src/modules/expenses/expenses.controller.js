@@ -37,6 +37,9 @@ let ExpensesController = class ExpensesController {
             dateTo,
         });
     }
+    checkEligibility(technicianId, excludeExpenseId) {
+        return this.expensesService.checkEligibility({ userId: '', role: 'Admin' }, technicianId, excludeExpenseId);
+    }
     findOne(id) {
         return this.expensesService.findById(id);
     }
@@ -107,6 +110,27 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ExpensesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('eligibility'),
+    (0, swagger_1.ApiOperation)({ summary: 'Check report eligibility for a technician' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'technicianId',
+        required: false,
+        type: String,
+        description: 'Technician/Service Engineer ID',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'excludeExpenseId',
+        required: false,
+        type: String,
+        description: 'Expense ID to exclude (when editing)',
+    }),
+    __param(0, (0, common_1.Query)('technicianId')),
+    __param(1, (0, common_1.Query)('excludeExpenseId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], ExpensesController.prototype, "checkEligibility", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get expense by ID' }),

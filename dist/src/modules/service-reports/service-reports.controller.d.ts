@@ -15,8 +15,8 @@ export declare class ServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -71,6 +71,7 @@ export declare class ServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto, req: any): Promise<{
         before: any;
@@ -81,8 +82,8 @@ export declare class ServiceReportsController {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 service_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -137,6 +138,7 @@ export declare class ServiceReportsController {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -146,8 +148,8 @@ export declare class ServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -202,5 +204,6 @@ export declare class ServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }>;
 }

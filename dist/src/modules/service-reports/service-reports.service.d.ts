@@ -45,8 +45,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -101,6 +101,7 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto | UpdateMobileServiceReportDto, user?: {
         userId: string;
@@ -114,8 +115,8 @@ export declare class ServiceReportsService {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 service_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -170,6 +171,7 @@ export declare class ServiceReportsService {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
         };
     }>;
     remove(id: string, user?: {
@@ -182,8 +184,8 @@ export declare class ServiceReportsService {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -238,6 +240,7 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }>;
     generatePdf(id: string, user?: {
         userId: string;
