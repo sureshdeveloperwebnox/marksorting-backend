@@ -36,8 +36,17 @@ const createDateBoundary = (dateValue, boundary) => {
     if (!match)
         return null;
     const [, year, month, day] = match;
+    const yearValue = Number(year);
+    const monthValue = Number(month);
+    const dayValue = Number(day);
+    const dateOnly = new Date(Date.UTC(yearValue, monthValue - 1, dayValue));
+    if (dateOnly.getUTCFullYear() !== yearValue ||
+        dateOnly.getUTCMonth() !== monthValue - 1 ||
+        dateOnly.getUTCDate() !== dayValue) {
+        return null;
+    }
     const kolkataOffsetMs = 5.5 * 60 * 60 * 1000;
-    const utcTime = Date.UTC(Number(year), Number(month) - 1, Number(day), boundary === 'start' ? 0 : 23, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 999);
+    const utcTime = Date.UTC(yearValue, monthValue - 1, dayValue, boundary === 'start' ? 0 : 23, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 999);
     const date = new Date(utcTime - kolkataOffsetMs);
     if (Number.isNaN(date.getTime()))
         return null;
