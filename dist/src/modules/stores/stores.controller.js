@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const stores_service_1 = require("./stores.service");
 const create_store_dto_1 = require("./dto/create-store.dto");
 const update_store_dto_1 = require("./dto/update-store.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const description_helper_1 = require("../activity-logs/helpers/description.helper");
@@ -110,6 +111,8 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Get all store records with pagination and filtering',
     }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of store records' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, swagger_1.ApiQuery)({
         name: 'skip',
         required: false,
@@ -186,6 +189,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get store record by ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record details' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -194,6 +200,10 @@ __decorate([
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new store record' }),
+    (0, swagger_1.ApiBody)({ type: create_store_dto_1.CreateStoreDto }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Store record created successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.CREATE,
         entityType: 'stores',
@@ -221,6 +231,11 @@ __decorate([
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing store record' }),
+    (0, swagger_1.ApiBody)({ type: update_store_dto_1.UpdateStoreDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record updated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.UPDATE,
         entityType: 'stores',
@@ -247,6 +262,9 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete store record' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record soft-deleted successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.DELETE,
         entityType: 'stores',
@@ -264,6 +282,8 @@ __decorate([
 ], StoresController.prototype, "remove", null);
 exports.StoresController = StoresController = __decorate([
     (0, swagger_1.ApiTags)('stores'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('stores'),
     __metadata("design:paramtypes", [stores_service_1.StoresService])
 ], StoresController);

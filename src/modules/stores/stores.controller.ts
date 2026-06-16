@@ -7,12 +7,21 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiBody,
+} from '@nestjs/swagger';
 import { StoresService } from './stores.service';
 import { Prisma } from '@prisma/client';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import {
@@ -23,6 +32,8 @@ import {
 } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('stores')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('stores')
 export class StoresController {
   constructor(private readonly storesService: StoresService) {}
@@ -31,6 +42,8 @@ export class StoresController {
   @ApiOperation({
     summary: 'Get all store records with pagination and filtering',
   })
+  @ApiResponse({ status: 200, description: 'Paginated list of store records' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @ApiQuery({
     name: 'skip',
     required: false,
@@ -175,12 +188,19 @@ export class StoresController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Get store record by ID' })
+  @ApiResponse({ status: 200, description: 'Store record details' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
   findOne(@Param('id') id: string) {
     return this.storesService.findById(id);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create new store record' })
+  @ApiBody({ type: CreateStoreDto })
+  @ApiResponse({ status: 201, description: 'Store record created successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @LogActivity({
     action: ActivityAction.CREATE,
     entityType: 'stores',
@@ -211,6 +231,11 @@ export class StoresController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update existing store record' })
+  @ApiBody({ type: UpdateStoreDto })
+  @ApiResponse({ status: 200, description: 'Store record updated successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.UPDATE,
     entityType: 'stores',
@@ -236,6 +261,9 @@ export class StoresController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete store record' })
+  @ApiResponse({ status: 200, description: 'Store record soft-deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.DELETE,
     entityType: 'stores',
