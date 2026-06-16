@@ -49,7 +49,7 @@ export class TicketsService {
     private prisma: PrismaService,
     private redis: RedisService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async findAll(
     params: {
@@ -58,6 +58,8 @@ export class TicketsService {
       search?: string;
       status?: string;
       priority?: string;
+      dateFrom?: string;
+      dateTo?: string;
     },
     user?: { userId: string; role: string },
   ) {
@@ -65,7 +67,7 @@ export class TicketsService {
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
-    const { skip, take, search, status, priority } = params;
+    const { skip, take, search, status, priority, dateFrom, dateTo } = params;
 
     const where: any = {};
 
@@ -100,6 +102,18 @@ export class TicketsService {
 
     if (priority) {
       where.priority = priority;
+    }
+
+    if (dateFrom || dateTo) {
+      where.created_at = {};
+      if (dateFrom) {
+        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+        where.created_at.gte = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+      }
+      if (dateTo) {
+        const [ty, tm, td] = dateTo.split('-').map(Number);
+        where.created_at.lte = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+      }
     }
 
     const [tickets, total] = await Promise.all([
@@ -352,7 +366,7 @@ export class TicketsService {
     return Array.isArray(target)
       ? target.includes('ticket_number')
       : target === 'ticket_number' ||
-          target === 'support_tickets_ticket_number_key';
+      target === 'support_tickets_ticket_number_key';
   }
 
   private generateTicketNumber() {

@@ -56,7 +56,7 @@ let TicketsService = class TicketsService {
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
-        const { skip, take, search, status, priority } = params;
+        const { skip, take, search, status, priority, dateFrom, dateTo } = params;
         const where = {};
         if (user && user.role === 'Service Engineer') {
             where.service_engineer_id = user.userId;
@@ -86,6 +86,17 @@ let TicketsService = class TicketsService {
         }
         if (priority) {
             where.priority = priority;
+        }
+        if (dateFrom || dateTo) {
+            where.created_at = {};
+            if (dateFrom) {
+                const [fy, fm, fd] = dateFrom.split('-').map(Number);
+                where.created_at.gte = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+            }
+            if (dateTo) {
+                const [ty, tm, td] = dateTo.split('-').map(Number);
+                where.created_at.lte = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+            }
         }
         const [tickets, total] = await Promise.all([
             this.prisma.supportTicket.findMany({

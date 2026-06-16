@@ -26,7 +26,7 @@ import {
 @ApiTags('tickets')
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) {}
+  constructor(private readonly ticketsService: TicketsService) { }
 
   @Get()
   @ApiOperation({
@@ -62,12 +62,26 @@ export class TicketsController {
     type: String,
     description: 'Filter by ticket priority',
   })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filter from created date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filter to created date (YYYY-MM-DD)',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
     @Query('status') status?: string,
     @Query('priority') priority?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
     return this.ticketsService.findAll({
       skip: skip ? parseInt(skip, 10) : 0,
@@ -75,6 +89,8 @@ export class TicketsController {
       search,
       status,
       priority,
+      dateFrom,
+      dateTo,
     });
   }
 

@@ -27,13 +27,15 @@ let TicketsController = class TicketsController {
     constructor(ticketsService) {
         this.ticketsService = ticketsService;
     }
-    findAll(skip, take, search, status, priority) {
+    findAll(skip, take, search, status, priority, dateFrom, dateTo) {
         return this.ticketsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
             status,
             priority,
+            dateFrom,
+            dateTo,
         });
     }
     findOne(id) {
@@ -91,13 +93,27 @@ __decorate([
         type: String,
         description: 'Filter by ticket priority',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateFrom',
+        required: false,
+        type: String,
+        description: 'Filter from created date (YYYY-MM-DD)',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateTo',
+        required: false,
+        type: String,
+        description: 'Filter to created date (YYYY-MM-DD)',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
     __param(3, (0, common_1.Query)('status')),
     __param(4, (0, common_1.Query)('priority')),
+    __param(5, (0, common_1.Query)('dateFrom')),
+    __param(6, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], TicketsController.prototype, "findAll", null);
 __decorate([
