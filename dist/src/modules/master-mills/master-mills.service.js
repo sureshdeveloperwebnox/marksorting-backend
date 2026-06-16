@@ -250,6 +250,204 @@ let MasterMillsService = class MasterMillsService {
             take: 10,
         });
     }
+    async quickRegister(dto) {
+        const customerIdInput = dto.customer_id?.trim();
+        const customerNameInput = dto.customer_name?.trim();
+        if (!customerIdInput && !customerNameInput) {
+            throw new common_1.BadRequestException('Either customer_id or customer_name must be provided');
+        }
+        const cleanMillName = dto.mill_name.trim();
+        const cleanRefNo = dto.ref_no.trim();
+        const cleanFrameNo = dto.frame_no?.trim();
+        const cleanMcModel = dto.mc_model?.trim();
+        const cleanAddress = dto.address?.trim();
+        const cleanPlace = dto.place.trim();
+        const cleanState = dto.state?.trim();
+        const cleanPhone = dto.phone?.trim();
+        const cleanEmail = dto.email?.trim();
+        const result = await this.prisma.$transaction(async (tx) => {
+            let customer = null;
+            if (customerIdInput) {
+                customer = await tx.customer.findFirst({
+                    where: { id: customerIdInput, deleted_at: null },
+                });
+                if (!customer) {
+                    throw new common_1.BadRequestException('Provided Customer ID does not exist');
+                }
+                const customerUpdates = {};
+                if (cleanAddress && customer.address !== cleanAddress)
+                    customerUpdates.address = cleanAddress;
+                if (cleanPhone && customer.phone !== cleanPhone)
+                    customerUpdates.phone = cleanPhone;
+                if (cleanEmail && customer.email !== cleanEmail)
+                    customerUpdates.email = cleanEmail;
+                if (Object.keys(customerUpdates).length > 0) {
+                    customer = await tx.customer.update({
+                        where: { id: customer.id },
+                        data: customerUpdates,
+                    });
+                }
+            }
+            else {
+                const cleanCustName = customerNameInput;
+                customer = await tx.customer.findFirst({
+                    where: {
+                        name: { equals: cleanCustName, mode: 'insensitive' },
+                        deleted_at: null,
+                    },
+                });
+                if (customer) {
+                    const customerUpdates = {};
+                    if (cleanAddress && customer.address !== cleanAddress)
+                        customerUpdates.address = cleanAddress;
+                    if (cleanPhone && customer.phone !== cleanPhone)
+                        customerUpdates.phone = cleanPhone;
+                    if (cleanEmail && customer.email !== cleanEmail)
+                        customerUpdates.email = cleanEmail;
+                    if (Object.keys(customerUpdates).length > 0) {
+                        customer = await tx.customer.update({
+                            where: { id: customer.id },
+                            data: customerUpdates,
+                        });
+                    }
+                }
+                else {
+                    customer = await tx.customer.create({
+                        data: {
+                            name: cleanCustName,
+                            address: cleanAddress,
+                            phone: cleanPhone,
+                            email: cleanEmail,
+                            status: 'ACTIVE',
+                        },
+                    });
+                }
+            }
+            const resolvedCustomerId = customer.id;
+            let mill = await tx.mill.findFirst({
+                where: {
+                    name: { equals: cleanMillName, mode: 'insensitive' },
+                    customer_id: resolvedCustomerId,
+                    deleted_at: null,
+                },
+            });
+            if (mill) {
+                const millUpdates = {};
+                if (cleanAddress && mill.address !== cleanAddress)
+                    millUpdates.address = cleanAddress;
+                if (cleanPhone && mill.phone !== cleanPhone)
+                    millUpdates.phone = cleanPhone;
+                if (cleanEmail && mill.email !== cleanEmail)
+                    millUpdates.email = cleanEmail;
+                if (cleanPlace && mill.place !== cleanPlace)
+                    millUpdates.place = cleanPlace;
+                if (cleanRefNo && mill.ref_no !== cleanRefNo)
+                    millUpdates.ref_no = cleanRefNo;
+                if (Object.keys(millUpdates).length > 0) {
+                    mill = await tx.mill.update({
+                        where: { id: mill.id },
+                        data: millUpdates,
+                    });
+                }
+            }
+            else {
+                mill = await tx.mill.create({
+                    data: {
+                        name: cleanMillName,
+                        customer_id: resolvedCustomerId,
+                        address: cleanAddress,
+                        phone: cleanPhone,
+                        place: cleanPlace,
+                        ref_no: cleanRefNo,
+                        email: cleanEmail,
+                        status: 'ACTIVE',
+                    },
+                });
+            }
+            const resolvedMillId = mill.id;
+            const orConditions = [
+                { ref_no: { equals: cleanRefNo, mode: 'insensitive' } }
+            ];
+            if (cleanFrameNo) {
+                orConditions.push({ frame_no: { equals: cleanFrameNo, mode: 'insensitive' } });
+            }
+            let masterMill = await tx.masterMill.findFirst({
+                where: {
+                    deleted_at: null,
+                    OR: orConditions,
+                },
+            });
+            if (masterMill) {
+                const masterMillUpdates = {};
+                if (cleanRefNo && masterMill.ref_no !== cleanRefNo)
+                    masterMillUpdates.ref_no = cleanRefNo;
+                if (cleanFrameNo && masterMill.frame_no !== cleanFrameNo)
+                    masterMillUpdates.frame_no = cleanFrameNo;
+                if (cleanMcModel && masterMill.mc_model !== cleanMcModel)
+                    masterMillUpdates.mc_model = cleanMcModel;
+                if (cleanAddress && masterMill.address !== cleanAddress)
+                    masterMillUpdates.address = cleanAddress;
+                if (cleanPlace && masterMill.place !== cleanPlace)
+                    masterMillUpdates.place = cleanPlace;
+                if (cleanState && masterMill.state !== cleanState)
+                    masterMillUpdates.state = cleanState;
+                if (cleanPhone && masterMill.phone_no !== cleanPhone)
+                    masterMillUpdates.phone_no = cleanPhone;
+                if (masterMill.mill_id !== resolvedMillId)
+                    masterMillUpdates.mill_id = resolvedMillId;
+                if (Object.keys(masterMillUpdates).length > 0) {
+                    masterMill = await tx.masterMill.update({
+                        where: { id: masterMill.id },
+                        data: masterMillUpdates,
+                    });
+                }
+            }
+            else {
+                const fallbackInvoiceNo = `INV-QR-${cleanRefNo}-${Date.now()}`;
+                masterMill = await tx.masterMill.create({
+                    data: {
+                        invoice_no: fallbackInvoiceNo,
+                        ref_no: cleanRefNo,
+                        frame_no: cleanFrameNo,
+                        mc_model: cleanMcModel,
+                        address: cleanAddress,
+                        place: cleanPlace,
+                        state: cleanState,
+                        phone_no: cleanPhone,
+                        mill_id: resolvedMillId,
+                        status: 'ACTIVE',
+                        type: 'Installation',
+                    },
+                });
+            }
+            return tx.masterMill.findUnique({
+                where: { id: masterMill.id },
+                include: {
+                    mill: {
+                        include: {
+                            customer: true,
+                        },
+                    },
+                },
+            });
+        });
+        await this.invalidateAllRelatedCaches(result?.mill?.customer_id ?? undefined, result?.mill_id ?? undefined, result?.id ?? undefined);
+        return result;
+    }
+    async invalidateAllRelatedCaches(customerId, millId, masterMillId) {
+        const promises = [
+            this.redis.delByPrefix('customers:list:'),
+            this.redis.delByPrefix('mills:list:'),
+            this.redis.delByPrefix('master_mills:list:'),
+        ];
+        if (customerId)
+            promises.push(this.redis.del(`customer:id:${customerId}`));
+        if (millId)
+            promises.push(this.redis.del(`mill:id:${millId}`));
+        if (masterMillId)
+            promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${masterMillId}`));
+        await Promise.all(promises);
+    }
     async invalidateCache(id) {
         const promises = [
             this.redis.delByPrefix(this.LIST_CACHE_KEY),

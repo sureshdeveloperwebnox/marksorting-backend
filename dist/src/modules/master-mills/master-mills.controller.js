@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const master_mills_service_1 = require("./master-mills.service");
 const create_master_mill_dto_1 = require("./dto/create-master-mill.dto");
 const update_master_mill_dto_1 = require("./dto/update-master-mill.dto");
+const quick_register_dto_1 = require("./dto/quick-register.dto");
 const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const description_helper_1 = require("../activity-logs/helpers/description.helper");
@@ -79,6 +80,9 @@ let MasterMillsController = class MasterMillsController {
     }
     create(dto) {
         return this.masterMillsService.create(dto);
+    }
+    quickRegister(dto) {
+        return this.masterMillsService.quickRegister(dto);
     }
     update(id, dto) {
         return this.masterMillsService.update(id, dto);
@@ -165,6 +169,33 @@ __decorate([
     __metadata("design:paramtypes", [create_master_mill_dto_1.CreateMasterMillDto]),
     __metadata("design:returntype", void 0)
 ], MasterMillsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Post)('quick-register'),
+    (0, swagger_1.ApiOperation)({ summary: 'Quick register Customer, Mill, and Master Mill' }),
+    (0, swagger_1.ApiBody)({ type: quick_register_dto_1.QuickRegisterDto }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Quick registration successful' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'master_mills',
+        description: (ctx) => {
+            const record = ctx.result;
+            const invoiceNo = record?.invoice_no || 'Unknown';
+            const details = [
+                record?.mill?.name ? `Mill: ${record.mill.name}` : null,
+                record?.mc_model ? `Model: ${record.mc_model}` : null,
+                record?.state ? `State: ${record.state}` : null,
+            ]
+                .filter(Boolean)
+                .join(', ');
+            return (0, description_helper_1.createDescription)('Master Mill (Quick Register)', invoiceNo, details || undefined, ctx.user.full_name);
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [quick_register_dto_1.QuickRegisterDto]),
+    __metadata("design:returntype", void 0)
+], MasterMillsController.prototype, "quickRegister", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update master mill record' }),

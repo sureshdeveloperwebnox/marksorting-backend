@@ -8,11 +8,12 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { MasterMillsService } from './master-mills.service';
 import { Prisma } from '@prisma/client';
 import { CreateMasterMillDto } from './dto/create-master-mill.dto';
 import { UpdateMasterMillDto } from './dto/update-master-mill.dto';
+import { QuickRegisterDto } from './dto/quick-register.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import {
@@ -140,6 +141,31 @@ export class MasterMillsController {
   })
   create(@Body() dto: CreateMasterMillDto) {
     return this.masterMillsService.create(dto);
+  }
+
+  @Post('quick-register')
+  @ApiOperation({ summary: 'Quick register Customer, Mill, and Master Mill' })
+  @ApiBody({ type: QuickRegisterDto })
+  @ApiResponse({ status: 201, description: 'Quick registration successful' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'master_mills',
+    description: (ctx) => {
+      const record = ctx.result;
+      const invoiceNo = record?.invoice_no || 'Unknown';
+      const details = [
+        record?.mill?.name ? `Mill: ${record.mill.name}` : null,
+        record?.mc_model ? `Model: ${record.mc_model}` : null,
+        record?.state ? `State: ${record.state}` : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription('Master Mill (Quick Register)', invoiceNo, details || undefined, ctx.user.full_name);
+    },
+  })
+  quickRegister(@Body() dto: QuickRegisterDto) {
+    return this.masterMillsService.quickRegister(dto);
   }
 
   @Put(':id')

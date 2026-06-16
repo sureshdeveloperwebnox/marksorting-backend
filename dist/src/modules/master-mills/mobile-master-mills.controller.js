@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const master_mills_service_1 = require("./master-mills.service");
+const quick_register_dto_1 = require("./dto/quick-register.dto");
 let MobileMasterMillsController = class MobileMasterMillsController {
     masterMillsService;
     constructor(masterMillsService) {
@@ -24,6 +25,9 @@ let MobileMasterMillsController = class MobileMasterMillsController {
     }
     findForPrefill(search, refNo, frameNo) {
         return this.masterMillsService.findForPrefill(search, refNo, frameNo);
+    }
+    quickRegister(dto) {
+        return this.masterMillsService.quickRegister(dto);
     }
 };
 exports.MobileMasterMillsController = MobileMasterMillsController;
@@ -60,6 +64,21 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileMasterMillsController.prototype, "findForPrefill", null);
+__decorate([
+    (0, common_1.Post)('quick-register'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Quick register Customer, Mill, and Master Mill',
+        description: 'Creates or updates Customer, Mill, and Master Mill record based on the payload, ensuring reuse where they already exist.',
+    }),
+    (0, swagger_1.ApiBody)({ type: quick_register_dto_1.QuickRegisterDto }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Quick registration successful' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [quick_register_dto_1.QuickRegisterDto]),
+    __metadata("design:returntype", void 0)
+], MobileMasterMillsController.prototype, "quickRegister", null);
 exports.MobileMasterMillsController = MobileMasterMillsController = __decorate([
     (0, swagger_1.ApiTags)('mobile / lookup'),
     (0, swagger_1.ApiBearerAuth)(),

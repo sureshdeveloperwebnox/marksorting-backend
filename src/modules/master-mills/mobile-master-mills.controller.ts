@@ -1,13 +1,15 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiBearerAuth,
   ApiQuery,
   ApiResponse,
+  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MasterMillsService } from './master-mills.service';
+import { QuickRegisterDto } from './dto/quick-register.dto';
 
 @ApiTags('mobile / lookup')
 @ApiBearerAuth()
@@ -47,5 +49,18 @@ export class MobileMasterMillsController {
     @Query('frame_no') frameNo?: string,
   ) {
     return this.masterMillsService.findForPrefill(search, refNo, frameNo);
+  }
+
+  @Post('quick-register')
+  @ApiOperation({
+    summary: '[Mobile] Quick register Customer, Mill, and Master Mill',
+    description: 'Creates or updates Customer, Mill, and Master Mill record based on the payload, ensuring reuse where they already exist.',
+  })
+  @ApiBody({ type: QuickRegisterDto })
+  @ApiResponse({ status: 201, description: 'Quick registration successful' })
+  @ApiResponse({ status: 400, description: 'Invalid input data' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  quickRegister(@Body() dto: QuickRegisterDto) {
+    return this.masterMillsService.quickRegister(dto);
   }
 }
