@@ -123,7 +123,9 @@ export class CreateExpenseDto {
       'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
   })
   @IsDateString()
-  visit_date: string;
+  @IsOptional()
+  visit_date?: string;
+
 
   @ApiProperty({
     example: '10:30',

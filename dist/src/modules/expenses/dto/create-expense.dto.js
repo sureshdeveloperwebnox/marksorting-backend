@@ -155,6 +155,7 @@ __decorate([
         description: 'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
     }),
     (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "visit_date", void 0);
 __decorate([

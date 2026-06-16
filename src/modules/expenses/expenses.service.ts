@@ -293,11 +293,6 @@ export class ExpensesService {
 
     // Validate role-based eligibility
     if (isServiceEngineer) {
-      if (!expenseData.service_report_id && !expenseData.installation_report_id) {
-        throw new BadRequestException(
-          'Service engineers must link the expense to either a service report or an installation report',
-        );
-      }
       if (expenseData.service_report_id && expenseData.installation_report_id) {
         throw new BadRequestException(
           'An expense can only be linked to a service report OR an installation report, not both',
@@ -320,6 +315,19 @@ export class ExpensesService {
         throw new ForbiddenException(
           'You are not eligible to create expenses because you have no assigned service or installation reports.',
         );
+      }
+    }
+
+    // Validate required fields when no report is linked
+    if (!expenseData.service_report_id && !expenseData.installation_report_id) {
+      if (!expenseData.visit_date) {
+        throw new BadRequestException('Visit date is required when no report is linked');
+      }
+      const expenseType = expenseData.expense_type || 'MILL';
+      if (expenseType === 'MILL') {
+        if (!expenseData.mill_id) {
+          throw new BadRequestException('Mill ID is required for MILL type expense when no report is linked');
+        }
       }
     }
 
@@ -552,15 +560,44 @@ export class ExpensesService {
       : existingExpense.installation_report_id;
 
     if (isServiceEngineer) {
-      if (!finalServiceReportId && !finalInstallationReportId) {
-        throw new BadRequestException(
-          'Service engineers must link the expense to either a service report or an installation report',
-        );
-      }
       if (finalServiceReportId && finalInstallationReportId) {
         throw new BadRequestException(
           'An expense can only be linked to a service report OR an installation report, not both',
         );
+      }
+
+      const reportsCount = await this.prisma.serviceReport.count({
+        where: {
+          deleted_at: null,
+          technicians: { some: { technician_id: user.userId } },
+        },
+      });
+      const installCount = await this.prisma.installationReport.count({
+        where: {
+          deleted_at: null,
+          technicians: { some: { technician_id: user.userId } },
+        },
+      });
+      if (reportsCount === 0 && installCount === 0) {
+        throw new ForbiddenException(
+          'You are not eligible to update expenses because you have no assigned service or installation reports.',
+        );
+      }
+    }
+
+    // If no report is linked, validate visit_date and mill_id (if MILL type)
+    if (!finalServiceReportId && !finalInstallationReportId) {
+      const targetVisitDate = expenseData.visit_date !== undefined ? expenseData.visit_date : existingExpense.visit_date;
+      if (!targetVisitDate) {
+        throw new BadRequestException('Visit date is required when no report is linked');
+      }
+
+      const targetExpenseType = expenseData.expense_type !== undefined ? expenseData.expense_type : existingExpense.expense_type;
+      if (targetExpenseType === 'MILL') {
+        const targetMillId = expenseData.mill_id !== undefined ? expenseData.mill_id : existingExpense.mill_id;
+        if (!targetMillId) {
+          throw new BadRequestException('Mill ID is required for MILL type expense when no report is linked');
+        }
       }
     }
 
@@ -694,6 +731,9 @@ export class ExpensesService {
         updateData.service_report_id = expenseData.service_report_id;
         updateData.mill_id = report.mill_id;
         updateData.place = report.place;
+        if (expenseData.visit_date === undefined) {
+          updateData.visit_date = report.visit_date;
+        }
       }
     }
 
@@ -716,6 +756,9 @@ export class ExpensesService {
         updateData.installation_report_id = expenseData.installation_report_id;
         updateData.mill_id = report.mill_id;
         updateData.place = report.place;
+        if (expenseData.visit_date === undefined) {
+          updateData.visit_date = report.visit_date;
+        }
       }
     }
 

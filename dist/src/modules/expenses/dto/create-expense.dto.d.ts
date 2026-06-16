@@ -11,7 +11,7 @@ export declare class CreateExpenseDto {
     customer_id?: string;
     mill_id?: string;
     place?: string;
-    visit_date: string;
+    visit_date?: string;
     visit_time?: string;
     expense_category_id?: string;
     expense_items?: CreateExpenseItemDto[];
