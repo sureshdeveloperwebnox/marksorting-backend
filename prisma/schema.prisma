@@ -506,18 +506,20 @@ model Expense {
   place               String?
   visit_date          DateTime
   visit_time          String
-  expense_category_id String
+  expense_category_id String?
   others              String?
-  description         String?
+  remarks             String?
   amount              Decimal             @default(0)
+  admin_amount        Decimal             @default(0)
   expense_images      String[]            @default([])
   status              String              @default("PENDING")
   created_at          DateTime            @default(now())
   updated_at          DateTime            @updatedAt
   deleted_at          DateTime?
   technicians         ExpenseTechnician[]
-  expenseCategory     ExpenseCategory     @relation(fields: [expense_category_id], references: [id])
+  expenseCategory     ExpenseCategory?    @relation(fields: [expense_category_id], references: [id])
   mill                Mill?               @relation(fields: [mill_id], references: [id])
+  expense_items       ExpenseItem[]
 
   @@map("expenses")
 }
@@ -533,16 +535,34 @@ model ExpenseTechnician {
 }
 
 model ExpenseCategory {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  description String?
-  status      String    @default("ACTIVE")
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-  deleted_at  DateTime?
-  expenses    Expense[]
+  id            String        @id @default(uuid())
+  name          String        @unique
+  description   String?
+  status        String        @default("ACTIVE")
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  deleted_at    DateTime?
+  expenses      Expense[]
+  expense_items ExpenseItem[]
 
   @@map("expense_categories")
+}
+
+model ExpenseItem {
+  id                  String          @id @default(uuid())
+  expense_id          String
+  expense_category_id String
+  amount              Decimal         @default(0)
+  admin_amount        Decimal         @default(0)
+  remarks             String?
+  expense_images      String[]        @default([])
+  created_at          DateTime        @default(now())
+  updated_at          DateTime        @updatedAt
+  expense             Expense         @relation(fields: [expense_id], references: [id], onDelete: Cascade)
+  expenseCategory     ExpenseCategory @relation(fields: [expense_category_id], references: [id])
+
+  @@unique([expense_id, expense_category_id])
+  @@map("expense_items")
 }
 
 model Material {

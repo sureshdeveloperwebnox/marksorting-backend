@@ -8,8 +8,60 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+export class CreateExpenseItemDto {
+  @ApiProperty({
+    example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    description: 'UUID of the expense category.',
+  })
+  @IsUUID()
+  @IsNotEmpty()
+  expense_category_id: string;
+
+  @ApiProperty({
+    example: 1500,
+    minimum: 0,
+    description: 'Amount for this category.',
+  })
+  @IsNumber()
+  @Min(0)
+  amount: number;
+
+  @ApiProperty({
+    example: 1500,
+    minimum: 0,
+    required: false,
+    description: 'Admin approved amount for this category.',
+  })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  admin_amount?: number;
+
+  @ApiProperty({
+    example: 'Details for this category',
+    required: false,
+    description: 'Remarks of the category expense.',
+  })
+  @IsString()
+  @IsOptional()
+  remarks?: string;
+
+  @ApiProperty({
+    example: ['receipts/2026/05/receipt-001.jpg'],
+    type: [String],
+    required: false,
+    description: 'Array of S3 object keys for uploaded receipt images.',
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  expense_images?: string[];
+}
 
 export class CreateExpenseDto {
   @ApiProperty({
@@ -75,13 +127,24 @@ export class CreateExpenseDto {
 
   @ApiProperty({
     example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+    required: false,
     description:
-      'UUID of the expense category (e.g. Travel, Food, Accommodation). **Required.** ' +
-      'The category must exist and not be soft-deleted — an invalid ID returns 400.',
+      'UUID of the expense category (e.g. Travel, Food, Accommodation). Optional if expense_items is provided.',
   })
   @IsUUID()
-  @IsNotEmpty()
-  expense_category_id: string;
+  @IsOptional()
+  expense_category_id?: string;
+
+  @ApiProperty({
+    type: [CreateExpenseItemDto],
+    required: false,
+    description: 'Breakdown of expense items for multi-category selection.',
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateExpenseItemDto)
+  @IsOptional()
+  expense_items?: CreateExpenseItemDto[];
 
   @ApiProperty({
     example: 'Taxi from railway station to mill site',
@@ -94,13 +157,13 @@ export class CreateExpenseDto {
   others?: string;
 
   @ApiProperty({
-    example: 'Detailed description of the expense',
+    example: 'Detailed remarks of the expense',
     required: false,
-    description: 'Detailed description of the expense',
+    description: 'Detailed remarks of the expense',
   })
   @IsString()
   @IsOptional()
-  description?: string;
+  remarks?: string;
 
   @ApiProperty({
     example: 1500,
@@ -113,6 +176,17 @@ export class CreateExpenseDto {
   @Min(0)
   @IsOptional()
   amount?: number;
+
+  @ApiProperty({
+    example: 1500,
+    required: false,
+    minimum: 0,
+    description: 'Admin approved expense amount in INR (₹).',
+  })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  admin_amount?: number;
 
   @ApiProperty({
     example: ['receipts/2026/05/receipt-001.jpg'],

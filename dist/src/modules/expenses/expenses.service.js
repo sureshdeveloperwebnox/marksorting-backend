@@ -26,6 +26,11 @@ const INCLUDE_SHAPE = {
         },
     },
     expenseCategory: { select: { id: true, name: true } },
+    expense_items: {
+        include: {
+            expenseCategory: { select: { id: true, name: true } },
+        },
+    },
     technicians: {
         include: { technician: { select: { id: true, full_name: true } } },
     },
@@ -47,7 +52,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
     mapExpenseImageUrls(expense) {
         if (!expense)
             return expense;
-        return {
+        const mappedExpense = {
             ...expense,
             expense_images: (expense.expense_images || []).map((key) => {
                 if (key.startsWith('http'))
@@ -55,6 +60,17 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 return this.s3Service.getFileUrl(key);
             }),
         };
+        if (mappedExpense.expense_items) {
+            mappedExpense.expense_items = mappedExpense.expense_items.map((item) => ({
+                ...item,
+                expense_images: (item.expense_images || []).map((key) => {
+                    if (key.startsWith('http'))
+                        return key;
+                    return this.s3Service.getFileUrl(key);
+                }),
+            }));
+        }
+        return mappedExpense;
     }
     mapExpensesImageUrls(expenses) {
         return expenses.map((expense) => this.mapExpenseImageUrls(expense));
@@ -78,7 +94,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 { expense_number: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { others: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
+                { remarks: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
                 {
                     expenseCategory: { name: { contains: search, mode: 'insensitive' } },
@@ -165,11 +181,25 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             !finalTechnicianIds.includes(user.userId)) {
             finalTechnicianIds.push(user.userId);
         }
-        const categoryExists = await this.prisma.expenseCategory.findFirst({
-            where: { id: expenseData.expense_category_id, deleted_at: null },
-        });
-        if (!categoryExists) {
-            throw new common_1.BadRequestException(`Expense category with ID "${expenseData.expense_category_id}" not found`);
+        if (expenseData.expense_items && expenseData.expense_items.length > 0) {
+            const categoryIds = expenseData.expense_items.map((it) => it.expense_category_id);
+            const categoriesCount = await this.prisma.expenseCategory.count({
+                where: { id: { in: categoryIds }, deleted_at: null },
+            });
+            if (categoriesCount !== new Set(categoryIds).size) {
+                throw new common_1.BadRequestException('One or more expense category IDs are invalid');
+            }
+        }
+        else if (expenseData.expense_category_id) {
+            const categoryExists = await this.prisma.expenseCategory.findFirst({
+                where: { id: expenseData.expense_category_id, deleted_at: null },
+            });
+            if (!categoryExists) {
+                throw new common_1.BadRequestException(`Expense category with ID "${expenseData.expense_category_id}" not found`);
+            }
+        }
+        else {
+            throw new common_1.BadRequestException('Expense category or items are required');
         }
         if (expenseData.mill_id) {
             const millExists = await this.prisma.mill.findFirst({
@@ -201,22 +231,59 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
             const seq = String(count + 1);
             const expense_number = `EXP-${dateStr}-${seq}`;
+            const items = expenseData.expense_items || [];
+            const firstItem = items[0];
+            const rootCategoryId = firstItem ? firstItem.expense_category_id : (expenseData.expense_category_id || null);
+            const totalAmount = items.length
+                ? items.reduce((sum, it) => sum + (it.amount || 0), 0)
+                : (expenseData.amount || 0);
+            const totalAdminAmount = items.length
+                ? items.reduce((sum, it) => sum + (it.admin_amount || 0), 0)
+                : (expenseData.admin_amount || 0);
+            const rootRemarks = firstItem ? (firstItem.remarks || expenseData.remarks || null) : (expenseData.remarks || null);
+            const rootImages = items.length
+                ? Array.from(new Set(items.flatMap((it) => it.expense_images || [])))
+                : (expenseData.expense_images || []);
             const created = await tx.expense.create({
                 data: {
                     expense_number,
                     visit_date: new Date(expenseData.visit_date),
                     visit_time: (expenseData.visit_time && expenseData.visit_time.trim()) ? expenseData.visit_time : (0, date_time_1.getAutoVisitTime)(),
-                    expense_category_id: expenseData.expense_category_id,
+                    expense_category_id: rootCategoryId,
                     place: expenseData.place || null,
                     others: expenseData.others || null,
-                    description: expenseData.description || null,
-                    amount: expenseData.amount ? String(expenseData.amount) : '0',
+                    remarks: rootRemarks,
+                    amount: String(totalAmount),
+                    admin_amount: String(totalAdminAmount),
                     status: expenseData.status || 'PENDING',
-                    expense_images: expenseData.expense_images || [],
+                    expense_images: rootImages,
                     mill_id: expenseData.mill_id || null,
                 },
-                include: INCLUDE_SHAPE,
             });
+            if (items.length > 0) {
+                await tx.expenseItem.createMany({
+                    data: items.map((it) => ({
+                        expense_id: created.id,
+                        expense_category_id: it.expense_category_id,
+                        amount: String(it.amount || 0),
+                        admin_amount: String(it.admin_amount || 0),
+                        remarks: it.remarks || null,
+                        expense_images: it.expense_images || [],
+                    })),
+                });
+            }
+            else if (rootCategoryId) {
+                await tx.expenseItem.create({
+                    data: {
+                        expense_id: created.id,
+                        expense_category_id: rootCategoryId,
+                        amount: String(expenseData.amount || 0),
+                        admin_amount: String(expenseData.admin_amount || 0),
+                        remarks: rootRemarks,
+                        expense_images: rootImages,
+                    },
+                });
+            }
             await tx.expenseTechnician.createMany({
                 data: finalTechnicianIds.map((tid) => ({
                     expense_id: created.id,
@@ -250,7 +317,9 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         const rawDto = dto;
         const { technician_ids, ...expenseData } = rawDto;
         delete expenseData.customer_id;
-        delete expenseData.technician_id;
+        if (technician_ids === undefined) {
+            delete rawDto.technician_id;
+        }
         let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
         if (rawDto.technician_id !== undefined) {
             if (finalTechnicianIds !== undefined) {
@@ -263,7 +332,16 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 finalTechnicianIds = rawDto.technician_id ? [rawDto.technician_id] : [];
             }
         }
-        if (expenseData.expense_category_id !== undefined) {
+        if (expenseData.expense_items && expenseData.expense_items.length > 0) {
+            const categoryIds = expenseData.expense_items.map((it) => it.expense_category_id);
+            const categoriesCount = await this.prisma.expenseCategory.count({
+                where: { id: { in: categoryIds }, deleted_at: null },
+            });
+            if (categoriesCount !== new Set(categoryIds).size) {
+                throw new common_1.BadRequestException('One or more expense category IDs are invalid');
+            }
+        }
+        else if (expenseData.expense_category_id !== undefined) {
             const categoryExists = await this.prisma.expenseCategory.findFirst({
                 where: { id: expenseData.expense_category_id, deleted_at: null },
             });
@@ -296,46 +374,115 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 ? expenseData.visit_time
                 : (0, date_time_1.getAutoVisitTime)();
         }
-        if (expenseData.expense_category_id !== undefined) {
-            updateData.expense_category_id = expenseData.expense_category_id;
-        }
         if (expenseData.place !== undefined) {
             updateData.place = expenseData.place || null;
         }
         if (expenseData.others !== undefined) {
             updateData.others = expenseData.others || null;
         }
-        if (expenseData.description !== undefined) {
-            updateData.description = expenseData.description || null;
-        }
-        if (expenseData.amount !== undefined) {
-            updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';
-        }
         if (expenseData.status !== undefined) {
             updateData.status = expenseData.status;
-        }
-        if (expenseData.expense_images !== undefined) {
-            updateData.expense_images = expenseData.expense_images;
         }
         if (expenseData.mill_id !== undefined) {
             updateData.mill_id = expenseData.mill_id || null;
         }
-        const expense = await this.prisma.expense.update({
-            where: { id },
-            data: updateData,
-            include: INCLUDE_SHAPE,
-        });
-        if (finalTechnicianIds !== undefined) {
-            await this.prisma.expenseTechnician.deleteMany({
-                where: { expense_id: id },
-            });
-            await this.prisma.expenseTechnician.createMany({
-                data: finalTechnicianIds.map((tid) => ({
-                    expense_id: id,
-                    technician_id: tid,
-                })),
-            });
+        const hasItems = expenseData.expense_items !== undefined;
+        if (hasItems) {
+            const items = expenseData.expense_items || [];
+            const firstItem = items[0];
+            updateData.expense_category_id = firstItem ? firstItem.expense_category_id : null;
+            const totalAmount = items.reduce((sum, it) => sum + (it.amount || 0), 0);
+            updateData.amount = String(totalAmount);
+            const totalAdminAmount = items.reduce((sum, it) => sum + (it.admin_amount || 0), 0);
+            updateData.admin_amount = String(totalAdminAmount);
+            updateData.remarks = firstItem ? (firstItem.remarks || null) : null;
+            updateData.expense_images = Array.from(new Set(items.flatMap((it) => it.expense_images || [])));
         }
+        else {
+            if (expenseData.expense_category_id !== undefined) {
+                updateData.expense_category_id = expenseData.expense_category_id;
+            }
+            if (expenseData.amount !== undefined) {
+                updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';
+            }
+            if (expenseData.admin_amount !== undefined) {
+                updateData.admin_amount = expenseData.admin_amount ? String(expenseData.admin_amount) : '0';
+            }
+            if (expenseData.remarks !== undefined) {
+                updateData.remarks = expenseData.remarks || null;
+            }
+            if (expenseData.expense_images !== undefined) {
+                updateData.expense_images = expenseData.expense_images;
+            }
+        }
+        const expense = await this.prisma.$transaction(async (tx) => {
+            const updated = await tx.expense.update({
+                where: { id },
+                data: updateData,
+                include: INCLUDE_SHAPE,
+            });
+            if (hasItems) {
+                await tx.expenseItem.deleteMany({
+                    where: { expense_id: id },
+                });
+                if (expenseData.expense_items.length > 0) {
+                    await tx.expenseItem.createMany({
+                        data: expenseData.expense_items.map((it) => ({
+                            expense_id: id,
+                            expense_category_id: it.expense_category_id,
+                            amount: String(it.amount || 0),
+                            admin_amount: String(it.admin_amount || 0),
+                            remarks: it.remarks || null,
+                            expense_images: it.expense_images || [],
+                        })),
+                    });
+                }
+            }
+            else {
+                const firstItem = await tx.expenseItem.findFirst({
+                    where: { expense_id: id },
+                });
+                if (firstItem) {
+                    await tx.expenseItem.update({
+                        where: { id: firstItem.id },
+                        data: {
+                            expense_category_id: updateData.expense_category_id !== undefined ? updateData.expense_category_id : undefined,
+                            amount: updateData.amount !== undefined ? updateData.amount : undefined,
+                            admin_amount: updateData.admin_amount !== undefined ? updateData.admin_amount : undefined,
+                            remarks: updateData.remarks !== undefined ? updateData.remarks : undefined,
+                            expense_images: updateData.expense_images !== undefined ? updateData.expense_images : undefined,
+                        },
+                    });
+                }
+                else if (updateData.expense_category_id) {
+                    await tx.expenseItem.create({
+                        data: {
+                            expense_id: id,
+                            expense_category_id: updateData.expense_category_id,
+                            amount: updateData.amount || '0',
+                            admin_amount: updateData.admin_amount || '0',
+                            remarks: updateData.remarks || null,
+                            expense_images: updateData.expense_images || [],
+                        },
+                    });
+                }
+            }
+            if (finalTechnicianIds !== undefined) {
+                await tx.expenseTechnician.deleteMany({
+                    where: { expense_id: id },
+                });
+                await tx.expenseTechnician.createMany({
+                    data: finalTechnicianIds.map((tid) => ({
+                        expense_id: id,
+                        technician_id: tid,
+                    })),
+                });
+            }
+            return tx.expense.findFirst({
+                where: { id },
+                include: INCLUDE_SHAPE,
+            });
+        });
         await this.invalidateCache(id);
         if (expense?.expense_images && expense.expense_images.length > 0) {
             const imageAclPromises = expense.expense_images.map((img) => this.s3Service.makeObjectPublic(img));

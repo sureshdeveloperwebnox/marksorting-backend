@@ -9,9 +9,71 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateExpenseDto = void 0;
+exports.CreateExpenseDto = exports.CreateExpenseItemDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
+class CreateExpenseItemDto {
+    expense_category_id;
+    amount;
+    admin_amount;
+    remarks;
+    expense_images;
+}
+exports.CreateExpenseItemDto = CreateExpenseItemDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+        description: 'UUID of the expense category.',
+    }),
+    (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateExpenseItemDto.prototype, "expense_category_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 1500,
+        minimum: 0,
+        description: 'Amount for this category.',
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], CreateExpenseItemDto.prototype, "amount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 1500,
+        minimum: 0,
+        required: false,
+        description: 'Admin approved amount for this category.',
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateExpenseItemDto.prototype, "admin_amount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Details for this category',
+        required: false,
+        description: 'Remarks of the category expense.',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseItemDto.prototype, "remarks", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['receipts/2026/05/receipt-001.jpg'],
+        type: [String],
+        required: false,
+        description: 'Array of S3 object keys for uploaded receipt images.',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateExpenseItemDto.prototype, "expense_images", void 0);
 class CreateExpenseDto {
     technician_ids;
     customer_id;
@@ -20,9 +82,11 @@ class CreateExpenseDto {
     visit_date;
     visit_time;
     expense_category_id;
+    expense_items;
     others;
-    description;
+    remarks;
     amount;
+    admin_amount;
     expense_images;
     status;
 }
@@ -92,13 +156,25 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-        description: 'UUID of the expense category (e.g. Travel, Food, Accommodation). **Required.** ' +
-            'The category must exist and not be soft-deleted — an invalid ID returns 400.',
+        required: false,
+        description: 'UUID of the expense category (e.g. Travel, Food, Accommodation). Optional if expense_items is provided.',
     }),
     (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "expense_category_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: [CreateExpenseItemDto],
+        required: false,
+        description: 'Breakdown of expense items for multi-category selection.',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => CreateExpenseItemDto),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateExpenseDto.prototype, "expense_items", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'Taxi from railway station to mill site',
@@ -111,14 +187,14 @@ __decorate([
 ], CreateExpenseDto.prototype, "others", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: 'Detailed description of the expense',
+        example: 'Detailed remarks of the expense',
         required: false,
-        description: 'Detailed description of the expense',
+        description: 'Detailed remarks of the expense',
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateExpenseDto.prototype, "description", void 0);
+], CreateExpenseDto.prototype, "remarks", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 1500,
@@ -131,6 +207,18 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateExpenseDto.prototype, "amount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 1500,
+        required: false,
+        minimum: 0,
+        description: 'Admin approved expense amount in INR (₹).',
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateExpenseDto.prototype, "admin_amount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: ['receipts/2026/05/receipt-001.jpg'],
