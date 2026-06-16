@@ -31,6 +31,13 @@ const INCLUDE_SHAPE = {
         include: { technician: { select: { id: true, full_name: true } } },
     },
 };
+const createDateBoundary = (dateValue, boundary) => {
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime()))
+        return null;
+    date.setUTCHours(boundary === 'start' ? 0 : 23, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 999);
+    return date;
+};
 let InstallationReportsService = class InstallationReportsService {
     prisma;
     redis;
@@ -94,14 +101,19 @@ let InstallationReportsService = class InstallationReportsService {
         if (dateFrom || dateTo) {
             where.visit_date = {};
             if (dateFrom) {
-                const fromDate = new Date(dateFrom);
-                fromDate.setUTCHours(0, 0, 0, 0);
-                where.visit_date.gte = fromDate;
+                const fromDate = createDateBoundary(dateFrom, 'start');
+                if (fromDate) {
+                    where.visit_date.gte = fromDate;
+                }
             }
-            if (dateTo) {
-                const toDate = new Date(dateTo);
-                toDate.setUTCHours(23, 59, 59, 999);
-                where.visit_date.lte = toDate;
+            if (dateTo || dateFrom) {
+                const toDate = createDateBoundary(dateTo || dateFrom, 'end');
+                if (toDate) {
+                    where.visit_date.lte = toDate;
+                }
+            }
+            if (Object.keys(where.visit_date).length === 0) {
+                delete where.visit_date;
             }
         }
         const [installationReports, total] = await Promise.all([
