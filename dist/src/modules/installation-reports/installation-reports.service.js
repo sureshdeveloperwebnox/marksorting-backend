@@ -32,10 +32,15 @@ const INCLUDE_SHAPE = {
     },
 };
 const createDateBoundary = (dateValue, boundary) => {
-    const date = new Date(dateValue);
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
+    if (!match)
+        return null;
+    const [, year, month, day] = match;
+    const kolkataOffsetMs = 5.5 * 60 * 60 * 1000;
+    const utcTime = Date.UTC(Number(year), Number(month) - 1, Number(day), boundary === 'start' ? 0 : 23, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 999);
+    const date = new Date(utcTime - kolkataOffsetMs);
     if (Number.isNaN(date.getTime()))
         return null;
-    date.setUTCHours(boundary === 'start' ? 0 : 23, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 59, boundary === 'start' ? 0 : 999);
     return date;
 };
 let InstallationReportsService = class InstallationReportsService {
