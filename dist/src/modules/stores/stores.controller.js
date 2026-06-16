@@ -27,7 +27,7 @@ let StoresController = class StoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel) {
+    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, dateFrom, dateTo) {
         const where = {};
         const engId = serviceEngineerId || serviceEngineerIdCamel;
         const custId = customerId || customerIdCamel;
@@ -84,6 +84,19 @@ let StoresController = class StoresController {
                     material_id: materialId,
                 },
             };
+        }
+        if (dateFrom || dateTo) {
+            where.created_at = {};
+            if (dateFrom) {
+                const [fy, fm, fd] = dateFrom.split('-').map(Number);
+                const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+                where.created_at.gte = from;
+            }
+            if (dateTo) {
+                const [ty, tm, td] = dateTo.split('-').map(Number);
+                const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+                where.created_at.lte = to;
+            }
         }
         return this.storesService.findAll({
             skip: skip ? parseInt(skip) : undefined,
@@ -167,6 +180,18 @@ __decorate([
         type: String,
         description: 'Filter by inflow/stock status',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateFrom',
+        required: false,
+        type: String,
+        description: 'Filter from created date (YYYY-MM-DD)',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateTo',
+        required: false,
+        type: String,
+        description: 'Filter to created date (YYYY-MM-DD)',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
@@ -182,8 +207,10 @@ __decorate([
     __param(12, (0, common_1.Query)('returnStatus')),
     __param(13, (0, common_1.Query)('inflow_status')),
     __param(14, (0, common_1.Query)('inflowStatus')),
+    __param(15, (0, common_1.Query)('dateFrom')),
+    __param(16, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "findAll", null);
 __decorate([

@@ -93,13 +93,13 @@ export class MasterMillsController {
     if (dateFrom || dateTo) {
       where.installation_date = {};
       if (dateFrom) {
-        const from = new Date(dateFrom);
-        from.setUTCHours(0, 0, 0, 0);
+        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+        const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
         (where.installation_date as any).gte = from;
       }
       if (dateTo) {
-        const to = new Date(dateTo);
-        to.setUTCHours(23, 59, 59, 999);
+        const [ty, tm, td] = dateTo.split('-').map(Number);
+        const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
         (where.installation_date as any).lte = to;
       }
     }

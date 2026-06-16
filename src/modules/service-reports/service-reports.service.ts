@@ -47,7 +47,7 @@ export class ServiceReportsService {
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async findAll(
     params: {
@@ -126,13 +126,13 @@ export class ServiceReportsService {
     if (dateFrom || dateTo) {
       where.visit_date = {};
       if (dateFrom) {
-        const fromDate = new Date(dateFrom);
-        fromDate.setUTCHours(0, 0, 0, 0);
+        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+        const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
         where.visit_date.gte = fromDate;
       }
       if (dateTo) {
-        const toDate = new Date(dateTo);
-        toDate.setUTCHours(23, 59, 59, 999);
+        const [ty, tm, td] = dateTo.split('-').map(Number);
+        const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
         where.visit_date.lte = toDate;
       }
     }

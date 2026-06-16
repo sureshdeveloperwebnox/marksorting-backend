@@ -36,7 +36,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('stores')
 export class StoresController {
-  constructor(private readonly storesService: StoresService) {}
+  constructor(private readonly storesService: StoresService) { }
 
   @Get()
   @ApiOperation({
@@ -98,6 +98,18 @@ export class StoresController {
     type: String,
     description: 'Filter by inflow/stock status',
   })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filter from created date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filter to created date (YYYY-MM-DD)',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -114,6 +126,8 @@ export class StoresController {
     @Query('returnStatus') returnStatusCamel?: string,
     @Query('inflow_status') inflowStatus?: string,
     @Query('inflowStatus') inflowStatusCamel?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
     const where: Prisma.StoreWhereInput = {};
 
@@ -176,6 +190,23 @@ export class StoresController {
           material_id: materialId,
         },
       };
+    }
+
+    if (dateFrom || dateTo) {
+      where.created_at = {};
+      if (dateFrom) {
+        // Use multi-arg constructor so the date is interpreted in the server's
+        // local timezone (matching how stored timestamps are represented),
+        // instead of new Date("yyyy-MM-dd") which parses as UTC midnight.
+        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+        const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+        (where.created_at as any).gte = from;
+      }
+      if (dateTo) {
+        const [ty, tm, td] = dateTo.split('-').map(Number);
+        const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+        (where.created_at as any).lte = to;
+      }
     }
 
     return this.storesService.findAll({
