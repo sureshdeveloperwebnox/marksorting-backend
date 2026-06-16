@@ -9,14 +9,6 @@ export declare class InstallationReportsController {
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateInstallationReportDto, req: any): Promise<({
-        mill: {
-            id: string;
-            name: string;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -26,6 +18,14 @@ export declare class InstallationReportsController {
             technician_id: string;
             installation_report_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -43,7 +43,6 @@ export declare class InstallationReportsController {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -59,6 +58,7 @@ export declare class InstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        authorized_person_phone: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;
@@ -72,14 +72,6 @@ export declare class InstallationReportsController {
     update(id: string, dto: UpdateInstallationReportDto, req: any): Promise<{
         before: any;
         after: {
-            mill: {
-                id: string;
-                name: string;
-                customer: {
-                    id: string;
-                    name: string;
-                } | null;
-            };
             technicians: ({
                 technician: {
                     id: string;
@@ -89,6 +81,14 @@ export declare class InstallationReportsController {
                 technician_id: string;
                 installation_report_id: string;
             })[];
+            mill: {
+                id: string;
+                name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
+            };
         } & {
             id: string;
             created_at: Date;
@@ -106,7 +106,6 @@ export declare class InstallationReportsController {
             machine_model: string;
             serial_or_frame_no: string;
             authorized_person: string;
-            authorized_person_phone: string | null;
             commodity: string | null;
             contamination: string | null;
             output_capacity_per_hour: string | null;
@@ -122,6 +121,7 @@ export declare class InstallationReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
+            authorized_person_phone: string | null;
             invoice_date: Date | null;
             invoice_number: string | null;
             warranty_start_date: Date | null;
@@ -134,14 +134,6 @@ export declare class InstallationReportsController {
         };
     }>;
     remove(id: string, req: any): Promise<{
-        mill: {
-            id: string;
-            name: string;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -151,6 +143,14 @@ export declare class InstallationReportsController {
             technician_id: string;
             installation_report_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -168,7 +168,6 @@ export declare class InstallationReportsController {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -184,6 +183,7 @@ export declare class InstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        authorized_person_phone: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;

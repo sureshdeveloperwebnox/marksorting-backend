@@ -24,9 +24,8 @@ export declare class MasterMillsService {
         status: string;
         mill_id: string | null;
         place: string | null;
-        ref_no: string | null;
         address: string | null;
-        type: string;
+        ref_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
         state: string | null;
@@ -43,6 +42,7 @@ export declare class MasterMillsService {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
+        type: string;
     }>;
     update(id: string, dto: UpdateMasterMillDto): Promise<{
         before: {
@@ -53,9 +53,8 @@ export declare class MasterMillsService {
             status: string;
             mill_id: string | null;
             place: string | null;
-            ref_no: string | null;
             address: string | null;
-            type: string;
+            ref_no: string | null;
             invoice_no: string;
             invoice_date: Date | null;
             state: string | null;
@@ -72,6 +71,7 @@ export declare class MasterMillsService {
             amc_particular: string | null;
             amc_closing_date: Date | null;
             amc_amount: Prisma.Decimal | null;
+            type: string;
         };
         after: {
             id: string;
@@ -81,9 +81,8 @@ export declare class MasterMillsService {
             status: string;
             mill_id: string | null;
             place: string | null;
-            ref_no: string | null;
             address: string | null;
-            type: string;
+            ref_no: string | null;
             invoice_no: string;
             invoice_date: Date | null;
             state: string | null;
@@ -100,6 +99,7 @@ export declare class MasterMillsService {
             amc_particular: string | null;
             amc_closing_date: Date | null;
             amc_amount: Prisma.Decimal | null;
+            type: string;
         };
     }>;
     remove(id: string): Promise<{
@@ -110,9 +110,8 @@ export declare class MasterMillsService {
         status: string;
         mill_id: string | null;
         place: string | null;
-        ref_no: string | null;
         address: string | null;
-        type: string;
+        ref_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
         state: string | null;
@@ -129,6 +128,7 @@ export declare class MasterMillsService {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
+        type: string;
     }>;
     getStats(): Promise<any>;
     private invalidateCache;

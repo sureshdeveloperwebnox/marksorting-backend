@@ -37,6 +37,15 @@ export declare class ExpensesService {
         userId: string;
         role: string;
     }): Promise<({
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            expense_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -45,15 +54,6 @@ export declare class ExpensesService {
                 name: string;
             } | null;
         } | null;
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            expense_id: string;
-        })[];
         expenseCategory: {
             id: string;
             name: string;
@@ -80,6 +80,15 @@ export declare class ExpensesService {
     }): Promise<{
         before: any;
         after: {
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                expense_id: string;
+                technician_id: string;
+            })[];
             mill: {
                 id: string;
                 name: string;
@@ -88,15 +97,6 @@ export declare class ExpensesService {
                     name: string;
                 } | null;
             } | null;
-            technicians: ({
-                technician: {
-                    id: string;
-                    full_name: string;
-                };
-            } & {
-                technician_id: string;
-                expense_id: string;
-            })[];
             expenseCategory: {
                 id: string;
                 name: string;
@@ -122,6 +122,15 @@ export declare class ExpensesService {
         userId: string;
         role: string;
     }): Promise<{
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            expense_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -130,15 +139,6 @@ export declare class ExpensesService {
                 name: string;
             } | null;
         } | null;
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            expense_id: string;
-        })[];
         expenseCategory: {
             id: string;
             name: string;

@@ -8,14 +8,6 @@ export declare class MobileInstallationReportsController {
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileInstallationReportDto, req: any): Promise<({
-        mill: {
-            id: string;
-            name: string;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -25,6 +17,14 @@ export declare class MobileInstallationReportsController {
             technician_id: string;
             installation_report_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -42,7 +42,6 @@ export declare class MobileInstallationReportsController {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -58,6 +57,7 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        authorized_person_phone: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;
@@ -71,14 +71,6 @@ export declare class MobileInstallationReportsController {
     update(id: string, dto: UpdateMobileInstallationReportDto, req: any): Promise<{
         before: any;
         after: {
-            mill: {
-                id: string;
-                name: string;
-                customer: {
-                    id: string;
-                    name: string;
-                } | null;
-            };
             technicians: ({
                 technician: {
                     id: string;
@@ -88,6 +80,14 @@ export declare class MobileInstallationReportsController {
                 technician_id: string;
                 installation_report_id: string;
             })[];
+            mill: {
+                id: string;
+                name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
+            };
         } & {
             id: string;
             created_at: Date;
@@ -105,7 +105,6 @@ export declare class MobileInstallationReportsController {
             machine_model: string;
             serial_or_frame_no: string;
             authorized_person: string;
-            authorized_person_phone: string | null;
             commodity: string | null;
             contamination: string | null;
             output_capacity_per_hour: string | null;
@@ -121,6 +120,7 @@ export declare class MobileInstallationReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
+            authorized_person_phone: string | null;
             invoice_date: Date | null;
             invoice_number: string | null;
             warranty_start_date: Date | null;
@@ -133,14 +133,6 @@ export declare class MobileInstallationReportsController {
         };
     }>;
     remove(id: string, req: any): Promise<{
-        mill: {
-            id: string;
-            name: string;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -150,6 +142,14 @@ export declare class MobileInstallationReportsController {
             technician_id: string;
             installation_report_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
     } & {
         id: string;
         created_at: Date;
@@ -167,7 +167,6 @@ export declare class MobileInstallationReportsController {
         machine_model: string;
         serial_or_frame_no: string;
         authorized_person: string;
-        authorized_person_phone: string | null;
         commodity: string | null;
         contamination: string | null;
         output_capacity_per_hour: string | null;
@@ -183,6 +182,7 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        authorized_person_phone: string | null;
         invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;

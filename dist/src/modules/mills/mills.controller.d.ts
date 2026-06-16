@@ -16,12 +16,12 @@ export declare class MillsController {
         phone: string | null;
         status: string;
         place: string | null;
+        address: string | null;
+        customer_id: string | null;
         ref_no: string | null;
+        city: string | null;
         phone_2: string | null;
         phone_3: string | null;
-        address: string | null;
-        city: string | null;
-        customer_id: string | null;
     }>;
     update(id: string, dto: UpdateMillDto): Promise<{
         before: {
@@ -34,12 +34,12 @@ export declare class MillsController {
             phone: string | null;
             status: string;
             place: string | null;
+            address: string | null;
+            customer_id: string | null;
             ref_no: string | null;
+            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
-            address: string | null;
-            city: string | null;
-            customer_id: string | null;
         };
         after: {
             id: string;
@@ -51,12 +51,12 @@ export declare class MillsController {
             phone: string | null;
             status: string;
             place: string | null;
+            address: string | null;
+            customer_id: string | null;
             ref_no: string | null;
+            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
-            address: string | null;
-            city: string | null;
-            customer_id: string | null;
         };
     }>;
     remove(id: string): Promise<{
@@ -69,11 +69,11 @@ export declare class MillsController {
         phone: string | null;
         status: string;
         place: string | null;
+        address: string | null;
+        customer_id: string | null;
         ref_no: string | null;
+        city: string | null;
         phone_2: string | null;
         phone_3: string | null;
-        address: string | null;
-        city: string | null;
-        customer_id: string | null;
     }>;
 }

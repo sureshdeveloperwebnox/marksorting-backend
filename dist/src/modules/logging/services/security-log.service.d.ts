@@ -69,8 +69,8 @@ export declare class SecurityLogService {
         correlation_id: string | null;
         session_id: string | null;
         created_at: Date;
-        event_type: string;
         severity: string;
+        event_type: string;
         email_attempted: string | null;
         auth_method: string | null;
         mfa_used: boolean;

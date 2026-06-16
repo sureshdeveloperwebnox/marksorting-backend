@@ -7,6 +7,15 @@ export declare class MobileExpensesController {
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileExpenseDto, req: any): Promise<({
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            expense_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -15,15 +24,6 @@ export declare class MobileExpensesController {
                 name: string;
             } | null;
         } | null;
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            expense_id: string;
-        })[];
         expenseCategory: {
             id: string;
             name: string;
@@ -47,6 +47,15 @@ export declare class MobileExpensesController {
     update(id: string, dto: UpdateMobileExpenseDto, req: any): Promise<{
         before: any;
         after: {
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                expense_id: string;
+                technician_id: string;
+            })[];
             mill: {
                 id: string;
                 name: string;
@@ -55,15 +64,6 @@ export declare class MobileExpensesController {
                     name: string;
                 } | null;
             } | null;
-            technicians: ({
-                technician: {
-                    id: string;
-                    full_name: string;
-                };
-            } & {
-                technician_id: string;
-                expense_id: string;
-            })[];
             expenseCategory: {
                 id: string;
                 name: string;
@@ -86,6 +86,15 @@ export declare class MobileExpensesController {
         };
     }>;
     remove(id: string, req: any): Promise<{
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            expense_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -94,15 +103,6 @@ export declare class MobileExpensesController {
                 name: string;
             } | null;
         } | null;
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            expense_id: string;
-        })[];
         expenseCategory: {
             id: string;
             name: string;
