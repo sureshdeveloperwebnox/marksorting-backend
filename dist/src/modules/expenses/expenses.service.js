@@ -249,7 +249,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                     expense_number,
                     expense_type: expenseData.expense_type || 'MILL',
                     visit_date: new Date(expenseData.visit_date),
-                    visit_time: (expenseData.visit_time && expenseData.visit_time.trim()) ? expenseData.visit_time : (0, date_time_1.getAutoVisitTime)(),
+                    visit_time: (0, date_time_1.getAutoVisitTime)(),
                     expense_category_id: rootCategoryId,
                     place: expenseData.place || null,
                     others: expenseData.others || null,
@@ -369,11 +369,6 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         const updateData = {};
         if (expenseData.visit_date !== undefined) {
             updateData.visit_date = new Date(expenseData.visit_date);
-        }
-        if (expenseData.visit_time !== undefined) {
-            updateData.visit_time = (expenseData.visit_time && expenseData.visit_time.trim())
-                ? expenseData.visit_time
-                : (0, date_time_1.getAutoVisitTime)();
         }
         if (expenseData.place !== undefined) {
             updateData.place = expenseData.place || null;
