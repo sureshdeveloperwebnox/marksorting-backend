@@ -27,7 +27,7 @@ import {
 @ApiBearerAuth()
 @Controller('master-mills')
 export class MasterMillsController {
-  constructor(private readonly masterMillsService: MasterMillsService) {}
+  constructor(private readonly masterMillsService: MasterMillsService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all master mill records with pagination and filtering' })
@@ -39,6 +39,8 @@ export class MasterMillsController {
   @ApiQuery({ name: 'all_warranty', required: false, type: String })
   @ApiQuery({ name: 'mill_id', required: false, type: String })
   @ApiQuery({ name: 'type', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String, description: 'Filter from installation date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'dateTo', required: false, type: String, description: 'Filter to installation date (YYYY-MM-DD)' })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -48,6 +50,8 @@ export class MasterMillsController {
     @Query('all_warranty') allWarranty?: string,
     @Query('mill_id') millId?: string,
     @Query('type') type?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
   ) {
     const where: Prisma.MasterMillWhereInput = {};
 
@@ -74,7 +78,7 @@ export class MasterMillsController {
 
     if (status) where.status = status;
     if (state) where.state = state;
-    
+
     if (allWarranty === 'Under AMC') {
       const now = new Date();
       where.amc_closing_date = { gte: now };
@@ -85,6 +89,20 @@ export class MasterMillsController {
 
     if (millId) where.mill_id = millId;
     if (type) where.type = type;
+
+    if (dateFrom || dateTo) {
+      where.installation_date = {};
+      if (dateFrom) {
+        const from = new Date(dateFrom);
+        from.setUTCHours(0, 0, 0, 0);
+        (where.installation_date as any).gte = from;
+      }
+      if (dateTo) {
+        const to = new Date(dateTo);
+        to.setUTCHours(23, 59, 59, 999);
+        (where.installation_date as any).lte = to;
+      }
+    }
 
     return this.masterMillsService.findAll({
       skip: skip ? parseInt(skip) : undefined,
