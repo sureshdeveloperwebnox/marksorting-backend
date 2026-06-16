@@ -121,8 +121,8 @@ export function renderInstallationReportTemplate(
     .filter(Boolean)
     .join(', ');
 
-  // Normalizer for Ground Earth Field option label
-  const formatGroundEarthField = (val: string) => {
+  // Normalizer for Running Channel Combination Value option label
+  const formatRunningChannelCombinationValue = (val: string) => {
     if (!val) return '-';
     const mapping: Record<string, string> = {
       PRIMARY: 'Primary',
@@ -384,7 +384,7 @@ export function renderInstallationReportTemplate(
               ${row('Air Drier Details', template.text(report.air_drier_details))}
               ${row('Ground Earth Provided', template.yesNo(report.ground_earth_provided))}
               ${row('Running Channel Combination', template.text(report.running_channel_combination))}
-              ${row('Running Channel Combination Type', formatGroundEarthField(report.ground_earth_field))}
+              ${row('Running Channel Combination Value', formatRunningChannelCombinationValue(report.running_channel_combination_value))}
               ${row('No.of Filters Installed', template.text(report.no_of_filters_installed))}
               ${row('Oil Filter Condition', template.text(report.oil_filter_condition))}
               ${row('Line Filter Condition', template.text(report.line_filter_condition))}

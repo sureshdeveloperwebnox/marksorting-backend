@@ -52,7 +52,7 @@ export declare class InstallationReportsController {
         air_drier_details: string | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
-        ground_earth_field: string | null;
+        running_channel_combination_value: string | null;
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
         line_filter_condition: string | null;
@@ -115,7 +115,7 @@ export declare class InstallationReportsController {
             air_drier_details: string | null;
             ground_earth_provided: boolean;
             running_channel_combination: number | null;
-            ground_earth_field: string | null;
+            running_channel_combination_value: string | null;
             no_of_filters_installed: number | null;
             oil_filter_condition: string | null;
             line_filter_condition: string | null;
@@ -177,7 +177,7 @@ export declare class InstallationReportsController {
         air_drier_details: string | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
-        ground_earth_field: string | null;
+        running_channel_combination_value: string | null;
         no_of_filters_installed: number | null;
         oil_filter_condition: string | null;
         line_filter_condition: string | null;

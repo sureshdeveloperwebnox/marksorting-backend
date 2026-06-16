@@ -40,7 +40,7 @@ class CreateInstallationReportDto {
     air_drier_details;
     ground_earth_provided;
     running_channel_combination;
-    ground_earth_field;
+    running_channel_combination_value;
     no_of_filters_installed;
     oil_filter_condition;
     line_filter_condition;
@@ -224,11 +224,12 @@ __decorate([
         example: 'PRIMARY',
         enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
         required: false,
+        description: 'Running Channel Combination Value',
     }),
     (0, class_validator_1.IsIn)(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT']),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateInstallationReportDto.prototype, "ground_earth_field", void 0);
+], CreateInstallationReportDto.prototype, "running_channel_combination_value", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 3, required: false }),
     (0, class_validator_1.IsInt)(),

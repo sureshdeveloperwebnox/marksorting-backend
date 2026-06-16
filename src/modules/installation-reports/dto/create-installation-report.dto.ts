@@ -158,10 +158,11 @@ export class CreateInstallationReportDto {
     example: 'PRIMARY',
     enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
     required: false,
+    description: 'Running Channel Combination Value',
   })
   @IsIn(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'])
   @IsOptional()
-  ground_earth_field?: string;
+  running_channel_combination_value?: string;
 
   @ApiProperty({ example: 3, required: false })
   @IsInt()
