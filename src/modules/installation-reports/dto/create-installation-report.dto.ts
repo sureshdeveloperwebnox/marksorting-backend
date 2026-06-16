@@ -152,7 +152,7 @@ export class CreateInstallationReportDto {
   @Min(1)
   @Max(12)
   @IsOptional()
-  ground_earth_value?: number;
+  running_channel_combination?: number;
 
   @ApiProperty({
     example: 'PRIMARY',

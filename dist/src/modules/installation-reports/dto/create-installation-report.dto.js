@@ -39,7 +39,7 @@ class CreateInstallationReportDto {
     compressor_details;
     air_drier_details;
     ground_earth_provided;
-    ground_earth_value;
+    running_channel_combination;
     ground_earth_field;
     no_of_filters_installed;
     oil_filter_condition;
@@ -218,7 +218,7 @@ __decorate([
     (0, class_validator_1.Max)(12),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
-], CreateInstallationReportDto.prototype, "ground_earth_value", void 0);
+], CreateInstallationReportDto.prototype, "running_channel_combination", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'PRIMARY',

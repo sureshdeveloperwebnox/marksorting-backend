@@ -468,7 +468,7 @@ model InstallationReport {
   compressor_details       String?
   air_drier_details        String?
   ground_earth_provided    Boolean                        @default(false)
-  ground_earth_value       Int?
+  running_channel_combination Int?
   ground_earth_field       String?
   no_of_filters_installed  Int?
   oil_filter_condition     String?

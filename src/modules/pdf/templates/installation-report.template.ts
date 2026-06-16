@@ -383,6 +383,7 @@ export function renderInstallationReportTemplate(
               ${row('Compressor Details', template.text(report.compressor_details))}
               ${row('Air Drier Details', template.text(report.air_drier_details))}
               ${row('Ground Earth Provided', template.yesNo(report.ground_earth_provided))}
+              ${row('Running Channel Combination', template.text(report.running_channel_combination))}
               ${row('Running Channel Combination Type', formatGroundEarthField(report.ground_earth_field))}
               ${row('No.of Filters Installed', template.text(report.no_of_filters_installed))}
               ${row('Oil Filter Condition', template.text(report.oil_filter_condition))}
