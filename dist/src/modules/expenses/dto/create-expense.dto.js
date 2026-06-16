@@ -21,6 +21,7 @@ class CreateExpenseDto {
     visit_time;
     expense_category_id;
     others;
+    description;
     amount;
     expense_images;
     status;
@@ -108,6 +109,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseDto.prototype, "others", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Detailed description of the expense',
+        required: false,
+        description: 'Detailed description of the expense',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 1500,

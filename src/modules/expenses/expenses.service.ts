@@ -102,6 +102,7 @@ export class ExpensesService {
         { expense_number: { contains: search, mode: 'insensitive' } },
         { place: { contains: search, mode: 'insensitive' } },
         { others: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
         { mill: { name: { contains: search, mode: 'insensitive' } } },
         {
           expenseCategory: { name: { contains: search, mode: 'insensitive' } },
@@ -273,6 +274,7 @@ export class ExpensesService {
           expense_category_id: expenseData.expense_category_id,
           place: expenseData.place || null,
           others: expenseData.others || null,
+          description: expenseData.description || null,
           amount: expenseData.amount ? String(expenseData.amount) : '0',
           status: expenseData.status || 'PENDING',
           expense_images: expenseData.expense_images || [],
@@ -398,6 +400,9 @@ export class ExpensesService {
     }
     if (expenseData.others !== undefined) {
       updateData.others = expenseData.others || null;
+    }
+    if (expenseData.description !== undefined) {
+      updateData.description = expenseData.description || null;
     }
     if (expenseData.amount !== undefined) {
       updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';

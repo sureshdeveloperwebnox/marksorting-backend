@@ -94,6 +94,15 @@ export class CreateExpenseDto {
   others?: string;
 
   @ApiProperty({
+    example: 'Detailed description of the expense',
+    required: false,
+    description: 'Detailed description of the expense',
+  })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @ApiProperty({
     example: 1500,
     required: false,
     minimum: 0,

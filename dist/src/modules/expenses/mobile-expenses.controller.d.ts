@@ -30,6 +30,7 @@ export declare class MobileExpensesController {
         };
     } & {
         id: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -70,6 +71,7 @@ export declare class MobileExpensesController {
             };
         } & {
             id: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
@@ -109,6 +111,7 @@ export declare class MobileExpensesController {
         };
     } & {
         id: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

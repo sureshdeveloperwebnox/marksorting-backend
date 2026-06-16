@@ -508,6 +508,7 @@ model Expense {
   visit_time          String
   expense_category_id String
   others              String?
+  description         String?
   amount              Decimal             @default(0)
   expense_images      String[]            @default([])
   status              String              @default("PENDING")
