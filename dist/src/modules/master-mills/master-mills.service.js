@@ -204,6 +204,52 @@ let MasterMillsService = class MasterMillsService {
         await this.redis.setJson(cacheKey, result, 120);
         return result;
     }
+    async findForPrefill(search, refNo, frameNo) {
+        if (!search && !refNo && !frameNo) {
+            return [];
+        }
+        const where = {
+            deleted_at: null,
+            status: 'ACTIVE',
+        };
+        if (search) {
+            const cleanSearch = search.trim();
+            where.OR = [
+                { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+                { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+            ];
+        }
+        else {
+            const orConditions = [];
+            if (refNo) {
+                orConditions.push({ ref_no: { contains: refNo.trim(), mode: 'insensitive' } });
+            }
+            if (frameNo) {
+                orConditions.push({ frame_no: { contains: frameNo.trim(), mode: 'insensitive' } });
+            }
+            if (orConditions.length > 0) {
+                where.OR = orConditions;
+            }
+        }
+        return this.prisma.masterMill.findMany({
+            where,
+            include: {
+                mill: {
+                    include: {
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                phone: true,
+                            },
+                        },
+                    },
+                },
+            },
+            take: 10,
+        });
+    }
     async invalidateCache(id) {
         const promises = [
             this.redis.delByPrefix(this.LIST_CACHE_KEY),

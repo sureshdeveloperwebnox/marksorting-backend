@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { MasterMillsService } from './master-mills.service';
 import { Prisma } from '@prisma/client';
 import { CreateMasterMillDto } from './dto/create-master-mill.dto';
@@ -23,6 +23,7 @@ import {
 } from '../activity-logs/helpers/description.helper';
 
 @ApiTags('master-mills')
+@ApiBearerAuth()
 @Controller('master-mills')
 export class MasterMillsController {
   constructor(private readonly masterMillsService: MasterMillsService) {}
@@ -96,6 +97,21 @@ export class MasterMillsController {
   @ApiOperation({ summary: 'Get master mill statistics' })
   getStats() {
     return this.masterMillsService.getStats();
+  }
+
+  @Get('prefill')
+  @ApiOperation({ summary: 'Search machine records by Ref No or Frame No for prefilling forms' })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'ref_no', required: false, type: String })
+  @ApiQuery({ name: 'frame_no', required: false, type: String })
+  @ApiResponse({ status: 200, description: 'Matched master mill records' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  findForPrefill(
+    @Query('search') search?: string,
+    @Query('ref_no') refNo?: string,
+    @Query('frame_no') frameNo?: string,
+  ) {
+    return this.masterMillsService.findForPrefill(search, refNo, frameNo);
   }
 
   @Get(':id')

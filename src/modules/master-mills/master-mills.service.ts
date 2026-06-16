@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -220,6 +220,55 @@ export class MasterMillsService {
     const result = { total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount };
     await this.redis.setJson(cacheKey, result, 120);
     return result;
+  }
+
+  async findForPrefill(search?: string, refNo?: string, frameNo?: string) {
+    if (!search && !refNo && !frameNo) {
+      return [];
+    }
+
+    const where: Prisma.MasterMillWhereInput = {
+      deleted_at: null,
+      status: 'ACTIVE',
+    };
+
+    if (search) {
+      const cleanSearch = search.trim();
+      where.OR = [
+        { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+        { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+      ];
+    } else {
+      const orConditions: Prisma.MasterMillWhereInput[] = [];
+      if (refNo) {
+        orConditions.push({ ref_no: { contains: refNo.trim(), mode: 'insensitive' } });
+      }
+      if (frameNo) {
+        orConditions.push({ frame_no: { contains: frameNo.trim(), mode: 'insensitive' } });
+      }
+      if (orConditions.length > 0) {
+        where.OR = orConditions;
+      }
+    }
+
+    return this.prisma.masterMill.findMany({
+      where,
+      include: {
+        mill: {
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              },
+            },
+          },
+        },
+      },
+      take: 10,
+    });
   }
 
   private async invalidateCache(id?: string) {

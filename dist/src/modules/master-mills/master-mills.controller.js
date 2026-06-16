@@ -71,6 +71,9 @@ let MasterMillsController = class MasterMillsController {
     getStats() {
         return this.masterMillsService.getStats();
     }
+    findForPrefill(search, refNo, frameNo) {
+        return this.masterMillsService.findForPrefill(search, refNo, frameNo);
+    }
     findOne(id) {
         return this.masterMillsService.findById(id);
     }
@@ -115,6 +118,21 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], MasterMillsController.prototype, "getStats", null);
+__decorate([
+    (0, common_1.Get)('prefill'),
+    (0, swagger_1.ApiOperation)({ summary: 'Search machine records by Ref No or Frame No for prefilling forms' }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'ref_no', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'frame_no', required: false, type: String }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Matched master mill records' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    __param(0, (0, common_1.Query)('search')),
+    __param(1, (0, common_1.Query)('ref_no')),
+    __param(2, (0, common_1.Query)('frame_no')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", void 0)
+], MasterMillsController.prototype, "findForPrefill", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get master mill record by ID' }),
@@ -191,6 +209,7 @@ __decorate([
 ], MasterMillsController.prototype, "remove", null);
 exports.MasterMillsController = MasterMillsController = __decorate([
     (0, swagger_1.ApiTags)('master-mills'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.Controller)('master-mills'),
     __metadata("design:paramtypes", [master_mills_service_1.MasterMillsService])
 ], MasterMillsController);
