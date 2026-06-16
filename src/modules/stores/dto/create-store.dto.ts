@@ -32,7 +32,7 @@ export class CreateStoreDto {
   @Min(1)
   quantity: number;
 
-  @ApiProperty({ example: 'Under Warranty' })
+  @ApiProperty({ example: 'Non Warranty' })
   @IsString()
   @IsNotEmpty()
   warranty_status: string;

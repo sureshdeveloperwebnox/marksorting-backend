@@ -167,7 +167,7 @@ export class MobileStoresController {
     name: 'warranty_status',
     required: false,
     type: String,
-    description: 'Filter by warranty status (Under Warranty, Expired)',
+    description: 'Filter by warranty status (Non Warranty, Supplementary, AMC With Spare, AMC Without Spare)',
   })
   @ApiResponse({ status: 200, description: 'Paginated list of store records' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })

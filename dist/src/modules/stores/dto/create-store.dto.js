@@ -52,7 +52,7 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateStoreDto.prototype, "quantity", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Under Warranty' }),
+    (0, swagger_1.ApiProperty)({ example: 'Non Warranty' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)

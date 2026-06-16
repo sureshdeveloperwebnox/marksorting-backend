@@ -188,7 +188,7 @@ __decorate([
         name: 'warranty_status',
         required: false,
         type: String,
-        description: 'Filter by warranty status (Under Warranty, Expired)',
+        description: 'Filter by warranty status (Non Warranty, Supplementary, AMC With Spare, AMC Without Spare)',
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of store records' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
