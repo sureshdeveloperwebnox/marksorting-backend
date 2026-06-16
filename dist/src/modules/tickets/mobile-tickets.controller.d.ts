@@ -21,8 +21,8 @@ export declare class MobileTicketsController {
             id: string;
             full_name: string;
             email: string | null;
-            phone: string | null;
             status: string;
+            phone: string | null;
         } | null;
     } & {
         id: string;
@@ -30,8 +30,8 @@ export declare class MobileTicketsController {
         description: string;
         created_at: Date;
         updated_at: Date;
-        status: string;
         mill_id: string | null;
+        status: string;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;
@@ -55,8 +55,8 @@ export declare class MobileTicketsController {
                 id: string;
                 full_name: string;
                 email: string | null;
-                phone: string | null;
                 status: string;
+                phone: string | null;
             } | null;
         } & {
             id: string;
@@ -64,8 +64,8 @@ export declare class MobileTicketsController {
             description: string;
             created_at: Date;
             updated_at: Date;
-            status: string;
             mill_id: string | null;
+            status: string;
             customer_id: string | null;
             ticket_number: string | null;
             service_engineer_id: string | null;
@@ -88,8 +88,8 @@ export declare class MobileTicketsController {
             id: string;
             full_name: string;
             email: string | null;
-            phone: string | null;
             status: string;
+            phone: string | null;
         } | null;
     } & {
         id: string;
@@ -97,8 +97,8 @@ export declare class MobileTicketsController {
         description: string;
         created_at: Date;
         updated_at: Date;
-        status: string;
         mill_id: string | null;
+        status: string;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;

@@ -99,10 +99,14 @@ let ServiceReportsService = class ServiceReportsService {
         if (dateFrom || dateTo) {
             where.visit_date = {};
             if (dateFrom) {
-                where.visit_date.gte = new Date(dateFrom);
+                const fromDate = new Date(dateFrom);
+                fromDate.setUTCHours(0, 0, 0, 0);
+                where.visit_date.gte = fromDate;
             }
             if (dateTo) {
-                where.visit_date.lte = new Date(dateTo);
+                const toDate = new Date(dateTo);
+                toDate.setUTCHours(23, 59, 59, 999);
+                where.visit_date.lte = toDate;
             }
         }
         const [serviceReports, total] = await Promise.all([

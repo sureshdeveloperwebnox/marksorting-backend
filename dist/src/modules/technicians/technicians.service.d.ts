@@ -24,8 +24,8 @@ export declare class TechniciansService implements OnApplicationBootstrap {
         email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
-        phone: string | null;
         status: string;
+        phone: string | null;
     }>;
     private invalidateCache;
 }

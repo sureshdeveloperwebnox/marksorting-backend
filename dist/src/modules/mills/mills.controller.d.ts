@@ -13,9 +13,9 @@ export declare class MillsController {
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
-        phone: string | null;
-        status: string;
         place: string | null;
+        status: string;
+        phone: string | null;
         address: string | null;
         customer_id: string | null;
         ref_no: string | null;
@@ -31,9 +31,9 @@ export declare class MillsController {
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            phone: string | null;
-            status: string;
             place: string | null;
+            status: string;
+            phone: string | null;
             address: string | null;
             customer_id: string | null;
             ref_no: string | null;
@@ -48,9 +48,9 @@ export declare class MillsController {
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            phone: string | null;
-            status: string;
             place: string | null;
+            status: string;
+            phone: string | null;
             address: string | null;
             customer_id: string | null;
             ref_no: string | null;
@@ -66,9 +66,9 @@ export declare class MillsController {
         updated_at: Date;
         deleted_at: Date | null;
         name: string;
-        phone: string | null;
-        status: string;
         place: string | null;
+        status: string;
+        phone: string | null;
         address: string | null;
         customer_id: string | null;
         ref_no: string | null;

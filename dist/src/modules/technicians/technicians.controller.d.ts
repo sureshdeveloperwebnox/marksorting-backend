@@ -11,7 +11,7 @@ export declare class TechniciansController {
         email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
-        phone: string | null;
         status: string;
+        phone: string | null;
     }>;
 }

@@ -60,7 +60,6 @@ export declare class InstallationReportsService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
         report_number: string;
         mill_id: string;
         place: string;
@@ -87,6 +86,7 @@ export declare class InstallationReportsService {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
         invoice_date: Date | null;
@@ -127,7 +127,6 @@ export declare class InstallationReportsService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            status: string;
             report_number: string;
             mill_id: string;
             place: string;
@@ -154,6 +153,7 @@ export declare class InstallationReportsService {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
+            status: string;
             authorized_person_phone: string | null;
             expense_id: string | null;
             invoice_date: Date | null;
@@ -193,7 +193,6 @@ export declare class InstallationReportsService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
         report_number: string;
         mill_id: string;
         place: string;
@@ -220,6 +219,7 @@ export declare class InstallationReportsService {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
         invoice_date: Date | null;

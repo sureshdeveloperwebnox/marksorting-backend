@@ -76,11 +76,11 @@ export declare class MobileExpensesController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
+        status: string;
         expense_number: string;
         expense_type: string;
         report_type: string;
@@ -146,11 +146,11 @@ export declare class MobileExpensesController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            status: string;
             mill_id: string | null;
             place: string | null;
             visit_date: Date;
             visit_time: string;
+            status: string;
             expense_number: string;
             expense_type: string;
             report_type: string;
@@ -215,11 +215,11 @@ export declare class MobileExpensesController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
+        status: string;
         expense_number: string;
         expense_type: string;
         report_type: string;
