@@ -502,6 +502,7 @@ model InstallationReportTechnician {
 model Expense {
   id                  String              @id @default(uuid())
   expense_number      String              @unique
+  expense_type        String              @default("MILL")
   mill_id             String?
   place               String?
   visit_date          DateTime

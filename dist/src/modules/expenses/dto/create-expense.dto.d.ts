@@ -6,6 +6,7 @@ export declare class CreateExpenseItemDto {
     expense_images?: string[];
 }
 export declare class CreateExpenseDto {
+    expense_type?: string;
     technician_ids?: string[];
     customer_id?: string;
     mill_id?: string;

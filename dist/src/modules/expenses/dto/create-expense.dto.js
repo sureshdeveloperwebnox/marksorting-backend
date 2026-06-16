@@ -75,6 +75,7 @@ __decorate([
     __metadata("design:type", Array)
 ], CreateExpenseItemDto.prototype, "expense_images", void 0);
 class CreateExpenseDto {
+    expense_type;
     technician_ids;
     customer_id;
     mill_id;
@@ -91,6 +92,17 @@ class CreateExpenseDto {
     status;
 }
 exports.CreateExpenseDto = CreateExpenseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'MILL',
+        enum: ['MILL', 'OTHERS'],
+        required: false,
+        description: 'Expense type: MILL or OTHERS',
+    }),
+    (0, class_validator_1.IsIn)(['MILL', 'OTHERS']),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseDto.prototype, "expense_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],

@@ -313,6 +313,7 @@ export class ExpensesService {
       const created = await tx.expense.create({
         data: {
           expense_number,
+          expense_type: expenseData.expense_type || 'MILL',
           visit_date: new Date(expenseData.visit_date),
           visit_time: (expenseData.visit_time && expenseData.visit_time.trim()) ? expenseData.visit_time : getAutoVisitTime(),
           expense_category_id: rootCategoryId,
@@ -483,6 +484,9 @@ export class ExpensesService {
     }
     if (expenseData.mill_id !== undefined) {
       updateData.mill_id = expenseData.mill_id || null;
+    }
+    if (expenseData.expense_type !== undefined) {
+      updateData.expense_type = expenseData.expense_type;
     }
 
     // Calculate aggregated items fields

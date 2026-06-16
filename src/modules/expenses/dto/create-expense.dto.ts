@@ -65,6 +65,16 @@ export class CreateExpenseItemDto {
 
 export class CreateExpenseDto {
   @ApiProperty({
+    example: 'MILL',
+    enum: ['MILL', 'OTHERS'],
+    required: false,
+    description: 'Expense type: MILL or OTHERS',
+  })
+  @IsIn(['MILL', 'OTHERS'])
+  @IsOptional()
+  expense_type?: string;
+
+  @ApiProperty({
     example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
     type: [String],
     required: false,
