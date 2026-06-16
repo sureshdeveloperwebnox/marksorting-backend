@@ -120,7 +120,7 @@ export class CreateExpenseDto {
   @ApiProperty({
     example: '2026-05-26',
     description:
-      'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
+      'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). Required if no report is linked, optional if a report is linked.',
   })
   @IsDateString()
   @IsOptional()

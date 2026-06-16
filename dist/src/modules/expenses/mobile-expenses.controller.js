@@ -274,6 +274,9 @@ __decorate([
             '**Auto-assignment rule:** When a `Service Engineer` submits this request, their ID is automatically ' +
             'appended to `technician_ids` even if the field is omitted from the payload. ' +
             'You may therefore send a minimal body without `technician_ids` from the mobile app.\n\n' +
+            '**Report Linkage:** Report linkage is optional. If `service_report_id` or `installation_report_id` is linked, ' +
+            'fields like `mill_id` and `place` are auto-populated from the report, and `visit_date` defaults to the report\'s date if omitted.\n\n' +
+            '**Required fields if unlinked:** If no report is linked, `visit_date` is required, and `mill_id` is required if `expense_type` is `MILL`.\n\n' +
             '**Validation:** All referenced IDs (`expense_category_id`, `mill_id`, `technician_ids`) are ' +
             'verified to exist in the database before creation. Invalid IDs return **400**.',
     }),
@@ -334,6 +337,7 @@ __decorate([
         summary: '[Mobile] Update an existing expense',
         description: 'Performs a **partial update** — only fields present in the request body are changed.\n\n' +
             'When `technician_ids` is provided, the existing technician assignment list is **fully replaced**.\n\n' +
+            'If the update unlinks the reports (setting them to null) or no report remains linked, a valid `visit_date` must remain and `mill_id` must remain if the type is `MILL`.\n\n' +
             'Service Engineers receive **403** if they are not assigned to the expense.',
     }),
     (0, swagger_1.ApiParam)({

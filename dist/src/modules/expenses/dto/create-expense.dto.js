@@ -152,7 +152,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: '2026-05-26',
-        description: 'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). **Required.**',
+        description: 'Date of the site visit — ISO 8601 date string (YYYY-MM-DD). Required if no report is linked, optional if a report is linked.',
     }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
