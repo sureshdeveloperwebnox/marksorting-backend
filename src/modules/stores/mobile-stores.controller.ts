@@ -1,7 +1,9 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
+  Delete,
   Param,
   Body,
   Query,
@@ -19,9 +21,16 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { StoresService } from './stores.service';
 import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
+import { MobileCreateStoreDto } from './dto/mobile-create-store.dto';
+import { MobileUpdateStoreDto } from './dto/mobile-update-store.dto';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
-import { buildDiffSummary } from '../activity-logs/helpers/description.helper';
+import {
+  createDescription,
+  updateDescription,
+  deleteDescription,
+  buildDiffSummary,
+} from '../activity-logs/helpers/description.helper';
 
 @ApiTags('mobile / store-returns')
 @ApiBearerAuth()
@@ -283,5 +292,114 @@ export class MobileStoresController {
     @Request() req: any,
   ) {
     return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+  }
+
+  @Post()
+  @ApiOperation({
+    summary: '[Mobile] Create a new store record for the logged-in engineer',
+    description: 'Registers a new store record under the logged-in technician.',
+  })
+  @ApiBody({ type: MobileCreateStoreDto })
+  @ApiResponse({ status: 201, description: 'Store record created successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @LogActivity({
+    action: ActivityAction.CREATE,
+    entityType: 'stores',
+    description: (ctx) => {
+      const store = ctx.result;
+      const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
+      const details = [
+        store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+        store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
+      ]
+        .filter(Boolean)
+        .join(', ');
+      return createDescription(
+        'Store Record',
+        `Frame ${frame}`,
+        details || undefined,
+        ctx.user.full_name,
+      );
+    },
+  })
+  create(@Body() dto: MobileCreateStoreDto, @Request() req: any) {
+    return this.storesService.create({
+      ...dto,
+      service_engineer_id: req.user.userId,
+    });
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: '[Mobile] Get store record by ID',
+    description: 'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+  })
+  @ApiResponse({ status: 200, description: 'Store record found' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden from accessing other engineers records' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.storesService.findByIdAndTechnician(id, req.user.userId);
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '[Mobile] Update store record by ID',
+    description: 'Updates a store record if it belongs to the logged-in technician.',
+  })
+  @ApiBody({ type: MobileUpdateStoreDto })
+  @ApiResponse({ status: 200, description: 'Store record updated successfully' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden from updating other engineers records' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'stores',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      return diff
+        ? `${who} Store Record "Frame ${frame}" — ${diff}`
+        : `${who} Store Record "Frame ${frame}" (no changes detected)`;
+    },
+  })
+  update(
+    @Param('id') id: string,
+    @Body() dto: MobileUpdateStoreDto,
+    @Request() req: any,
+  ) {
+    return this.storesService.updateByTechnician(id, req.user.userId, dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({
+    summary: '[Mobile] Delete store record by ID',
+    description: 'Soft deletes a store record if it belongs to the logged-in technician.',
+  })
+  @ApiResponse({ status: 200, description: 'Store record deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({ status: 403, description: 'Forbidden from deleting other engineers records' })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
+  @LogActivity({
+    action: ActivityAction.DELETE,
+    entityType: 'stores',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const store = ctx.result;
+      const frame = store?.frame_number || ctx.params.id;
+      return deleteDescription(
+        'Store Record',
+        `Frame ${frame}`,
+        ctx.user.full_name,
+      );
+    },
+  })
+  remove(@Param('id') id: string, @Request() req: any) {
+    return this.storesService.removeByTechnician(id, req.user.userId);
   }
 }

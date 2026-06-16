@@ -351,6 +351,53 @@ export class StoresService {
     return { before: existing, after: store };
   }
 
+  async findByIdAndTechnician(id: string, technicianId: string) {
+    const store = await this.findById(id);
+    if (!store) {
+      throw new NotFoundException('Store record not found');
+    }
+    if (store.service_engineer_id !== technicianId) {
+      throw new ForbiddenException(
+        'You are not authorized to access this store record',
+      );
+    }
+    return store;
+  }
+
+  async updateByTechnician(
+    id: string,
+    technicianId: string,
+    dto: UpdateStoreDto,
+  ) {
+    const existing = await this.prisma.store.findFirst({
+      where: { id, deleted_at: null },
+    });
+    if (!existing) {
+      throw new NotFoundException('Store record not found');
+    }
+    if (existing.service_engineer_id !== technicianId) {
+      throw new ForbiddenException(
+        'You are not authorized to update this store record',
+      );
+    }
+    return this.update(id, dto);
+  }
+
+  async removeByTechnician(id: string, technicianId: string) {
+    const existing = await this.prisma.store.findFirst({
+      where: { id, deleted_at: null },
+    });
+    if (!existing) {
+      throw new NotFoundException('Store record not found');
+    }
+    if (existing.service_engineer_id !== technicianId) {
+      throw new ForbiddenException(
+        'You are not authorized to delete this store record',
+      );
+    }
+    return this.remove(id);
+  }
+
   private async invalidateCache(id?: string) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),

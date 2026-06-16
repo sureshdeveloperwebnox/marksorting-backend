@@ -10,6 +10,7 @@ exports.MaterialsModule = void 0;
 const common_1 = require("@nestjs/common");
 const materials_service_1 = require("./materials.service");
 const materials_controller_1 = require("./materials.controller");
+const mobile_materials_controller_1 = require("./mobile-materials.controller");
 const prisma_module_1 = require("../../prisma/prisma.module");
 const redis_module_1 = require("../../redis/redis.module");
 let MaterialsModule = class MaterialsModule {
@@ -18,7 +19,7 @@ exports.MaterialsModule = MaterialsModule;
 exports.MaterialsModule = MaterialsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule],
-        controllers: [materials_controller_1.MaterialsController],
+        controllers: [materials_controller_1.MaterialsController, mobile_materials_controller_1.MobileMaterialsController],
         providers: [materials_service_1.MaterialsService],
         exports: [materials_service_1.MaterialsService],
     })

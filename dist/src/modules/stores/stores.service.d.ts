@@ -256,5 +256,74 @@ export declare class StoresService {
             provider_name: string | null;
         };
     }>;
+    findByIdAndTechnician(id: string, technicianId: string): Promise<any>;
+    updateByTechnician(id: string, technicianId: string, dto: UpdateStoreDto): Promise<{
+        before: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+        after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                store_id: string;
+                material_id: string;
+            })[];
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+    }>;
+    removeByTechnician(id: string, technicianId: string): Promise<{
+        id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        customer_id: string;
+        service_engineer_id: string;
+        invoice_number: string | null;
+        quantity: number;
+        warranty_status: string;
+        frame_number: string;
+        return_status: string;
+        inflow_status: string;
+        barcode: string | null;
+        provider_name: string | null;
+    }>;
     private invalidateCache;
 }

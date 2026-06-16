@@ -18,6 +18,8 @@ const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const stores_service_1 = require("./stores.service");
 const update_store_return_dto_1 = require("./dto/update-store-return.dto");
+const mobile_create_store_dto_1 = require("./dto/mobile-create-store.dto");
+const mobile_update_store_dto_1 = require("./dto/mobile-update-store.dto");
 const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const description_helper_1 = require("../activity-logs/helpers/description.helper");
@@ -145,6 +147,21 @@ let MobileStoresController = class MobileStoresController {
     }
     submitReturnAlias(id, dto, req) {
         return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    }
+    create(dto, req) {
+        return this.storesService.create({
+            ...dto,
+            service_engineer_id: req.user.userId,
+        });
+    }
+    findOne(id, req) {
+        return this.storesService.findByIdAndTechnician(id, req.user.userId);
+    }
+    update(id, dto, req) {
+        return this.storesService.updateByTechnician(id, req.user.userId, dto);
+    }
+    remove(id, req) {
+        return this.storesService.removeByTechnician(id, req.user.userId);
     }
 };
 exports.MobileStoresController = MobileStoresController;
@@ -292,6 +309,112 @@ __decorate([
     __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
     __metadata("design:returntype", void 0)
 ], MobileStoresController.prototype, "submitReturnAlias", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Create a new store record for the logged-in engineer',
+        description: 'Registers a new store record under the logged-in technician.',
+    }),
+    (0, swagger_1.ApiBody)({ type: mobile_create_store_dto_1.MobileCreateStoreDto }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Store record created successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.CREATE,
+        entityType: 'stores',
+        description: (ctx) => {
+            const store = ctx.result;
+            const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
+            const details = [
+                store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+                store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
+            ]
+                .filter(Boolean)
+                .join(', ');
+            return (0, description_helper_1.createDescription)('Store Record', `Frame ${frame}`, details || undefined, ctx.user.full_name);
+        },
+    }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [mobile_create_store_dto_1.MobileCreateStoreDto, Object]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Get store record by ID',
+        description: 'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record found' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from accessing other engineers records' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Update store record by ID',
+        description: 'Updates a store record if it belongs to the logged-in technician.',
+    }),
+    (0, swagger_1.ApiBody)({ type: mobile_update_store_dto_1.MobileUpdateStoreDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record updated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from updating other engineers records' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'stores',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const frame = after?.frame_number || before?.frame_number || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            return diff
+                ? `${who} Store Record "Frame ${frame}" — ${diff}`
+                : `${who} Store Record "Frame ${frame}" (no changes detected)`;
+        },
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, mobile_update_store_dto_1.MobileUpdateStoreDto, Object]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Delete store record by ID',
+        description: 'Soft deletes a store record if it belongs to the logged-in technician.',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record deleted successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from deleting other engineers records' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.DELETE,
+        entityType: 'stores',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const store = ctx.result;
+            const frame = store?.frame_number || ctx.params.id;
+            return (0, description_helper_1.deleteDescription)('Store Record', `Frame ${frame}`, ctx.user.full_name);
+        },
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "remove", null);
 exports.MobileStoresController = MobileStoresController = __decorate([
     (0, swagger_1.ApiTags)('mobile / stores'),
     (0, swagger_1.ApiBearerAuth)(),
