@@ -4,6 +4,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { seedPermissions } from './seed-permissions';
 import { seedCustomers } from './seed-customers';
+import { seedMasterMills } from './seed-master-mills';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -12,6 +13,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   await seedPermissions();
   await seedCustomers(prisma);
+  await seedMasterMills(prisma);
   console.log('Seed data created successfully');
 }
 
