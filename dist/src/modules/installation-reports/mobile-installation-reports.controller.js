@@ -24,14 +24,14 @@ let MobileInstallationReportsController = class MobileInstallationReportsControl
     constructor(installationReportsService) {
         this.installationReportsService = installationReportsService;
     }
-    findAll(req, skip, take, search, status, dateFrom, dateTo) {
+    findAll(req, skip, take, search, status, dateFrom, dateTo, startDate, endDate) {
         return this.installationReportsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
             status,
-            dateFrom,
-            dateTo,
+            dateFrom: dateFrom || startDate,
+            dateTo: dateTo || endDate,
         }, req.user);
     }
     findOne(id, req) {
@@ -98,6 +98,18 @@ __decorate([
         type: String,
         description: 'Visit date to (YYYY-MM-DD)',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'startDate',
+        required: false,
+        type: String,
+        description: 'Alias/fallback for dateFrom — ISO date string `YYYY-MM-DD`',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'endDate',
+        required: false,
+        type: String,
+        description: 'Alias/fallback for dateTo — ISO date string `YYYY-MM-DD`',
+    }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Paginated list of installation reports',
@@ -110,8 +122,10 @@ __decorate([
     __param(4, (0, common_1.Query)('status')),
     __param(5, (0, common_1.Query)('dateFrom')),
     __param(6, (0, common_1.Query)('dateTo')),
+    __param(7, (0, common_1.Query)('startDate')),
+    __param(8, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileInstallationReportsController.prototype, "findAll", null);
 __decorate([

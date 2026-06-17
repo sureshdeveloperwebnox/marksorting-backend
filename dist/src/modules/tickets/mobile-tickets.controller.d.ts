@@ -4,7 +4,7 @@ import { UpdateMobileTicketDto } from './dto/update-mobile-ticket.dto';
 export declare class MobileTicketsController {
     private readonly ticketsService;
     constructor(ticketsService: TicketsService);
-    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, priority?: string): Promise<any>;
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, priority?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileTicketDto, req: any): Promise<{
         mill: {

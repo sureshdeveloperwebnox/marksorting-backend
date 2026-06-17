@@ -81,6 +81,18 @@ export class MobileInstallationReportsController {
     type: String,
     description: 'Visit date to (YYYY-MM-DD)',
   })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateFrom — ISO date string `YYYY-MM-DD`',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateTo — ISO date string `YYYY-MM-DD`',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of installation reports',
@@ -94,6 +106,8 @@ export class MobileInstallationReportsController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     return this.installationReportsService.findAll(
       {
@@ -101,8 +115,8 @@ export class MobileInstallationReportsController {
         take: take ? parseInt(take, 10) : 10,
         search,
         status,
-        dateFrom,
-        dateTo,
+        dateFrom: dateFrom || startDate,
+        dateTo: dateTo || endDate,
       },
       req.user,
     );

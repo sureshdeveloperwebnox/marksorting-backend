@@ -168,6 +168,30 @@ export class MobileTicketsController {
     enum: ['LOW', 'MEDIUM', 'HIGH', 'URGENT'],
     description: 'Filter by ticket priority',
   })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filter from creation date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filter to creation date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateFrom (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateTo (YYYY-MM-DD)',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of support tickets',
@@ -185,6 +209,10 @@ export class MobileTicketsController {
     @Query('search') search?: string,
     @Query('status') status?: string,
     @Query('priority') priority?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     return this.ticketsService.findAll(
       {
@@ -193,6 +221,8 @@ export class MobileTicketsController {
         search,
         status,
         priority,
+        dateFrom: dateFrom || startDate,
+        dateTo: dateTo || endDate,
       },
       req.user,
     );

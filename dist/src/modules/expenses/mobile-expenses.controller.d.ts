@@ -4,7 +4,7 @@ import { UpdateMobileExpenseDto } from './dto/update-mobile-expense.dto';
 export declare class MobileExpensesController {
     private readonly expensesService;
     constructor(expensesService: ExpensesService);
-    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string): Promise<any>;
     checkEligibility(req: any, excludeExpenseId?: string): Promise<{
         eligible: boolean;
         serviceReports: {

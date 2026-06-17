@@ -169,6 +169,18 @@ export class MobileExpensesController {
     type: String,
     description: 'Visit date upper bound — ISO date string `YYYY-MM-DD`',
   })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateFrom — ISO date string `YYYY-MM-DD`',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Alias/fallback for dateTo — ISO date string `YYYY-MM-DD`',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of expenses',
@@ -187,6 +199,8 @@ export class MobileExpensesController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
     return this.expensesService.findAll(
       {
@@ -194,8 +208,8 @@ export class MobileExpensesController {
         take: take ? parseInt(take, 10) : 10,
         search,
         status,
-        dateFrom,
-        dateTo,
+        dateFrom: dateFrom || startDate,
+        dateTo: dateTo || endDate,
       },
       req.user,
     );
