@@ -30,8 +30,8 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -49,8 +49,8 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -83,8 +83,8 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -123,8 +123,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -142,8 +142,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -176,8 +176,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -194,8 +194,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -228,8 +228,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -263,8 +263,8 @@ export declare class MobileStoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        invoice_number: string | null;
         service_engineer_id: string;
+        invoice_number: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -281,8 +281,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -315,8 +315,8 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -332,8 +332,8 @@ export declare class MobileStoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        invoice_number: string | null;
         service_engineer_id: string;
+        invoice_number: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;

@@ -15,8 +15,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             installation_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -79,8 +79,8 @@ export declare class InstallationReportsController {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 installation_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -142,8 +142,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             installation_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
