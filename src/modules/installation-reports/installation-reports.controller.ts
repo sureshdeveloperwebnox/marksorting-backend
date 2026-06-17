@@ -38,7 +38,7 @@ import {
 export class InstallationReportsController {
   constructor(
     private readonly installationReportsService: InstallationReportsService,
-  ) {}
+  ) { }
 
   @Get()
   @ApiOperation({
@@ -87,6 +87,18 @@ export class InstallationReportsController {
     type: String,
     description: 'Filter by technician/service engineer ID',
   })
+  @ApiQuery({
+    name: 'customerId',
+    required: false,
+    type: String,
+    description: 'Filter by customer ID (via mill.customer_id)',
+  })
+  @ApiQuery({
+    name: 'millId',
+    required: false,
+    type: String,
+    description: 'Filter by mill ID',
+  })
   @ApiResponse({
     status: 200,
     description: 'List of installation reports successfully retrieved',
@@ -99,6 +111,8 @@ export class InstallationReportsController {
     @Query('search') search?: string,
     @Query('status') status?: string,
     @Query('technicianId') technicianId?: string,
+    @Query('customerId') customerId?: string,
+    @Query('millId') millId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -109,6 +123,8 @@ export class InstallationReportsController {
         search,
         status,
         technicianId,
+        customerId,
+        millId,
         dateFrom,
         dateTo,
       },

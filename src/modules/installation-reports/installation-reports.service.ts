@@ -83,7 +83,7 @@ export class InstallationReportsService {
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
     private eventEmitter: EventEmitter2,
-  ) {}
+  ) { }
 
   async findAll(
     params: {
@@ -92,6 +92,8 @@ export class InstallationReportsService {
       search?: string;
       status?: string;
       technicianId?: string;
+      customerId?: string;
+      millId?: string;
       dateFrom?: string;
       dateTo?: string;
     },
@@ -101,7 +103,7 @@ export class InstallationReportsService {
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
-    const { skip, take, search, status, technicianId, dateFrom, dateTo } =
+    const { skip, take, search, status, technicianId, customerId, millId, dateFrom, dateTo } =
       params;
 
     const where: any = { deleted_at: null };
@@ -127,6 +129,14 @@ export class InstallationReportsService {
 
     if (status) {
       where.status = status;
+    }
+
+    if (millId) {
+      where.mill_id = millId;
+    }
+
+    if (customerId) {
+      where.mill = { customer_id: customerId };
     }
 
     if (technicianId) {

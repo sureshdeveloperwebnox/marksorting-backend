@@ -27,13 +27,15 @@ let InstallationReportsController = class InstallationReportsController {
     constructor(installationReportsService) {
         this.installationReportsService = installationReportsService;
     }
-    findAll(req, skip, take, search, status, technicianId, dateFrom, dateTo) {
+    findAll(req, skip, take, search, status, technicianId, customerId, millId, dateFrom, dateTo) {
         return this.installationReportsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
             search,
             status,
             technicianId,
+            customerId,
+            millId,
             dateFrom,
             dateTo,
         }, req.user);
@@ -106,6 +108,18 @@ __decorate([
         type: String,
         description: 'Filter by technician/service engineer ID',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'customerId',
+        required: false,
+        type: String,
+        description: 'Filter by customer ID (via mill.customer_id)',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'millId',
+        required: false,
+        type: String,
+        description: 'Filter by mill ID',
+    }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'List of installation reports successfully retrieved',
@@ -117,10 +131,12 @@ __decorate([
     __param(3, (0, common_1.Query)('search')),
     __param(4, (0, common_1.Query)('status')),
     __param(5, (0, common_1.Query)('technicianId')),
-    __param(6, (0, common_1.Query)('dateFrom')),
-    __param(7, (0, common_1.Query)('dateTo')),
+    __param(6, (0, common_1.Query)('customerId')),
+    __param(7, (0, common_1.Query)('millId')),
+    __param(8, (0, common_1.Query)('dateFrom')),
+    __param(9, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], InstallationReportsController.prototype, "findAll", null);
 __decorate([
