@@ -33,36 +33,36 @@ export declare class TicketsService {
         userId: string;
         role: string;
     }): Promise<{
-        customer: {
-            id: string;
-            name: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
         mill: {
             id: string;
             name: string;
         } | null;
+        customer: {
+            id: string;
+            email: string | null;
+            name: string;
+            phone: string | null;
+        } | null;
         service_engineer: {
             id: string;
-            status: string;
-            email: string | null;
-            phone: string | null;
             full_name: string;
+            email: string | null;
+            status: string;
+            phone: string | null;
         } | null;
     } & {
         id: string;
-        ticket_number: string | null;
         user_id: string | null;
-        service_engineer_id: string | null;
-        customer_id: string | null;
-        mill_id: string | null;
-        subject: string;
         description: string;
-        status: string;
-        priority: string;
         created_at: Date;
         updated_at: Date;
+        mill_id: string | null;
+        status: string;
+        customer_id: string | null;
+        ticket_number: string | null;
+        service_engineer_id: string | null;
+        subject: string;
+        priority: string;
     }>;
     update(id: string, dto: UpdateTicketDto | UpdateMobileTicketDto, user?: {
         userId: string;
@@ -70,72 +70,72 @@ export declare class TicketsService {
     }): Promise<{
         before: any;
         after: {
-            customer: {
-                id: string;
-                name: string;
-                email: string | null;
-                phone: string | null;
-            } | null;
             mill: {
                 id: string;
                 name: string;
             } | null;
+            customer: {
+                id: string;
+                email: string | null;
+                name: string;
+                phone: string | null;
+            } | null;
             service_engineer: {
                 id: string;
-                status: string;
-                email: string | null;
-                phone: string | null;
                 full_name: string;
+                email: string | null;
+                status: string;
+                phone: string | null;
             } | null;
         } & {
             id: string;
-            ticket_number: string | null;
             user_id: string | null;
-            service_engineer_id: string | null;
-            customer_id: string | null;
-            mill_id: string | null;
-            subject: string;
             description: string;
-            status: string;
-            priority: string;
             created_at: Date;
             updated_at: Date;
+            mill_id: string | null;
+            status: string;
+            customer_id: string | null;
+            ticket_number: string | null;
+            service_engineer_id: string | null;
+            subject: string;
+            priority: string;
         };
     }>;
     remove(id: string, user?: {
         userId: string;
         role: string;
     }): Promise<{
-        customer: {
-            id: string;
-            name: string;
-            email: string | null;
-            phone: string | null;
-        } | null;
         mill: {
             id: string;
             name: string;
         } | null;
+        customer: {
+            id: string;
+            email: string | null;
+            name: string;
+            phone: string | null;
+        } | null;
         service_engineer: {
             id: string;
-            status: string;
-            email: string | null;
-            phone: string | null;
             full_name: string;
+            email: string | null;
+            status: string;
+            phone: string | null;
         } | null;
     } & {
         id: string;
-        ticket_number: string | null;
         user_id: string | null;
-        service_engineer_id: string | null;
-        customer_id: string | null;
-        mill_id: string | null;
-        subject: string;
         description: string;
-        status: string;
-        priority: string;
         created_at: Date;
         updated_at: Date;
+        mill_id: string | null;
+        status: string;
+        customer_id: string | null;
+        ticket_number: string | null;
+        service_engineer_id: string | null;
+        subject: string;
+        priority: string;
     }>;
     private invalidateCache;
     private normalizePayload;
@@ -150,35 +150,35 @@ export declare class TicketsService {
     }): Promise<{
         user: {
             id: string;
-            email: string;
             full_name: string;
+            email: string;
         };
     } & {
         id: string;
         user_id: string;
-        status: string | null;
         created_at: Date;
         updated_at: Date;
+        status: string | null;
+        ticket_id: string;
         notes: string;
         timeline_date: Date;
         next_follow_up_date: Date | null;
-        ticket_id: string;
     }>;
     getTimelines(ticketId: string): Promise<({
         user: {
             id: string;
-            email: string;
             full_name: string;
+            email: string;
         };
     } & {
         id: string;
         user_id: string;
-        status: string | null;
         created_at: Date;
         updated_at: Date;
+        status: string | null;
+        ticket_id: string;
         notes: string;
         timeline_date: Date;
         next_follow_up_date: Date | null;
-        ticket_id: string;
     })[]>;
 }
