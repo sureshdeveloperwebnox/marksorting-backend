@@ -18,7 +18,7 @@ import {
 import { UploadService } from './upload.service';
 import { GetPresignedUrlDto } from './dto/get-presigned-url.dto';
 import { UploadImageDto } from './dto/upload-image.dto';
-// import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'; // Assuming you have an auth guard
+import { Public } from '../auth/decorators/public.decorator';
 
 // Multer file type declaration
 interface MulterFile {
@@ -36,11 +36,10 @@ interface MulterFile {
 @ApiTags('Upload')
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(private readonly uploadService: UploadService) { }
 
   @Post('presigned-url')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
+  @Public()
   @ApiOperation({ summary: 'Get a presigned URL for file upload' })
   @ApiResponse({
     status: 201,
@@ -51,8 +50,7 @@ export class UploadController {
   }
 
   @Post('image')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
+  @Public()
   @ApiOperation({
     summary: 'Upload an image directly (base64)',
     description:
@@ -90,8 +88,7 @@ export class UploadController {
   }
 
   @Post('file')
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
+  @Public()
   @ApiOperation({
     summary: 'Upload an image file directly (multipart/form-data)',
     description:

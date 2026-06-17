@@ -21,22 +21,22 @@ export declare class MobileTicketsController {
             id: string;
             full_name: string;
             email: string | null;
-            status: string;
             phone: string | null;
+            status: string;
         } | null;
     } & {
-        id: string;
-        user_id: string | null;
         description: string;
+        id: string;
         created_at: Date;
+        user_id: string | null;
         updated_at: Date;
-        mill_id: string | null;
-        status: string;
         customer_id: string | null;
+        status: string;
+        mill_id: string | null;
+        priority: string;
         ticket_number: string | null;
         service_engineer_id: string | null;
         subject: string;
-        priority: string;
     }>;
     update(id: string, dto: UpdateMobileTicketDto, req: any): Promise<{
         before: any;
@@ -55,22 +55,22 @@ export declare class MobileTicketsController {
                 id: string;
                 full_name: string;
                 email: string | null;
-                status: string;
                 phone: string | null;
+                status: string;
             } | null;
         } & {
-            id: string;
-            user_id: string | null;
             description: string;
+            id: string;
             created_at: Date;
+            user_id: string | null;
             updated_at: Date;
-            mill_id: string | null;
-            status: string;
             customer_id: string | null;
+            status: string;
+            mill_id: string | null;
+            priority: string;
             ticket_number: string | null;
             service_engineer_id: string | null;
             subject: string;
-            priority: string;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -88,21 +88,21 @@ export declare class MobileTicketsController {
             id: string;
             full_name: string;
             email: string | null;
-            status: string;
             phone: string | null;
+            status: string;
         } | null;
     } & {
-        id: string;
-        user_id: string | null;
         description: string;
+        id: string;
         created_at: Date;
+        user_id: string | null;
         updated_at: Date;
-        mill_id: string | null;
-        status: string;
         customer_id: string | null;
+        status: string;
+        mill_id: string | null;
+        priority: string;
         ticket_number: string | null;
         service_engineer_id: string | null;
         subject: string;
-        priority: string;
     }>;
 }

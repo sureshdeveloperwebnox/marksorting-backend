@@ -19,6 +19,7 @@ const swagger_1 = require("@nestjs/swagger");
 const upload_service_1 = require("./upload.service");
 const get_presigned_url_dto_1 = require("./dto/get-presigned-url.dto");
 const upload_image_dto_1 = require("./dto/upload-image.dto");
+const public_decorator_1 = require("../auth/decorators/public.decorator");
 let UploadController = class UploadController {
     uploadService;
     constructor(uploadService) {
@@ -48,6 +49,7 @@ let UploadController = class UploadController {
 exports.UploadController = UploadController;
 __decorate([
     (0, common_1.Post)('presigned-url'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get a presigned URL for file upload' }),
     (0, swagger_1.ApiResponse)({
         status: 201,
@@ -60,6 +62,7 @@ __decorate([
 ], UploadController.prototype, "getPresignedUrl", null);
 __decorate([
     (0, common_1.Post)('image'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Upload an image directly (base64)',
         description: 'Upload an image as base64 string. Returns the S3 key to save in database.',
@@ -90,6 +93,7 @@ __decorate([
 ], UploadController.prototype, "uploadBase64Image", null);
 __decorate([
     (0, common_1.Post)('file'),
+    (0, public_decorator_1.Public)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Upload an image file directly (multipart/form-data)',
         description: 'Upload an image file directly. Returns the S3 key to save in database.',
