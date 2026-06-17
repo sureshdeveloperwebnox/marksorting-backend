@@ -25,6 +25,8 @@ export declare class ServiceReportsService {
         status?: string;
         serviceCategoryId?: string;
         technicianId?: string;
+        customerId?: string;
+        millId?: string;
         dateFrom?: string;
         dateTo?: string;
     }, user?: {

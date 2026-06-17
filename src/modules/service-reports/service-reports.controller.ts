@@ -36,7 +36,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('service-reports')
 export class ServiceReportsController {
-  constructor(private readonly serviceReportsService: ServiceReportsService) {}
+  constructor(private readonly serviceReportsService: ServiceReportsService) { }
 
   @Get()
   @ApiOperation({
@@ -95,6 +95,18 @@ export class ServiceReportsController {
     type: String,
     description: 'Filter by technician/service engineer ID',
   })
+  @ApiQuery({
+    name: 'customerId',
+    required: false,
+    type: String,
+    description: 'Filter by customer ID',
+  })
+  @ApiQuery({
+    name: 'millId',
+    required: false,
+    type: String,
+    description: 'Filter by mill ID',
+  })
   findAll(
     @Request() req: any,
     @Query('skip') skip?: string,
@@ -103,6 +115,8 @@ export class ServiceReportsController {
     @Query('status') status?: string,
     @Query('serviceCategoryId') serviceCategoryId?: string,
     @Query('technicianId') technicianId?: string,
+    @Query('customerId') customerId?: string,
+    @Query('millId') millId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -114,6 +128,8 @@ export class ServiceReportsController {
         status,
         serviceCategoryId,
         technicianId,
+        customerId,
+        millId,
         dateFrom,
         dateTo,
       },

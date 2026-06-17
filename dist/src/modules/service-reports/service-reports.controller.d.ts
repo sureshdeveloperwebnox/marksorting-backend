@@ -5,7 +5,7 @@ import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 export declare class ServiceReportsController {
     private readonly serviceReportsService;
     constructor(serviceReportsService: ServiceReportsService);
-    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, technicianId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, technicianId?: string, customerId?: string, millId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateServiceReportDto, req: any): Promise<({

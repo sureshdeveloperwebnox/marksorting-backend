@@ -54,7 +54,7 @@ let ServiceReportsService = class ServiceReportsService {
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
-        const { skip, take, search, status, serviceCategoryId, technicianId, dateFrom, dateTo, } = params;
+        const { skip, take, search, status, serviceCategoryId, technicianId, customerId, millId, dateFrom, dateTo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -79,6 +79,12 @@ let ServiceReportsService = class ServiceReportsService {
         }
         if (serviceCategoryId) {
             where.service_category_id = serviceCategoryId;
+        }
+        if (millId) {
+            where.mill_id = millId;
+        }
+        if (customerId) {
+            where.mill = { customer_id: customerId };
         }
         if (technicianId) {
             if (user && user.role === 'Service Engineer') {

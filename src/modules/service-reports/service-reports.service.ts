@@ -57,6 +57,8 @@ export class ServiceReportsService {
       status?: string;
       serviceCategoryId?: string;
       technicianId?: string;
+      customerId?: string;
+      millId?: string;
       dateFrom?: string;
       dateTo?: string;
     },
@@ -73,6 +75,8 @@ export class ServiceReportsService {
       status,
       serviceCategoryId,
       technicianId,
+      customerId,
+      millId,
       dateFrom,
       dateTo,
     } = params;
@@ -105,6 +109,14 @@ export class ServiceReportsService {
 
     if (serviceCategoryId) {
       where.service_category_id = serviceCategoryId;
+    }
+
+    if (millId) {
+      where.mill_id = millId;
+    }
+
+    if (customerId) {
+      where.mill = { customer_id: customerId };
     }
 
     if (technicianId) {

@@ -27,7 +27,7 @@ let ServiceReportsController = class ServiceReportsController {
     constructor(serviceReportsService) {
         this.serviceReportsService = serviceReportsService;
     }
-    findAll(req, skip, take, search, status, serviceCategoryId, technicianId, dateFrom, dateTo) {
+    findAll(req, skip, take, search, status, serviceCategoryId, technicianId, customerId, millId, dateFrom, dateTo) {
         return this.serviceReportsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -35,6 +35,8 @@ let ServiceReportsController = class ServiceReportsController {
             status,
             serviceCategoryId,
             technicianId,
+            customerId,
+            millId,
             dateFrom,
             dateTo,
         }, req.user);
@@ -118,6 +120,18 @@ __decorate([
         type: String,
         description: 'Filter by technician/service engineer ID',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'customerId',
+        required: false,
+        type: String,
+        description: 'Filter by customer ID',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'millId',
+        required: false,
+        type: String,
+        description: 'Filter by mill ID',
+    }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('skip')),
     __param(2, (0, common_1.Query)('take')),
@@ -125,10 +139,12 @@ __decorate([
     __param(4, (0, common_1.Query)('status')),
     __param(5, (0, common_1.Query)('serviceCategoryId')),
     __param(6, (0, common_1.Query)('technicianId')),
-    __param(7, (0, common_1.Query)('dateFrom')),
-    __param(8, (0, common_1.Query)('dateTo')),
+    __param(7, (0, common_1.Query)('customerId')),
+    __param(8, (0, common_1.Query)('millId')),
+    __param(9, (0, common_1.Query)('dateFrom')),
+    __param(10, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], ServiceReportsController.prototype, "findAll", null);
 __decorate([
