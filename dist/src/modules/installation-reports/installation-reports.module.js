@@ -15,6 +15,9 @@ const settings_module_1 = require("../settings/settings.module");
 const installation_reports_service_1 = require("./installation-reports.service");
 const installation_reports_controller_1 = require("./installation-reports.controller");
 const mobile_installation_reports_controller_1 = require("./mobile-installation-reports.controller");
+const installation_reports_bulk_service_1 = require("./installation-reports-bulk.service");
+const installation_reports_bulk_controller_1 = require("./installation-reports-bulk.controller");
+const installation_reports_excel_parser_service_1 = require("./installation-reports-excel-parser.service");
 let InstallationReportsModule = class InstallationReportsModule {
 };
 exports.InstallationReportsModule = InstallationReportsModule;
@@ -24,8 +27,13 @@ exports.InstallationReportsModule = InstallationReportsModule = __decorate([
         controllers: [
             installation_reports_controller_1.InstallationReportsController,
             mobile_installation_reports_controller_1.MobileInstallationReportsController,
+            installation_reports_bulk_controller_1.InstallationReportsBulkController,
         ],
-        providers: [installation_reports_service_1.InstallationReportsService],
+        providers: [
+            installation_reports_service_1.InstallationReportsService,
+            installation_reports_bulk_service_1.InstallationReportsBulkService,
+            installation_reports_excel_parser_service_1.InstallationReportsExcelParserService,
+        ],
         exports: [installation_reports_service_1.InstallationReportsService],
     })
 ], InstallationReportsModule);
