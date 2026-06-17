@@ -18,33 +18,32 @@ export declare class MobileMasterMillsController {
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            customer_id: string | null;
-            city: string | null;
             place: string | null;
-            address: string | null;
-            ref_no: string | null;
-            phone: string | null;
             status: string;
+            phone: string | null;
+            address: string | null;
+            customer_id: string | null;
+            ref_no: string | null;
+            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
         }) | null;
     } & {
-        type: string;
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        mill_id: string | null;
         place: string | null;
+        status: string;
         address: string | null;
         ref_no: string | null;
-        status: string;
-        frame_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
-        mill_id: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
+        frame_no: string | null;
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;
@@ -55,6 +54,7 @@ export declare class MobileMasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: import("@prisma/client/runtime/client").Decimal | null;
+        type: string;
     })[]>;
     quickRegister(dto: QuickRegisterDto): Promise<({
         mill: ({
@@ -65,9 +65,9 @@ export declare class MobileMasterMillsController {
                 updated_at: Date;
                 deleted_at: Date | null;
                 name: string;
-                address: string | null;
-                phone: string | null;
                 status: string;
+                phone: string | null;
+                address: string | null;
             } | null;
         } & {
             id: string;
@@ -76,33 +76,32 @@ export declare class MobileMasterMillsController {
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            customer_id: string | null;
-            city: string | null;
             place: string | null;
-            address: string | null;
-            ref_no: string | null;
-            phone: string | null;
             status: string;
+            phone: string | null;
+            address: string | null;
+            customer_id: string | null;
+            ref_no: string | null;
+            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
         }) | null;
     } & {
-        type: string;
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        mill_id: string | null;
         place: string | null;
+        status: string;
         address: string | null;
         ref_no: string | null;
-        status: string;
-        frame_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
-        mill_id: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
+        frame_no: string | null;
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;
@@ -113,5 +112,6 @@ export declare class MobileMasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: import("@prisma/client/runtime/client").Decimal | null;
+        type: string;
     }) | null>;
 }

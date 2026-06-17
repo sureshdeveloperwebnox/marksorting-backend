@@ -21,8 +21,8 @@ export declare class StoresController {
                 name: string;
             };
         } & {
-            material_id: string;
             store_id: string;
+            material_id: string;
         })[];
     } & {
         id: string;
@@ -30,14 +30,14 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        invoice_number: string | null;
         service_engineer_id: string;
+        invoice_number: string | null;
+        quantity: number;
         warranty_status: string;
+        frame_number: string;
         return_status: string;
         inflow_status: string;
         barcode: string | null;
-        frame_number: string;
-        quantity: number;
         provider_name: string | null;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
@@ -47,14 +47,14 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
+            quantity: number;
             warranty_status: string;
+            frame_number: string;
             return_status: string;
             inflow_status: string;
             barcode: string | null;
-            frame_number: string;
-            quantity: number;
             provider_name: string | null;
         };
         after: {
@@ -72,8 +72,8 @@ export declare class StoresController {
                     name: string;
                 };
             } & {
-                material_id: string;
                 store_id: string;
+                material_id: string;
             })[];
         } & {
             id: string;
@@ -81,14 +81,14 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            invoice_number: string | null;
             service_engineer_id: string;
+            invoice_number: string | null;
+            quantity: number;
             warranty_status: string;
+            frame_number: string;
             return_status: string;
             inflow_status: string;
             barcode: string | null;
-            frame_number: string;
-            quantity: number;
             provider_name: string | null;
         };
     }>;
@@ -98,14 +98,14 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        invoice_number: string | null;
         service_engineer_id: string;
+        invoice_number: string | null;
+        quantity: number;
         warranty_status: string;
+        frame_number: string;
         return_status: string;
         inflow_status: string;
         barcode: string | null;
-        frame_number: string;
-        quantity: number;
         provider_name: string | null;
     }>;
 }

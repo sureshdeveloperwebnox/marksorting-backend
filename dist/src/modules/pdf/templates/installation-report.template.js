@@ -103,8 +103,8 @@ function renderInstallationReportTemplate(data, template) {
       margin: 0;
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 11px;
-      line-height: 1.25;
+      font-size: 14px;
+      line-height: 1.35;
       background: #fff;
     }
     .print-frame {
@@ -145,7 +145,7 @@ function renderInstallationReportTemplate(data, template) {
       text-align: right;
       font-weight: 700;
       line-height: 1.15;
-      font-size: 9px;
+      font-size: 11.5px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -153,14 +153,14 @@ function renderInstallationReportTemplate(data, template) {
     }
     .header-company-name {
       color: #00664d;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
       line-height: 1;
       margin-bottom: 0.6mm;
     }
     .header-partner {
       color: #f05a00;
-      font-size: 9px;
+      font-size: 11.5px;
       line-height: 1.15;
     }
     .header-address,
@@ -170,7 +170,7 @@ function renderInstallationReportTemplate(data, template) {
     .header-serial {
       grid-column: 1 / -1;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 13.5px;
       margin-top: 0;
     }
     .document {
@@ -192,13 +192,14 @@ function renderInstallationReportTemplate(data, template) {
     .report td {
       border: 1px solid #111;
       vertical-align: top;
-      padding: 3.5px 6px;
+      padding: 4px 6.5px;
       word-break: break-word;
       overflow-wrap: anywhere;
     }
     .report th {
       text-align: center;
       font-weight: 800;
+      font-size: 15px;
       background: #fff;
     }
     .label {
@@ -224,7 +225,7 @@ function renderInstallationReportTemplate(data, template) {
     }
     .company-name {
       font-weight: 800;
-      font-size: 11.5px;
+      font-size: 15.5px;
       margin-bottom: 2px;
     }
     .company-sub {
@@ -250,7 +251,7 @@ function renderInstallationReportTemplate(data, template) {
       border: 1px solid #111;
       border-top: 0;
       padding: 7px 8px;
-      font-size: 10px;
+      font-size: 13.5px;
       font-weight: 800;
       text-align: center;
       text-transform: uppercase;
@@ -263,12 +264,12 @@ function renderInstallationReportTemplate(data, template) {
       text-decoration: underline;
       font-weight: 800;
       text-align: center;
-      font-size: 11.5px;
+      font-size: 15px;
       padding: 6px 0 !important;
     }
     .maintenance td {
       color: #f05a00;
-      font-size: 10.5px;
+      font-size: 13.5px;
       height: 9.5mm;
       vertical-align: middle;
     }

@@ -147,8 +147,8 @@ export function renderServiceReportTemplate(
       margin: 0;
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 11px;
-      line-height: 1.2;
+      font-size: 14px;
+      line-height: 1.35;
       background: #fff;
     }
     .print-frame {
@@ -184,12 +184,13 @@ export function renderServiceReportTemplate(
       width: 38mm;
       height: 18mm;
       object-fit: contain;
+      margin-top: 2px;
     }
     .header-company {
       text-align: right;
       font-weight: 700;
       line-height: 1.15;
-      font-size: 9px;
+      font-size: 11.5px;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -197,24 +198,24 @@ export function renderServiceReportTemplate(
     }
     .header-company-name {
       color: #00664d;
-      font-size: 20px;
+      font-size: 24px;
       font-weight: 800;
       line-height: 1;
       margin-bottom: 0.6mm;
     }
     .header-partner {
       color: #f05a00;
-      font-size: 9px;
+      font-size: 11.5px;
       line-height: 1.15;
     }
     .header-address,
     .header-contact {
-      line-height: 1.18;
+      line-height: 1.2;
     }
     .header-serial {
       grid-column: 1 / -1;
       font-weight: 700;
-      font-size: 11px;
+      font-size: 13.5px;
       margin-top: 0;
     }
     .document {
@@ -244,13 +245,14 @@ export function renderServiceReportTemplate(
     .report td {
       border: 1px solid #111;
       vertical-align: top;
-      padding: 2px 4px;
+      padding: 4px 6px;
       word-break: break-word;
       overflow-wrap: anywhere;
     }
     .report th {
       text-align: center;
       font-weight: 800;
+      font-size: 15px;
       background: #fff;
     }
     .label {
@@ -314,8 +316,8 @@ export function renderServiceReportTemplate(
     .notice {
       border: 1px solid #111;
       border-top: 0;
-      padding: 5px 6px;
-      font-size: 11px;
+      padding: 6px 7px;
+      font-size: 13.5px;
       text-transform: uppercase;
     }
     .maintenance-title {
@@ -326,8 +328,8 @@ export function renderServiceReportTemplate(
     }
     .maintenance td {
       color: #f05a00;
-      font-size: 11px;
-      height: 9mm;
+      font-size: 13.5px;
+      height: 9.5mm;
     }
     .signature-cell {
       height: 28mm;

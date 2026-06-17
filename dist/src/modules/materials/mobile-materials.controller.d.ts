@@ -5,8 +5,8 @@ export declare class MobileMaterialsController {
     constructor(materialsService: MaterialsService);
     findAll(skip?: string, take?: string, search?: string): Promise<any>;
     create(dto: CreateMaterialDto): Promise<{
-        description: string | null;
         id: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

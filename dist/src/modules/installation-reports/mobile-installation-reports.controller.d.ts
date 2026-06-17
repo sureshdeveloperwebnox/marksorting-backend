@@ -8,6 +8,15 @@ export declare class MobileInstallationReportsController {
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileInstallationReportDto, req: any): Promise<({
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            installation_report_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -16,25 +25,14 @@ export declare class MobileInstallationReportsController {
                 name: string;
             } | null;
         };
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            installation_report_id: string;
-        })[];
     } & {
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        place: string;
-        status: string;
-        invoice_date: Date | null;
-        mill_id: string;
         report_number: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
@@ -58,8 +56,10 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
+        invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
@@ -72,6 +72,15 @@ export declare class MobileInstallationReportsController {
     update(id: string, dto: UpdateMobileInstallationReportDto, req: any): Promise<{
         before: any;
         after: {
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                installation_report_id: string;
+                technician_id: string;
+            })[];
             mill: {
                 id: string;
                 name: string;
@@ -80,25 +89,14 @@ export declare class MobileInstallationReportsController {
                     name: string;
                 } | null;
             };
-            technicians: ({
-                technician: {
-                    id: string;
-                    full_name: string;
-                };
-            } & {
-                technician_id: string;
-                installation_report_id: string;
-            })[];
         } & {
             id: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            place: string;
-            status: string;
-            invoice_date: Date | null;
-            mill_id: string;
             report_number: string;
+            mill_id: string;
+            place: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
             visit_date: Date;
@@ -122,8 +120,10 @@ export declare class MobileInstallationReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
+            status: string;
             authorized_person_phone: string | null;
             expense_id: string | null;
+            invoice_date: Date | null;
             invoice_number: string | null;
             warranty_start_date: Date | null;
             warranty_end_date: Date | null;
@@ -135,6 +135,15 @@ export declare class MobileInstallationReportsController {
         };
     }>;
     remove(id: string, req: any): Promise<{
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            installation_report_id: string;
+            technician_id: string;
+        })[];
         mill: {
             id: string;
             name: string;
@@ -143,25 +152,14 @@ export declare class MobileInstallationReportsController {
                 name: string;
             } | null;
         };
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            technician_id: string;
-            installation_report_id: string;
-        })[];
     } & {
         id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        place: string;
-        status: string;
-        invoice_date: Date | null;
-        mill_id: string;
         report_number: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
@@ -185,8 +183,10 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
+        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
+        invoice_date: Date | null;
         invoice_number: string | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
