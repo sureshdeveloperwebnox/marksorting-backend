@@ -9,14 +9,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SharedModule = void 0;
 const common_1 = require("@nestjs/common");
 const s3_service_1 = require("./services/s3.service");
+const excel_parser_service_1 = require("./services/excel-parser.service");
 let SharedModule = class SharedModule {
 };
 exports.SharedModule = SharedModule;
 exports.SharedModule = SharedModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        providers: [s3_service_1.S3Service],
-        exports: [s3_service_1.S3Service],
+        providers: [s3_service_1.S3Service, excel_parser_service_1.ExcelParserService],
+        exports: [s3_service_1.S3Service, excel_parser_service_1.ExcelParserService],
     })
 ], SharedModule);
 //# sourceMappingURL=shared.module.js.map

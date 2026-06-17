@@ -11,13 +11,15 @@ const common_1 = require("@nestjs/common");
 const master_mills_service_1 = require("./master-mills.service");
 const master_mills_controller_1 = require("./master-mills.controller");
 const mobile_master_mills_controller_1 = require("./mobile-master-mills.controller");
+const master_mills_bulk_service_1 = require("./master-mills-bulk.service");
+const master_mills_bulk_controller_1 = require("./master-mills-bulk.controller");
 let MasterMillsModule = class MasterMillsModule {
 };
 exports.MasterMillsModule = MasterMillsModule;
 exports.MasterMillsModule = MasterMillsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [master_mills_controller_1.MasterMillsController, mobile_master_mills_controller_1.MobileMasterMillsController],
-        providers: [master_mills_service_1.MasterMillsService],
+        controllers: [master_mills_controller_1.MasterMillsController, mobile_master_mills_controller_1.MobileMasterMillsController, master_mills_bulk_controller_1.MasterMillsBulkController],
+        providers: [master_mills_service_1.MasterMillsService, master_mills_bulk_service_1.MasterMillsBulkService],
         exports: [master_mills_service_1.MasterMillsService],
     })
 ], MasterMillsModule);
