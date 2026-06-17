@@ -32,6 +32,10 @@ async function checkEligibility(
           technician_id: targetUserId,
         },
       },
+      OR: [
+        { expense_id: null },
+        ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+      ],
       expenses: {
         none: {
           deleted_at: null,
@@ -62,6 +66,10 @@ async function checkEligibility(
           technician_id: targetUserId,
         },
       },
+      OR: [
+        { expense_id: null },
+        ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+      ],
       expenses: {
         none: {
           deleted_at: null,

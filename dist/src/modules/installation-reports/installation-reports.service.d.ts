@@ -44,8 +44,8 @@ export declare class InstallationReportsService {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;
@@ -111,8 +111,8 @@ export declare class InstallationReportsService {
                     full_name: string;
                 };
             } & {
-                installation_report_id: string;
                 technician_id: string;
+                installation_report_id: string;
             })[];
             mill: {
                 id: string;
@@ -177,8 +177,8 @@ export declare class InstallationReportsService {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;

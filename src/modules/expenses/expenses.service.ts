@@ -987,6 +987,10 @@ export class ExpensesService {
             technician_id: targetUserId,
           },
         },
+        OR: [
+          { expense_id: null },
+          ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+        ],
         expenses: {
           none: {
             deleted_at: null,
@@ -1017,6 +1021,10 @@ export class ExpensesService {
             technician_id: targetUserId,
           },
         },
+        OR: [
+          { expense_id: null },
+          ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+        ],
         expenses: {
           none: {
             deleted_at: null,

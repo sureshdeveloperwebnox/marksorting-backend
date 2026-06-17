@@ -47,10 +47,6 @@ export declare class MobileExpensesController {
                 name: string;
             } | null;
         } | null;
-        installationReport: {
-            id: string;
-            report_number: string;
-        } | null;
         expenseCategory: {
             id: string;
             name: string;
@@ -71,6 +67,10 @@ export declare class MobileExpensesController {
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
         })[];
+        installationReport: {
+            id: string;
+            report_number: string;
+        } | null;
     } & {
         id: string;
         created_at: Date;
@@ -81,6 +81,7 @@ export declare class MobileExpensesController {
         visit_date: Date;
         visit_time: string;
         status: string;
+        service_report_id: string | null;
         expense_number: string;
         expense_type: string;
         report_type: string;
@@ -90,7 +91,6 @@ export declare class MobileExpensesController {
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        service_report_id: string | null;
         installation_report_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateMobileExpenseDto, req: any): Promise<{
@@ -117,10 +117,6 @@ export declare class MobileExpensesController {
                     name: string;
                 } | null;
             } | null;
-            installationReport: {
-                id: string;
-                report_number: string;
-            } | null;
             expenseCategory: {
                 id: string;
                 name: string;
@@ -141,6 +137,10 @@ export declare class MobileExpensesController {
                 admin_amount: import("@prisma/client/runtime/client").Decimal;
                 expense_images: string[];
             })[];
+            installationReport: {
+                id: string;
+                report_number: string;
+            } | null;
         } & {
             id: string;
             created_at: Date;
@@ -151,6 +151,7 @@ export declare class MobileExpensesController {
             visit_date: Date;
             visit_time: string;
             status: string;
+            service_report_id: string | null;
             expense_number: string;
             expense_type: string;
             report_type: string;
@@ -160,7 +161,6 @@ export declare class MobileExpensesController {
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
-            service_report_id: string | null;
             installation_report_id: string | null;
         }) | null;
     }>;
@@ -186,10 +186,6 @@ export declare class MobileExpensesController {
                 name: string;
             } | null;
         } | null;
-        installationReport: {
-            id: string;
-            report_number: string;
-        } | null;
         expenseCategory: {
             id: string;
             name: string;
@@ -210,6 +206,10 @@ export declare class MobileExpensesController {
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
         })[];
+        installationReport: {
+            id: string;
+            report_number: string;
+        } | null;
     } & {
         id: string;
         created_at: Date;
@@ -220,6 +220,7 @@ export declare class MobileExpensesController {
         visit_date: Date;
         visit_time: string;
         status: string;
+        service_report_id: string | null;
         expense_number: string;
         expense_type: string;
         report_type: string;
@@ -229,7 +230,6 @@ export declare class MobileExpensesController {
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        service_report_id: string | null;
         installation_report_id: string | null;
     }>;
 }

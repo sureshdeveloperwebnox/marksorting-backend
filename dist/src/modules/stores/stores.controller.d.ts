@@ -30,8 +30,8 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        service_engineer_id: string;
         invoice_number: string | null;
+        service_engineer_id: string;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -47,8 +47,8 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            service_engineer_id: string;
             invoice_number: string | null;
+            service_engineer_id: string;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -81,8 +81,8 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             customer_id: string;
-            service_engineer_id: string;
             invoice_number: string | null;
+            service_engineer_id: string;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -98,8 +98,8 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         customer_id: string;
-        service_engineer_id: string;
         invoice_number: string | null;
+        service_engineer_id: string;
         quantity: number;
         warranty_status: string;
         frame_number: string;
