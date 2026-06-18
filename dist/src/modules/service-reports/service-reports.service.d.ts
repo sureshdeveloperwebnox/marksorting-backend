@@ -29,6 +29,8 @@ export declare class ServiceReportsService {
         millId?: string;
         dateFrom?: string;
         dateTo?: string;
+        expenseEligibleOnly?: boolean;
+        excludeExpenseId?: string;
     }, user?: {
         userId: string;
         role: string;

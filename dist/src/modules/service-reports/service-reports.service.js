@@ -54,7 +54,7 @@ let ServiceReportsService = class ServiceReportsService {
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
-        const { skip, take, search, status, serviceCategoryId, technicianId, customerId, millId, dateFrom, dateTo, } = params;
+        const { skip, take, search, status, serviceCategoryId, technicianId, customerId, millId, dateFrom, dateTo, expenseEligibleOnly, excludeExpenseId, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -114,6 +114,25 @@ let ServiceReportsService = class ServiceReportsService {
                 const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
                 where.visit_date.lte = toDate;
             }
+        }
+        if (expenseEligibleOnly) {
+            where.AND = [
+                ...(where.AND || []),
+                {
+                    OR: [
+                        { expense_id: null },
+                        ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+                    ],
+                },
+                {
+                    expenses: {
+                        none: {
+                            deleted_at: null,
+                            ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+                        },
+                    },
+                },
+            ];
         }
         const [serviceReports, total] = await Promise.all([
             this.prisma.serviceReport.findMany({

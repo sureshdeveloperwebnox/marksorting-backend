@@ -93,6 +93,20 @@ export class MobileInstallationReportsController {
     type: String,
     description: 'Alias/fallback for dateTo — ISO date string `YYYY-MM-DD`',
   })
+  @ApiQuery({
+    name: 'expenseEligibleOnly',
+    required: false,
+    type: Boolean,
+    description:
+      'When true, returns only reports that do not already have an active expense. Use for expense dropdowns.',
+  })
+  @ApiQuery({
+    name: 'excludeExpenseId',
+    required: false,
+    type: String,
+    description:
+      'Expense ID to ignore while checking report linkage, used when editing an existing expense.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of installation reports',
@@ -108,6 +122,8 @@ export class MobileInstallationReportsController {
     @Query('dateTo') dateTo?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
+    @Query('expenseEligibleOnly') expenseEligibleOnly?: string,
+    @Query('excludeExpenseId') excludeExpenseId?: string,
   ) {
     return this.installationReportsService.findAll(
       {
@@ -117,6 +133,8 @@ export class MobileInstallationReportsController {
         status,
         dateFrom: dateFrom || startDate,
         dateTo: dateTo || endDate,
+        expenseEligibleOnly: expenseEligibleOnly === 'true',
+        excludeExpenseId,
       },
       req.user,
     );

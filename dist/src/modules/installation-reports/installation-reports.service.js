@@ -74,7 +74,7 @@ let InstallationReportsService = class InstallationReportsService {
         const cachedData = await this.redis.getJson(cacheKey);
         if (cachedData)
             return cachedData;
-        const { skip, take, search, status, technicianId, customerId, millId, dateFrom, dateTo } = params;
+        const { skip, take, search, status, technicianId, customerId, millId, dateFrom, dateTo, expenseEligibleOnly, excludeExpenseId, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -135,6 +135,25 @@ let InstallationReportsService = class InstallationReportsService {
             if (Object.keys(where.visit_date).length === 0) {
                 delete where.visit_date;
             }
+        }
+        if (expenseEligibleOnly) {
+            where.AND = [
+                ...(where.AND || []),
+                {
+                    OR: [
+                        { expense_id: null },
+                        ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+                    ],
+                },
+                {
+                    expenses: {
+                        none: {
+                            deleted_at: null,
+                            ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+                        },
+                    },
+                },
+            ];
         }
         const [installationReports, total] = await Promise.all([
             this.prisma.installationReport.findMany({

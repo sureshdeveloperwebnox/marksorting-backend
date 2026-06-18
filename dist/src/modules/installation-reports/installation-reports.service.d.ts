@@ -28,6 +28,8 @@ export declare class InstallationReportsService {
         millId?: string;
         dateFrom?: string;
         dateTo?: string;
+        expenseEligibleOnly?: boolean;
+        excludeExpenseId?: string;
     }, user?: {
         userId: string;
         role: string;

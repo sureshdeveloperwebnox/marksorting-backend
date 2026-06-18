@@ -24,7 +24,7 @@ let MobileInstallationReportsController = class MobileInstallationReportsControl
     constructor(installationReportsService) {
         this.installationReportsService = installationReportsService;
     }
-    findAll(req, skip, take, search, status, dateFrom, dateTo, startDate, endDate) {
+    findAll(req, skip, take, search, status, dateFrom, dateTo, startDate, endDate, expenseEligibleOnly, excludeExpenseId) {
         return this.installationReportsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -32,6 +32,8 @@ let MobileInstallationReportsController = class MobileInstallationReportsControl
             status,
             dateFrom: dateFrom || startDate,
             dateTo: dateTo || endDate,
+            expenseEligibleOnly: expenseEligibleOnly === 'true',
+            excludeExpenseId,
         }, req.user);
     }
     findOne(id, req) {
@@ -110,6 +112,18 @@ __decorate([
         type: String,
         description: 'Alias/fallback for dateTo — ISO date string `YYYY-MM-DD`',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'expenseEligibleOnly',
+        required: false,
+        type: Boolean,
+        description: 'When true, returns only reports that do not already have an active expense. Use for expense dropdowns.',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'excludeExpenseId',
+        required: false,
+        type: String,
+        description: 'Expense ID to ignore while checking report linkage, used when editing an existing expense.',
+    }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Paginated list of installation reports',
@@ -124,8 +138,10 @@ __decorate([
     __param(6, (0, common_1.Query)('dateTo')),
     __param(7, (0, common_1.Query)('startDate')),
     __param(8, (0, common_1.Query)('endDate')),
+    __param(9, (0, common_1.Query)('expenseEligibleOnly')),
+    __param(10, (0, common_1.Query)('excludeExpenseId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileInstallationReportsController.prototype, "findAll", null);
 __decorate([

@@ -5,7 +5,7 @@ import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report
 export declare class MobileServiceReportsController {
     private readonly serviceReportsService;
     constructor(serviceReportsService: ServiceReportsService);
-    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string): Promise<any>;
+    findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string, expenseEligibleOnly?: string, excludeExpenseId?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileServiceReportDto, req: any): Promise<({
         technicians: ({

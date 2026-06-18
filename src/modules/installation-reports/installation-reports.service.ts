@@ -96,6 +96,8 @@ export class InstallationReportsService {
       millId?: string;
       dateFrom?: string;
       dateTo?: string;
+      expenseEligibleOnly?: boolean;
+      excludeExpenseId?: string;
     },
     user?: { userId: string; role: string },
   ) {
@@ -103,8 +105,19 @@ export class InstallationReportsService {
     const cachedData = await this.redis.getJson<any>(cacheKey);
     if (cachedData) return cachedData;
 
-    const { skip, take, search, status, technicianId, customerId, millId, dateFrom, dateTo } =
-      params;
+    const {
+      skip,
+      take,
+      search,
+      status,
+      technicianId,
+      customerId,
+      millId,
+      dateFrom,
+      dateTo,
+      expenseEligibleOnly,
+      excludeExpenseId,
+    } = params;
 
     const where: any = { deleted_at: null };
 
@@ -172,6 +185,26 @@ export class InstallationReportsService {
       if (Object.keys(where.visit_date).length === 0) {
         delete where.visit_date;
       }
+    }
+
+    if (expenseEligibleOnly) {
+      where.AND = [
+        ...(where.AND || []),
+        {
+          OR: [
+            { expense_id: null },
+            ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+          ],
+        },
+        {
+          expenses: {
+            none: {
+              deleted_at: null,
+              ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+            },
+          },
+        },
+      ];
     }
 
     const [installationReports, total] = await Promise.all([

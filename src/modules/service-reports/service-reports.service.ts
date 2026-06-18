@@ -61,6 +61,8 @@ export class ServiceReportsService {
       millId?: string;
       dateFrom?: string;
       dateTo?: string;
+      expenseEligibleOnly?: boolean;
+      excludeExpenseId?: string;
     },
     user?: { userId: string; role: string },
   ) {
@@ -79,6 +81,8 @@ export class ServiceReportsService {
       millId,
       dateFrom,
       dateTo,
+      expenseEligibleOnly,
+      excludeExpenseId,
     } = params;
 
     const where: any = { deleted_at: null };
@@ -147,6 +151,26 @@ export class ServiceReportsService {
         const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
         where.visit_date.lte = toDate;
       }
+    }
+
+    if (expenseEligibleOnly) {
+      where.AND = [
+        ...(where.AND || []),
+        {
+          OR: [
+            { expense_id: null },
+            ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
+          ],
+        },
+        {
+          expenses: {
+            none: {
+              deleted_at: null,
+              ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+            },
+          },
+        },
+      ];
     }
 
     const [serviceReports, total] = await Promise.all([
