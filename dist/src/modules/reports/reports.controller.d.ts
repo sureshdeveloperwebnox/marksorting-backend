@@ -6,4 +6,5 @@ export declare class ReportsController {
     getServices(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, categoryId?: string, dateFrom?: string, dateTo?: string, millId?: string, technicianId?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
     getInstallations(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, millId?: string, technicianId?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
     getExpenses(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, categoryId?: string, dateFrom?: string, dateTo?: string, millId?: string, technicianId?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getMasterMills(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, millId?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
 }

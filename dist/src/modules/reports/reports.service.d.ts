@@ -47,6 +47,13 @@ export declare class ReportsService {
         fileName: string;
         contentType: string;
     }>;
+    private getMasterMillsWhereClause;
+    getMasterMills(params: ReportParams, user: UserSessionPayload): Promise<any>;
+    exportMasterMills(params: ReportParams, user: UserSessionPayload, formatType: 'pdf' | 'csv' | 'excel'): Promise<{
+        buffer: Buffer<ArrayBufferLike>;
+        fileName: string;
+        contentType: string;
+    }>;
     private generateCsv;
     private generateExcel;
     private getFiltersSummary;

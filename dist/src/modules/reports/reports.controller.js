@@ -89,6 +89,26 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getExpenses(params, req.user);
         return res.json(data);
     }
+    async getMasterMills(req, res, skip, take, search, status, dateFrom, dateTo, millId, exportType) {
+        const params = {
+            skip: skip ? parseInt(skip, 10) : 0,
+            take: take ? parseInt(take, 10) : 10,
+            search,
+            status,
+            dateFrom,
+            dateTo,
+            millId,
+        };
+        if (exportType) {
+            const { buffer, fileName, contentType } = await this.reportsService.exportMasterMills(params, req.user, exportType);
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+            res.setHeader('Content-Length', buffer.length);
+            return res.end(buffer);
+        }
+        const data = await this.reportsService.getMasterMills(params, req.user);
+        return res.json(data);
+    }
 };
 exports.ReportsController = ReportsController;
 __decorate([
@@ -224,6 +244,47 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getExpenses", null);
+__decorate([
+    (0, common_1.Get)('master-mills'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get master mills reports log or export it' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.EXPORT,
+        entityType: 'reports',
+        description: (ctx) => {
+            const exportType = ctx.query.export;
+            return exportType
+                ? `Exported master mills reports as ${exportType.toUpperCase()}`
+                : 'Viewed master mills reports list';
+        },
+        ignoreNullEntity: true,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'status', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({
+        name: 'export',
+        required: false,
+        type: String,
+        description: 'pdf, csv, excel',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Query)('skip')),
+    __param(3, (0, common_1.Query)('take')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('status')),
+    __param(6, (0, common_1.Query)('dateFrom')),
+    __param(7, (0, common_1.Query)('dateTo')),
+    __param(8, (0, common_1.Query)('millId')),
+    __param(9, (0, common_1.Query)('export')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], ReportsController.prototype, "getMasterMills", null);
 exports.ReportsController = ReportsController = __decorate([
     (0, swagger_1.ApiTags)('reports'),
     (0, swagger_1.ApiBearerAuth)(),

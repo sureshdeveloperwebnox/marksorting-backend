@@ -693,6 +693,194 @@ let ReportsService = class ReportsService {
         }
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
+    getMasterMillsWhereClause(params, user) {
+        const { search, status, dateFrom, dateTo, millId } = params;
+        const where = { deleted_at: null };
+        if (search) {
+            where.OR = [
+                { ref_no: { contains: search, mode: 'insensitive' } },
+                { frame_no: { contains: search, mode: 'insensitive' } },
+                { mc_model: { contains: search, mode: 'insensitive' } },
+                { invoice_no: { contains: search, mode: 'insensitive' } },
+                { place: { contains: search, mode: 'insensitive' } },
+                { mill: { name: { contains: search, mode: 'insensitive' } } },
+            ];
+        }
+        if (status) {
+            where.status = status;
+        }
+        if (millId) {
+            where.mill_id = millId;
+        }
+        if (dateFrom || dateTo) {
+            where.installation_date = {};
+            if (dateFrom) {
+                const [fy, fm, fd] = dateFrom.split('-').map(Number);
+                const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+                where.installation_date.gte = fromDate;
+            }
+            if (dateTo) {
+                const [ty, tm, td] = dateTo.split('-').map(Number);
+                const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+                where.installation_date.lte = toDate;
+            }
+        }
+        return where;
+    }
+    async getMasterMills(params, user) {
+        const cacheKey = `${this.CACHE_PREFIX}master-mills:${JSON.stringify({ params, user })}`;
+        const cached = await this.redis.getJson(cacheKey);
+        if (cached)
+            return cached;
+        const where = this.getMasterMillsWhereClause(params, user);
+        const [reports, total] = await Promise.all([
+            this.prisma.masterMill.findMany({
+                skip: params.skip,
+                take: params.take,
+                where,
+                include: {
+                    mill: { select: { id: true, name: true } },
+                },
+                orderBy: { installation_date: 'desc' },
+            }),
+            this.prisma.masterMill.count({ where }),
+        ]);
+        const now = new Date();
+        const [underWarrantyCount, underAmcCount, nonWarrantyCount] = await Promise.all([
+            this.prisma.masterMill.count({
+                where: {
+                    ...where,
+                    warranty_closing_date: { gte: now },
+                    all_warranty: { not: 'Non Warranty' },
+                },
+            }),
+            this.prisma.masterMill.count({
+                where: {
+                    ...where,
+                    amc_closing_date: { gte: now },
+                    amc_starting_date: { not: null },
+                },
+            }),
+            this.prisma.masterMill.count({
+                where: { ...where, all_warranty: 'Non Warranty' },
+            }),
+        ]);
+        const result = {
+            reports,
+            total,
+            metrics: {
+                totalCount: total,
+                underWarrantyCount,
+                underAmcCount,
+                nonWarrantyCount,
+            },
+        };
+        await this.redis.setJson(cacheKey, result, 300);
+        return result;
+    }
+    async exportMasterMills(params, user, formatType) {
+        const where = this.getMasterMillsWhereClause(params, user);
+        const reports = await this.prisma.masterMill.findMany({
+            where,
+            include: {
+                mill: { select: { id: true, name: true } },
+            },
+            orderBy: { installation_date: 'desc' },
+        });
+        const headers = [
+            'Ref No / Frame No',
+            'Mill Name',
+            'Place',
+            'Machine Model',
+            'Installation Date',
+            'Warranty Status',
+            'AMC Period',
+            'Status',
+        ];
+        const data = reports.map((r) => [
+            `${r.ref_no || '-'} / ${r.frame_no || '-'}`,
+            r.mill?.name || '-',
+            r.place || '-',
+            r.mc_model || '-',
+            r.installation_date ? r.installation_date.toISOString().slice(0, 10) : '-',
+            r.all_warranty || 'Non Warranty',
+            r.amc_period ? `${r.amc_period} Months` : '-',
+            r.status,
+        ]);
+        if (formatType === 'csv') {
+            const buffer = this.generateCsv(headers, data);
+            return {
+                buffer,
+                fileName: `master_mills_report_${Date.now()}.csv`,
+                contentType: 'text/csv',
+            };
+        }
+        if (formatType === 'excel') {
+            const buffer = this.generateExcel('Master Mills', headers, data);
+            return {
+                buffer,
+                fileName: `master_mills_report_${Date.now()}.xlsx`,
+                contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            };
+        }
+        if (formatType === 'pdf') {
+            const now = new Date();
+            const underWarranty = reports.filter((r) => r.warranty_closing_date &&
+                new Date(r.warranty_closing_date) >= now &&
+                r.all_warranty !== 'Non Warranty').length;
+            const underAmc = reports.filter((r) => r.amc_closing_date &&
+                new Date(r.amc_closing_date) >= now &&
+                r.amc_starting_date !== null).length;
+            const nonWarranty = reports.filter((r) => r.all_warranty === 'Non Warranty').length;
+            const pdfData = {
+                title: 'Master Mills Report Log',
+                filters: this.getFiltersSummary(params),
+                metrics: [
+                    {
+                        label: 'Total Records',
+                        value: String(reports.length),
+                        colorClass: 'text-primary',
+                    },
+                    {
+                        label: 'Under Warranty',
+                        value: String(underWarranty),
+                        colorClass: 'text-success',
+                    },
+                    {
+                        label: 'Under AMC',
+                        value: String(underAmc),
+                        colorClass: 'text-info',
+                    },
+                    {
+                        label: 'Non Warranty',
+                        value: String(nonWarranty),
+                        colorClass: 'text-warning',
+                    },
+                ],
+                headers,
+                rows: reports.map((r) => [
+                    `<span class="font-semibold">${this.documentTemplateService.escape(r.ref_no || '-')} / ${this.documentTemplateService.escape(r.frame_no || '-')}</span>`,
+                    this.documentTemplateService.escape(r.mill?.name),
+                    this.documentTemplateService.escape(r.place),
+                    this.documentTemplateService.escape(r.mc_model),
+                    this.documentTemplateService.date(r.installation_date),
+                    `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.all_warranty || 'Non Warranty')}</span>`,
+                    r.amc_period ? `${r.amc_period} Months` : '-',
+                    `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
+                ]),
+                company: await this.getCompanyPdfSettings(),
+            };
+            pdfData.company.logoUrl = await this.pdfService.embedImageAsDataUrl(pdfData.company.logoUrl);
+            const html = (0, reports_template_1.renderTabularReportTemplate)(pdfData, this.documentTemplateService);
+            const buffer = await this.pdfService.renderHtmlToPdf(html, (0, reports_template_1.renderTabularReportPdfOptions)(pdfData.company, this.documentTemplateService));
+            return {
+                buffer,
+                fileName: `master_mills_report_${Date.now()}.pdf`,
+                contentType: 'application/pdf',
+            };
+        }
+        throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
+    }
     generateCsv(headers, rows) {
         const escapeCsvCell = (val) => {
             const str = String(val);

@@ -236,4 +236,72 @@ export class ReportsController {
     const data = await this.reportsService.getExpenses(params, req.user);
     return res.json(data);
   }
+
+  @Get('master-mills')
+  @ApiOperation({ summary: 'Get master mills reports log or export it' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'reports',
+    description: (ctx) => {
+      const exportType = ctx.query.export;
+      return exportType
+        ? `Exported master mills reports as ${exportType.toUpperCase()}`
+        : 'Viewed master mills reports list';
+    },
+    ignoreNullEntity: true,
+  })
+  @ApiQuery({ name: 'skip', required: false, type: String })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'millId', required: false, type: String })
+  @ApiQuery({
+    name: 'export',
+    required: false,
+    type: String,
+    description: 'pdf, csv, excel',
+  })
+  async getMasterMills(
+    @Request() req: any,
+    @Res() res: Response,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('millId') millId?: string,
+    @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
+  ) {
+    const params = {
+      skip: skip ? parseInt(skip, 10) : 0,
+      take: take ? parseInt(take, 10) : 10,
+      search,
+      status,
+      dateFrom,
+      dateTo,
+      millId,
+    };
+
+    if (exportType) {
+      const { buffer, fileName, contentType } =
+        await this.reportsService.exportMasterMills(
+          params,
+          req.user,
+          exportType,
+        );
+      res.setHeader('Content-Type', contentType);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${fileName}"`,
+      );
+      res.setHeader('Content-Length', buffer.length);
+      return res.end(buffer);
+    }
+
+    const data = await this.reportsService.getMasterMills(params, req.user);
+    return res.json(data);
+  }
 }
