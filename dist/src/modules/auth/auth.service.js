@@ -53,6 +53,7 @@ const redis_service_1 = require("../../redis/redis.service");
 const permissions_service_1 = require("../permissions/permissions.service");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const mail_service_1 = require("../mail/mail.service");
+const date_time_1 = require("../../common/utils/date-time");
 let AuthService = class AuthService {
     usersService;
     jwtService;
@@ -190,11 +191,13 @@ let AuthService = class AuthService {
         return this.jwtService.decode(token);
     }
     async generateRefreshToken(userId) {
+        const refreshExpiresIn = this.configService.get('jwt.refreshExpiresIn') || '7d';
         const refreshToken = this.jwtService.sign({ sub: userId }, {
             secret: this.configService.get('jwt.refreshSecret'),
-            expiresIn: this.configService.get('jwt.refreshExpiresIn'),
+            expiresIn: refreshExpiresIn,
         });
-        await this.redisService.set(`refresh_token:${userId}`, refreshToken, 'EX', 7 * 24 * 60 * 60);
+        const redisExpirySeconds = Math.floor((0, date_time_1.parseDuration)(refreshExpiresIn, 7 * 24 * 60 * 60 * 1000) / 1000);
+        await this.redisService.set(`refresh_token:${userId}`, refreshToken, 'EX', redisExpirySeconds);
         return refreshToken;
     }
     async refresh(refreshToken) {

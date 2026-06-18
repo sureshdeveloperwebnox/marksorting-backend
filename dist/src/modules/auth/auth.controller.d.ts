@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { MobileLoginDto } from './dto/mobile-login.dto';
@@ -10,8 +11,9 @@ import * as express from 'express';
 export declare class AuthController {
     private authService;
     private activityLogsService;
+    private configService;
     private readonly logger;
-    constructor(authService: AuthService, activityLogsService: ActivityLogsService);
+    constructor(authService: AuthService, activityLogsService: ActivityLogsService, configService: ConfigService);
     private setTokens;
     login(req: any, res: express.Response): Promise<{
         access_token: string;

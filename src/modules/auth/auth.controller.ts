@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -32,7 +33,9 @@ import {
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 import { Public } from '../../common/decorators/public.decorator';
+import { parseDuration } from '../../common/utils/date-time';
 import * as express from 'express';
+
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -42,6 +45,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private activityLogsService: ActivityLogsService,
+    private configService: ConfigService,
   ) {}
 
   private setTokens(req: express.Request, res: express.Response, result: any) {
@@ -56,11 +60,17 @@ export class AuthController {
     const cookieSecure = isProduction || isSecure;
     const cookieSameSite = isNgrok ? 'none' : 'lax';
 
+    const jwtExpiresIn = this.configService.get<string>('jwt.expiresIn') || '15m';
+    const jwtRefreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
+
+    const accessTokenMaxAge = parseDuration(jwtExpiresIn, 15 * 60 * 1000);
+    const refreshTokenMaxAge = parseDuration(jwtRefreshExpiresIn, 7 * 24 * 60 * 60 * 1000);
+
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
       secure: cookieSecure,
       sameSite: cookieSameSite,
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: accessTokenMaxAge,
       path: '/',
     });
 
@@ -69,7 +79,7 @@ export class AuthController {
         httpOnly: true,
         secure: cookieSecure,
         sameSite: cookieSameSite,
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        maxAge: refreshTokenMaxAge,
         path: '/',
       });
     }

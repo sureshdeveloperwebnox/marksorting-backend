@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ActivityLogsService } from '../activity-logs/activity-logs.service';
 import { UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -17,6 +18,14 @@ describe('AuthController', () => {
     create: jest.fn(),
   };
 
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      if (key === 'jwt.expiresIn') return '15m';
+      if (key === 'jwt.refreshExpiresIn') return '7d';
+      return null;
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
@@ -28,6 +37,10 @@ describe('AuthController', () => {
         {
           provide: ActivityLogsService,
           useValue: mockActivityLogsService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

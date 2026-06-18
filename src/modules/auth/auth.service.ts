@@ -14,6 +14,7 @@ import { PermissionsService } from '../permissions/permissions.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { parseDuration } from '../../common/utils/date-time';
 
 @Injectable()
 export class AuthService {
@@ -175,14 +176,18 @@ export class AuthService {
   }
 
   async generateRefreshToken(userId: string): Promise<string> {
+    const refreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
     const refreshToken = this.jwtService.sign(
       { sub: userId },
       {
         secret: this.configService.get<string>('jwt.refreshSecret')!,
-        expiresIn: this.configService.get<string>(
-          'jwt.refreshExpiresIn',
-        ) as any,
+        expiresIn: refreshExpiresIn as any,
       },
+    );
+
+    // Parse duration to seconds for Redis TTL (default 7 days)
+    const redisExpirySeconds = Math.floor(
+      parseDuration(refreshExpiresIn, 7 * 24 * 60 * 60 * 1000) / 1000,
     );
 
     // Store in Redis with expiry
@@ -190,7 +195,7 @@ export class AuthService {
       `refresh_token:${userId}`,
       refreshToken,
       'EX',
-      7 * 24 * 60 * 60, // 7 days
+      redisExpirySeconds,
     );
 
     return refreshToken;

@@ -48,6 +48,7 @@ var AuthController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const auth_service_1 = require("./auth.service");
 const local_auth_guard_1 = require("./guards/local-auth.guard");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
@@ -65,14 +66,17 @@ const change_password_dto_1 = require("./dto/change-password.dto");
 const activity_logs_service_1 = require("../activity-logs/activity-logs.service");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const date_time_1 = require("../../common/utils/date-time");
 const express = __importStar(require("express"));
 let AuthController = AuthController_1 = class AuthController {
     authService;
     activityLogsService;
+    configService;
     logger = new common_1.Logger(AuthController_1.name);
-    constructor(authService, activityLogsService) {
+    constructor(authService, activityLogsService, configService) {
         this.authService = authService;
         this.activityLogsService = activityLogsService;
+        this.configService = configService;
     }
     setTokens(req, res, result) {
         const isProduction = process.env.NODE_ENV === 'production';
@@ -82,11 +86,15 @@ let AuthController = AuthController_1 = class AuthController {
         const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
         const cookieSecure = isProduction || isSecure;
         const cookieSameSite = isNgrok ? 'none' : 'lax';
+        const jwtExpiresIn = this.configService.get('jwt.expiresIn') || '15m';
+        const jwtRefreshExpiresIn = this.configService.get('jwt.refreshExpiresIn') || '7d';
+        const accessTokenMaxAge = (0, date_time_1.parseDuration)(jwtExpiresIn, 15 * 60 * 1000);
+        const refreshTokenMaxAge = (0, date_time_1.parseDuration)(jwtRefreshExpiresIn, 7 * 24 * 60 * 60 * 1000);
         res.cookie('access_token', result.access_token, {
             httpOnly: true,
             secure: cookieSecure,
             sameSite: cookieSameSite,
-            maxAge: 15 * 60 * 1000,
+            maxAge: accessTokenMaxAge,
             path: '/',
         });
         if (result.refresh_token) {
@@ -94,7 +102,7 @@ let AuthController = AuthController_1 = class AuthController {
                 httpOnly: true,
                 secure: cookieSecure,
                 sameSite: cookieSameSite,
-                maxAge: 7 * 24 * 60 * 60 * 1000,
+                maxAge: refreshTokenMaxAge,
                 path: '/',
             });
         }
@@ -382,6 +390,7 @@ exports.AuthController = AuthController = AuthController_1 = __decorate([
     (0, swagger_1.ApiTags)('Authentication'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService,
-        activity_logs_service_1.ActivityLogsService])
+        activity_logs_service_1.ActivityLogsService,
+        config_1.ConfigService])
 ], AuthController);
 //# sourceMappingURL=auth.controller.js.map
