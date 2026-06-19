@@ -78,11 +78,15 @@ let AuthController = AuthController_1 = class AuthController {
         this.activityLogsService = activityLogsService;
         this.configService = configService;
     }
-    setTokens(req, res, result) {
-        const isProduction = process.env.NODE_ENV === 'production';
+    getCookieFlags(req) {
         const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
-        const cookieSecure = isProduction || isSecure;
-        const cookieSameSite = cookieSecure ? 'none' : 'lax';
+        return {
+            secure: isSecure,
+            sameSite: isSecure ? 'none' : 'lax',
+        };
+    }
+    setTokens(req, res, result) {
+        const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
         const jwtExpiresIn = this.configService.get('jwt.expiresIn') || '15m';
         const jwtRefreshExpiresIn = this.configService.get('jwt.refreshExpiresIn') || '7d';
         const accessTokenMaxAge = (0, date_time_1.parseDuration)(jwtExpiresIn, 15 * 60 * 1000);
@@ -202,8 +206,9 @@ let AuthController = AuthController_1 = class AuthController {
                 device_name: deviceName,
             });
         }
-        res.clearCookie('access_token', { path: '/' });
-        res.clearCookie('refresh_token', { path: '/' });
+        const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
+        res.clearCookie('access_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+        res.clearCookie('refresh_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
         return { message: 'Logged out successfully' };
     }
     async refresh(req, res) {

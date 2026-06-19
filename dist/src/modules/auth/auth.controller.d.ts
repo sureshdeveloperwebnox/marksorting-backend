@@ -14,6 +14,7 @@ export declare class AuthController {
     private configService;
     private readonly logger;
     constructor(authService: AuthService, activityLogsService: ActivityLogsService, configService: ConfigService);
+    private getCookieFlags;
     private setTokens;
     login(req: any, res: express.Response): Promise<{
         access_token: string;

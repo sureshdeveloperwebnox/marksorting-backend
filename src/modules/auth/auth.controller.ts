@@ -48,13 +48,21 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  private setTokens(req: express.Request, res: express.Response, result: any) {
-    const isProduction = process.env.NODE_ENV === 'production';
+  /** Returns cookie security flags based on the actual transport (HTTPS vs HTTP). */
+  private getCookieFlags(req: express.Request): { secure: boolean; sameSite: 'none' | 'lax' } {
+    // Use actual connection security, NOT NODE_ENV, to determine flags.
+    // This ensures cookies work correctly both in local HTTP dev and production HTTPS.
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+    return {
+      secure: isSecure,
+      // sameSite 'none' requires secure:true per browser spec.
+      // Fall back to 'lax' for plain HTTP (local dev) so cookies are accepted.
+      sameSite: isSecure ? 'none' : 'lax',
+    };
+  }
 
-    const cookieSecure = isProduction || isSecure;
-    // In secure/HTTPS contexts, use 'none' to support subdomain and cross-origin authentication
-    const cookieSameSite = cookieSecure ? 'none' : 'lax';
+  private setTokens(req: express.Request, res: express.Response, result: any) {
+    const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
 
     const jwtExpiresIn = this.configService.get<string>('jwt.expiresIn') || '15m';
     const jwtRefreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
@@ -207,8 +215,10 @@ export class AuthController {
       });
     }
 
-    res.clearCookie('access_token', { path: '/' });
-    res.clearCookie('refresh_token', { path: '/' });
+    // Must include the same secure/sameSite flags used when setting, or browsers ignore the clear.
+    const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
+    res.clearCookie('access_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+    res.clearCookie('refresh_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
     return { message: 'Logged out successfully' };
   }
 
