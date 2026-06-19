@@ -331,6 +331,13 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 linkedVisitDate = report.visit_date.toISOString().split('T')[0];
             }
         }
+        if (linkedVisitDate) {
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            if (new Date(linkedVisitDate) > today) {
+                throw new common_1.BadRequestException('Expense date cannot be in the future');
+            }
+        }
         const expense = await this.prisma.$transaction(async (tx) => {
             const todayStart = new Date();
             todayStart.setUTCHours(0, 0, 0, 0);
@@ -626,6 +633,16 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 if (expenseData.visit_date === undefined) {
                     updateData.visit_date = report.visit_date;
                 }
+            }
+        }
+        const finalVisitDate = updateData.visit_date !== undefined
+            ? updateData.visit_date
+            : (expenseData.visit_date !== undefined ? new Date(expenseData.visit_date) : undefined);
+        if (finalVisitDate) {
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            if (finalVisitDate > today) {
+                throw new common_1.BadRequestException('Expense date cannot be in the future');
             }
         }
         const hasItems = expenseData.expense_items !== undefined;
