@@ -33,7 +33,7 @@ export declare class CreateInstallationReportDto {
     auto_drain_valve_working?: boolean;
     engineer_remarks: string;
     engineer_signature: string;
-    customer_signature: string;
+    customer_signature?: string;
     mill_email?: string;
     customer_remarks?: string;
     status?: string;

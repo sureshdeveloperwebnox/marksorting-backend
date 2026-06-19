@@ -268,9 +268,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "engineer_signature", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'data:image/png;base64,...' }),
+    (0, swagger_1.ApiProperty)({ example: 'data:image/png;base64,...', required: false }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "customer_signature", void 0);
 __decorate([

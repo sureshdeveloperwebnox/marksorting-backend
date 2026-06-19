@@ -195,10 +195,10 @@ export class CreateInstallationReportDto {
   @IsNotEmpty()
   engineer_signature: string;
 
-  @ApiProperty({ example: 'data:image/png;base64,...' })
+  @ApiProperty({ example: 'data:image/png;base64,...', required: false })
   @IsString()
-  @IsNotEmpty()
-  customer_signature: string;
+  @IsOptional()
+  customer_signature?: string;
 
   @ApiProperty({ example: 'mill@example.com', required: false })
   @IsString()
