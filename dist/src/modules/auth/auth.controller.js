@@ -81,11 +81,8 @@ let AuthController = AuthController_1 = class AuthController {
     setTokens(req, res, result) {
         const isProduction = process.env.NODE_ENV === 'production';
         const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
-        const host = (req.headers.host || '').toLowerCase();
-        const origin = (req.headers.origin || '').toLowerCase();
-        const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
         const cookieSecure = isProduction || isSecure;
-        const cookieSameSite = isNgrok ? 'none' : 'lax';
+        const cookieSameSite = cookieSecure ? 'none' : 'lax';
         const jwtExpiresIn = this.configService.get('jwt.expiresIn') || '15m';
         const jwtRefreshExpiresIn = this.configService.get('jwt.refreshExpiresIn') || '7d';
         const accessTokenMaxAge = (0, date_time_1.parseDuration)(jwtExpiresIn, 15 * 60 * 1000);
@@ -160,14 +157,34 @@ let AuthController = AuthController_1 = class AuthController {
         let userId = null;
         let userEmail = 'Unknown';
         try {
+            let refreshToken = req.cookies?.['refresh_token'];
+            if (!refreshToken && req.headers.authorization) {
+                const parts = req.headers.authorization.split(' ');
+                if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+                    refreshToken = parts[1];
+                }
+            }
             const authHeader = req.headers.authorization;
+            let token = null;
             if (authHeader && authHeader.startsWith('Bearer ')) {
-                const token = authHeader.split(' ')[1];
+                token = authHeader.split(' ')[1];
+            }
+            else if (req.cookies?.['access_token']) {
+                token = req.cookies?.['access_token'];
+            }
+            if (token) {
                 const payload = this.authService.decodeToken(token);
                 if (payload?.sub) {
                     userId = payload.sub;
                     userEmail = payload.email || 'Unknown';
-                    await this.authService.logout(payload.sub);
+                    await this.authService.logout(payload.sub, refreshToken);
+                }
+            }
+            else if (refreshToken) {
+                const payload = this.authService.decodeToken(refreshToken);
+                if (payload?.sub) {
+                    userId = payload.sub;
+                    await this.authService.logout(payload.sub, refreshToken);
                 }
             }
         }

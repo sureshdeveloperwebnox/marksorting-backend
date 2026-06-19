@@ -201,8 +201,8 @@ describe('AuthService', () => {
 
       expect(jwtService.sign).toHaveBeenCalled();
       expect(redisService.set).toHaveBeenCalledWith(
-        'refresh_token:user-id',
-        'refresh-token-val',
+        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/),
+        'active',
         'EX',
         expect.any(Number),
       );
@@ -224,7 +224,7 @@ describe('AuthService', () => {
       };
 
       mockJwtService.verify.mockReturnValue({ sub: 'user-id' });
-      mockRedisService.get.mockResolvedValue('old-refresh-token');
+      mockRedisService.get.mockResolvedValue('active');
       mockUsersService.findById.mockResolvedValue(mockUser);
       mockPermissionsService.getUserPermissions.mockResolvedValue([
         'some.permission',
@@ -240,12 +240,20 @@ describe('AuthService', () => {
       expect(jwtService.verify).toHaveBeenCalledWith('old-refresh-token', {
         secret: 'refresh-secret',
       });
-      expect(redisService.get).toHaveBeenCalledWith('refresh_token:user-id');
+      expect(redisService.get).toHaveBeenCalledWith(
+        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/)
+      );
       expect(redisService.set).toHaveBeenCalledWith(
-        'refresh_token:user-id',
-        'new-refresh-token',
+        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/),
+        'active',
         'EX',
         expect.any(Number),
+      );
+      expect(redisService.set).toHaveBeenCalledWith(
+        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/),
+        expect.stringContaining('"status":"rotated"'),
+        'EX',
+        60,
       );
       expect(result).toEqual({
         access_token: 'new-access-token',

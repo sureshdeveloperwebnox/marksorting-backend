@@ -148,8 +148,17 @@ export class AuthService {
     };
   }
 
-  async logout(userId: string) {
-    await this.redisService.del(`refresh_token:${userId}`);
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  async logout(userId: string, refreshToken?: string) {
+    if (refreshToken) {
+      const hash = this.hashToken(refreshToken);
+      await this.redisService.del(`refresh_token:${userId}:${hash}`);
+    } else {
+      await this.redisService.delByPrefix(`refresh_token:${userId}:`);
+    }
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
@@ -190,10 +199,12 @@ export class AuthService {
       parseDuration(refreshExpiresIn, 7 * 24 * 60 * 60 * 1000) / 1000,
     );
 
+    const hash = this.hashToken(refreshToken);
+
     // Store in Redis with expiry
     await this.redisService.set(
-      `refresh_token:${userId}`,
-      refreshToken,
+      `refresh_token:${userId}:${hash}`,
+      'active',
       'EX',
       redisExpirySeconds,
     );
@@ -208,12 +219,40 @@ export class AuthService {
       });
 
       const userId = payload.sub;
-      const storedToken = await this.redisService.get(
-        `refresh_token:${userId}`,
-      );
+      const hash = this.hashToken(refreshToken);
+      const tokenKey = `refresh_token:${userId}:${hash}`;
+      const storedValue = await this.redisService.get(tokenKey);
 
-      if (!storedToken || storedToken !== refreshToken) {
+      if (!storedValue) {
         throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // Handle reuse grace period (rotated within 60s)
+      if (storedValue.startsWith('{')) {
+        const parsed = JSON.parse(storedValue);
+        if (parsed.status === 'rotated') {
+          const now = Date.now();
+          if (now - parsed.rotatedAt < 60000) {
+            const nextKey = `refresh_token:${userId}:${parsed.newHash}`;
+            const nextValue = await this.redisService.get(nextKey);
+            if (nextValue) {
+              return {
+                access_token: parsed.access_token,
+                refresh_token: parsed.refresh_token,
+                user: await this.getProfile(userId),
+              };
+            }
+          } else {
+            // Potential token reuse breach! Revoke all tokens for safety
+            await this.redisService.delByPrefix(`refresh_token:${userId}:`);
+            throw new UnauthorizedException('Refresh token expired and reused. Sessions revoked.');
+          }
+        }
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      if (storedValue !== 'active') {
+        throw new UnauthorizedException('Invalid refresh token state');
       }
 
       const user = await this.usersService.findById(userId);
@@ -225,9 +264,7 @@ export class AuthService {
       const permissions =
         await this.permissionsService.getUserPermissions(userId);
 
-      // Generate new refresh token for rotation
-      const newRefreshToken = await this.generateRefreshToken(userId);
-
+      // Generate new access token payload
       const newPayload = {
         email: user.email,
         sub: user.id,
@@ -235,8 +272,26 @@ export class AuthService {
         role: user.role.name,
         permissions: permissions,
       };
+      const newAccessToken = this.jwtService.sign(newPayload);
+
+      // Generate new refresh token for rotation
+      const newRefreshToken = await this.generateRefreshToken(userId);
+      const newHash = this.hashToken(newRefreshToken);
+
+      // Mark current token as rotated with 60s TTL
+      const rotatedData = JSON.stringify({
+        status: 'rotated',
+        newHash,
+        rotatedAt: Date.now(),
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
+      });
+
+      // Keep rotated token valid for 60 seconds to support concurrent reloads
+      await this.redisService.set(tokenKey, rotatedData, 'EX', 60);
+
       return {
-        access_token: this.jwtService.sign(newPayload),
+        access_token: newAccessToken,
         refresh_token: newRefreshToken,
         user: {
           id: user.id,
@@ -253,6 +308,9 @@ export class AuthService {
         },
       };
     } catch (e) {
+      if (e instanceof UnauthorizedException) {
+        throw e;
+      }
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -329,7 +387,7 @@ export class AuthService {
     ]);
 
     // Invalidate user cache to ensure clean updates (must match UsersService cache keys)
-    await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
+    await this.redisService.delByPrefix(`refresh_token:${resetRecord.user_id}:`);
     await this.redisService.del(`user:email:${resetRecord.user.email}`);
     await this.redisService.del(`user:id:${resetRecord.user_id}`);
   }
@@ -388,7 +446,7 @@ export class AuthService {
     ]);
 
     // Invalidate all refresh tokens for this user (force re-login)
-    await this.redisService.del(`refresh_token:${userId}`);
+    await this.redisService.delByPrefix(`refresh_token:${userId}:`);
 
     // Invalidate user cache (must match UsersService cache keys)
     await this.redisService.del(`user:email:${user.email}`);

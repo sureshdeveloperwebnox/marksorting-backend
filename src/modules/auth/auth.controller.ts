@@ -52,13 +52,9 @@ export class AuthController {
     const isProduction = process.env.NODE_ENV === 'production';
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
 
-    // Detect ngrok tunnels or cross-site contexts for sameSite: 'none'
-    const host = (req.headers.host || '').toLowerCase();
-    const origin = (req.headers.origin || '').toLowerCase();
-    const isNgrok = host.includes('ngrok') || origin.includes('ngrok');
-
     const cookieSecure = isProduction || isSecure;
-    const cookieSameSite = isNgrok ? 'none' : 'lax';
+    // In secure/HTTPS contexts, use 'none' to support subdomain and cross-origin authentication
+    const cookieSameSite = cookieSecure ? 'none' : 'lax';
 
     const jwtExpiresIn = this.configService.get<string>('jwt.expiresIn') || '15m';
     const jwtRefreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
@@ -163,18 +159,38 @@ export class AuthController {
 
     // Try to get user ID from token even if expired for Redis cleanup
     try {
+      let refreshToken = req.cookies?.['refresh_token'];
+      if (!refreshToken && req.headers.authorization) {
+        const parts = req.headers.authorization.split(' ');
+        if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+          refreshToken = parts[1];
+        }
+      }
+
       const authHeader = req.headers.authorization;
+      let token = null;
       if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
+        token = authHeader.split(' ')[1];
+      } else if (req.cookies?.['access_token']) {
+        token = req.cookies?.['access_token'];
+      }
+
+      if (token) {
         const payload = this.authService.decodeToken(token);
         if (payload?.sub) {
           userId = payload.sub;
           userEmail = payload.email || 'Unknown';
-          await this.authService.logout(payload.sub);
+          await this.authService.logout(payload.sub, refreshToken);
+        }
+      } else if (refreshToken) {
+        const payload = this.authService.decodeToken(refreshToken);
+        if (payload?.sub) {
+          userId = payload.sub;
+          await this.authService.logout(payload.sub, refreshToken);
         }
       }
     } catch (e) {
-      // Ignore Redis errors during logout
+      // Ignore errors during logout
     }
 
     // Log logout if we have a user ID

@@ -167,8 +167,17 @@ let AuthService = class AuthService {
             background_image_url: user.background_image_url,
         };
     }
-    async logout(userId) {
-        await this.redisService.del(`refresh_token:${userId}`);
+    hashToken(token) {
+        return crypto.createHash('sha256').update(token).digest('hex');
+    }
+    async logout(userId, refreshToken) {
+        if (refreshToken) {
+            const hash = this.hashToken(refreshToken);
+            await this.redisService.del(`refresh_token:${userId}:${hash}`);
+        }
+        else {
+            await this.redisService.delByPrefix(`refresh_token:${userId}:`);
+        }
     }
     async updateProfile(userId, dto) {
         const { after: user } = await this.usersService.update(userId, dto);
@@ -197,7 +206,8 @@ let AuthService = class AuthService {
             expiresIn: refreshExpiresIn,
         });
         const redisExpirySeconds = Math.floor((0, date_time_1.parseDuration)(refreshExpiresIn, 7 * 24 * 60 * 60 * 1000) / 1000);
-        await this.redisService.set(`refresh_token:${userId}`, refreshToken, 'EX', redisExpirySeconds);
+        const hash = this.hashToken(refreshToken);
+        await this.redisService.set(`refresh_token:${userId}:${hash}`, 'active', 'EX', redisExpirySeconds);
         return refreshToken;
     }
     async refresh(refreshToken) {
@@ -206,16 +216,42 @@ let AuthService = class AuthService {
                 secret: this.configService.get('jwt.refreshSecret'),
             });
             const userId = payload.sub;
-            const storedToken = await this.redisService.get(`refresh_token:${userId}`);
-            if (!storedToken || storedToken !== refreshToken) {
+            const hash = this.hashToken(refreshToken);
+            const tokenKey = `refresh_token:${userId}:${hash}`;
+            const storedValue = await this.redisService.get(tokenKey);
+            if (!storedValue) {
                 throw new common_1.UnauthorizedException('Invalid refresh token');
+            }
+            if (storedValue.startsWith('{')) {
+                const parsed = JSON.parse(storedValue);
+                if (parsed.status === 'rotated') {
+                    const now = Date.now();
+                    if (now - parsed.rotatedAt < 60000) {
+                        const nextKey = `refresh_token:${userId}:${parsed.newHash}`;
+                        const nextValue = await this.redisService.get(nextKey);
+                        if (nextValue) {
+                            return {
+                                access_token: parsed.access_token,
+                                refresh_token: parsed.refresh_token,
+                                user: await this.getProfile(userId),
+                            };
+                        }
+                    }
+                    else {
+                        await this.redisService.delByPrefix(`refresh_token:${userId}:`);
+                        throw new common_1.UnauthorizedException('Refresh token expired and reused. Sessions revoked.');
+                    }
+                }
+                throw new common_1.UnauthorizedException('Invalid refresh token');
+            }
+            if (storedValue !== 'active') {
+                throw new common_1.UnauthorizedException('Invalid refresh token state');
             }
             const user = await this.usersService.findById(userId);
             if (!user) {
                 throw new common_1.UnauthorizedException('User not found');
             }
             const permissions = await this.permissionsService.getUserPermissions(userId);
-            const newRefreshToken = await this.generateRefreshToken(userId);
             const newPayload = {
                 email: user.email,
                 sub: user.id,
@@ -223,8 +259,19 @@ let AuthService = class AuthService {
                 role: user.role.name,
                 permissions: permissions,
             };
+            const newAccessToken = this.jwtService.sign(newPayload);
+            const newRefreshToken = await this.generateRefreshToken(userId);
+            const newHash = this.hashToken(newRefreshToken);
+            const rotatedData = JSON.stringify({
+                status: 'rotated',
+                newHash,
+                rotatedAt: Date.now(),
+                access_token: newAccessToken,
+                refresh_token: newRefreshToken,
+            });
+            await this.redisService.set(tokenKey, rotatedData, 'EX', 60);
             return {
-                access_token: this.jwtService.sign(newPayload),
+                access_token: newAccessToken,
                 refresh_token: newRefreshToken,
                 user: {
                     id: user.id,
@@ -242,6 +289,9 @@ let AuthService = class AuthService {
             };
         }
         catch (e) {
+            if (e instanceof common_1.UnauthorizedException) {
+                throw e;
+            }
             throw new common_1.UnauthorizedException('Invalid refresh token');
         }
     }
@@ -291,7 +341,7 @@ let AuthService = class AuthService {
                 data: { used_at: new Date() },
             }),
         ]);
-        await this.redisService.del(`refresh_token:${resetRecord.user_id}`);
+        await this.redisService.delByPrefix(`refresh_token:${resetRecord.user_id}:`);
         await this.redisService.del(`user:email:${resetRecord.user.email}`);
         await this.redisService.del(`user:id:${resetRecord.user_id}`);
     }
@@ -321,7 +371,7 @@ let AuthService = class AuthService {
                 data: { password_hash: hashedPassword },
             }),
         ]);
-        await this.redisService.del(`refresh_token:${userId}`);
+        await this.redisService.delByPrefix(`refresh_token:${userId}:`);
         await this.redisService.del(`user:email:${user.email}`);
         await this.redisService.del(`user:id:${userId}`);
         await this.permissionsService.invalidateUserPermissionsCache(userId);

@@ -68,7 +68,8 @@ export declare class AuthService {
         background_image: any;
         background_image_url: any;
     }>;
-    logout(userId: string): Promise<void>;
+    private hashToken;
+    logout(userId: string, refreshToken?: string): Promise<void>;
     updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
         id: any;
         email: any;
@@ -85,8 +86,8 @@ export declare class AuthService {
     decodeToken(token: string): any;
     generateRefreshToken(userId: string): Promise<string>;
     refresh(refreshToken: string): Promise<{
-        access_token: string;
-        refresh_token: string;
+        access_token: any;
+        refresh_token: any;
         user: {
             id: any;
             email: any;

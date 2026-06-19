@@ -54,8 +54,8 @@ export declare class AuthController {
         message: string;
     }>;
     refresh(req: any, res: express.Response): Promise<{
-        access_token: string;
-        refresh_token: string;
+        access_token: any;
+        refresh_token: any;
         user: {
             id: any;
             email: any;
