@@ -79,11 +79,7 @@ export class MasterMillsController {
     if (status) where.status = status;
     if (state) where.state = state;
 
-    if (allWarranty === 'Under AMC') {
-      const now = new Date();
-      where.amc_closing_date = { gte: now };
-      where.amc_starting_date = { not: null };
-    } else if (allWarranty) {
+    if (allWarranty) {
       where.all_warranty = allWarranty;
     }
 

@@ -7,39 +7,35 @@ export declare class MobileMasterMillsController {
         mill: ({
             customer: {
                 id: string;
-                email: string | null;
                 name: string;
+                email: string | null;
                 phone: string | null;
             } | null;
         } & {
             id: string;
+            ref_no: string | null;
+            address: string | null;
+            place: string | null;
+            status: string;
             created_at: Date;
-            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            place: string | null;
-            status: string;
+            email: string | null;
             phone: string | null;
-            address: string | null;
             customer_id: string | null;
-            ref_no: string | null;
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
         }) | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        mill_id: string | null;
-        place: string | null;
-        status: string;
-        address: string | null;
-        ref_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
+        ref_no: string | null;
+        mill_id: string | null;
+        address: string | null;
+        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -54,50 +50,50 @@ export declare class MobileMasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: import("@prisma/client/runtime/client").Decimal | null;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         type: string;
     })[]>;
     quickRegister(dto: QuickRegisterDto): Promise<({
         mill: ({
             customer: {
                 id: string;
+                address: string | null;
+                status: string;
                 created_at: Date;
-                email: string | null;
                 updated_at: Date;
                 deleted_at: Date | null;
                 name: string;
-                status: string;
+                email: string | null;
                 phone: string | null;
-                address: string | null;
             } | null;
         } & {
             id: string;
+            ref_no: string | null;
+            address: string | null;
+            place: string | null;
+            status: string;
             created_at: Date;
-            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            place: string | null;
-            status: string;
+            email: string | null;
             phone: string | null;
-            address: string | null;
             customer_id: string | null;
-            ref_no: string | null;
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
         }) | null;
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        mill_id: string | null;
-        place: string | null;
-        status: string;
-        address: string | null;
-        ref_no: string | null;
         invoice_no: string;
         invoice_date: Date | null;
+        ref_no: string | null;
+        mill_id: string | null;
+        address: string | null;
+        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -112,6 +108,10 @@ export declare class MobileMasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: import("@prisma/client/runtime/client").Decimal | null;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         type: string;
     }) | null>;
 }

@@ -179,15 +179,13 @@ let MasterMillsService = class MasterMillsService {
             this.prisma.masterMill.count({
                 where: {
                     deleted_at: null,
-                    warranty_closing_date: { gte: now },
-                    all_warranty: { not: 'Non Warranty' },
+                    all_warranty: 'Under Warranty',
                 },
             }),
             this.prisma.masterMill.count({
                 where: {
                     deleted_at: null,
-                    amc_closing_date: { gte: now },
-                    amc_starting_date: { not: null },
+                    all_warranty: 'Under AMC',
                 },
             }),
             this.prisma.masterMill.count({

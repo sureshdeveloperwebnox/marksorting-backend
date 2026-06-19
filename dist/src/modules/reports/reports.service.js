@@ -750,15 +750,13 @@ let ReportsService = class ReportsService {
             this.prisma.masterMill.count({
                 where: {
                     ...where,
-                    warranty_closing_date: { gte: now },
-                    all_warranty: { not: 'Non Warranty' },
+                    all_warranty: 'Under Warranty',
                 },
             }),
             this.prisma.masterMill.count({
                 where: {
                     ...where,
-                    amc_closing_date: { gte: now },
-                    amc_starting_date: { not: null },
+                    all_warranty: 'Under AMC',
                 },
             }),
             this.prisma.masterMill.count({
@@ -825,12 +823,8 @@ let ReportsService = class ReportsService {
         }
         if (formatType === 'pdf') {
             const now = new Date();
-            const underWarranty = reports.filter((r) => r.warranty_closing_date &&
-                new Date(r.warranty_closing_date) >= now &&
-                r.all_warranty !== 'Non Warranty').length;
-            const underAmc = reports.filter((r) => r.amc_closing_date &&
-                new Date(r.amc_closing_date) >= now &&
-                r.amc_starting_date !== null).length;
+            const underWarranty = reports.filter((r) => r.all_warranty === 'Under Warranty').length;
+            const underAmc = reports.filter((r) => r.all_warranty === 'Under AMC').length;
             const nonWarranty = reports.filter((r) => r.all_warranty === 'Non Warranty').length;
             const pdfData = {
                 title: 'Master Mills Report Log',
