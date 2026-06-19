@@ -115,6 +115,26 @@ export class UsersService {
       include: { role: true },
     });
 
+    if (user.role?.name === 'Service Engineer') {
+      await this.prisma.technician.upsert({
+        where: { id: user.id },
+        update: {
+          full_name: user.full_name,
+          email: user.email,
+          phone: user.phone_number,
+        },
+        create: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          phone: user.phone_number,
+          status: 'AVAILABLE',
+        },
+      });
+      await this.redis.delByPrefix('technicians:list:');
+      await this.redis.del(`technician:id:${user.id}`);
+    }
+
     const imageAclPromises: Promise<void>[] = [];
     if (user.profile_image) {
       imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
@@ -126,7 +146,7 @@ export class UsersService {
       await Promise.all(imageAclPromises);
     }
 
-    await this.invalidateCache();
+    await this.invalidateCache(user.id, user.email);
     return this.formatUser(user);
   }
 
@@ -174,6 +194,37 @@ export class UsersService {
       include: { role: true },
     });
 
+    if (user.role?.name === 'Service Engineer') {
+      await this.prisma.technician.upsert({
+        where: { id: user.id },
+        update: {
+          full_name: user.full_name,
+          email: user.email,
+          phone: user.phone_number,
+        },
+        create: {
+          id: user.id,
+          full_name: user.full_name,
+          email: user.email,
+          phone: user.phone_number,
+          status: 'AVAILABLE',
+        },
+      });
+      await this.redis.delByPrefix('technicians:list:');
+      await this.redis.del(`technician:id:${user.id}`);
+    } else {
+      // Deactivate the technician if role was changed from Service Engineer to something else
+      await this.prisma.technician.updateMany({
+        where: { id: user.id, deleted_at: null },
+        data: {
+          deleted_at: new Date(),
+          status: 'INACTIVE',
+        },
+      });
+      await this.redis.delByPrefix('technicians:list:');
+      await this.redis.del(`technician:id:${user.id}`);
+    }
+
     const imageAclPromises: Promise<void>[] = [];
     if (user.profile_image && user.profile_image !== existingUser.profile_image) {
       imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
@@ -197,6 +248,16 @@ export class UsersService {
       where: { id },
       data: { deleted_at: new Date(), account_status: 'DELETED' },
     });
+
+    await this.prisma.technician.updateMany({
+      where: { id, deleted_at: null },
+      data: {
+        deleted_at: new Date(),
+        status: 'INACTIVE',
+      },
+    });
+    await this.redis.delByPrefix('technicians:list:');
+    await this.redis.del(`technician:id:${id}`);
 
     await this.invalidateCache(id, user.email);
     return user;

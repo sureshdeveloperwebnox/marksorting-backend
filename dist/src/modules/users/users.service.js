@@ -133,6 +133,25 @@ let UsersService = class UsersService {
             },
             include: { role: true },
         });
+        if (user.role?.name === 'Service Engineer') {
+            await this.prisma.technician.upsert({
+                where: { id: user.id },
+                update: {
+                    full_name: user.full_name,
+                    email: user.email,
+                    phone: user.phone_number,
+                },
+                create: {
+                    id: user.id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    phone: user.phone_number,
+                    status: 'AVAILABLE',
+                },
+            });
+            await this.redis.delByPrefix('technicians:list:');
+            await this.redis.del(`technician:id:${user.id}`);
+        }
         const imageAclPromises = [];
         if (user.profile_image) {
             imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
@@ -143,7 +162,7 @@ let UsersService = class UsersService {
         if (imageAclPromises.length > 0) {
             await Promise.all(imageAclPromises);
         }
-        await this.invalidateCache();
+        await this.invalidateCache(user.id, user.email);
         return this.formatUser(user);
     }
     async update(id, dto, requestingUser) {
@@ -181,6 +200,36 @@ let UsersService = class UsersService {
             data: updateData,
             include: { role: true },
         });
+        if (user.role?.name === 'Service Engineer') {
+            await this.prisma.technician.upsert({
+                where: { id: user.id },
+                update: {
+                    full_name: user.full_name,
+                    email: user.email,
+                    phone: user.phone_number,
+                },
+                create: {
+                    id: user.id,
+                    full_name: user.full_name,
+                    email: user.email,
+                    phone: user.phone_number,
+                    status: 'AVAILABLE',
+                },
+            });
+            await this.redis.delByPrefix('technicians:list:');
+            await this.redis.del(`technician:id:${user.id}`);
+        }
+        else {
+            await this.prisma.technician.updateMany({
+                where: { id: user.id, deleted_at: null },
+                data: {
+                    deleted_at: new Date(),
+                    status: 'INACTIVE',
+                },
+            });
+            await this.redis.delByPrefix('technicians:list:');
+            await this.redis.del(`technician:id:${user.id}`);
+        }
         const imageAclPromises = [];
         if (user.profile_image && user.profile_image !== existingUser.profile_image) {
             imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
@@ -202,6 +251,15 @@ let UsersService = class UsersService {
             where: { id },
             data: { deleted_at: new Date(), account_status: 'DELETED' },
         });
+        await this.prisma.technician.updateMany({
+            where: { id, deleted_at: null },
+            data: {
+                deleted_at: new Date(),
+                status: 'INACTIVE',
+            },
+        });
+        await this.redis.delByPrefix('technicians:list:');
+        await this.redis.del(`technician:id:${id}`);
         await this.invalidateCache(id, user.email);
         return user;
     }

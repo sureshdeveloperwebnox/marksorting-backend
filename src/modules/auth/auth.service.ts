@@ -39,10 +39,15 @@ export class AuthService {
 
   async validateServiceEngineer(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
+    
+    const roleName = user?.role?.name || (typeof user?.role === 'string' ? user.role : undefined);
+    const isServiceEngineer = roleName?.toLowerCase() === 'service engineer' || roleName?.toLowerCase() === 'service_engineer';
+    const isActive = user?.account_status?.toUpperCase() === 'ACTIVE';
+
     if (
       user &&
-      user.role?.name === 'Service Engineer' &&
-      user.account_status === 'ACTIVE' &&
+      isServiceEngineer &&
+      isActive &&
       !user.deleted_at &&
       (await bcrypt.compare(pass, user.password_hash))
     ) {
