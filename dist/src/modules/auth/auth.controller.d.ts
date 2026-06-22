@@ -72,6 +72,7 @@ export declare class AuthController {
         };
     }>;
     getProfile(req: any): Promise<{
+        expires_at: number | undefined;
         id: any;
         email: any;
         full_name: any;
