@@ -78,9 +78,25 @@ export class AuthController {
       path: '/',
     });
 
+    const now = Date.now();
+    res.cookie('access_token_expires', (now + accessTokenMaxAge).toString(), {
+      httpOnly: false,
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
+      maxAge: accessTokenMaxAge,
+      path: '/',
+    });
+
     if (result.refresh_token) {
       res.cookie('refresh_token', result.refresh_token, {
         httpOnly: true,
+        secure: cookieSecure,
+        sameSite: cookieSameSite,
+        maxAge: refreshTokenMaxAge,
+        path: '/',
+      });
+      res.cookie('refresh_token_expires', (now + refreshTokenMaxAge).toString(), {
+        httpOnly: false,
         secure: cookieSecure,
         sameSite: cookieSameSite,
         maxAge: refreshTokenMaxAge,
@@ -219,6 +235,8 @@ export class AuthController {
     const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
     res.clearCookie('access_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
     res.clearCookie('refresh_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+    res.clearCookie('access_token_expires', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+    res.clearCookie('refresh_token_expires', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
     return { message: 'Logged out successfully' };
   }
 
