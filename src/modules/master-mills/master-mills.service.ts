@@ -34,7 +34,22 @@ export class MasterMillsService {
         take,
         where: { ...where, deleted_at: null },
         include: {
-          mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
+          mill: {
+            select: {
+              id: true,
+              name: true,
+              ref_no: true,
+              place: true,
+              phone: true,
+              customer_id: true,
+              customer: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
         },
         orderBy,
       }),
@@ -54,7 +69,22 @@ export class MasterMillsService {
     const masterMill = await this.prisma.masterMill.findFirst({
       where: { id, deleted_at: null },
       include: {
-        mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
+        mill: {
+          select: {
+            id: true,
+            name: true,
+            ref_no: true,
+            place: true,
+            phone: true,
+            customer_id: true,
+            customer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -236,6 +266,8 @@ export class MasterMillsService {
       where.OR = [
         { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
         { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+        { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+        { mill: { customer: { name: { contains: cleanSearch, mode: 'insensitive' } } } },
       ];
     } else {
       const orConditions: Prisma.MasterMillWhereInput[] = [];

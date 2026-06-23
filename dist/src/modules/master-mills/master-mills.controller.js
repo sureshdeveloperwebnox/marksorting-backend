@@ -39,9 +39,10 @@ let MasterMillsController = class MasterMillsController {
                 { address: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
                 { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
+                { mill: { customer: { name: { contains: search, mode: 'insensitive' } } } },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
-            if (cleanedPhone && cleanedPhone !== '+') {
+            if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
                 orConditions.push({ phone_no: { contains: cleanedPhone, mode: 'insensitive' } });
             }
             where.OR = orConditions;

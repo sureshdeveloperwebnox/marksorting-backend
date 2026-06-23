@@ -41,7 +41,7 @@ let UsersController = class UsersController {
                 { role: { name: { contains: search, mode: 'insensitive' } } },
             ];
             const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
-            if (cleanedPhoneSearch && cleanedPhoneSearch !== '+') {
+            if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
                 orConditions.push({
                     phone_number: { contains: cleanedPhoneSearch, mode: 'insensitive' },
                 });

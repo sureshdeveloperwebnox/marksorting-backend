@@ -38,7 +38,7 @@ let MillsController = class MillsController {
                 { city: { contains: search, mode: 'insensitive' } },
             ];
             const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
-            if (cleanedPhoneSearch && cleanedPhoneSearch !== '+') {
+            if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
                 orConditions.push({ phone: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_2: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_3: { contains: cleanedPhoneSearch, mode: 'insensitive' } });
             }
             where.OR = orConditions;

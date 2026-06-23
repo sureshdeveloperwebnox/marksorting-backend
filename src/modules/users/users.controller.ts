@@ -91,7 +91,7 @@ export class UsersController {
 
       // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
       const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
-      if (cleanedPhoneSearch && cleanedPhoneSearch !== '+') {
+      if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
         orConditions.push({
           phone_number: { contains: cleanedPhoneSearch, mode: 'insensitive' },
         });

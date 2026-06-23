@@ -203,7 +203,7 @@ export async function seedMasterMills(prisma: PrismaClient) {
           warranty_months: 0,
           installation_date: new Date('2026-06-13'),
           warranty_closing_date: new Date('2027-06-13'),
-          all_warranty: 'Warranty',
+          all_warranty: 'Under Warranty',
           status: 'ACTIVE',
           type: 'Installation',
         },

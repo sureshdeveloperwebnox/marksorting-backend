@@ -34,7 +34,22 @@ let MasterMillsService = class MasterMillsService {
                 take,
                 where: { ...where, deleted_at: null },
                 include: {
-                    mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
+                    mill: {
+                        select: {
+                            id: true,
+                            name: true,
+                            ref_no: true,
+                            place: true,
+                            phone: true,
+                            customer_id: true,
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
                 },
                 orderBy,
             }),
@@ -52,7 +67,22 @@ let MasterMillsService = class MasterMillsService {
         const masterMill = await this.prisma.masterMill.findFirst({
             where: { id, deleted_at: null },
             include: {
-                mill: { select: { id: true, name: true, ref_no: true, place: true, phone: true, customer_id: true } },
+                mill: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ref_no: true,
+                        place: true,
+                        phone: true,
+                        customer_id: true,
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
             },
         });
         if (!masterMill)
@@ -215,6 +245,8 @@ let MasterMillsService = class MasterMillsService {
             where.OR = [
                 { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
                 { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                { mill: { customer: { name: { contains: cleanSearch, mode: 'insensitive' } } } },
             ];
         }
         else {
