@@ -25,10 +25,19 @@ let MobileCustomersController = class MobileCustomersController {
     findAll(skip, take, search, status) {
         const where = {};
         if (search) {
-            where.OR = [
+            const orConditions = [
                 { name: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
+                { address: { contains: search, mode: 'insensitive' } },
+                { mills: { some: { name: { contains: search, mode: 'insensitive' } } } },
             ];
+            const cleanedPhone = search.replace(/[^\d+]/g, '');
+            if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
+                orConditions.push({
+                    phone: { contains: cleanedPhone, mode: 'insensitive' },
+                });
+            }
+            where.OR = orConditions;
         }
         where.status = status || 'ACTIVE';
         return this.customersService.findAll({

@@ -59,10 +59,21 @@ export class MobileCustomersController {
     const where: Prisma.CustomerWhereInput = {};
 
     if (search) {
-      where.OR = [
+      const orConditions: Prisma.CustomerWhereInput[] = [
         { name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
+        { address: { contains: search, mode: 'insensitive' } },
+        { mills: { some: { name: { contains: search, mode: 'insensitive' } } } },
       ];
+
+      const cleanedPhone = search.replace(/[^\d+]/g, '');
+      if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
+        orConditions.push({
+          phone: { contains: cleanedPhone, mode: 'insensitive' },
+        });
+      }
+
+      where.OR = orConditions;
     }
 
     where.status = status || 'ACTIVE';

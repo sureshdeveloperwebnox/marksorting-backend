@@ -48,6 +48,18 @@ export class MillsController {
     description: 'Search query',
   })
   @ApiQuery({
+    name: 'ref_no',
+    required: false,
+    type: String,
+    description: 'Filter by reference number',
+  })
+  @ApiQuery({
+    name: 'frame_no',
+    required: false,
+    type: String,
+    description: 'Filter by machine frame number',
+  })
+  @ApiQuery({
     name: 'status',
     required: false,
     type: String,
@@ -63,6 +75,8 @@ export class MillsController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
+    @Query('ref_no') refNo?: string,
+    @Query('frame_no') frameNo?: string,
     @Query('status') status?: string,
     @Query('customer_id') customerId?: string,
   ) {
@@ -76,6 +90,9 @@ export class MillsController {
         { address: { contains: search, mode: 'insensitive' } },
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
+        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
       ];
 
       // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
@@ -89,6 +106,21 @@ export class MillsController {
       }
 
       where.OR = orConditions;
+    }
+
+    if (refNo) {
+      where.OR = [
+        ...(where.OR as Prisma.MillWhereInput[] || []),
+        { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+        { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+      ];
+    }
+
+    if (frameNo) {
+      where.OR = [
+        ...(where.OR as Prisma.MillWhereInput[] || []),
+        { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+      ];
     }
 
     if (status) {

@@ -49,7 +49,19 @@ export class MobileMillsController {
     name: 'search',
     required: false,
     type: String,
-    description: 'Search by mill name, email, phone, or address',
+    description: 'Search by mill name, email, phone, address, machine ref_no, or frame_no',
+  })
+  @ApiQuery({
+    name: 'ref_no',
+    required: false,
+    type: String,
+    description: 'Filter by reference number',
+  })
+  @ApiQuery({
+    name: 'frame_no',
+    required: false,
+    type: String,
+    description: 'Filter by machine frame number',
   })
   @ApiResponse({ status: 200, description: 'Paginated list of mills' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
@@ -58,6 +70,8 @@ export class MobileMillsController {
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
+    @Query('ref_no') refNo?: string,
+    @Query('frame_no') frameNo?: string,
   ) {
     const where: Prisma.MillWhereInput = {};
 
@@ -73,6 +87,9 @@ export class MobileMillsController {
         { address: { contains: search, mode: 'insensitive' } },
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
+        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
@@ -83,6 +100,21 @@ export class MobileMillsController {
         );
       }
       where.OR = orConditions;
+    }
+
+    if (refNo) {
+      where.OR = [
+        ...(where.OR as Prisma.MillWhereInput[] || []),
+        { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+        { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+      ];
+    }
+
+    if (frameNo) {
+      where.OR = [
+        ...(where.OR as Prisma.MillWhereInput[] || []),
+        { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+      ];
     }
 
     return this.millsService.findAll({
@@ -125,6 +157,9 @@ export class MobileMillsController {
         { address: { contains: search, mode: 'insensitive' } },
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
+        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {

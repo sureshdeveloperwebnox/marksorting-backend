@@ -22,7 +22,7 @@ let MobileMillsController = class MobileMillsController {
     constructor(millsService) {
         this.millsService = millsService;
     }
-    findAll(customerId, skip, take, search) {
+    findAll(customerId, skip, take, search, refNo, frameNo) {
         const where = {};
         if (customerId) {
             where.customer_id = customerId;
@@ -35,12 +35,28 @@ let MobileMillsController = class MobileMillsController {
                 { address: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
+                { customer: { name: { contains: search, mode: 'insensitive' } } },
+                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
                 orConditions.push({ phone: { contains: cleanedPhone, mode: 'insensitive' } }, { phone_2: { contains: cleanedPhone, mode: 'insensitive' } }, { phone_3: { contains: cleanedPhone, mode: 'insensitive' } });
             }
             where.OR = orConditions;
+        }
+        if (refNo) {
+            where.OR = [
+                ...(where.OR || []),
+                { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+                { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+            ];
+        }
+        if (frameNo) {
+            where.OR = [
+                ...(where.OR || []),
+                { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+            ];
         }
         return this.millsService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
@@ -59,6 +75,9 @@ let MobileMillsController = class MobileMillsController {
                 { address: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
+                { customer: { name: { contains: search, mode: 'insensitive' } } },
+                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
@@ -107,7 +126,19 @@ __decorate([
         name: 'search',
         required: false,
         type: String,
-        description: 'Search by mill name, email, phone, or address',
+        description: 'Search by mill name, email, phone, address, machine ref_no, or frame_no',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'ref_no',
+        required: false,
+        type: String,
+        description: 'Filter by reference number',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'frame_no',
+        required: false,
+        type: String,
+        description: 'Filter by machine frame number',
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of mills' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
@@ -115,8 +146,10 @@ __decorate([
     __param(1, (0, common_1.Query)('skip')),
     __param(2, (0, common_1.Query)('take')),
     __param(3, (0, common_1.Query)('search')),
+    __param(4, (0, common_1.Query)('ref_no')),
+    __param(5, (0, common_1.Query)('frame_no')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileMillsController.prototype, "findAll", null);
 __decorate([

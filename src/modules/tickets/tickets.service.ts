@@ -93,6 +93,9 @@ export class TicketsService {
         { customer: { name: { contains: search, mode: 'insensitive' } } },
         { customer: { email: { contains: search, mode: 'insensitive' } } },
         { mill: { name: { contains: search, mode: 'insensitive' } } },
+        { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
+        { mill: { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } } },
+        { mill: { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } } },
       ];
     }
 

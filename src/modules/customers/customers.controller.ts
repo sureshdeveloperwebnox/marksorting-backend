@@ -66,6 +66,7 @@ export class CustomersController {
         { name: { contains: search, mode: 'insensitive' } },
         { email: { contains: search, mode: 'insensitive' } },
         { address: { contains: search, mode: 'insensitive' } },
+        { mills: { some: { name: { contains: search, mode: 'insensitive' } } } },
       ];
 
       const cleanedPhone = search.replace(/[^\d+]/g, '');

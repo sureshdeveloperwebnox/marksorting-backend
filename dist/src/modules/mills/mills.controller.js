@@ -26,7 +26,7 @@ let MillsController = class MillsController {
     constructor(millsService) {
         this.millsService = millsService;
     }
-    findAll(skip, take, search, status, customerId) {
+    findAll(skip, take, search, refNo, frameNo, status, customerId) {
         const where = {};
         if (search) {
             const orConditions = [
@@ -36,12 +36,28 @@ let MillsController = class MillsController {
                 { address: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
+                { customer: { name: { contains: search, mode: 'insensitive' } } },
+                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
+                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
             ];
             const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
             if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
                 orConditions.push({ phone: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_2: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_3: { contains: cleanedPhoneSearch, mode: 'insensitive' } });
             }
             where.OR = orConditions;
+        }
+        if (refNo) {
+            where.OR = [
+                ...(where.OR || []),
+                { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+                { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+            ];
+        }
+        if (frameNo) {
+            where.OR = [
+                ...(where.OR || []),
+                { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+            ];
         }
         if (status) {
             where.status = status;
@@ -93,6 +109,18 @@ __decorate([
         description: 'Search query',
     }),
     (0, swagger_1.ApiQuery)({
+        name: 'ref_no',
+        required: false,
+        type: String,
+        description: 'Filter by reference number',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'frame_no',
+        required: false,
+        type: String,
+        description: 'Filter by machine frame number',
+    }),
+    (0, swagger_1.ApiQuery)({
         name: 'status',
         required: false,
         type: String,
@@ -107,10 +135,12 @@ __decorate([
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
-    __param(3, (0, common_1.Query)('status')),
-    __param(4, (0, common_1.Query)('customer_id')),
+    __param(3, (0, common_1.Query)('ref_no')),
+    __param(4, (0, common_1.Query)('frame_no')),
+    __param(5, (0, common_1.Query)('status')),
+    __param(6, (0, common_1.Query)('customer_id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MillsController.prototype, "findAll", null);
 __decorate([
