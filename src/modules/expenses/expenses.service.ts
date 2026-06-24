@@ -294,6 +294,15 @@ export class ExpensesService {
     }
 
     const isServiceEngineer = user && user.role === 'Service Engineer';
+    const expenseType = expenseData.expense_type || 'MILL';
+
+    if (expenseType === 'OTHERS') {
+      if (expenseData.service_report_id || expenseData.installation_report_id) {
+        throw new BadRequestException(
+          'An expense of type OTHERS cannot be linked to a service report or installation report',
+        );
+      }
+    }
 
     // Validate role-based eligibility
     if (isServiceEngineer) {
@@ -303,22 +312,24 @@ export class ExpensesService {
         );
       }
 
-      const reportsCount = await this.prisma.serviceReport.count({
-        where: {
-          deleted_at: null,
-          technicians: { some: { technician_id: user.userId } },
-        },
-      });
-      const installCount = await this.prisma.installationReport.count({
-        where: {
-          deleted_at: null,
-          technicians: { some: { technician_id: user.userId } },
-        },
-      });
-      if (reportsCount === 0 && installCount === 0) {
-        throw new ForbiddenException(
-          'You are not eligible to create expenses because you have no assigned service or installation reports.',
-        );
+      if (expenseType !== 'OTHERS') {
+        const reportsCount = await this.prisma.serviceReport.count({
+          where: {
+            deleted_at: null,
+            technicians: { some: { technician_id: user.userId } },
+          },
+        });
+        const installCount = await this.prisma.installationReport.count({
+          where: {
+            deleted_at: null,
+            technicians: { some: { technician_id: user.userId } },
+          },
+        });
+        if (reportsCount === 0 && installCount === 0) {
+          throw new ForbiddenException(
+            'You are not eligible to create expenses because you have no assigned service or installation reports.',
+          );
+        }
       }
     }
 
@@ -327,7 +338,6 @@ export class ExpensesService {
       if (!expenseData.visit_date) {
         throw new BadRequestException('Visit date is required when no report is linked');
       }
-      const expenseType = expenseData.expense_type || 'MILL';
       if (expenseType === 'MILL') {
         if (!expenseData.mill_id) {
           throw new BadRequestException('Mill ID is required for MILL type expense when no report is linked');
@@ -562,7 +572,7 @@ export class ExpensesService {
 
     const isServiceEngineer = user && user.role === 'Service Engineer';
 
-    // Determine target report IDs for validation
+    // Determine target report IDs and expense type for validation
     const finalServiceReportId = expenseData.service_report_id !== undefined
       ? expenseData.service_report_id
       : existingExpense.service_report_id;
@@ -571,6 +581,16 @@ export class ExpensesService {
       ? expenseData.installation_report_id
       : existingExpense.installation_report_id;
 
+    const targetExpenseType = expenseData.expense_type !== undefined ? expenseData.expense_type : existingExpense.expense_type;
+
+    if (targetExpenseType === 'OTHERS') {
+      if (finalServiceReportId || finalInstallationReportId) {
+        throw new BadRequestException(
+          'An expense of type OTHERS cannot be linked to a service report or installation report',
+        );
+      }
+    }
+
     if (isServiceEngineer) {
       if (finalServiceReportId && finalInstallationReportId) {
         throw new BadRequestException(
@@ -578,22 +598,24 @@ export class ExpensesService {
         );
       }
 
-      const reportsCount = await this.prisma.serviceReport.count({
-        where: {
-          deleted_at: null,
-          technicians: { some: { technician_id: user.userId } },
-        },
-      });
-      const installCount = await this.prisma.installationReport.count({
-        where: {
-          deleted_at: null,
-          technicians: { some: { technician_id: user.userId } },
-        },
-      });
-      if (reportsCount === 0 && installCount === 0) {
-        throw new ForbiddenException(
-          'You are not eligible to update expenses because you have no assigned service or installation reports.',
-        );
+      if (targetExpenseType !== 'OTHERS') {
+        const reportsCount = await this.prisma.serviceReport.count({
+          where: {
+            deleted_at: null,
+            technicians: { some: { technician_id: user.userId } },
+          },
+        });
+        const installCount = await this.prisma.installationReport.count({
+          where: {
+            deleted_at: null,
+            technicians: { some: { technician_id: user.userId } },
+          },
+        });
+        if (reportsCount === 0 && installCount === 0) {
+          throw new ForbiddenException(
+            'You are not eligible to update expenses because you have no assigned service or installation reports.',
+          );
+        }
       }
     }
 
@@ -604,7 +626,6 @@ export class ExpensesService {
         throw new BadRequestException('Visit date is required when no report is linked');
       }
 
-      const targetExpenseType = expenseData.expense_type !== undefined ? expenseData.expense_type : existingExpense.expense_type;
       if (targetExpenseType === 'MILL') {
         const targetMillId = expenseData.mill_id !== undefined ? expenseData.mill_id : existingExpense.mill_id;
         if (!targetMillId) {
@@ -724,52 +745,57 @@ export class ExpensesService {
       updateData.expense_type = expenseData.expense_type;
     }
 
-    if (expenseData.service_report_id !== undefined) {
-      if (expenseData.service_report_id === null) {
-        updateData.service_report_id = null;
-      } else {
-        const report = await this.prisma.serviceReport.findFirst({
-          where: {
-            id: expenseData.service_report_id,
-            deleted_at: null,
-            ...(user && user.role === 'Service Engineer'
-              ? { technicians: { some: { technician_id: user.userId } } }
-              : {}),
-          },
-        });
-        if (!report) {
-          throw new BadRequestException('Linked service report is invalid or not assigned to you');
-        }
-        updateData.service_report_id = expenseData.service_report_id;
-        updateData.mill_id = report.mill_id;
-        updateData.place = report.place;
-        if (expenseData.visit_date === undefined) {
-          updateData.visit_date = report.visit_date;
+    if (targetExpenseType === 'OTHERS') {
+      updateData.service_report_id = null;
+      updateData.installation_report_id = null;
+    } else {
+      if (expenseData.service_report_id !== undefined) {
+        if (expenseData.service_report_id === null) {
+          updateData.service_report_id = null;
+        } else {
+          const report = await this.prisma.serviceReport.findFirst({
+            where: {
+              id: expenseData.service_report_id,
+              deleted_at: null,
+              ...(user && user.role === 'Service Engineer'
+                ? { technicians: { some: { technician_id: user.userId } } }
+                : {}),
+            },
+          });
+          if (!report) {
+            throw new BadRequestException('Linked service report is invalid or not assigned to you');
+          }
+          updateData.service_report_id = expenseData.service_report_id;
+          updateData.mill_id = report.mill_id;
+          updateData.place = report.place;
+          if (expenseData.visit_date === undefined) {
+            updateData.visit_date = report.visit_date;
+          }
         }
       }
-    }
 
-    if (expenseData.installation_report_id !== undefined) {
-      if (expenseData.installation_report_id === null) {
-        updateData.installation_report_id = null;
-      } else {
-        const report = await this.prisma.installationReport.findFirst({
-          where: {
-            id: expenseData.installation_report_id,
-            deleted_at: null,
-            ...(user && user.role === 'Service Engineer'
-              ? { technicians: { some: { technician_id: user.userId } } }
-              : {}),
-          },
-        });
-        if (!report) {
-          throw new BadRequestException('Linked installation report is invalid or not assigned to you');
-        }
-        updateData.installation_report_id = expenseData.installation_report_id;
-        updateData.mill_id = report.mill_id;
-        updateData.place = report.place;
-        if (expenseData.visit_date === undefined) {
-          updateData.visit_date = report.visit_date;
+      if (expenseData.installation_report_id !== undefined) {
+        if (expenseData.installation_report_id === null) {
+          updateData.installation_report_id = null;
+        } else {
+          const report = await this.prisma.installationReport.findFirst({
+            where: {
+              id: expenseData.installation_report_id,
+              deleted_at: null,
+              ...(user && user.role === 'Service Engineer'
+                ? { technicians: { some: { technician_id: user.userId } } }
+                : {}),
+            },
+          });
+          if (!report) {
+            throw new BadRequestException('Linked installation report is invalid or not assigned to you');
+          }
+          updateData.installation_report_id = expenseData.installation_report_id;
+          updateData.mill_id = report.mill_id;
+          updateData.place = report.place;
+          if (expenseData.visit_date === undefined) {
+            updateData.visit_date = report.visit_date;
+          }
         }
       }
     }
@@ -1067,10 +1093,8 @@ export class ExpensesService {
       orderBy: { created_at: 'desc' },
     });
 
-    const eligible = serviceReports.length > 0 || installationReports.length > 0;
-
     return {
-      eligible: isServiceEngineer ? eligible : true,
+      eligible: true,
       serviceReports: serviceReports.map((r) => ({
         id: r.id,
         report_number: r.report_number,
