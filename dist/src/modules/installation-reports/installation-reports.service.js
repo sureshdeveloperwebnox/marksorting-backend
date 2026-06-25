@@ -233,7 +233,7 @@ let InstallationReportsService = class InstallationReportsService {
                     ...reportData,
                     report_number,
                     visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : (0, date_time_1.getAutoVisitTime)(),
-                    visit_date: new Date(reportData.visit_date),
+                    visit_date: reportData.visit_date ? new Date(reportData.visit_date) : new Date(),
                     call_registered_date: new Date(reportData.call_registered_date),
                     invoice_date: (reportData.invoice_date && reportData.invoice_date.trim())
                         ? new Date(reportData.invoice_date)

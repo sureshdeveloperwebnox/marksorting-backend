@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMobileInstallationReportDto extends OmitType(
   CreateInstallationReportDto,
-  ['technician_ids'] as const,
+  ['technician_ids', 'visit_date', 'visit_time'] as const,
 ) {
   @ApiProperty({
     example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',

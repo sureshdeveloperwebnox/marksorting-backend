@@ -14,7 +14,7 @@ const swagger_1 = require("@nestjs/swagger");
 const create_installation_report_dto_1 = require("./create-installation-report.dto");
 const class_validator_1 = require("class-validator");
 const swagger_2 = require("@nestjs/swagger");
-class CreateMobileInstallationReportDto extends (0, swagger_1.OmitType)(create_installation_report_dto_1.CreateInstallationReportDto, ['technician_ids']) {
+class CreateMobileInstallationReportDto extends (0, swagger_1.OmitType)(create_installation_report_dto_1.CreateInstallationReportDto, ['technician_ids', 'visit_date', 'visit_time']) {
     technician_id;
 }
 exports.CreateMobileInstallationReportDto = CreateMobileInstallationReportDto;

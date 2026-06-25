@@ -58,6 +58,18 @@ export class DocumentTemplateService {
     return value ? 'yes' : 'no';
   }
 
+  status(value: unknown): string {
+    if (!value) return '-';
+    const statusStr = String(value).toUpperCase().trim();
+    const mapping: Record<string, string> = {
+      PENDING: 'Pending',
+      IN_PROGRESS: 'Work In Progress',
+      COMPLETED: 'Completed',
+      CANCELLED: 'Cancelled',
+    };
+    return mapping[statusStr] || this.text(value);
+  }
+
   imageSrc(value: unknown): string {
     const src = this.escape(value);
     if (!src) return '';

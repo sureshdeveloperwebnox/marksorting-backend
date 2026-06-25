@@ -58,6 +58,18 @@ let DocumentTemplateService = class DocumentTemplateService {
     yesNo(value) {
         return value ? 'yes' : 'no';
     }
+    status(value) {
+        if (!value)
+            return '-';
+        const statusStr = String(value).toUpperCase().trim();
+        const mapping = {
+            PENDING: 'Pending',
+            IN_PROGRESS: 'Work In Progress',
+            COMPLETED: 'Completed',
+            CANCELLED: 'Cancelled',
+        };
+        return mapping[statusStr] || this.text(value);
+    }
     imageSrc(value) {
         const src = this.escape(value);
         if (!src)

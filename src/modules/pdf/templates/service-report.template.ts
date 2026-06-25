@@ -435,7 +435,7 @@ export function renderServiceReportTemplate(
       <table class="report">
         <tr class="signature-top-spacer"><td colspan="4"></td></tr>
         ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
-        ${fullRow('Work Status Remarks :', template.text(report.status), 24)}
+        ${fullRow('Work Status :', template.status(report.status), 24)}
         <tr class="signature-spacer"><td colspan="4"></td></tr>
         <tr>
           <td colspan="2" class="signature-cell">

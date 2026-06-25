@@ -382,7 +382,7 @@ function renderInstallationReportTemplate(data, template) {
               <table class="report">
                 <tr class="signature-top-spacer"><td colspan="2"></td></tr>
                 ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
-                ${fullRow('Work Status Remarks :', template.text(report.status), 24)}
+                ${fullRow('Work Status :', template.status(report.status), 24)}
                 <tr class="signature-spacer"><td colspan="2"></td></tr>
                 <tr>
                   <td class="signature-cell" style="width: 50%;">
