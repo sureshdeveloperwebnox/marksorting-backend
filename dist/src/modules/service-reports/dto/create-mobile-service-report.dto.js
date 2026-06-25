@@ -13,13 +13,13 @@ exports.CreateMobileServiceReportDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const create_service_report_dto_1 = require("./create-service-report.dto");
 const class_validator_1 = require("class-validator");
-const swagger_2 = require("@nestjs/swagger");
 class CreateMobileServiceReportDto extends (0, swagger_1.OmitType)(create_service_report_dto_1.CreateServiceReportDto, ['technician_ids']) {
     technician_id;
+    technician_ids;
 }
 exports.CreateMobileServiceReportDto = CreateMobileServiceReportDto;
 __decorate([
-    (0, swagger_2.ApiProperty)({
+    (0, swagger_1.ApiProperty)({
         example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
         required: false,
         description: 'Single technician UUID assigned to this service report (optional). Used by the mobile client.',
@@ -28,4 +28,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMobileServiceReportDto.prototype, "technician_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
+        required: false,
+        type: [String],
+        description: 'Multiple technician UUIDs assigned to this service report (optional).',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('all', { each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateMobileServiceReportDto.prototype, "technician_ids", void 0);
 //# sourceMappingURL=create-mobile-service-report.dto.js.map

@@ -1,7 +1,6 @@
-import { OmitType } from '@nestjs/swagger';
+import { OmitType, ApiProperty } from '@nestjs/swagger';
 import { CreateServiceReportDto } from './create-service-report.dto';
-import { IsOptional, IsUUID } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsUUID, IsArray } from 'class-validator';
 
 export class CreateMobileServiceReportDto extends OmitType(
   CreateServiceReportDto,
@@ -16,4 +15,16 @@ export class CreateMobileServiceReportDto extends OmitType(
   @IsUUID()
   @IsOptional()
   technician_id?: string;
+
+  @ApiProperty({
+    example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
+    required: false,
+    type: [String],
+    description:
+      'Multiple technician UUIDs assigned to this service report (optional).',
+  })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  @IsOptional()
+  technician_ids?: string[];
 }

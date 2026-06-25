@@ -86,9 +86,14 @@ let TechniciansService = class TechniciansService {
             await this.syncTechnicians();
         }
         else {
-            this.syncTechnicians().catch((error) => {
-                console.error('Background technician sync failed:', error);
-            });
+            const syncLockKey = 'technicians:sync:lock';
+            const isLocked = await this.redis.get(syncLockKey);
+            if (!isLocked) {
+                await this.redis.set(syncLockKey, 'true', 'EX', 1800);
+                this.syncTechnicians().catch((error) => {
+                    console.error('Background technician sync failed:', error);
+                });
+            }
         }
         const { skip, take, where, orderBy } = params;
         const [technicians, total] = await Promise.all([

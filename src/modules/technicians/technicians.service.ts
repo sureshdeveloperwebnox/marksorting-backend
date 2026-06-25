@@ -94,16 +94,21 @@ export class TechniciansService implements OnApplicationBootstrap {
     if (cachedData) return cachedData;
 
     // Run the sync process. If the database is empty, run synchronously.
-    // Otherwise run in the background to prevent blocking the query.
+    // Otherwise run in the background with a 30-minute cooldown lock.
     const activeCount = await this.prisma.technician.count({
       where: { deleted_at: null },
     });
     if (activeCount === 0) {
       await this.syncTechnicians();
     } else {
-      this.syncTechnicians().catch((error) => {
-        console.error('Background technician sync failed:', error);
-      });
+      const syncLockKey = 'technicians:sync:lock';
+      const isLocked = await this.redis.get(syncLockKey);
+      if (!isLocked) {
+        await this.redis.set(syncLockKey, 'true', 'EX', 1800); // 30 minutes lock
+        this.syncTechnicians().catch((error) => {
+          console.error('Background technician sync failed:', error);
+        });
+      }
     }
 
     const { skip, take, where, orderBy } = params;
