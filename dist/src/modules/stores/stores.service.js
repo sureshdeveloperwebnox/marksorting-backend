@@ -72,20 +72,27 @@ let StoresService = class StoresService {
         return store;
     }
     async create(dto) {
-        const { material_ids, ...data } = dto;
+        const { material_ids, material_quantities, ...data } = dto;
         const existingFrame = await this.prisma.store.findFirst({
             where: { frame_number: data.frame_number },
         });
         if (existingFrame) {
             throw new common_1.ConflictException('Frame number already exists');
         }
+        if (material_quantities && material_quantities.length > 0) {
+            data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
+        }
         const store = await this.prisma.store.create({
             data: {
                 ...data,
                 materials: {
-                    create: material_ids.map((id) => ({
-                        material: { connect: { id } },
-                    })),
+                    create: material_ids.map((id) => {
+                        const qtyObj = material_quantities?.find((q) => q.material_id === id);
+                        return {
+                            material: { connect: { id } },
+                            quantity: qtyObj ? qtyObj.quantity : 1,
+                        };
+                    }),
                 },
             },
             include: {
@@ -108,7 +115,7 @@ let StoresService = class StoresService {
         if (!existing) {
             throw new common_1.NotFoundException('Store record not found');
         }
-        const { material_ids, ...data } = dto;
+        const { material_ids, material_quantities, ...data } = dto;
         if (data.frame_number) {
             const existingFrame = await this.prisma.store.findFirst({
                 where: {
@@ -120,6 +127,9 @@ let StoresService = class StoresService {
                 throw new common_1.ConflictException('Frame number already exists');
             }
         }
+        if (material_quantities && material_quantities.length > 0) {
+            data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
+        }
         const store = await this.prisma.store.update({
             where: { id },
             data: {
@@ -127,9 +137,13 @@ let StoresService = class StoresService {
                 materials: material_ids
                     ? {
                         deleteMany: {},
-                        create: material_ids.map((matId) => ({
-                            material: { connect: { id: matId } },
-                        })),
+                        create: material_ids.map((matId) => {
+                            const qtyObj = material_quantities?.find((q) => q.material_id === matId);
+                            return {
+                                material: { connect: { id: matId } },
+                                quantity: qtyObj ? qtyObj.quantity : 1,
+                            };
+                        }),
                     }
                     : undefined,
             },

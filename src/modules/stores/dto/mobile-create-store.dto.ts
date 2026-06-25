@@ -22,6 +22,14 @@ export class MobileCreateStoreDto {
   @ArrayMinSize(1)
   material_ids: string[];
 
+  @ApiProperty({
+    example: [{ material_id: 'uuid-of-material-1', quantity: 2 }],
+    required: false,
+  })
+  @IsArray()
+  @IsOptional()
+  material_quantities?: { material_id: string; quantity: number }[];
+
   @ApiProperty({ example: 1 })
   @IsInt()
   @Min(1)

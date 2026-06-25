@@ -15,6 +15,7 @@ const swagger_1 = require("@nestjs/swagger");
 class MobileCreateStoreDto {
     customer_id;
     material_ids;
+    material_quantities;
     quantity;
     warranty_status;
     frame_number;
@@ -38,6 +39,15 @@ __decorate([
     (0, class_validator_1.ArrayMinSize)(1),
     __metadata("design:type", Array)
 ], MobileCreateStoreDto.prototype, "material_ids", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: [{ material_id: 'uuid-of-material-1', quantity: 2 }],
+        required: false,
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], MobileCreateStoreDto.prototype, "material_quantities", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1 }),
     (0, class_validator_1.IsInt)(),

@@ -613,6 +613,7 @@ model Store {
 model StoreMaterial {
   store_id    String
   material_id String
+  quantity    Int      @default(1)
   material    Material @relation(fields: [material_id], references: [id])
   store       Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
 
