@@ -655,6 +655,7 @@ export class ReportsService {
       where,
       select: {
         amount: true,
+        admin_amount: true,
         status: true,
       },
     });
@@ -665,7 +666,8 @@ export class ReportsService {
     let completedCount = 0;
 
     for (const exp of expensesAggregated) {
-      const amt = parseFloat(exp.amount ? String(exp.amount) : '0');
+      const adminAmt = parseFloat(exp.admin_amount ? String(exp.admin_amount) : '0');
+      const amt = adminAmt > 0 ? adminAmt : parseFloat(exp.amount ? String(exp.amount) : '0');
       totalAmount += amt;
 
       if (exp.status === 'PENDING') pendingCount++;
@@ -718,19 +720,23 @@ export class ReportsService {
       'Status',
     ];
 
-    const data = reports.map((r) => [
-      r.expense_number,
-      r.mill?.name || r.others || '-',
-      r.place || '-',
-      r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
-      r.expenseCategory?.name || '-',
-      Number(r.amount || 0).toFixed(2),
-      r.technicians
-        .map((t) => t.technician?.full_name)
-        .filter(Boolean)
-        .join(', ') || '-',
-      r.status,
-    ]);
+    const data = reports.map((r) => {
+      const adminAmt = Number(r.admin_amount || 0);
+      const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+      return [
+        r.expense_number,
+        r.mill?.name || r.others || '-',
+        r.place || '-',
+        r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
+        r.expenseCategory?.name || '-',
+        displayAmt.toFixed(2),
+        r.technicians
+          .map((t) => t.technician?.full_name)
+          .filter(Boolean)
+          .join(', ') || '-',
+        r.status,
+      ];
+    });
 
     if (formatType === 'csv') {
       const buffer = this.generateCsv(headers, data);
@@ -759,7 +765,9 @@ export class ReportsService {
       let completed = 0;
 
       reports.forEach((r) => {
-        totalAmount += parseFloat(r.amount ? String(r.amount) : '0');
+        const adminAmt = parseFloat(r.admin_amount ? String(r.admin_amount) : '0');
+        const amt = adminAmt > 0 ? adminAmt : parseFloat(r.amount ? String(r.amount) : '0');
+        totalAmount += amt;
         if (r.status === 'PENDING') pending++;
         else if (r.status === 'IN_PROGRESS') inProgress++;
         else if (r.status === 'COMPLETED') completed++;
@@ -793,18 +801,22 @@ export class ReportsService {
           },
         ],
         headers,
-        rows: reports.map((r) => [
-          `<span class="font-semibold">${this.documentTemplateService.escape(r.expense_number)}</span>`,
-          this.documentTemplateService.escape(r.mill?.name || r.others),
-          this.documentTemplateService.escape(r.place),
-          this.documentTemplateService.date(r.visit_date),
-          `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.expenseCategory?.name)}</span>`,
-          `<span class="font-semibold">₹${Number(r.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
-          this.documentTemplateService.escape(
-            r.technicians.map((t) => t.technician?.full_name).join(', '),
-          ),
-          `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
-        ]),
+        rows: reports.map((r) => {
+          const adminAmt = Number(r.admin_amount || 0);
+          const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+          return [
+            `<span class="font-semibold">${this.documentTemplateService.escape(r.expense_number)}</span>`,
+            this.documentTemplateService.escape(r.mill?.name || r.others),
+            this.documentTemplateService.escape(r.place),
+            this.documentTemplateService.date(r.visit_date),
+            `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.expenseCategory?.name)}</span>`,
+            `<span class="font-semibold">₹${displayAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
+            this.documentTemplateService.escape(
+              r.technicians.map((t) => t.technician?.full_name).join(', '),
+            ),
+            `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
+          ];
+        }),
         company: await this.getCompanyPdfSettings(),
       };
 
