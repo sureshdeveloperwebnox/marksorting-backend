@@ -18,6 +18,14 @@ export declare class StoresService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        };
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -27,18 +35,14 @@ export declare class StoresService {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        };
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         customer_id: string;
+        service_engineer_id: string;
+        invoice_number: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -46,16 +50,16 @@ export declare class StoresService {
         inflow_status: string;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     update(id: string, dto: UpdateStoreDto): Promise<{
         before: {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -63,12 +67,16 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
             materials: ({
                 material: {
                     id: string;
@@ -78,18 +86,14 @@ export declare class StoresService {
                 store_id: string;
                 material_id: string;
             })[];
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
         } & {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -97,16 +101,16 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         customer_id: string;
+        service_engineer_id: string;
+        invoice_number: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -114,10 +118,6 @@ export declare class StoresService {
         inflow_status: string;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     findByTechnician(technicianId: string, params: {
         skip?: number;
@@ -128,6 +128,14 @@ export declare class StoresService {
         warranty_status?: string;
     }): Promise<{
         stores: ({
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
             materials: ({
                 material: {
                     id: string;
@@ -137,18 +145,14 @@ export declare class StoresService {
                 store_id: string;
                 material_id: string;
             })[];
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
         } & {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -156,10 +160,6 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         })[];
         total: number;
     }>;
@@ -169,6 +169,14 @@ export declare class StoresService {
         search?: string;
     }): Promise<{
         stores: ({
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
             materials: ({
                 material: {
                     id: string;
@@ -178,18 +186,14 @@ export declare class StoresService {
                 store_id: string;
                 material_id: string;
             })[];
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
         } & {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -197,18 +201,18 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         })[];
         total: number;
     }>;
     submitReturnDetails(storeId: string, technicianId: string, dto: UpdateStoreReturnDto): Promise<{
         before: {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -216,12 +220,16 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
             materials: ({
                 material: {
                     id: string;
@@ -231,18 +239,14 @@ export declare class StoresService {
                 store_id: string;
                 material_id: string;
             })[];
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
         } & {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -250,18 +254,18 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
     }>;
     findByIdAndTechnician(id: string, technicianId: string): Promise<any>;
     updateByTechnician(id: string, technicianId: string, dto: UpdateStoreDto): Promise<{
         before: {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -269,12 +273,16 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
             materials: ({
                 material: {
                     id: string;
@@ -284,18 +292,14 @@ export declare class StoresService {
                 store_id: string;
                 material_id: string;
             })[];
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
         } & {
             id: string;
-            service_engineer_id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             customer_id: string;
+            service_engineer_id: string;
+            invoice_number: string | null;
             quantity: number;
             warranty_status: string;
             frame_number: string;
@@ -303,16 +307,16 @@ export declare class StoresService {
             inflow_status: string;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
     }>;
     removeByTechnician(id: string, technicianId: string): Promise<{
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         customer_id: string;
+        service_engineer_id: string;
+        invoice_number: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -320,10 +324,6 @@ export declare class StoresService {
         inflow_status: string;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     private invalidateCache;
 }
