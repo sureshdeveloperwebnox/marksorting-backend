@@ -24,6 +24,7 @@ class QuickRegisterDto {
     state;
     phone;
     email;
+    type;
 }
 exports.QuickRegisterDto = QuickRegisterDto;
 __decorate([
@@ -95,4 +96,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "email", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Installation', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "type", void 0);
 //# sourceMappingURL=quick-register.dto.js.map

@@ -440,6 +440,8 @@ let MasterMillsService = class MasterMillsService {
                     masterMillUpdates.state = cleanState;
                 if (cleanPhone && masterMill.phone_no !== cleanPhone)
                     masterMillUpdates.phone_no = cleanPhone;
+                if (dto.type && masterMill.type !== dto.type)
+                    masterMillUpdates.type = dto.type;
                 if (masterMill.mill_id !== resolvedMillId)
                     masterMillUpdates.mill_id = resolvedMillId;
                 if (Object.keys(masterMillUpdates).length > 0) {
@@ -463,7 +465,7 @@ let MasterMillsService = class MasterMillsService {
                         phone_no: cleanPhone,
                         mill_id: resolvedMillId,
                         status: 'ACTIVE',
-                        type: 'Installation',
+                        type: dto.type || 'Installation',
                     },
                 });
             }

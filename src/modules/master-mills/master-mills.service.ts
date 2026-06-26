@@ -507,6 +507,8 @@ export class MasterMillsService {
           masterMillUpdates.state = cleanState;
         if (cleanPhone && masterMill.phone_no !== cleanPhone)
           masterMillUpdates.phone_no = cleanPhone;
+        if (dto.type && masterMill.type !== dto.type)
+          masterMillUpdates.type = dto.type;
 
         // Ensure the Master Mill is linked to the resolved Mill
         if (masterMill.mill_id !== resolvedMillId)
@@ -534,7 +536,7 @@ export class MasterMillsService {
             phone_no: cleanPhone,
             mill_id: resolvedMillId,
             status: 'ACTIVE',
-            type: 'Installation',
+            type: dto.type || 'Installation',
           },
         });
       }

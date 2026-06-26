@@ -10,4 +10,5 @@ export declare class QuickRegisterDto {
     state?: string;
     phone?: string;
     email?: string;
+    type?: string;
 }

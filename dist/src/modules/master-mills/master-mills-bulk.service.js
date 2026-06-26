@@ -89,6 +89,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             place: row.place,
                             state: row.state || undefined,
                             phone: row.phone_no || undefined,
+                            type: row.type || undefined,
                         };
                         await this.masterMillsService.quickRegister(dto);
                         status.createdCount++;

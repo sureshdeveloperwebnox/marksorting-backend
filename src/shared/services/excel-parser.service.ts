@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { PreviewRow } from '../../modules/master-mills/interfaces/bulk-upload.interface';
 
-// Column order for template (18 headers)
+// Column order for template (19 headers)
 const TEMPLATE_HEADERS = [
   'Invoice No',
+  'Record Type',
   'Invoice Date',
   'Ref No',
   'Frame No',
@@ -28,6 +29,7 @@ const TEMPLATE_HEADERS = [
 // Example data row for the template
 const EXAMPLE_ROW = [
   'INV-001',
+  'Installation',
   '01/01/2024',
   'REF-001',
   'FRM-001',
@@ -54,6 +56,7 @@ const HEADER_TO_FIELD_MAP: Record<
   keyof Omit<PreviewRow, 'errors' | 'isValid' | 'rowIndex'>
 > = {
   'invoice no': 'invoice_no',
+  'record type': 'type',
   'invoice date': 'invoice_date',
   'ref no': 'ref_no',
   'frame no': 'frame_no',
@@ -192,9 +195,24 @@ export class ExcelParserService {
         }
       });
 
+      // Normalize type
+      const rawType = (rawData.type ?? '').trim();
+      let normalizedType = 'Installation';
+      if (rawType) {
+        const lowerType = rawType.toLowerCase();
+        if (lowerType === 'service') {
+          normalizedType = 'Service';
+        } else if (lowerType === 'installation') {
+          normalizedType = 'Installation';
+        } else {
+          normalizedType = rawType; // Let validator catch invalid values
+        }
+      }
+
       // Build a complete PreviewRow with empty strings for missing fields
       const previewRow: PreviewRow = {
         invoice_no: rawData.invoice_no ?? '',
+        type: normalizedType,
         invoice_date: rawData.invoice_date ?? '',
         ref_no: rawData.ref_no ?? '',
         frame_no: rawData.frame_no ?? '',
@@ -246,6 +264,12 @@ export class ExcelParserService {
               `${field} must be a numeric value`;
           }
         }
+      }
+
+      // Validate record type — must be 'Installation' or 'Service'
+      if (previewRow.type !== 'Installation' && previewRow.type !== 'Service') {
+        previewRow.errors['type'] =
+          "Record Type must be 'Installation' or 'Service'";
       }
 
       // Set isValid based on whether there are any errors
