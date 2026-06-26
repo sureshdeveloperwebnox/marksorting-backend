@@ -173,6 +173,7 @@ export class MasterMillsBulkService {
               invoice_no: row.invoice_no || undefined,
               invoice_date: this.parseExcelDate(row.invoice_date),
               installation_date: this.parseExcelDate(row.installation_date),
+              warranty_start_date: this.parseExcelDate(row.warranty_start_date),
               warranty_years: row.warranty_years ? Number(row.warranty_years) : undefined,
               warranty_months: row.warranty_months ? Number(row.warranty_months) : undefined,
               amc_starting_date: this.parseExcelDate(row.amc_starting_date),

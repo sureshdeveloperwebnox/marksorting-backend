@@ -91,6 +91,11 @@ export class QuickRegisterDto {
   @IsOptional()
   installation_date?: string;
 
+  @ApiProperty({ example: '2024-01-15', required: false })
+  @IsDateString()
+  @IsOptional()
+  warranty_start_date?: string;
+
   @ApiProperty({ example: 1, required: false })
   @IsInt()
   @Min(0)

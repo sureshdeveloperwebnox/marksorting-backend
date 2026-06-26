@@ -29,6 +29,7 @@ class CreateMasterMillDto {
     warranty_years;
     warranty_months;
     installation_date;
+    warranty_start_date;
     warranty_closing_date;
     all_warranty;
     amc_starting_date;
@@ -138,6 +139,13 @@ __decorate([
     emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "installation_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
+    __metadata("design:type", String)
+], CreateMasterMillDto.prototype, "warranty_start_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2025-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),

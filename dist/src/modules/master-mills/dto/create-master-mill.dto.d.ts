@@ -13,6 +13,7 @@ export declare class CreateMasterMillDto {
     warranty_years?: number;
     warranty_months?: number;
     installation_date?: string;
+    warranty_start_date?: string;
     warranty_closing_date?: string;
     all_warranty?: string;
     amc_starting_date?: string;

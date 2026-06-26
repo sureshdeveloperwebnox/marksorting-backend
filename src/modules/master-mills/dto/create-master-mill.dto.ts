@@ -103,6 +103,12 @@ export class CreateMasterMillDto {
   @emptyStringToUndefined
   installation_date?: string;
 
+  @ApiProperty({ example: '2024-01-15', required: false })
+  @IsDateString()
+  @IsOptional()
+  @emptyStringToUndefined
+  warranty_start_date?: string;
+
   @ApiProperty({ example: '2025-01-15', required: false })
   @IsDateString()
   @IsOptional()

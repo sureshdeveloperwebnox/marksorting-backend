@@ -14,6 +14,7 @@ export declare class QuickRegisterDto {
     invoice_no?: string;
     invoice_date?: string;
     installation_date?: string;
+    warranty_start_date?: string;
     warranty_years?: number;
     warranty_months?: number;
     amc_starting_date?: string;

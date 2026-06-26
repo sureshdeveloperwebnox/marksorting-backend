@@ -61,8 +61,8 @@ export declare class InstallationReportsController {
         authorized_person_phone: string | null;
         expense_id: string | null;
         invoice_date: Date | null;
-        invoice_number: string | null;
         warranty_start_date: Date | null;
+        invoice_number: string | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
@@ -125,8 +125,8 @@ export declare class InstallationReportsController {
             authorized_person_phone: string | null;
             expense_id: string | null;
             invoice_date: Date | null;
-            invoice_number: string | null;
             warranty_start_date: Date | null;
+            invoice_number: string | null;
             warranty_end_date: Date | null;
             ground_earth_provided: boolean;
             running_channel_combination: number | null;
@@ -188,8 +188,8 @@ export declare class InstallationReportsController {
         authorized_person_phone: string | null;
         expense_id: string | null;
         invoice_date: Date | null;
-        invoice_number: string | null;
         warranty_start_date: Date | null;
+        invoice_number: string | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;

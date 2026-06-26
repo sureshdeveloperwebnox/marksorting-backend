@@ -202,6 +202,7 @@ model MasterMill {
   warranty_years        Int?      @default(0)
   warranty_months       Int?      @default(0)
   installation_date     DateTime?
+  warranty_start_date   DateTime?
   warranty_closing_date DateTime?
   all_warranty          String?   @default("Non Warranty")
   amc_starting_date     DateTime?

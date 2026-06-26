@@ -29,6 +29,7 @@ class QuickRegisterDto {
     invoice_no;
     invoice_date;
     installation_date;
+    warranty_start_date;
     warranty_years;
     warranty_months;
     amc_starting_date;
@@ -131,6 +132,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "installation_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "warranty_start_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1, required: false }),
     (0, class_validator_1.IsInt)(),
