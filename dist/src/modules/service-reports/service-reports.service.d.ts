@@ -5,6 +5,7 @@ import { CreateServiceReportDto } from './dto/create-service-report.dto';
 import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
 import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
 import { DocumentTemplateService } from '../pdf/templates/document-template.service';
@@ -15,9 +16,10 @@ export declare class ServiceReportsService {
     private pdfService;
     private documentTemplateService;
     private eventEmitter;
+    private masterMillsService;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
-    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService, eventEmitter: EventEmitter2);
+    constructor(prisma: PrismaService, redis: RedisService, settingsService: SettingsService, pdfService: PdfService, documentTemplateService: DocumentTemplateService, eventEmitter: EventEmitter2, masterMillsService: MasterMillsService);
     findAll(params: {
         skip?: number;
         take?: number;
@@ -66,9 +68,6 @@ export declare class ServiceReportsService {
         };
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -104,6 +103,9 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         authorized_person_phone: string | null;
         expense_id: string | null;
     }) | null>;
@@ -136,9 +138,6 @@ export declare class ServiceReportsService {
             };
         } & {
             id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
             report_number: string;
             service_category_id: string;
             mill_id: string;
@@ -174,6 +173,9 @@ export declare class ServiceReportsService {
             customer_remarks: string | null;
             customer_signature: string;
             status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             authorized_person_phone: string | null;
             expense_id: string | null;
         };
@@ -205,9 +207,6 @@ export declare class ServiceReportsService {
         };
     } & {
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -243,6 +242,9 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
         authorized_person_phone: string | null;
         expense_id: string | null;
     }>;

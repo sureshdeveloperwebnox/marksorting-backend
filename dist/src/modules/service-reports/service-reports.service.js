@@ -15,6 +15,7 @@ const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const date_time_1 = require("../../common/utils/date-time");
+const master_mills_service_1 = require("../master-mills/master-mills.service");
 const settings_service_1 = require("../settings/settings.service");
 const pdf_service_1 = require("../pdf/pdf.service");
 const document_template_service_1 = require("../pdf/templates/document-template.service");
@@ -39,15 +40,17 @@ let ServiceReportsService = class ServiceReportsService {
     pdfService;
     documentTemplateService;
     eventEmitter;
+    masterMillsService;
     CACHE_PREFIX = 'service-report:';
     LIST_CACHE_KEY = 'service-reports:list:';
-    constructor(prisma, redis, settingsService, pdfService, documentTemplateService, eventEmitter) {
+    constructor(prisma, redis, settingsService, pdfService, documentTemplateService, eventEmitter, masterMillsService) {
         this.prisma = prisma;
         this.redis = redis;
         this.settingsService = settingsService;
         this.pdfService = pdfService;
         this.documentTemplateService = documentTemplateService;
         this.eventEmitter = eventEmitter;
+        this.masterMillsService = masterMillsService;
     }
     async findAll(params, user) {
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify({ params, user })}`;
@@ -261,6 +264,17 @@ let ServiceReportsService = class ServiceReportsService {
         });
         await this.invalidateCache();
         if (serviceReport) {
+            void this.masterMillsService.syncFromServiceReport({
+                millId: serviceReport.mill_id,
+                frameNo: serviceReport.serial_or_frame_no,
+                mcModel: serviceReport.machine_model,
+                installationDate: serviceReport.machine_installation_date
+                    ? new Date(serviceReport.machine_installation_date)
+                    : null,
+                place: serviceReport.place,
+            });
+        }
+        if (serviceReport) {
             this.eventEmitter.emit('service-report.created', {
                 reportNumber: serviceReport.report_number,
                 millName: serviceReport.mill?.name || '',
@@ -351,6 +365,15 @@ let ServiceReportsService = class ServiceReportsService {
                 })),
             });
         }
+        void this.masterMillsService.syncFromServiceReport({
+            millId: serviceReport.mill_id,
+            frameNo: serviceReport.serial_or_frame_no,
+            mcModel: serviceReport.machine_model,
+            installationDate: serviceReport.machine_installation_date
+                ? new Date(serviceReport.machine_installation_date)
+                : null,
+            place: serviceReport.place,
+        });
         await this.invalidateCache(id);
         return { before: existingReport, after: serviceReport };
     }
@@ -417,6 +440,7 @@ exports.ServiceReportsService = ServiceReportsService = __decorate([
         settings_service_1.SettingsService,
         pdf_service_1.PdfService,
         document_template_service_1.DocumentTemplateService,
-        event_emitter_1.EventEmitter2])
+        event_emitter_1.EventEmitter2,
+        master_mills_service_1.MasterMillsService])
 ], ServiceReportsService);
 //# sourceMappingURL=service-reports.service.js.map

@@ -12,6 +12,7 @@ const prisma_module_1 = require("../../prisma/prisma.module");
 const redis_module_1 = require("../../redis/redis.module");
 const pdf_module_1 = require("../pdf/pdf.module");
 const settings_module_1 = require("../settings/settings.module");
+const master_mills_module_1 = require("../master-mills/master-mills.module");
 const service_reports_service_1 = require("./service-reports.service");
 const service_reports_controller_1 = require("./service-reports.controller");
 const mobile_service_reports_controller_1 = require("./mobile-service-reports.controller");
@@ -23,7 +24,7 @@ let ServiceReportsModule = class ServiceReportsModule {
 exports.ServiceReportsModule = ServiceReportsModule;
 exports.ServiceReportsModule = ServiceReportsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule, pdf_module_1.PdfModule, settings_module_1.SettingsModule],
+        imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule, pdf_module_1.PdfModule, settings_module_1.SettingsModule, master_mills_module_1.MasterMillsModule],
         controllers: [
             service_reports_controller_1.ServiceReportsController,
             mobile_service_reports_controller_1.MobileServiceReportsController,

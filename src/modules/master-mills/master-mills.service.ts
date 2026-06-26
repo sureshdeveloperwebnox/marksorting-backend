@@ -581,6 +581,98 @@ export class MasterMillsService {
     await Promise.all(promises);
   }
 
+  /**
+   * Synchronises the MasterMill registry after a ServiceReport is created or
+   * updated.  If no matching record exists (by frame_no or mill_id), a new one
+   * is created with type = 'Service'.  If one already exists, its machine
+   * details are updated to reflect the latest service data.
+   *
+   * Called fire-and-forget from ServiceReportsService so that failures here
+   * never break the service-report creation flow.
+   */
+  async syncFromServiceReport(params: {
+    millId: string;
+    frameNo?: string;
+    mcModel?: string;
+    installationDate?: Date | null;
+    place?: string;
+  }): Promise<void> {
+    try {
+      const { millId, frameNo, mcModel, installationDate, place } = params;
+
+      // Fetch mill with customer for address / ref_no data
+      const mill = await this.prisma.mill.findUnique({
+        where: { id: millId },
+        include: { customer: true },
+      });
+
+      if (!mill) return;
+
+      // Build OR conditions to find an existing master-mill record
+      const orConditions: Prisma.MasterMillWhereInput[] = [
+        { mill_id: millId },
+      ];
+      if (frameNo && frameNo.trim()) {
+        orConditions.push({
+          frame_no: { equals: frameNo.trim(), mode: 'insensitive' },
+        });
+      }
+
+      const existing = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          OR: orConditions,
+        },
+      });
+
+      if (existing) {
+        // Update fields that are empty or differ
+        const updates: Record<string, any> = {};
+        if (frameNo && frameNo.trim() && existing.frame_no !== frameNo.trim())
+          updates.frame_no = frameNo.trim();
+        if (mcModel && mcModel.trim() && existing.mc_model !== mcModel.trim())
+          updates.mc_model = mcModel.trim();
+        if (installationDate && !existing.installation_date)
+          updates.installation_date = installationDate;
+        if (place && place.trim() && existing.place !== place.trim())
+          updates.place = place.trim();
+        if (existing.mill_id !== millId) updates.mill_id = millId;
+        // Only flip type to 'Service' if it hasn't already been set to 'Installation'
+        if (existing.type !== 'Installation') updates.type = 'Service';
+
+        if (Object.keys(updates).length > 0) {
+          await this.prisma.masterMill.update({
+            where: { id: existing.id },
+            data: updates,
+          });
+        }
+      } else {
+        // Create a new record with type = 'Service'
+        const fallbackInvoiceNo = `INV-SR-${mill.ref_no || millId.slice(0, 8)}-${Date.now()}`;
+        await this.prisma.masterMill.create({
+          data: {
+            invoice_no: fallbackInvoiceNo,
+            ref_no: mill.ref_no || undefined,
+            frame_no: frameNo?.trim() || undefined,
+            mc_model: mcModel?.trim() || undefined,
+            installation_date: installationDate || undefined,
+            address: mill.address || undefined,
+            place: place?.trim() || mill.place || undefined,
+            phone_no: mill.phone || undefined,
+            mill_id: millId,
+            status: 'ACTIVE',
+            type: 'Service',
+          },
+        });
+      }
+
+      // Invalidate master-mills list cache
+      await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+    } catch {
+      // Fire-and-forget — swallow errors so service report creation is unaffected
+    }
+  }
+
   private async invalidateCache(id?: string) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),

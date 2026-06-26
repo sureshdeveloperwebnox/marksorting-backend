@@ -497,6 +497,73 @@ let MasterMillsService = class MasterMillsService {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${masterMillId}`));
         await Promise.all(promises);
     }
+    async syncFromServiceReport(params) {
+        try {
+            const { millId, frameNo, mcModel, installationDate, place } = params;
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: millId },
+                include: { customer: true },
+            });
+            if (!mill)
+                return;
+            const orConditions = [
+                { mill_id: millId },
+            ];
+            if (frameNo && frameNo.trim()) {
+                orConditions.push({
+                    frame_no: { equals: frameNo.trim(), mode: 'insensitive' },
+                });
+            }
+            const existing = await this.prisma.masterMill.findFirst({
+                where: {
+                    deleted_at: null,
+                    OR: orConditions,
+                },
+            });
+            if (existing) {
+                const updates = {};
+                if (frameNo && frameNo.trim() && existing.frame_no !== frameNo.trim())
+                    updates.frame_no = frameNo.trim();
+                if (mcModel && mcModel.trim() && existing.mc_model !== mcModel.trim())
+                    updates.mc_model = mcModel.trim();
+                if (installationDate && !existing.installation_date)
+                    updates.installation_date = installationDate;
+                if (place && place.trim() && existing.place !== place.trim())
+                    updates.place = place.trim();
+                if (existing.mill_id !== millId)
+                    updates.mill_id = millId;
+                if (existing.type !== 'Installation')
+                    updates.type = 'Service';
+                if (Object.keys(updates).length > 0) {
+                    await this.prisma.masterMill.update({
+                        where: { id: existing.id },
+                        data: updates,
+                    });
+                }
+            }
+            else {
+                const fallbackInvoiceNo = `INV-SR-${mill.ref_no || millId.slice(0, 8)}-${Date.now()}`;
+                await this.prisma.masterMill.create({
+                    data: {
+                        invoice_no: fallbackInvoiceNo,
+                        ref_no: mill.ref_no || undefined,
+                        frame_no: frameNo?.trim() || undefined,
+                        mc_model: mcModel?.trim() || undefined,
+                        installation_date: installationDate || undefined,
+                        address: mill.address || undefined,
+                        place: place?.trim() || mill.place || undefined,
+                        phone_no: mill.phone || undefined,
+                        mill_id: millId,
+                        status: 'ACTIVE',
+                        type: 'Service',
+                    },
+                });
+            }
+            await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+        }
+        catch {
+        }
+    }
     async invalidateCache(id) {
         const promises = [
             this.redis.delByPrefix(this.LIST_CACHE_KEY),

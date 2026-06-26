@@ -11,6 +11,7 @@ import { UpdateServiceReportDto } from './dto/update-service-report.dto';
 import { CreateMobileServiceReportDto } from './dto/create-mobile-service-report.dto';
 import { UpdateMobileServiceReportDto } from './dto/update-mobile-service-report.dto';
 import { getAutoVisitTime } from '../../common/utils/date-time';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 
 import { SettingsService } from '../settings/settings.service';
 import { PdfService } from '../pdf/pdf.service';
@@ -47,6 +48,7 @@ export class ServiceReportsService {
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
     private eventEmitter: EventEmitter2,
+    private masterMillsService: MasterMillsService,
   ) {}
 
   async findAll(
@@ -338,6 +340,19 @@ export class ServiceReportsService {
 
     await this.invalidateCache();
 
+    // Sync master-mills registry (fire-and-forget — never blocks report creation)
+    if (serviceReport) {
+      void this.masterMillsService.syncFromServiceReport({
+        millId: serviceReport.mill_id,
+        frameNo: (serviceReport as any).serial_or_frame_no,
+        mcModel: (serviceReport as any).machine_model,
+        installationDate: (serviceReport as any).machine_installation_date
+          ? new Date((serviceReport as any).machine_installation_date)
+          : null,
+        place: (serviceReport as any).place,
+      });
+    }
+
     if (serviceReport) {
       this.eventEmitter.emit('service-report.created', {
         reportNumber: serviceReport.report_number,
@@ -452,6 +467,17 @@ export class ServiceReportsService {
         })),
       });
     }
+
+    // Sync master-mills registry (fire-and-forget)
+    void this.masterMillsService.syncFromServiceReport({
+      millId: serviceReport.mill_id,
+      frameNo: (serviceReport as any).serial_or_frame_no,
+      mcModel: (serviceReport as any).machine_model,
+      installationDate: (serviceReport as any).machine_installation_date
+        ? new Date((serviceReport as any).machine_installation_date)
+        : null,
+      place: (serviceReport as any).place,
+    });
 
     await this.invalidateCache(id);
     return { before: existingReport, after: serviceReport };
