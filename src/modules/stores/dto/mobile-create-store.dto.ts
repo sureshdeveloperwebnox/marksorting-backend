@@ -69,4 +69,9 @@ export class MobileCreateStoreDto {
   @IsString()
   @IsOptional()
   invoice_number?: string;
+
+  @ApiProperty({ example: 'Some remarks about the store record', required: false })
+  @IsString()
+  @IsOptional()
+  remarks?: string;
 }

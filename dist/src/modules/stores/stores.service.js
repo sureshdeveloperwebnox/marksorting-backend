@@ -72,7 +72,7 @@ let StoresService = class StoresService {
         return store;
     }
     async create(dto) {
-        const { material_ids, material_quantities, ...data } = dto;
+        const { material_ids, material_quantities, service_engineer_id, customer_id, ...data } = dto;
         const existingFrame = await this.prisma.store.findFirst({
             where: { frame_number: data.frame_number },
         });
@@ -85,6 +85,8 @@ let StoresService = class StoresService {
         const store = await this.prisma.store.create({
             data: {
                 ...data,
+                service_engineer: { connect: { id: service_engineer_id } },
+                customer: { connect: { id: customer_id } },
                 materials: {
                     create: material_ids.map((id) => {
                         const qtyObj = material_quantities?.find((q) => q.material_id === id);
@@ -115,7 +117,7 @@ let StoresService = class StoresService {
         if (!existing) {
             throw new common_1.NotFoundException('Store record not found');
         }
-        const { material_ids, material_quantities, ...data } = dto;
+        const { material_ids, material_quantities, service_engineer_id, customer_id, ...data } = dto;
         if (data.frame_number) {
             const existingFrame = await this.prisma.store.findFirst({
                 where: {
@@ -134,6 +136,12 @@ let StoresService = class StoresService {
             where: { id },
             data: {
                 ...data,
+                service_engineer: service_engineer_id
+                    ? { connect: { id: service_engineer_id } }
+                    : undefined,
+                customer: customer_id
+                    ? { connect: { id: customer_id } }
+                    : undefined,
                 materials: material_ids
                     ? {
                         deleteMany: {},

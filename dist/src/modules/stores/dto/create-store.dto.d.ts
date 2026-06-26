@@ -14,4 +14,5 @@ export declare class CreateStoreDto {
     barcode?: string;
     provider_name?: string;
     invoice_number?: string;
+    remarks?: string;
 }

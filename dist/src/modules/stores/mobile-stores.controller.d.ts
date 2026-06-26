@@ -21,6 +21,7 @@ export declare class MobileStoreReturnsController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -31,6 +32,7 @@ export declare class MobileStoreReturnsController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -50,6 +52,7 @@ export declare class MobileStoreReturnsController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -74,6 +77,7 @@ export declare class MobileStoreReturnsController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -84,6 +88,7 @@ export declare class MobileStoreReturnsController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -114,6 +119,7 @@ export declare class MobileStoresController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -124,6 +130,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -143,6 +150,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -167,6 +175,7 @@ export declare class MobileStoresController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -177,6 +186,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -195,6 +205,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -219,6 +230,7 @@ export declare class MobileStoresController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -229,6 +241,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -254,6 +267,7 @@ export declare class MobileStoresController {
                 name: string;
             };
         } & {
+            quantity: number;
             store_id: string;
             material_id: string;
         })[];
@@ -264,6 +278,7 @@ export declare class MobileStoresController {
         deleted_at: Date | null;
         customer_id: string;
         service_engineer_id: string;
+        remarks: string | null;
         invoice_number: string | null;
         quantity: number;
         warranty_status: string;
@@ -282,6 +297,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -306,6 +322,7 @@ export declare class MobileStoresController {
                     name: string;
                 };
             } & {
+                quantity: number;
                 store_id: string;
                 material_id: string;
             })[];
@@ -316,6 +333,7 @@ export declare class MobileStoresController {
             deleted_at: Date | null;
             customer_id: string;
             service_engineer_id: string;
+            remarks: string | null;
             invoice_number: string | null;
             quantity: number;
             warranty_status: string;
@@ -333,6 +351,7 @@ export declare class MobileStoresController {
         deleted_at: Date | null;
         customer_id: string;
         service_engineer_id: string;
+        remarks: string | null;
         invoice_number: string | null;
         quantity: number;
         warranty_status: string;

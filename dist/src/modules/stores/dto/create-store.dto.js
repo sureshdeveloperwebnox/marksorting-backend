@@ -25,6 +25,7 @@ class CreateStoreDto {
     barcode;
     provider_name;
     invoice_number;
+    remarks;
 }
 exports.CreateStoreDto = CreateStoreDto;
 __decorate([
@@ -103,4 +104,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateStoreDto.prototype, "invoice_number", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Some remarks about the store record', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateStoreDto.prototype, "remarks", void 0);
 //# sourceMappingURL=create-store.dto.js.map

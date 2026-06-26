@@ -13,4 +13,5 @@ export declare class MobileCreateStoreDto {
     barcode?: string;
     provider_name?: string;
     invoice_number?: string;
+    remarks?: string;
 }
