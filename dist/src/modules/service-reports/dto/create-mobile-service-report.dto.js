@@ -13,9 +13,10 @@ exports.CreateMobileServiceReportDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const create_service_report_dto_1 = require("./create-service-report.dto");
 const class_validator_1 = require("class-validator");
-class CreateMobileServiceReportDto extends (0, swagger_1.OmitType)(create_service_report_dto_1.CreateServiceReportDto, ['technician_ids']) {
+class CreateMobileServiceReportDto extends (0, swagger_1.OmitType)(create_service_report_dto_1.CreateServiceReportDto, ['technician_ids', 'visit_date']) {
     technician_id;
     technician_ids;
+    visit_date;
 }
 exports.CreateMobileServiceReportDto = CreateMobileServiceReportDto;
 __decorate([
@@ -40,4 +41,14 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Array)
 ], CreateMobileServiceReportDto.prototype, "technician_ids", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: '2024-06-15',
+        required: false,
+        description: 'Visit date in YYYY-MM-DD format (optional). Defaults to current date if omitted.',
+    }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMobileServiceReportDto.prototype, "visit_date", void 0);
 //# sourceMappingURL=create-mobile-service-report.dto.js.map

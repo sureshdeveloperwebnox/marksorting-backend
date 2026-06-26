@@ -308,7 +308,9 @@ export class ServiceReportsService {
             reportData.visit_time && reportData.visit_time.trim()
               ? reportData.visit_time
               : getAutoVisitTime(),
-          visit_date: new Date(reportData.visit_date),
+          visit_date: reportData.visit_date
+            ? new Date(reportData.visit_date)
+            : new Date(),
           call_registered_date: new Date(reportData.call_registered_date),
           machine_mfg_date:
             reportData.machine_mfg_date && reportData.machine_mfg_date.trim()

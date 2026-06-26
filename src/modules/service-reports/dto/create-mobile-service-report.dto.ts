@@ -1,10 +1,10 @@
 import { OmitType, ApiProperty } from '@nestjs/swagger';
 import { CreateServiceReportDto } from './create-service-report.dto';
-import { IsOptional, IsUUID, IsArray } from 'class-validator';
+import { IsOptional, IsUUID, IsArray, IsDateString } from 'class-validator';
 
 export class CreateMobileServiceReportDto extends OmitType(
   CreateServiceReportDto,
-  ['technician_ids'] as const,
+  ['technician_ids', 'visit_date'] as const,
 ) {
   @ApiProperty({
     example: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -27,4 +27,14 @@ export class CreateMobileServiceReportDto extends OmitType(
   @IsUUID('all', { each: true })
   @IsOptional()
   technician_ids?: string[];
+
+  @ApiProperty({
+    example: '2024-06-15',
+    required: false,
+    description:
+      'Visit date in YYYY-MM-DD format (optional). Defaults to current date if omitted.',
+  })
+  @IsDateString()
+  @IsOptional()
+  visit_date?: string;
 }
