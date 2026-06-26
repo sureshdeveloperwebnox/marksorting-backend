@@ -72,6 +72,27 @@ let ServiceReportsService = class ServiceReportsService {
                 { nature_of_complaint: { contains: search, mode: 'insensitive' } },
                 { authorized_person: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: {
+                            name: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                },
+                {
+                    serviceCategory: {
+                        name: { contains: search, mode: 'insensitive' },
+                    },
+                },
+                {
+                    technicians: {
+                        some: {
+                            technician: {
+                                full_name: { contains: search, mode: 'insensitive' },
+                            },
+                        },
+                    },
+                },
             ];
         }
         if (status) {
