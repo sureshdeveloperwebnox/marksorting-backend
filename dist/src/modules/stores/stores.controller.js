@@ -228,7 +228,10 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create new store record' }),
     (0, swagger_1.ApiBody)({ type: create_store_dto_1.CreateStoreDto }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Store record created successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Store record created successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, log_activity_decorator_1.LogActivity)({
@@ -259,7 +262,10 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing store record' }),
     (0, swagger_1.ApiBody)({ type: update_store_dto_1.UpdateStoreDto }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record updated successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store record updated successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
@@ -289,7 +295,10 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Soft delete store record' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record soft-deleted successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store record soft-deleted successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({

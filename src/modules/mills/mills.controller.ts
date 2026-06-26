@@ -91,13 +91,25 @@ export class MillsController {
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
         { customer: { name: { contains: search, mode: 'insensitive' } } },
-        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+        {
+          masterMills: {
+            some: { ref_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
+        {
+          masterMills: {
+            some: { frame_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
 
       // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
       const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
-      if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
+      if (
+        cleanedPhoneSearch &&
+        cleanedPhoneSearch !== '+' &&
+        cleanedPhoneSearch.length >= 5
+      ) {
         orConditions.push(
           { phone: { contains: cleanedPhoneSearch, mode: 'insensitive' } },
           { phone_2: { contains: cleanedPhoneSearch, mode: 'insensitive' } },
@@ -110,16 +122,26 @@ export class MillsController {
 
     if (refNo) {
       where.OR = [
-        ...(where.OR as Prisma.MillWhereInput[] || []),
+        ...((where.OR as Prisma.MillWhereInput[]) || []),
         { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
-        { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+        {
+          masterMills: {
+            some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+          },
+        },
       ];
     }
 
     if (frameNo) {
       where.OR = [
-        ...(where.OR as Prisma.MillWhereInput[] || []),
-        { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+        ...((where.OR as Prisma.MillWhereInput[]) || []),
+        {
+          masterMills: {
+            some: {
+              frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+            },
+          },
+        },
       ];
     }
 

@@ -207,8 +207,16 @@ let AuthController = AuthController_1 = class AuthController {
             });
         }
         const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
-        res.clearCookie('access_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
-        res.clearCookie('refresh_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+        res.clearCookie('access_token', {
+            path: '/',
+            secure: cookieSecure,
+            sameSite: cookieSameSite,
+        });
+        res.clearCookie('refresh_token', {
+            path: '/',
+            secure: cookieSecure,
+            sameSite: cookieSameSite,
+        });
         return { message: 'Logged out successfully' };
     }
     async refresh(req, res) {

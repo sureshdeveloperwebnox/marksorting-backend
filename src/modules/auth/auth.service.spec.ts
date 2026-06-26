@@ -241,7 +241,7 @@ describe('AuthService', () => {
         secret: 'refresh-secret',
       });
       expect(redisService.get).toHaveBeenCalledWith(
-        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/)
+        expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/),
       );
       expect(redisService.set).toHaveBeenCalledWith(
         expect.stringMatching(/^refresh_token:user-id:[a-f0-9]{64}$/),

@@ -36,8 +36,16 @@ let MobileMillsController = class MobileMillsController {
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
                 { customer: { name: { contains: search, mode: 'insensitive' } } },
-                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: { ref_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
+                {
+                    masterMills: {
+                        some: { frame_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
@@ -49,13 +57,23 @@ let MobileMillsController = class MobileMillsController {
             where.OR = [
                 ...(where.OR || []),
                 { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
-                { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+                    },
+                },
             ];
         }
         if (frameNo) {
             where.OR = [
                 ...(where.OR || []),
-                { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: {
+                            frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+                        },
+                    },
+                },
             ];
         }
         return this.millsService.findAll({
@@ -76,8 +94,16 @@ let MobileMillsController = class MobileMillsController {
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
                 { customer: { name: { contains: search, mode: 'insensitive' } } },
-                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: { ref_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
+                {
+                    masterMills: {
+                        some: { frame_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {

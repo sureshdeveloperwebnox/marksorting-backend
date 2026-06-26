@@ -28,7 +28,7 @@ describe('ExpensesService', () => {
     prisma.installationReport.findMany.mockResolvedValue([]);
 
     service = new ExpensesService(
-      prisma as any,
+      prisma,
       redis as any,
       { emit: jest.fn() } as any,
       s3Service as any,
@@ -223,7 +223,10 @@ describe('ExpensesService', () => {
       };
 
       await expect(
-        service.update('exp-id', dto, { userId: 'tech-id', role: 'Service Engineer' }),
+        service.update('exp-id', dto, {
+          userId: 'tech-id',
+          role: 'Service Engineer',
+        }),
       ).rejects.toThrow(
         'An expense of type OTHERS cannot be linked to a service report or installation report',
       );

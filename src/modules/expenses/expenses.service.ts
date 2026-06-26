@@ -57,7 +57,7 @@ export class ExpensesService {
     private redis: RedisService,
     private eventEmitter: EventEmitter2,
     private s3Service: S3Service,
-  ) { }
+  ) {}
 
   /**
    * Transform expense image keys to full S3 URLs
@@ -78,13 +78,15 @@ export class ExpensesService {
     };
 
     if (mappedExpense.expense_items) {
-      mappedExpense.expense_items = mappedExpense.expense_items.map((item: any) => ({
-        ...item,
-        expense_images: (item.expense_images || []).map((key: string) => {
-          if (key.startsWith('http')) return key;
-          return this.s3Service.getFileUrl(key);
+      mappedExpense.expense_items = mappedExpense.expense_items.map(
+        (item: any) => ({
+          ...item,
+          expense_images: (item.expense_images || []).map((key: string) => {
+            if (key.startsWith('http')) return key;
+            return this.s3Service.getFileUrl(key);
+          }),
         }),
-      }));
+      );
     }
 
     return mappedExpense;
@@ -249,12 +251,16 @@ export class ExpensesService {
 
     // Validate expense category / items exist
     if (expenseData.expense_items && expenseData.expense_items.length > 0) {
-      const categoryIds = expenseData.expense_items.map((it: any) => it.expense_category_id);
+      const categoryIds = expenseData.expense_items.map(
+        (it: any) => it.expense_category_id,
+      );
       const categoriesCount = await this.prisma.expenseCategory.count({
         where: { id: { in: categoryIds }, deleted_at: null },
       });
       if (categoriesCount !== new Set(categoryIds).size) {
-        throw new BadRequestException('One or more expense category IDs are invalid');
+        throw new BadRequestException(
+          'One or more expense category IDs are invalid',
+        );
       }
     } else if (expenseData.expense_category_id) {
       const categoryExists = await this.prisma.expenseCategory.findFirst({
@@ -336,11 +342,15 @@ export class ExpensesService {
     // Validate required fields when no report is linked
     if (!expenseData.service_report_id && !expenseData.installation_report_id) {
       if (!expenseData.visit_date) {
-        throw new BadRequestException('Visit date is required when no report is linked');
+        throw new BadRequestException(
+          'Visit date is required when no report is linked',
+        );
       }
       if (expenseType === 'MILL') {
         if (!expenseData.mill_id) {
-          throw new BadRequestException('Mill ID is required for MILL type expense when no report is linked');
+          throw new BadRequestException(
+            'Mill ID is required for MILL type expense when no report is linked',
+          );
         }
       }
     }
@@ -388,7 +398,9 @@ export class ExpensesService {
         },
       });
       if (!report) {
-        throw new BadRequestException('Linked service report is invalid or not assigned to you');
+        throw new BadRequestException(
+          'Linked service report is invalid or not assigned to you',
+        );
       }
       linkedMillId = report.mill_id;
       linkedPlace = report.place;
@@ -406,7 +418,9 @@ export class ExpensesService {
         },
       });
       if (!report) {
-        throw new BadRequestException('Linked installation report is invalid or not assigned to you');
+        throw new BadRequestException(
+          'Linked installation report is invalid or not assigned to you',
+        );
       }
       linkedMillId = report.mill_id;
       linkedPlace = report.place;
@@ -443,22 +457,33 @@ export class ExpensesService {
       // Calculate aggregated fields for root-level backward compatibility
       const items = expenseData.expense_items || [];
       const firstItem = items[0];
-      const rootCategoryId = firstItem ? firstItem.expense_category_id : (expenseData.expense_category_id || null);
+      const rootCategoryId = firstItem
+        ? firstItem.expense_category_id
+        : expenseData.expense_category_id || null;
       const totalAmount = items.length
         ? items.reduce((sum: number, it: any) => sum + (it.amount || 0), 0)
-        : (expenseData.amount || 0);
+        : expenseData.amount || 0;
       const totalAdminAmount = items.length
-        ? items.reduce((sum: number, it: any) => sum + (it.admin_amount || 0), 0)
-        : (expenseData.admin_amount || 0);
-      const rootRemarks = firstItem ? (firstItem.remarks || expenseData.remarks || null) : (expenseData.remarks || null);
+        ? items.reduce(
+            (sum: number, it: any) => sum + (it.admin_amount || 0),
+            0,
+          )
+        : expenseData.admin_amount || 0;
+      const rootRemarks = firstItem
+        ? firstItem.remarks || expenseData.remarks || null
+        : expenseData.remarks || null;
       const rootImages = items.length
-        ? Array.from(new Set(items.flatMap((it: any) => it.expense_images || [])))
-        : (expenseData.expense_images || []);
+        ? Array.from(
+            new Set(items.flatMap((it: any) => it.expense_images || [])),
+          )
+        : expenseData.expense_images || [];
 
       // Determine report_type
       const report_type = expenseData.service_report_id
         ? 'SERVICE'
-        : (expenseData.installation_report_id ? 'INSTALLATION' : 'NONE');
+        : expenseData.installation_report_id
+          ? 'INSTALLATION'
+          : 'NONE';
 
       // Insert the expense record
       const created = await tx.expense.create({
@@ -573,15 +598,20 @@ export class ExpensesService {
     const isServiceEngineer = user && user.role === 'Service Engineer';
 
     // Determine target report IDs and expense type for validation
-    const finalServiceReportId = expenseData.service_report_id !== undefined
-      ? expenseData.service_report_id
-      : existingExpense.service_report_id;
+    const finalServiceReportId =
+      expenseData.service_report_id !== undefined
+        ? expenseData.service_report_id
+        : existingExpense.service_report_id;
 
-    const finalInstallationReportId = expenseData.installation_report_id !== undefined
-      ? expenseData.installation_report_id
-      : existingExpense.installation_report_id;
+    const finalInstallationReportId =
+      expenseData.installation_report_id !== undefined
+        ? expenseData.installation_report_id
+        : existingExpense.installation_report_id;
 
-    const targetExpenseType = expenseData.expense_type !== undefined ? expenseData.expense_type : existingExpense.expense_type;
+    const targetExpenseType =
+      expenseData.expense_type !== undefined
+        ? expenseData.expense_type
+        : existingExpense.expense_type;
 
     if (targetExpenseType === 'OTHERS') {
       if (finalServiceReportId || finalInstallationReportId) {
@@ -621,21 +651,34 @@ export class ExpensesService {
 
     // If no report is linked, validate visit_date and mill_id (if MILL type)
     if (!finalServiceReportId && !finalInstallationReportId) {
-      const targetVisitDate = expenseData.visit_date !== undefined ? expenseData.visit_date : existingExpense.visit_date;
+      const targetVisitDate =
+        expenseData.visit_date !== undefined
+          ? expenseData.visit_date
+          : existingExpense.visit_date;
       if (!targetVisitDate) {
-        throw new BadRequestException('Visit date is required when no report is linked');
+        throw new BadRequestException(
+          'Visit date is required when no report is linked',
+        );
       }
 
       if (targetExpenseType === 'MILL') {
-        const targetMillId = expenseData.mill_id !== undefined ? expenseData.mill_id : existingExpense.mill_id;
+        const targetMillId =
+          expenseData.mill_id !== undefined
+            ? expenseData.mill_id
+            : existingExpense.mill_id;
         if (!targetMillId) {
-          throw new BadRequestException('Mill ID is required for MILL type expense when no report is linked');
+          throw new BadRequestException(
+            'Mill ID is required for MILL type expense when no report is linked',
+          );
         }
       }
     }
 
     // Verify report duplicate linkage (no two active expenses for the same report)
-    if (expenseData.service_report_id && typeof expenseData.service_report_id === 'string') {
+    if (
+      expenseData.service_report_id &&
+      typeof expenseData.service_report_id === 'string'
+    ) {
       const duplicateExpense = await this.prisma.expense.findFirst({
         where: {
           service_report_id: expenseData.service_report_id,
@@ -649,7 +692,10 @@ export class ExpensesService {
         );
       }
     }
-    if (expenseData.installation_report_id && typeof expenseData.installation_report_id === 'string') {
+    if (
+      expenseData.installation_report_id &&
+      typeof expenseData.installation_report_id === 'string'
+    ) {
       const duplicateExpense = await this.prisma.expense.findFirst({
         where: {
           installation_report_id: expenseData.installation_report_id,
@@ -684,12 +730,16 @@ export class ExpensesService {
 
     // Validate expense category if provided
     if (expenseData.expense_items && expenseData.expense_items.length > 0) {
-      const categoryIds = expenseData.expense_items.map((it: any) => it.expense_category_id);
+      const categoryIds = expenseData.expense_items.map(
+        (it: any) => it.expense_category_id,
+      );
       const categoriesCount = await this.prisma.expenseCategory.count({
         where: { id: { in: categoryIds }, deleted_at: null },
       });
       if (categoriesCount !== new Set(categoryIds).size) {
-        throw new BadRequestException('One or more expense category IDs are invalid');
+        throw new BadRequestException(
+          'One or more expense category IDs are invalid',
+        );
       }
     } else if (expenseData.expense_category_id !== undefined) {
       const categoryExists = await this.prisma.expenseCategory.findFirst({
@@ -763,7 +813,9 @@ export class ExpensesService {
             },
           });
           if (!report) {
-            throw new BadRequestException('Linked service report is invalid or not assigned to you');
+            throw new BadRequestException(
+              'Linked service report is invalid or not assigned to you',
+            );
           }
           updateData.service_report_id = expenseData.service_report_id;
           updateData.mill_id = report.mill_id;
@@ -788,9 +840,12 @@ export class ExpensesService {
             },
           });
           if (!report) {
-            throw new BadRequestException('Linked installation report is invalid or not assigned to you');
+            throw new BadRequestException(
+              'Linked installation report is invalid or not assigned to you',
+            );
           }
-          updateData.installation_report_id = expenseData.installation_report_id;
+          updateData.installation_report_id =
+            expenseData.installation_report_id;
           updateData.mill_id = report.mill_id;
           updateData.place = report.place;
           if (expenseData.visit_date === undefined) {
@@ -800,9 +855,12 @@ export class ExpensesService {
       }
     }
 
-    const finalVisitDate = updateData.visit_date !== undefined
-      ? updateData.visit_date
-      : (expenseData.visit_date !== undefined ? new Date(expenseData.visit_date) : undefined);
+    const finalVisitDate =
+      updateData.visit_date !== undefined
+        ? updateData.visit_date
+        : expenseData.visit_date !== undefined
+          ? new Date(expenseData.visit_date)
+          : undefined;
 
     if (finalVisitDate) {
       const today = new Date();
@@ -817,23 +875,37 @@ export class ExpensesService {
     if (hasItems) {
       const items = expenseData.expense_items || [];
       const firstItem = items[0];
-      updateData.expense_category_id = firstItem ? firstItem.expense_category_id : null;
-      const totalAmount = items.reduce((sum: number, it: any) => sum + (it.amount || 0), 0);
+      updateData.expense_category_id = firstItem
+        ? firstItem.expense_category_id
+        : null;
+      const totalAmount = items.reduce(
+        (sum: number, it: any) => sum + (it.amount || 0),
+        0,
+      );
       updateData.amount = String(totalAmount);
-      const totalAdminAmount = items.reduce((sum: number, it: any) => sum + (it.admin_amount || 0), 0);
+      const totalAdminAmount = items.reduce(
+        (sum: number, it: any) => sum + (it.admin_amount || 0),
+        0,
+      );
       updateData.admin_amount = String(totalAdminAmount);
-      updateData.remarks = firstItem ? (firstItem.remarks || null) : null;
-      updateData.expense_images = Array.from(new Set(items.flatMap((it: any) => it.expense_images || [])));
+      updateData.remarks = firstItem ? firstItem.remarks || null : null;
+      updateData.expense_images = Array.from(
+        new Set(items.flatMap((it: any) => it.expense_images || [])),
+      );
     } else {
       // Legacy updates
       if (expenseData.expense_category_id !== undefined) {
         updateData.expense_category_id = expenseData.expense_category_id;
       }
       if (expenseData.amount !== undefined) {
-        updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';
+        updateData.amount = expenseData.amount
+          ? String(expenseData.amount)
+          : '0';
       }
       if (expenseData.admin_amount !== undefined) {
-        updateData.admin_amount = expenseData.admin_amount ? String(expenseData.admin_amount) : '0';
+        updateData.admin_amount = expenseData.admin_amount
+          ? String(expenseData.admin_amount)
+          : '0';
       }
       if (expenseData.remarks !== undefined) {
         updateData.remarks = expenseData.remarks || null;
@@ -843,16 +915,20 @@ export class ExpensesService {
       }
     }
     // Determine report_type
-    const currentServiceReportId = updateData.service_report_id !== undefined
-      ? updateData.service_report_id
-      : existingExpense.service_report_id;
-    const currentInstallationReportId = updateData.installation_report_id !== undefined
-      ? updateData.installation_report_id
-      : existingExpense.installation_report_id;
+    const currentServiceReportId =
+      updateData.service_report_id !== undefined
+        ? updateData.service_report_id
+        : existingExpense.service_report_id;
+    const currentInstallationReportId =
+      updateData.installation_report_id !== undefined
+        ? updateData.installation_report_id
+        : existingExpense.installation_report_id;
 
     updateData.report_type = currentServiceReportId
       ? 'SERVICE'
-      : (currentInstallationReportId ? 'INSTALLATION' : 'NONE');
+      : currentInstallationReportId
+        ? 'INSTALLATION'
+        : 'NONE';
 
     const expense = await this.prisma.$transaction(async (tx) => {
       const updated = await tx.expense.update({
@@ -862,25 +938,39 @@ export class ExpensesService {
       });
 
       // Sync report changes
-      if (existingExpense.service_report_id && existingExpense.service_report_id !== updated.service_report_id) {
+      if (
+        existingExpense.service_report_id &&
+        existingExpense.service_report_id !== updated.service_report_id
+      ) {
         await tx.serviceReport.update({
           where: { id: existingExpense.service_report_id },
           data: { expense_id: null },
         });
       }
-      if (existingExpense.installation_report_id && existingExpense.installation_report_id !== updated.installation_report_id) {
+      if (
+        existingExpense.installation_report_id &&
+        existingExpense.installation_report_id !==
+          updated.installation_report_id
+      ) {
         await tx.installationReport.update({
           where: { id: existingExpense.installation_report_id },
           data: { expense_id: null },
         });
       }
-      if (updated.service_report_id && updated.service_report_id !== existingExpense.service_report_id) {
+      if (
+        updated.service_report_id &&
+        updated.service_report_id !== existingExpense.service_report_id
+      ) {
         await tx.serviceReport.update({
           where: { id: updated.service_report_id },
           data: { expense_id: updated.id },
         });
       }
-      if (updated.installation_report_id && updated.installation_report_id !== existingExpense.installation_report_id) {
+      if (
+        updated.installation_report_id &&
+        updated.installation_report_id !==
+          existingExpense.installation_report_id
+      ) {
         await tx.installationReport.update({
           where: { id: updated.installation_report_id },
           data: { expense_id: updated.id },
@@ -914,11 +1004,24 @@ export class ExpensesService {
           await tx.expenseItem.update({
             where: { id: firstItem.id },
             data: {
-              expense_category_id: updateData.expense_category_id !== undefined ? updateData.expense_category_id : undefined,
-              amount: updateData.amount !== undefined ? updateData.amount : undefined,
-              admin_amount: updateData.admin_amount !== undefined ? updateData.admin_amount : undefined,
-              remarks: updateData.remarks !== undefined ? updateData.remarks : undefined,
-              expense_images: updateData.expense_images !== undefined ? updateData.expense_images : undefined,
+              expense_category_id:
+                updateData.expense_category_id !== undefined
+                  ? updateData.expense_category_id
+                  : undefined,
+              amount:
+                updateData.amount !== undefined ? updateData.amount : undefined,
+              admin_amount:
+                updateData.admin_amount !== undefined
+                  ? updateData.admin_amount
+                  : undefined,
+              remarks:
+                updateData.remarks !== undefined
+                  ? updateData.remarks
+                  : undefined,
+              expense_images:
+                updateData.expense_images !== undefined
+                  ? updateData.expense_images
+                  : undefined,
             },
           });
         } else if (updateData.expense_category_id) {

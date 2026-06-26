@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -88,7 +92,8 @@ export class MasterMillsService {
       },
     });
 
-    if (!masterMill) throw new NotFoundException('Master Mill record not found');
+    if (!masterMill)
+      throw new NotFoundException('Master Mill record not found');
     await this.redis.setJson(cacheKey, masterMill, 3600);
     return masterMill;
   }
@@ -135,10 +140,14 @@ export class MasterMillsService {
 
     // Convert date strings to Date objects for Prisma
     if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
-    if (data.installation_date) data.installation_date = new Date(data.installation_date);
-    if (data.warranty_closing_date) data.warranty_closing_date = new Date(data.warranty_closing_date);
-    if (data.amc_starting_date) data.amc_starting_date = new Date(data.amc_starting_date);
-    if (data.amc_closing_date) data.amc_closing_date = new Date(data.amc_closing_date);
+    if (data.installation_date)
+      data.installation_date = new Date(data.installation_date);
+    if (data.warranty_closing_date)
+      data.warranty_closing_date = new Date(data.warranty_closing_date);
+    if (data.amc_starting_date)
+      data.amc_starting_date = new Date(data.amc_starting_date);
+    if (data.amc_closing_date)
+      data.amc_closing_date = new Date(data.amc_closing_date);
 
     const masterMill = await this.prisma.masterMill.create({ data });
     await this.invalidateCache();
@@ -185,10 +194,14 @@ export class MasterMillsService {
 
     // Convert date strings to Date objects for Prisma
     if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
-    if (data.installation_date) data.installation_date = new Date(data.installation_date);
-    if (data.warranty_closing_date) data.warranty_closing_date = new Date(data.warranty_closing_date);
-    if (data.amc_starting_date) data.amc_starting_date = new Date(data.amc_starting_date);
-    if (data.amc_closing_date) data.amc_closing_date = new Date(data.amc_closing_date);
+    if (data.installation_date)
+      data.installation_date = new Date(data.installation_date);
+    if (data.warranty_closing_date)
+      data.warranty_closing_date = new Date(data.warranty_closing_date);
+    if (data.amc_starting_date)
+      data.amc_starting_date = new Date(data.amc_starting_date);
+    if (data.amc_closing_date)
+      data.amc_closing_date = new Date(data.amc_closing_date);
 
     const updated = await this.prisma.masterMill.update({
       where: { id },
@@ -221,7 +234,14 @@ export class MasterMillsService {
 
     const now = new Date();
 
-    const [total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount] = await Promise.all([
+    const [
+      total,
+      underWarranty,
+      underAmc,
+      nonWarranty,
+      installationCount,
+      serviceCount,
+    ] = await Promise.all([
       this.prisma.masterMill.count({ where: { deleted_at: null } }),
       this.prisma.masterMill.count({
         where: {
@@ -246,7 +266,14 @@ export class MasterMillsService {
       }),
     ]);
 
-    const result = { total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount };
+    const result = {
+      total,
+      underWarranty,
+      underAmc,
+      nonWarranty,
+      installationCount,
+      serviceCount,
+    };
     await this.redis.setJson(cacheKey, result, 120);
     return result;
   }
@@ -267,15 +294,23 @@ export class MasterMillsService {
         { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
         { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
         { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-        { mill: { customer: { name: { contains: cleanSearch, mode: 'insensitive' } } } },
+        {
+          mill: {
+            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+          },
+        },
       ];
     } else {
       const orConditions: Prisma.MasterMillWhereInput[] = [];
       if (refNo) {
-        orConditions.push({ ref_no: { contains: refNo.trim(), mode: 'insensitive' } });
+        orConditions.push({
+          ref_no: { contains: refNo.trim(), mode: 'insensitive' },
+        });
       }
       if (frameNo) {
-        orConditions.push({ frame_no: { contains: frameNo.trim(), mode: 'insensitive' } });
+        orConditions.push({
+          frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+        });
       }
       if (orConditions.length > 0) {
         where.OR = orConditions;
@@ -307,7 +342,9 @@ export class MasterMillsService {
     const customerNameInput = dto.customer_name?.trim();
 
     if (!customerIdInput && !customerNameInput) {
-      throw new BadRequestException('Either customer_id or customer_name must be provided');
+      throw new BadRequestException(
+        'Either customer_id or customer_name must be provided',
+      );
     }
 
     const cleanMillName = dto.mill_name.trim();
@@ -334,9 +371,12 @@ export class MasterMillsService {
 
         // Checklist 1: Update customer fields if provided and empty/different
         const customerUpdates: any = {};
-        if (cleanAddress && customer.address !== cleanAddress) customerUpdates.address = cleanAddress;
-        if (cleanPhone && customer.phone !== cleanPhone) customerUpdates.phone = cleanPhone;
-        if (cleanEmail && customer.email !== cleanEmail) customerUpdates.email = cleanEmail;
+        if (cleanAddress && customer.address !== cleanAddress)
+          customerUpdates.address = cleanAddress;
+        if (cleanPhone && customer.phone !== cleanPhone)
+          customerUpdates.phone = cleanPhone;
+        if (cleanEmail && customer.email !== cleanEmail)
+          customerUpdates.email = cleanEmail;
 
         if (Object.keys(customerUpdates).length > 0) {
           customer = await tx.customer.update({
@@ -357,9 +397,12 @@ export class MasterMillsService {
         if (customer) {
           // Checklist 1: Update customer fields if provided and empty/different
           const customerUpdates: any = {};
-          if (cleanAddress && customer.address !== cleanAddress) customerUpdates.address = cleanAddress;
-          if (cleanPhone && customer.phone !== cleanPhone) customerUpdates.phone = cleanPhone;
-          if (cleanEmail && customer.email !== cleanEmail) customerUpdates.email = cleanEmail;
+          if (cleanAddress && customer.address !== cleanAddress)
+            customerUpdates.address = cleanAddress;
+          if (cleanPhone && customer.phone !== cleanPhone)
+            customerUpdates.phone = cleanPhone;
+          if (cleanEmail && customer.email !== cleanEmail)
+            customerUpdates.email = cleanEmail;
 
           if (Object.keys(customerUpdates).length > 0) {
             customer = await tx.customer.update({
@@ -395,11 +438,16 @@ export class MasterMillsService {
       if (mill) {
         // Checklist 2: Update mill fields if provided and empty/different
         const millUpdates: any = {};
-        if (cleanAddress && mill.address !== cleanAddress) millUpdates.address = cleanAddress;
-        if (cleanPhone && mill.phone !== cleanPhone) millUpdates.phone = cleanPhone;
-        if (cleanEmail && mill.email !== cleanEmail) millUpdates.email = cleanEmail;
-        if (cleanPlace && mill.place !== cleanPlace) millUpdates.place = cleanPlace;
-        if (cleanRefNo && mill.ref_no !== cleanRefNo) millUpdates.ref_no = cleanRefNo;
+        if (cleanAddress && mill.address !== cleanAddress)
+          millUpdates.address = cleanAddress;
+        if (cleanPhone && mill.phone !== cleanPhone)
+          millUpdates.phone = cleanPhone;
+        if (cleanEmail && mill.email !== cleanEmail)
+          millUpdates.email = cleanEmail;
+        if (cleanPlace && mill.place !== cleanPlace)
+          millUpdates.place = cleanPlace;
+        if (cleanRefNo && mill.ref_no !== cleanRefNo)
+          millUpdates.ref_no = cleanRefNo;
 
         if (Object.keys(millUpdates).length > 0) {
           mill = await tx.mill.update({
@@ -427,10 +475,12 @@ export class MasterMillsService {
 
       // 3. Resolve & Update Master Mill
       const orConditions: Prisma.MasterMillWhereInput[] = [
-        { ref_no: { equals: cleanRefNo, mode: 'insensitive' } }
+        { ref_no: { equals: cleanRefNo, mode: 'insensitive' } },
       ];
       if (cleanFrameNo) {
-        orConditions.push({ frame_no: { equals: cleanFrameNo, mode: 'insensitive' } });
+        orConditions.push({
+          frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
+        });
       }
 
       let masterMill = await tx.masterMill.findFirst({
@@ -443,16 +493,24 @@ export class MasterMillsService {
       if (masterMill) {
         // Checklist 3: Update master mill fields if provided and empty/different
         const masterMillUpdates: any = {};
-        if (cleanRefNo && masterMill.ref_no !== cleanRefNo) masterMillUpdates.ref_no = cleanRefNo;
-        if (cleanFrameNo && masterMill.frame_no !== cleanFrameNo) masterMillUpdates.frame_no = cleanFrameNo;
-        if (cleanMcModel && masterMill.mc_model !== cleanMcModel) masterMillUpdates.mc_model = cleanMcModel;
-        if (cleanAddress && masterMill.address !== cleanAddress) masterMillUpdates.address = cleanAddress;
-        if (cleanPlace && masterMill.place !== cleanPlace) masterMillUpdates.place = cleanPlace;
-        if (cleanState && masterMill.state !== cleanState) masterMillUpdates.state = cleanState;
-        if (cleanPhone && masterMill.phone_no !== cleanPhone) masterMillUpdates.phone_no = cleanPhone;
-        
+        if (cleanRefNo && masterMill.ref_no !== cleanRefNo)
+          masterMillUpdates.ref_no = cleanRefNo;
+        if (cleanFrameNo && masterMill.frame_no !== cleanFrameNo)
+          masterMillUpdates.frame_no = cleanFrameNo;
+        if (cleanMcModel && masterMill.mc_model !== cleanMcModel)
+          masterMillUpdates.mc_model = cleanMcModel;
+        if (cleanAddress && masterMill.address !== cleanAddress)
+          masterMillUpdates.address = cleanAddress;
+        if (cleanPlace && masterMill.place !== cleanPlace)
+          masterMillUpdates.place = cleanPlace;
+        if (cleanState && masterMill.state !== cleanState)
+          masterMillUpdates.state = cleanState;
+        if (cleanPhone && masterMill.phone_no !== cleanPhone)
+          masterMillUpdates.phone_no = cleanPhone;
+
         // Ensure the Master Mill is linked to the resolved Mill
-        if (masterMill.mill_id !== resolvedMillId) masterMillUpdates.mill_id = resolvedMillId;
+        if (masterMill.mill_id !== resolvedMillId)
+          masterMillUpdates.mill_id = resolvedMillId;
 
         if (Object.keys(masterMillUpdates).length > 0) {
           masterMill = await tx.masterMill.update({
@@ -498,13 +556,17 @@ export class MasterMillsService {
     await this.invalidateAllRelatedCaches(
       result?.mill?.customer_id ?? undefined,
       result?.mill_id ?? undefined,
-      result?.id ?? undefined
+      result?.id ?? undefined,
     );
 
     return result;
   }
 
-  private async invalidateAllRelatedCaches(customerId?: string, millId?: string, masterMillId?: string) {
+  private async invalidateAllRelatedCaches(
+    customerId?: string,
+    millId?: string,
+    masterMillId?: string,
+  ) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix('customers:list:'),
       this.redis.delByPrefix('mills:list:'),
@@ -512,7 +574,8 @@ export class MasterMillsService {
     ];
     if (customerId) promises.push(this.redis.del(`customer:id:${customerId}`));
     if (millId) promises.push(this.redis.del(`mill:id:${millId}`));
-    if (masterMillId) promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${masterMillId}`));
+    if (masterMillId)
+      promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${masterMillId}`));
     await Promise.all(promises);
   }
 

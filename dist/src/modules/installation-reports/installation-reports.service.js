@@ -192,7 +192,8 @@ let InstallationReportsService = class InstallationReportsService {
     }
     async create(dto, user) {
         const rawDto = dto;
-        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
+            rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
                 select: { phone: true, email: true },
@@ -232,16 +233,21 @@ let InstallationReportsService = class InstallationReportsService {
                 data: {
                     ...reportData,
                     report_number,
-                    visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : (0, date_time_1.getAutoVisitTime)(),
-                    visit_date: reportData.visit_date ? new Date(reportData.visit_date) : new Date(),
+                    visit_time: reportData.visit_time && reportData.visit_time.trim()
+                        ? reportData.visit_time
+                        : (0, date_time_1.getAutoVisitTime)(),
+                    visit_date: reportData.visit_date
+                        ? new Date(reportData.visit_date)
+                        : new Date(),
                     call_registered_date: new Date(reportData.call_registered_date),
-                    invoice_date: (reportData.invoice_date && reportData.invoice_date.trim())
+                    invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
                         ? new Date(reportData.invoice_date)
                         : undefined,
-                    warranty_start_date: (reportData.warranty_start_date && reportData.warranty_start_date.trim())
+                    warranty_start_date: reportData.warranty_start_date &&
+                        reportData.warranty_start_date.trim()
                         ? new Date(reportData.warranty_start_date)
                         : undefined,
-                    warranty_end_date: (reportData.warranty_end_date && reportData.warranty_end_date.trim())
+                    warranty_end_date: reportData.warranty_end_date && reportData.warranty_end_date.trim()
                         ? new Date(reportData.warranty_end_date)
                         : undefined,
                 },
@@ -280,7 +286,8 @@ let InstallationReportsService = class InstallationReportsService {
     async update(id, dto, user) {
         const existingReport = await this.findById(id, user);
         const rawDto = dto;
-        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
+            rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
                 select: { phone: true, email: true },
@@ -309,9 +316,10 @@ let InstallationReportsService = class InstallationReportsService {
         }
         const updateData = { ...reportData };
         if (reportData.visit_time !== undefined) {
-            updateData.visit_time = (reportData.visit_time && reportData.visit_time.trim())
-                ? reportData.visit_time
-                : (0, date_time_1.getAutoVisitTime)();
+            updateData.visit_time =
+                reportData.visit_time && reportData.visit_time.trim()
+                    ? reportData.visit_time
+                    : (0, date_time_1.getAutoVisitTime)();
         }
         if (reportData.visit_date !== undefined) {
             updateData.visit_date = new Date(reportData.visit_date);
@@ -320,19 +328,22 @@ let InstallationReportsService = class InstallationReportsService {
             updateData.call_registered_date = new Date(reportData.call_registered_date);
         }
         if (reportData.invoice_date !== undefined) {
-            updateData.invoice_date = (reportData.invoice_date && reportData.invoice_date.trim())
-                ? new Date(reportData.invoice_date)
-                : null;
+            updateData.invoice_date =
+                reportData.invoice_date && reportData.invoice_date.trim()
+                    ? new Date(reportData.invoice_date)
+                    : null;
         }
         if (reportData.warranty_start_date !== undefined) {
-            updateData.warranty_start_date = (reportData.warranty_start_date && reportData.warranty_start_date.trim())
-                ? new Date(reportData.warranty_start_date)
-                : null;
+            updateData.warranty_start_date =
+                reportData.warranty_start_date && reportData.warranty_start_date.trim()
+                    ? new Date(reportData.warranty_start_date)
+                    : null;
         }
         if (reportData.warranty_end_date !== undefined) {
-            updateData.warranty_end_date = (reportData.warranty_end_date && reportData.warranty_end_date.trim())
-                ? new Date(reportData.warranty_end_date)
-                : null;
+            updateData.warranty_end_date =
+                reportData.warranty_end_date && reportData.warranty_end_date.trim()
+                    ? new Date(reportData.warranty_end_date)
+                    : null;
         }
         const installationReport = await this.prisma.installationReport.update({
             where: { id },

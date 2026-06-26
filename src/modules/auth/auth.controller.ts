@@ -36,7 +36,6 @@ import { Public } from '../../common/decorators/public.decorator';
 import { parseDuration } from '../../common/utils/date-time';
 import * as express from 'express';
 
-
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
@@ -49,7 +48,10 @@ export class AuthController {
   ) {}
 
   /** Returns cookie security flags based on the actual transport (HTTPS vs HTTP). */
-  private getCookieFlags(req: express.Request): { secure: boolean; sameSite: 'none' | 'lax' } {
+  private getCookieFlags(req: express.Request): {
+    secure: boolean;
+    sameSite: 'none' | 'lax';
+  } {
     // Use actual connection security, NOT NODE_ENV, to determine flags.
     // This ensures cookies work correctly both in local HTTP dev and production HTTPS.
     const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
@@ -62,13 +64,19 @@ export class AuthController {
   }
 
   private setTokens(req: express.Request, res: express.Response, result: any) {
-    const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
+    const { secure: cookieSecure, sameSite: cookieSameSite } =
+      this.getCookieFlags(req);
 
-    const jwtExpiresIn = this.configService.get<string>('jwt.expiresIn') || '15m';
-    const jwtRefreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
+    const jwtExpiresIn =
+      this.configService.get<string>('jwt.expiresIn') || '15m';
+    const jwtRefreshExpiresIn =
+      this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
 
     const accessTokenMaxAge = parseDuration(jwtExpiresIn, 15 * 60 * 1000);
-    const refreshTokenMaxAge = parseDuration(jwtRefreshExpiresIn, 7 * 24 * 60 * 60 * 1000);
+    const refreshTokenMaxAge = parseDuration(
+      jwtRefreshExpiresIn,
+      7 * 24 * 60 * 60 * 1000,
+    );
 
     res.cookie('access_token', result.access_token, {
       httpOnly: true,
@@ -216,9 +224,18 @@ export class AuthController {
     }
 
     // Must include the same secure/sameSite flags used when setting, or browsers ignore the clear.
-    const { secure: cookieSecure, sameSite: cookieSameSite } = this.getCookieFlags(req);
-    res.clearCookie('access_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
-    res.clearCookie('refresh_token', { path: '/', secure: cookieSecure, sameSite: cookieSameSite });
+    const { secure: cookieSecure, sameSite: cookieSameSite } =
+      this.getCookieFlags(req);
+    res.clearCookie('access_token', {
+      path: '/',
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
+    });
+    res.clearCookie('refresh_token', {
+      path: '/',
+      secure: cookieSecure,
+      sameSite: cookieSameSite,
+    });
     return { message: 'Logged out successfully' };
   }
 

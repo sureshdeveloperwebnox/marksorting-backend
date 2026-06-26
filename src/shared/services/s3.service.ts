@@ -154,7 +154,9 @@ export class S3Service {
         }
         actualKey = pathname;
       } catch (error) {
-        this.logger.error(`Error parsing URL to key: ${key} - ${error.message}`);
+        this.logger.error(
+          `Error parsing URL to key: ${key} - ${error.message}`,
+        );
         return;
       }
     }

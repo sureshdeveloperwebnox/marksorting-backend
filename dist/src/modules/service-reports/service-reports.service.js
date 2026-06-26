@@ -171,7 +171,8 @@ let ServiceReportsService = class ServiceReportsService {
     }
     async create(dto, user) {
         const rawDto = dto;
-        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
+            rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
                 select: { phone: true, email: true },
@@ -211,13 +212,16 @@ let ServiceReportsService = class ServiceReportsService {
                 data: {
                     ...reportData,
                     report_number,
-                    visit_time: (reportData.visit_time && reportData.visit_time.trim()) ? reportData.visit_time : (0, date_time_1.getAutoVisitTime)(),
+                    visit_time: reportData.visit_time && reportData.visit_time.trim()
+                        ? reportData.visit_time
+                        : (0, date_time_1.getAutoVisitTime)(),
                     visit_date: new Date(reportData.visit_date),
                     call_registered_date: new Date(reportData.call_registered_date),
-                    machine_mfg_date: (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
+                    machine_mfg_date: reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
                         ? new Date(reportData.machine_mfg_date)
                         : undefined,
-                    machine_installation_date: (reportData.machine_installation_date && reportData.machine_installation_date.trim())
+                    machine_installation_date: reportData.machine_installation_date &&
+                        reportData.machine_installation_date.trim()
                         ? new Date(reportData.machine_installation_date)
                         : undefined,
                 },
@@ -256,7 +260,8 @@ let ServiceReportsService = class ServiceReportsService {
     async update(id, dto, user) {
         const existingReport = await this.findById(id, user);
         const rawDto = dto;
-        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) && rawDto.mill_id) {
+        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
+            rawDto.mill_id) {
             const mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
                 select: { phone: true, email: true },
@@ -285,9 +290,10 @@ let ServiceReportsService = class ServiceReportsService {
         }
         const updateData = { ...reportData };
         if (reportData.visit_time !== undefined) {
-            updateData.visit_time = (reportData.visit_time && reportData.visit_time.trim())
-                ? reportData.visit_time
-                : (0, date_time_1.getAutoVisitTime)();
+            updateData.visit_time =
+                reportData.visit_time && reportData.visit_time.trim()
+                    ? reportData.visit_time
+                    : (0, date_time_1.getAutoVisitTime)();
         }
         if (reportData.visit_date !== undefined) {
             updateData.visit_date = new Date(reportData.visit_date);
@@ -296,13 +302,15 @@ let ServiceReportsService = class ServiceReportsService {
             updateData.call_registered_date = new Date(reportData.call_registered_date);
         }
         if (reportData.machine_mfg_date !== undefined) {
-            updateData.machine_mfg_date = (reportData.machine_mfg_date && reportData.machine_mfg_date.trim())
-                ? new Date(reportData.machine_mfg_date)
-                : null;
+            updateData.machine_mfg_date =
+                reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
+                    ? new Date(reportData.machine_mfg_date)
+                    : null;
         }
         if (reportData.machine_installation_date !== undefined) {
             updateData.machine_installation_date =
-                (reportData.machine_installation_date && reportData.machine_installation_date.trim())
+                reportData.machine_installation_date &&
+                    reportData.machine_installation_date.trim()
                     ? new Date(reportData.machine_installation_date)
                     : null;
         }

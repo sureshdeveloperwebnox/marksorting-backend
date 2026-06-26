@@ -72,7 +72,8 @@ export class NotificationsEventListener {
     technicianUserIds?: string[];
   }) {
     try {
-      const { expenseNumber, amount, creatorUserId, technicianUserIds } = payload;
+      const { expenseNumber, amount, creatorUserId, technicianUserIds } =
+        payload;
       const title = 'New Expense Submitted';
       const message = `Expense ${expenseNumber} of ₹${amount} has been submitted for approval.`;
 

@@ -26,7 +26,7 @@ import {
 @ApiTags('tickets')
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) { }
+  constructor(private readonly ticketsService: TicketsService) {}
 
   @Get()
   @ApiOperation({

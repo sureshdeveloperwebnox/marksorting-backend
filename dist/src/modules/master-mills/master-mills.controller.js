@@ -39,11 +39,17 @@ let MasterMillsController = class MasterMillsController {
                 { address: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
                 { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
-                { mill: { customer: { name: { contains: search, mode: 'insensitive' } } } },
+                {
+                    mill: {
+                        customer: { name: { contains: search, mode: 'insensitive' } },
+                    },
+                },
             ];
             const cleanedPhone = search.replace(/[^\d+]/g, '');
             if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
-                orConditions.push({ phone_no: { contains: cleanedPhone, mode: 'insensitive' } });
+                orConditions.push({
+                    phone_no: { contains: cleanedPhone, mode: 'insensitive' },
+                });
             }
             where.OR = orConditions;
         }
@@ -103,7 +109,9 @@ let MasterMillsController = class MasterMillsController {
 exports.MasterMillsController = MasterMillsController;
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all master mill records with pagination and filtering' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get all master mill records with pagination and filtering',
+    }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
@@ -112,8 +120,18 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'all_warranty', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'mill_id', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'type', required: false, type: String }),
-    (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String, description: 'Filter from installation date (YYYY-MM-DD)' }),
-    (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String, description: 'Filter to installation date (YYYY-MM-DD)' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateFrom',
+        required: false,
+        type: String,
+        description: 'Filter from installation date (YYYY-MM-DD)',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'dateTo',
+        required: false,
+        type: String,
+        description: 'Filter to installation date (YYYY-MM-DD)',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
@@ -137,7 +155,9 @@ __decorate([
 ], MasterMillsController.prototype, "getStats", null);
 __decorate([
     (0, common_1.Get)('prefill'),
-    (0, swagger_1.ApiOperation)({ summary: 'Search machine records by Ref No or Frame No for prefilling forms' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Search machine records by Ref No or Frame No for prefilling forms',
+    }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'ref_no', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'frame_no', required: false, type: String }),
@@ -221,7 +241,9 @@ __decorate([
             const after = ctx.result?.after;
             const name = after?.invoice_no || before?.invoice_no || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Master Mill "${name}" — ${diff}`
                 : `${who} Master Mill "${name}" (no changes detected)`;

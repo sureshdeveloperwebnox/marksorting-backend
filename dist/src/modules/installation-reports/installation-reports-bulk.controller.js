@@ -49,7 +49,9 @@ let InstallationReportsBulkController = class InstallationReportsBulkController 
 exports.InstallationReportsBulkController = InstallationReportsBulkController;
 __decorate([
     (0, common_1.Get)('bulk-upload/template'),
-    (0, swagger_1.ApiOperation)({ summary: 'Download the installation report bulk upload Excel template' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Download the installation report bulk upload Excel template',
+    }),
     __param(0, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -57,7 +59,9 @@ __decorate([
 ], InstallationReportsBulkController.prototype, "getTemplate", null);
 __decorate([
     (0, common_1.Post)('bulk-upload/preview'),
-    (0, swagger_1.ApiOperation)({ summary: 'Upload installation report Excel file and preview parsed rows' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Upload installation report Excel file and preview parsed rows',
+    }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {
@@ -76,7 +80,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('bulk-upload/import'),
     (0, common_1.HttpCode)(202),
-    (0, swagger_1.ApiOperation)({ summary: 'Confirm and start bulk import of installation reports' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Confirm and start bulk import of installation reports',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [installation_report_bulk_upload_dto_1.InstallationReportBulkImportDto]),
@@ -84,7 +90,9 @@ __decorate([
 ], InstallationReportsBulkController.prototype, "confirmImport", null);
 __decorate([
     (0, common_1.Get)('bulk-upload/status/:importId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get the status of an installation report bulk import' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get the status of an installation report bulk import',
+    }),
     __param(0, (0, common_1.Param)('importId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

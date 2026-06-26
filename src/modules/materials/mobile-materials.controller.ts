@@ -73,7 +73,8 @@ export class MobileMaterialsController {
   @Post()
   @ApiOperation({
     summary: '[Mobile] Create a new material on the fly',
-    description: 'Creates a new material for the store record material selector.',
+    description:
+      'Creates a new material for the store record material selector.',
   })
   @ApiBody({ type: CreateMaterialDto })
   @ApiResponse({ status: 201, description: 'Material created successfully' })
@@ -86,7 +87,9 @@ export class MobileMaterialsController {
       const material = ctx.result;
       const name = material?.name || ctx.body.name || 'Unknown';
       const details = [
-        material?.unit || ctx.body.unit ? `Unit: ${material?.unit || ctx.body.unit}` : null,
+        material?.unit || ctx.body.unit
+          ? `Unit: ${material?.unit || ctx.body.unit}`
+          : null,
         material?.status ? `Status: ${material.status}` : null,
       ]
         .filter(Boolean)

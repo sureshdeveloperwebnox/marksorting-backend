@@ -49,7 +49,8 @@ export class MobileMillsController {
     name: 'search',
     required: false,
     type: String,
-    description: 'Search by mill name, email, phone, address, machine ref_no, or frame_no',
+    description:
+      'Search by mill name, email, phone, address, machine ref_no, or frame_no',
   })
   @ApiQuery({
     name: 'ref_no',
@@ -88,8 +89,16 @@ export class MobileMillsController {
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
         { customer: { name: { contains: search, mode: 'insensitive' } } },
-        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+        {
+          masterMills: {
+            some: { ref_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
+        {
+          masterMills: {
+            some: { frame_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
@@ -104,16 +113,26 @@ export class MobileMillsController {
 
     if (refNo) {
       where.OR = [
-        ...(where.OR as Prisma.MillWhereInput[] || []),
+        ...((where.OR as Prisma.MillWhereInput[]) || []),
         { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
-        { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+        {
+          masterMills: {
+            some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+          },
+        },
       ];
     }
 
     if (frameNo) {
       where.OR = [
-        ...(where.OR as Prisma.MillWhereInput[] || []),
-        { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+        ...((where.OR as Prisma.MillWhereInput[]) || []),
+        {
+          masterMills: {
+            some: {
+              frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+            },
+          },
+        },
       ];
     }
 
@@ -158,8 +177,16 @@ export class MobileMillsController {
         { place: { contains: search, mode: 'insensitive' } },
         { city: { contains: search, mode: 'insensitive' } },
         { customer: { name: { contains: search, mode: 'insensitive' } } },
-        { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-        { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+        {
+          masterMills: {
+            some: { ref_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
+        {
+          masterMills: {
+            some: { frame_no: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {

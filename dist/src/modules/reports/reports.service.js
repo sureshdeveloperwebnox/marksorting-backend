@@ -556,7 +556,9 @@ let ReportsService = class ReportsService {
         let completedCount = 0;
         for (const exp of expensesAggregated) {
             const adminAmt = parseFloat(exp.admin_amount ? String(exp.admin_amount) : '0');
-            const amt = adminAmt > 0 ? adminAmt : parseFloat(exp.amount ? String(exp.amount) : '0');
+            const amt = adminAmt > 0
+                ? adminAmt
+                : parseFloat(exp.amount ? String(exp.amount) : '0');
             totalAmount += amt;
             if (exp.status === 'PENDING')
                 pendingCount++;
@@ -589,29 +591,78 @@ let ReportsService = class ReportsService {
                 technicians: {
                     include: { technician: { select: { id: true, full_name: true } } },
                 },
+                expense_items: {
+                    include: {
+                        expenseCategory: { select: { id: true, name: true } },
+                    },
+                },
             },
             orderBy: { visit_date: 'desc' },
         });
+        const activeCategories = await this.prisma.expenseCategory.findMany({
+            where: { deleted_at: null },
+            orderBy: { name: 'asc' },
+        });
+        const usedCategoriesSet = new Set();
+        reports.forEach((r) => {
+            if (r.expenseCategory?.name) {
+                usedCategoriesSet.add(r.expenseCategory.name);
+            }
+            if (r.expense_items) {
+                r.expense_items.forEach((item) => {
+                    if (item.expenseCategory?.name) {
+                        usedCategoriesSet.add(item.expenseCategory.name);
+                    }
+                });
+            }
+        });
+        const categoryNames = Array.from(new Set([
+            ...activeCategories.map((c) => c.name),
+            ...Array.from(usedCategoriesSet),
+        ])).sort();
         const headers = [
             'Expense No',
             'Mill Name / Details',
             'Place',
             'Visit Date',
-            'Category',
-            'Amount (INR)',
+            ...categoryNames,
+            'Total Amount (INR)',
             'Technicians',
             'Status',
         ];
         const data = reports.map((r) => {
-            const adminAmt = Number(r.admin_amount || 0);
-            const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+            const categoryAmounts = {};
+            categoryNames.forEach((cat) => {
+                categoryAmounts[cat] = 0;
+            });
+            if (r.expense_items && r.expense_items.length > 0) {
+                r.expense_items.forEach((item) => {
+                    const catName = item.expenseCategory?.name;
+                    if (catName) {
+                        const itemAdminAmt = Number(item.admin_amount || 0);
+                        const itemDisplayAmt = itemAdminAmt > 0 ? itemAdminAmt : Number(item.amount || 0);
+                        categoryAmounts[catName] =
+                            (categoryAmounts[catName] || 0) + itemDisplayAmt;
+                    }
+                });
+            }
+            else {
+                const catName = r.expenseCategory?.name;
+                if (catName) {
+                    const adminAmt = Number(r.admin_amount || 0);
+                    const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+                    categoryAmounts[catName] = displayAmt;
+                }
+            }
+            const totalDisplayAmt = Object.values(categoryAmounts).reduce((sum, val) => sum + val, 0);
+            const categoryCols = categoryNames.map((cat) => categoryAmounts[cat].toFixed(2));
             return [
                 r.expense_number,
                 r.mill?.name || r.others || '-',
                 r.place || '-',
                 r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
-                r.expenseCategory?.name || '-',
-                displayAmt.toFixed(2),
+                ...categoryCols,
+                totalDisplayAmt.toFixed(2),
                 r.technicians
                     .map((t) => t.technician?.full_name)
                     .filter(Boolean)
@@ -642,7 +693,9 @@ let ReportsService = class ReportsService {
             let completed = 0;
             reports.forEach((r) => {
                 const adminAmt = parseFloat(r.admin_amount ? String(r.admin_amount) : '0');
-                const amt = adminAmt > 0 ? adminAmt : parseFloat(r.amount ? String(r.amount) : '0');
+                const amt = adminAmt > 0
+                    ? adminAmt
+                    : parseFloat(r.amount ? String(r.amount) : '0');
                 totalAmount += amt;
                 if (r.status === 'PENDING')
                     pending++;
@@ -679,15 +732,38 @@ let ReportsService = class ReportsService {
                 ],
                 headers,
                 rows: reports.map((r) => {
-                    const adminAmt = Number(r.admin_amount || 0);
-                    const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+                    const categoryAmounts = {};
+                    categoryNames.forEach((cat) => {
+                        categoryAmounts[cat] = 0;
+                    });
+                    if (r.expense_items && r.expense_items.length > 0) {
+                        r.expense_items.forEach((item) => {
+                            const catName = item.expenseCategory?.name;
+                            if (catName) {
+                                const itemAdminAmt = Number(item.admin_amount || 0);
+                                const itemDisplayAmt = itemAdminAmt > 0 ? itemAdminAmt : Number(item.amount || 0);
+                                categoryAmounts[catName] =
+                                    (categoryAmounts[catName] || 0) + itemDisplayAmt;
+                            }
+                        });
+                    }
+                    else {
+                        const catName = r.expenseCategory?.name;
+                        if (catName) {
+                            const adminAmt = Number(r.admin_amount || 0);
+                            const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+                            categoryAmounts[catName] = displayAmt;
+                        }
+                    }
+                    const totalDisplayAmt = Object.values(categoryAmounts).reduce((sum, val) => sum + val, 0);
+                    const categoryColsHtml = categoryNames.map((cat) => `₹${categoryAmounts[cat].toLocaleString('en-IN', { minimumFractionDigits: 2 })}`);
                     return [
                         `<span class="font-semibold">${this.documentTemplateService.escape(r.expense_number)}</span>`,
                         this.documentTemplateService.escape(r.mill?.name || r.others),
                         this.documentTemplateService.escape(r.place),
                         this.documentTemplateService.date(r.visit_date),
-                        `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.expenseCategory?.name)}</span>`,
-                        `<span class="font-semibold">₹${displayAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
+                        ...categoryColsHtml,
+                        `<span class="font-semibold">₹${totalDisplayAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
                         this.documentTemplateService.escape(r.technicians.map((t) => t.technician?.full_name).join(', ')),
                         `<span class="status-badge status-${r.status.toLowerCase().replace(/_/g, '')}">${r.status}</span>`,
                     ];
@@ -696,7 +772,10 @@ let ReportsService = class ReportsService {
             };
             pdfData.company.logoUrl = await this.pdfService.embedImageAsDataUrl(pdfData.company.logoUrl);
             const html = (0, reports_template_1.renderTabularReportTemplate)(pdfData, this.documentTemplateService);
-            const buffer = await this.pdfService.renderHtmlToPdf(html, (0, reports_template_1.renderTabularReportPdfOptions)(pdfData.company, this.documentTemplateService));
+            const landscapeHtml = html.replace('@page { size: A4; }', '@page { size: A4 landscape; }');
+            const pdfOptions = (0, reports_template_1.renderTabularReportPdfOptions)(pdfData.company, this.documentTemplateService);
+            pdfOptions.landscape = true;
+            const buffer = await this.pdfService.renderHtmlToPdf(landscapeHtml, pdfOptions);
             return {
                 buffer,
                 fileName: `expense_reports_${Date.now()}.pdf`,
@@ -812,7 +891,9 @@ let ReportsService = class ReportsService {
             r.mill?.name || '-',
             r.place || '-',
             r.mc_model || '-',
-            r.installation_date ? r.installation_date.toISOString().slice(0, 10) : '-',
+            r.installation_date
+                ? r.installation_date.toISOString().slice(0, 10)
+                : '-',
             r.all_warranty || 'Non Warranty',
             r.amc_period ? `${r.amc_period} Months` : '-',
             r.status,

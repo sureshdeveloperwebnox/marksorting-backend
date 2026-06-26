@@ -8,7 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiBearerAuth,
+  ApiResponse,
+  ApiBody,
+} from '@nestjs/swagger';
 import { MasterMillsService } from './master-mills.service';
 import { Prisma } from '@prisma/client';
 import { CreateMasterMillDto } from './dto/create-master-mill.dto';
@@ -27,10 +34,12 @@ import {
 @ApiBearerAuth()
 @Controller('master-mills')
 export class MasterMillsController {
-  constructor(private readonly masterMillsService: MasterMillsService) { }
+  constructor(private readonly masterMillsService: MasterMillsService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all master mill records with pagination and filtering' })
+  @ApiOperation({
+    summary: 'Get all master mill records with pagination and filtering',
+  })
   @ApiQuery({ name: 'skip', required: false, type: String })
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -39,8 +48,18 @@ export class MasterMillsController {
   @ApiQuery({ name: 'all_warranty', required: false, type: String })
   @ApiQuery({ name: 'mill_id', required: false, type: String })
   @ApiQuery({ name: 'type', required: false, type: String })
-  @ApiQuery({ name: 'dateFrom', required: false, type: String, description: 'Filter from installation date (YYYY-MM-DD)' })
-  @ApiQuery({ name: 'dateTo', required: false, type: String, description: 'Filter to installation date (YYYY-MM-DD)' })
+  @ApiQuery({
+    name: 'dateFrom',
+    required: false,
+    type: String,
+    description: 'Filter from installation date (YYYY-MM-DD)',
+  })
+  @ApiQuery({
+    name: 'dateTo',
+    required: false,
+    type: String,
+    description: 'Filter to installation date (YYYY-MM-DD)',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -67,12 +86,18 @@ export class MasterMillsController {
         { mill: { name: { contains: search, mode: 'insensitive' } } },
         { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
         // Search by the Mill's Customer's name
-        { mill: { customer: { name: { contains: search, mode: 'insensitive' } } } },
+        {
+          mill: {
+            customer: { name: { contains: search, mode: 'insensitive' } },
+          },
+        },
       ];
 
       const cleanedPhone = search.replace(/[^\d+]/g, '');
       if (cleanedPhone && cleanedPhone !== '+' && cleanedPhone.length >= 5) {
-        orConditions.push({ phone_no: { contains: cleanedPhone, mode: 'insensitive' } });
+        orConditions.push({
+          phone_no: { contains: cleanedPhone, mode: 'insensitive' },
+        });
       }
 
       where.OR = orConditions;
@@ -117,7 +142,10 @@ export class MasterMillsController {
   }
 
   @Get('prefill')
-  @ApiOperation({ summary: 'Search machine records by Ref No or Frame No for prefilling forms' })
+  @ApiOperation({
+    summary:
+      'Search machine records by Ref No or Frame No for prefilling forms',
+  })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'ref_no', required: false, type: String })
   @ApiQuery({ name: 'frame_no', required: false, type: String })
@@ -152,7 +180,12 @@ export class MasterMillsController {
       ]
         .filter(Boolean)
         .join(', ');
-      return createDescription('Master Mill', invoiceNo, details || undefined, ctx.user.full_name);
+      return createDescription(
+        'Master Mill',
+        invoiceNo,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   create(@Body() dto: CreateMasterMillDto) {
@@ -177,7 +210,12 @@ export class MasterMillsController {
       ]
         .filter(Boolean)
         .join(', ');
-      return createDescription('Master Mill (Quick Register)', invoiceNo, details || undefined, ctx.user.full_name);
+      return createDescription(
+        'Master Mill (Quick Register)',
+        invoiceNo,
+        details || undefined,
+        ctx.user.full_name,
+      );
     },
   })
   quickRegister(@Body() dto: QuickRegisterDto) {
@@ -194,8 +232,11 @@ export class MasterMillsController {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
       const name = after?.invoice_no || before?.invoice_no || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Master Mill "${name}" — ${diff}`
         : `${who} Master Mill "${name}" (no changes detected)`;

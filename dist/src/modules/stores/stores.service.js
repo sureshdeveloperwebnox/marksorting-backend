@@ -139,9 +139,7 @@ let StoresService = class StoresService {
                 service_engineer: service_engineer_id
                     ? { connect: { id: service_engineer_id } }
                     : undefined,
-                customer: customer_id
-                    ? { connect: { id: customer_id } }
-                    : undefined,
+                customer: customer_id ? { connect: { id: customer_id } } : undefined,
                 materials: material_ids
                     ? {
                         deleteMany: {},

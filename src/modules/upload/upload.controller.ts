@@ -36,7 +36,7 @@ interface MulterFile {
 @ApiTags('Upload')
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) { }
+  constructor(private readonly uploadService: UploadService) {}
 
   @Post('presigned-url')
   @Public()

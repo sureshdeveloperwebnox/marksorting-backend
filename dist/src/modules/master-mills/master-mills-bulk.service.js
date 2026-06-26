@@ -107,7 +107,8 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         }
         catch (error) {
             status.state = 'failed';
-            status.errorMessage = error instanceof Error ? error.message : String(error);
+            status.errorMessage =
+                error instanceof Error ? error.message : String(error);
             await this.redis.setJson(statusKey, status, 7200).catch(() => {
             });
         }

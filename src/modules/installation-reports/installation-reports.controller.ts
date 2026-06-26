@@ -38,7 +38,7 @@ import {
 export class InstallationReportsController {
   constructor(
     private readonly installationReportsService: InstallationReportsService,
-  ) { }
+  ) {}
 
   @Get()
   @ApiOperation({

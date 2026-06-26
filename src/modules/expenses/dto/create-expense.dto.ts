@@ -126,7 +126,6 @@ export class CreateExpenseDto {
   @IsOptional()
   visit_date?: string;
 
-
   @ApiProperty({
     example: '10:30',
     description:

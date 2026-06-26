@@ -81,8 +81,10 @@ let AuthService = class AuthService {
     }
     async validateServiceEngineer(email, pass) {
         const user = await this.usersService.findByEmail(email);
-        const roleName = user?.role?.name || (typeof user?.role === 'string' ? user.role : undefined);
-        const isServiceEngineer = roleName?.toLowerCase() === 'service engineer' || roleName?.toLowerCase() === 'service_engineer';
+        const roleName = user?.role?.name ||
+            (typeof user?.role === 'string' ? user.role : undefined);
+        const isServiceEngineer = roleName?.toLowerCase() === 'service engineer' ||
+            roleName?.toLowerCase() === 'service_engineer';
         const isActive = user?.account_status?.toUpperCase() === 'ACTIVE';
         if (user &&
             isServiceEngineer &&

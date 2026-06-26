@@ -24,4 +24,4 @@ import { InstallationReportsExcelParserService } from './installation-reports-ex
   ],
   exports: [InstallationReportsService],
 })
-export class InstallationReportsModule { }
+export class InstallationReportsModule {}

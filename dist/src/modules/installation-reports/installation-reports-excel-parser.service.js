@@ -118,7 +118,7 @@ const EXAMPLE_ROW = [
 ];
 const HEADER_TO_FIELD_MAP = {
     'mill name': 'mill_name',
-    'place': 'place',
+    place: 'place',
     'technician names': 'technician_names',
     'visit date': 'visit_date',
     'visit time': 'visit_time',
@@ -133,11 +133,11 @@ const HEADER_TO_FIELD_MAP = {
     'invoice date': 'invoice_date',
     'warranty start date': 'warranty_start_date',
     'warranty end date': 'warranty_end_date',
-    'commodity': 'commodity',
-    'contamination': 'contamination',
+    commodity: 'commodity',
+    contamination: 'contamination',
     'output capacity/hour': 'output_capacity_per_hour',
     'rejection ratio': 'rejection_ratio',
-    'purity': 'purity',
+    purity: 'purity',
     'no of programs set': 'no_of_programs_set',
     'ac provided (yes/no)': 'ac_provided',
     'compressor details': 'compressor_details',
@@ -151,7 +151,7 @@ const HEADER_TO_FIELD_MAP = {
     'auto drain valve working (yes/no)': 'auto_drain_valve_working',
     'engineer remarks': 'engineer_remarks',
     'customer remarks': 'customer_remarks',
-    'status': 'status',
+    status: 'status',
 };
 const REQUIRED_FIELDS = [
     'mill_name',
@@ -177,7 +177,13 @@ const YES_NO_FIELDS = [
     'auto_drain_valve_working',
 ];
 const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
-const VALID_CHANNEL_VALUES = ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'];
+const VALID_CHANNEL_VALUES = [
+    'PRIMARY',
+    'SECONDARY',
+    'REJECTION_1',
+    'REJECTION_2',
+    'SPLIT',
+];
 let InstallationReportsExcelParserService = class InstallationReportsExcelParserService {
     async generateTemplate() {
         const workbook = new ExcelJS.Workbook();
@@ -213,12 +219,18 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
             info.getCell(`A${4 + i}`).value = `• ${f.replace(/_/g, ' ')}`;
         });
         const baseRow = 4 + REQUIRED_FIELDS.length + 1;
-        info.getCell(`A${baseRow}`).value = 'Date format: DD/MM/YYYY — e.g. 30/06/2026';
-        info.getCell(`A${baseRow + 1}`).value = 'Status values: PENDING, IN_PROGRESS, COMPLETED, CANCELLED (defaults to PENDING if blank)';
-        info.getCell(`A${baseRow + 2}`).value = 'Yes/No fields (AC Provided, Ground Earth Provided, Auto Drain Valve): Yes or No';
-        info.getCell(`A${baseRow + 3}`).value = 'Running Channel Combination Value: PRIMARY, SECONDARY, REJECTION_1, REJECTION_2, SPLIT';
-        info.getCell(`A${baseRow + 4}`).value = 'Running Channel Combination: integer 1-12';
-        info.getCell(`A${baseRow + 5}`).value = 'Technician Names: comma-separated, must match existing technician names exactly';
+        info.getCell(`A${baseRow}`).value =
+            'Date format: DD/MM/YYYY — e.g. 30/06/2026';
+        info.getCell(`A${baseRow + 1}`).value =
+            'Status values: PENDING, IN_PROGRESS, COMPLETED, CANCELLED (defaults to PENDING if blank)';
+        info.getCell(`A${baseRow + 2}`).value =
+            'Yes/No fields (AC Provided, Ground Earth Provided, Auto Drain Valve): Yes or No';
+        info.getCell(`A${baseRow + 3}`).value =
+            'Running Channel Combination Value: PRIMARY, SECONDARY, REJECTION_1, REJECTION_2, SPLIT';
+        info.getCell(`A${baseRow + 4}`).value =
+            'Running Channel Combination: integer 1-12';
+        info.getCell(`A${baseRow + 5}`).value =
+            'Technician Names: comma-separated, must match existing technician names exactly';
         const arrayBuffer = await workbook.xlsx.writeBuffer();
         return Buffer.from(arrayBuffer);
     }
@@ -231,7 +243,9 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
         const headerRow = worksheet.getRow(1);
         const headerMap = {};
         headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
-            const normalized = String(cell.value ?? '').trim().toLowerCase();
+            const normalized = String(cell.value ?? '')
+                .trim()
+                .toLowerCase();
             const fieldKey = HEADER_TO_FIELD_MAP[normalized];
             if (fieldKey)
                 headerMap[colNumber] = fieldKey;
@@ -296,19 +310,22 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
             for (const field of DATE_FIELDS) {
                 const value = previewRow[field];
                 if (value && value.trim() !== '' && !this.isValidDate(value)) {
-                    previewRow.errors[field] = `${field.replace(/_/g, ' ')} must be a valid date (DD/MM/YYYY)`;
+                    previewRow.errors[field] =
+                        `${field.replace(/_/g, ' ')} must be a valid date (DD/MM/YYYY)`;
                 }
             }
             for (const field of YES_NO_FIELDS) {
                 const value = previewRow[field].trim().toLowerCase();
                 if (value !== '' && value !== 'yes' && value !== 'no') {
-                    previewRow.errors[field] = `${field.replace(/_/g, ' ')} must be "Yes" or "No"`;
+                    previewRow.errors[field] =
+                        `${field.replace(/_/g, ' ')} must be "Yes" or "No"`;
                 }
             }
             if (previewRow.status.trim() !== '') {
                 const upper = previewRow.status.trim().toUpperCase();
                 if (!VALID_STATUSES.includes(upper)) {
-                    previewRow.errors['status'] = `Status must be one of: ${VALID_STATUSES.join(', ')}`;
+                    previewRow.errors['status'] =
+                        `Status must be one of: ${VALID_STATUSES.join(', ')}`;
                 }
                 else {
                     previewRow.status = upper;
@@ -325,7 +342,9 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
                 }
             }
             if (previewRow.running_channel_combination_value.trim() !== '') {
-                const upper = previewRow.running_channel_combination_value.trim().toUpperCase();
+                const upper = previewRow.running_channel_combination_value
+                    .trim()
+                    .toUpperCase();
                 if (!VALID_CHANNEL_VALUES.includes(upper)) {
                     previewRow.errors['running_channel_combination_value'] =
                         `Running channel combination value must be one of: ${VALID_CHANNEL_VALUES.join(', ')}`;
@@ -334,13 +353,17 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
                     previewRow.running_channel_combination_value = upper;
                 }
             }
-            const intFields = ['no_of_programs_set', 'no_of_filters_installed'];
+            const intFields = [
+                'no_of_programs_set',
+                'no_of_filters_installed',
+            ];
             for (const field of intFields) {
                 const value = previewRow[field];
                 if (value.trim() !== '') {
                     const n = Number(value.trim());
                     if (!Number.isInteger(n) || n < 0) {
-                        previewRow.errors[field] = `${field.replace(/_/g, ' ')} must be a non-negative integer`;
+                        previewRow.errors[field] =
+                            `${field.replace(/_/g, ' ')} must be a non-negative integer`;
                     }
                 }
             }

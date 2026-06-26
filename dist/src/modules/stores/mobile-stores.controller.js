@@ -316,7 +316,10 @@ __decorate([
         description: 'Registers a new store record under the logged-in technician.',
     }),
     (0, swagger_1.ApiBody)({ type: mobile_create_store_dto_1.MobileCreateStoreDto }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Store record created successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Store record created successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Validation error' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     (0, log_activity_decorator_1.LogActivity)({
@@ -326,7 +329,9 @@ __decorate([
             const store = ctx.result;
             const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
             const details = [
-                store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+                store?.barcode || ctx.body.barcode
+                    ? `Barcode: ${store?.barcode || ctx.body.barcode}`
+                    : null,
                 store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
             ]
                 .filter(Boolean)
@@ -348,7 +353,10 @@ __decorate([
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record found' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from accessing other engineers records' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Forbidden from accessing other engineers records',
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Request)()),
@@ -363,9 +371,15 @@ __decorate([
         description: 'Updates a store record if it belongs to the logged-in technician.',
     }),
     (0, swagger_1.ApiBody)({ type: mobile_update_store_dto_1.MobileUpdateStoreDto }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record updated successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store record updated successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from updating other engineers records' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Forbidden from updating other engineers records',
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.UPDATE,
@@ -376,7 +390,9 @@ __decorate([
             const after = ctx.result?.after;
             const frame = after?.frame_number || before?.frame_number || ctx.params.id;
             const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
-            const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} updated`
+                : 'Updated';
             return diff
                 ? `${who} Store Record "Frame ${frame}" — ${diff}`
                 : `${who} Store Record "Frame ${frame}" (no changes detected)`;
@@ -395,9 +411,15 @@ __decorate([
         summary: '[Mobile] Delete store record by ID',
         description: 'Soft deletes a store record if it belongs to the logged-in technician.',
     }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store record deleted successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store record deleted successfully',
+    }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
-    (0, swagger_1.ApiResponse)({ status: 403, description: 'Forbidden from deleting other engineers records' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Forbidden from deleting other engineers records',
+    }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
     (0, log_activity_decorator_1.LogActivity)({
         action: activity_action_enum_1.ActivityAction.DELETE,

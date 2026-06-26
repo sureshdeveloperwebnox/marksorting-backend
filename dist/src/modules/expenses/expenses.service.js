@@ -358,20 +358,26 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             const expense_number = `EXP-${dateStr}-${seq}`;
             const items = expenseData.expense_items || [];
             const firstItem = items[0];
-            const rootCategoryId = firstItem ? firstItem.expense_category_id : (expenseData.expense_category_id || null);
+            const rootCategoryId = firstItem
+                ? firstItem.expense_category_id
+                : expenseData.expense_category_id || null;
             const totalAmount = items.length
                 ? items.reduce((sum, it) => sum + (it.amount || 0), 0)
-                : (expenseData.amount || 0);
+                : expenseData.amount || 0;
             const totalAdminAmount = items.length
                 ? items.reduce((sum, it) => sum + (it.admin_amount || 0), 0)
-                : (expenseData.admin_amount || 0);
-            const rootRemarks = firstItem ? (firstItem.remarks || expenseData.remarks || null) : (expenseData.remarks || null);
+                : expenseData.admin_amount || 0;
+            const rootRemarks = firstItem
+                ? firstItem.remarks || expenseData.remarks || null
+                : expenseData.remarks || null;
             const rootImages = items.length
                 ? Array.from(new Set(items.flatMap((it) => it.expense_images || [])))
-                : (expenseData.expense_images || []);
+                : expenseData.expense_images || [];
             const report_type = expenseData.service_report_id
                 ? 'SERVICE'
-                : (expenseData.installation_report_id ? 'INSTALLATION' : 'NONE');
+                : expenseData.installation_report_id
+                    ? 'INSTALLATION'
+                    : 'NONE';
             const created = await tx.expense.create({
                 data: {
                     expense_number,
@@ -468,7 +474,9 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         const finalInstallationReportId = expenseData.installation_report_id !== undefined
             ? expenseData.installation_report_id
             : existingExpense.installation_report_id;
-        const targetExpenseType = expenseData.expense_type !== undefined ? expenseData.expense_type : existingExpense.expense_type;
+        const targetExpenseType = expenseData.expense_type !== undefined
+            ? expenseData.expense_type
+            : existingExpense.expense_type;
         if (targetExpenseType === 'OTHERS') {
             if (finalServiceReportId || finalInstallationReportId) {
                 throw new common_1.BadRequestException('An expense of type OTHERS cannot be linked to a service report or installation report');
@@ -497,18 +505,23 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             }
         }
         if (!finalServiceReportId && !finalInstallationReportId) {
-            const targetVisitDate = expenseData.visit_date !== undefined ? expenseData.visit_date : existingExpense.visit_date;
+            const targetVisitDate = expenseData.visit_date !== undefined
+                ? expenseData.visit_date
+                : existingExpense.visit_date;
             if (!targetVisitDate) {
                 throw new common_1.BadRequestException('Visit date is required when no report is linked');
             }
             if (targetExpenseType === 'MILL') {
-                const targetMillId = expenseData.mill_id !== undefined ? expenseData.mill_id : existingExpense.mill_id;
+                const targetMillId = expenseData.mill_id !== undefined
+                    ? expenseData.mill_id
+                    : existingExpense.mill_id;
                 if (!targetMillId) {
                     throw new common_1.BadRequestException('Mill ID is required for MILL type expense when no report is linked');
                 }
             }
         }
-        if (expenseData.service_report_id && typeof expenseData.service_report_id === 'string') {
+        if (expenseData.service_report_id &&
+            typeof expenseData.service_report_id === 'string') {
             const duplicateExpense = await this.prisma.expense.findFirst({
                 where: {
                     service_report_id: expenseData.service_report_id,
@@ -520,7 +533,8 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 throw new common_1.BadRequestException('An active expense has already been created for this service report');
             }
         }
-        if (expenseData.installation_report_id && typeof expenseData.installation_report_id === 'string') {
+        if (expenseData.installation_report_id &&
+            typeof expenseData.installation_report_id === 'string') {
             const duplicateExpense = await this.prisma.expense.findFirst({
                 where: {
                     installation_report_id: expenseData.installation_report_id,
@@ -646,7 +660,8 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                     if (!report) {
                         throw new common_1.BadRequestException('Linked installation report is invalid or not assigned to you');
                     }
-                    updateData.installation_report_id = expenseData.installation_report_id;
+                    updateData.installation_report_id =
+                        expenseData.installation_report_id;
                     updateData.mill_id = report.mill_id;
                     updateData.place = report.place;
                     if (expenseData.visit_date === undefined) {
@@ -657,7 +672,9 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         }
         const finalVisitDate = updateData.visit_date !== undefined
             ? updateData.visit_date
-            : (expenseData.visit_date !== undefined ? new Date(expenseData.visit_date) : undefined);
+            : expenseData.visit_date !== undefined
+                ? new Date(expenseData.visit_date)
+                : undefined;
         if (finalVisitDate) {
             const today = new Date();
             today.setHours(23, 59, 59, 999);
@@ -669,12 +686,14 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         if (hasItems) {
             const items = expenseData.expense_items || [];
             const firstItem = items[0];
-            updateData.expense_category_id = firstItem ? firstItem.expense_category_id : null;
+            updateData.expense_category_id = firstItem
+                ? firstItem.expense_category_id
+                : null;
             const totalAmount = items.reduce((sum, it) => sum + (it.amount || 0), 0);
             updateData.amount = String(totalAmount);
             const totalAdminAmount = items.reduce((sum, it) => sum + (it.admin_amount || 0), 0);
             updateData.admin_amount = String(totalAdminAmount);
-            updateData.remarks = firstItem ? (firstItem.remarks || null) : null;
+            updateData.remarks = firstItem ? firstItem.remarks || null : null;
             updateData.expense_images = Array.from(new Set(items.flatMap((it) => it.expense_images || [])));
         }
         else {
@@ -682,10 +701,14 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 updateData.expense_category_id = expenseData.expense_category_id;
             }
             if (expenseData.amount !== undefined) {
-                updateData.amount = expenseData.amount ? String(expenseData.amount) : '0';
+                updateData.amount = expenseData.amount
+                    ? String(expenseData.amount)
+                    : '0';
             }
             if (expenseData.admin_amount !== undefined) {
-                updateData.admin_amount = expenseData.admin_amount ? String(expenseData.admin_amount) : '0';
+                updateData.admin_amount = expenseData.admin_amount
+                    ? String(expenseData.admin_amount)
+                    : '0';
             }
             if (expenseData.remarks !== undefined) {
                 updateData.remarks = expenseData.remarks || null;
@@ -702,32 +725,40 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             : existingExpense.installation_report_id;
         updateData.report_type = currentServiceReportId
             ? 'SERVICE'
-            : (currentInstallationReportId ? 'INSTALLATION' : 'NONE');
+            : currentInstallationReportId
+                ? 'INSTALLATION'
+                : 'NONE';
         const expense = await this.prisma.$transaction(async (tx) => {
             const updated = await tx.expense.update({
                 where: { id },
                 data: updateData,
                 include: INCLUDE_SHAPE,
             });
-            if (existingExpense.service_report_id && existingExpense.service_report_id !== updated.service_report_id) {
+            if (existingExpense.service_report_id &&
+                existingExpense.service_report_id !== updated.service_report_id) {
                 await tx.serviceReport.update({
                     where: { id: existingExpense.service_report_id },
                     data: { expense_id: null },
                 });
             }
-            if (existingExpense.installation_report_id && existingExpense.installation_report_id !== updated.installation_report_id) {
+            if (existingExpense.installation_report_id &&
+                existingExpense.installation_report_id !==
+                    updated.installation_report_id) {
                 await tx.installationReport.update({
                     where: { id: existingExpense.installation_report_id },
                     data: { expense_id: null },
                 });
             }
-            if (updated.service_report_id && updated.service_report_id !== existingExpense.service_report_id) {
+            if (updated.service_report_id &&
+                updated.service_report_id !== existingExpense.service_report_id) {
                 await tx.serviceReport.update({
                     where: { id: updated.service_report_id },
                     data: { expense_id: updated.id },
                 });
             }
-            if (updated.installation_report_id && updated.installation_report_id !== existingExpense.installation_report_id) {
+            if (updated.installation_report_id &&
+                updated.installation_report_id !==
+                    existingExpense.installation_report_id) {
                 await tx.installationReport.update({
                     where: { id: updated.installation_report_id },
                     data: { expense_id: updated.id },
@@ -758,11 +789,19 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                     await tx.expenseItem.update({
                         where: { id: firstItem.id },
                         data: {
-                            expense_category_id: updateData.expense_category_id !== undefined ? updateData.expense_category_id : undefined,
+                            expense_category_id: updateData.expense_category_id !== undefined
+                                ? updateData.expense_category_id
+                                : undefined,
                             amount: updateData.amount !== undefined ? updateData.amount : undefined,
-                            admin_amount: updateData.admin_amount !== undefined ? updateData.admin_amount : undefined,
-                            remarks: updateData.remarks !== undefined ? updateData.remarks : undefined,
-                            expense_images: updateData.expense_images !== undefined ? updateData.expense_images : undefined,
+                            admin_amount: updateData.admin_amount !== undefined
+                                ? updateData.admin_amount
+                                : undefined,
+                            remarks: updateData.remarks !== undefined
+                                ? updateData.remarks
+                                : undefined,
+                            expense_images: updateData.expense_images !== undefined
+                                ? updateData.expense_images
+                                : undefined,
                         },
                     });
                 }

@@ -204,7 +204,7 @@ let MasterMillsService = class MasterMillsService {
         if (cached)
             return cached;
         const now = new Date();
-        const [total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount] = await Promise.all([
+        const [total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount,] = await Promise.all([
             this.prisma.masterMill.count({ where: { deleted_at: null } }),
             this.prisma.masterMill.count({
                 where: {
@@ -228,7 +228,14 @@ let MasterMillsService = class MasterMillsService {
                 where: { deleted_at: null, type: 'Service' },
             }),
         ]);
-        const result = { total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount };
+        const result = {
+            total,
+            underWarranty,
+            underAmc,
+            nonWarranty,
+            installationCount,
+            serviceCount,
+        };
         await this.redis.setJson(cacheKey, result, 120);
         return result;
     }
@@ -246,16 +253,24 @@ let MasterMillsService = class MasterMillsService {
                 { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
                 { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
                 { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                { mill: { customer: { name: { contains: cleanSearch, mode: 'insensitive' } } } },
+                {
+                    mill: {
+                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                    },
+                },
             ];
         }
         else {
             const orConditions = [];
             if (refNo) {
-                orConditions.push({ ref_no: { contains: refNo.trim(), mode: 'insensitive' } });
+                orConditions.push({
+                    ref_no: { contains: refNo.trim(), mode: 'insensitive' },
+                });
             }
             if (frameNo) {
-                orConditions.push({ frame_no: { contains: frameNo.trim(), mode: 'insensitive' } });
+                orConditions.push({
+                    frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+                });
             }
             if (orConditions.length > 0) {
                 where.OR = orConditions;
@@ -396,10 +411,12 @@ let MasterMillsService = class MasterMillsService {
             }
             const resolvedMillId = mill.id;
             const orConditions = [
-                { ref_no: { equals: cleanRefNo, mode: 'insensitive' } }
+                { ref_no: { equals: cleanRefNo, mode: 'insensitive' } },
             ];
             if (cleanFrameNo) {
-                orConditions.push({ frame_no: { equals: cleanFrameNo, mode: 'insensitive' } });
+                orConditions.push({
+                    frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
+                });
             }
             let masterMill = await tx.masterMill.findFirst({
                 where: {

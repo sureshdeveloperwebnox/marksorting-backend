@@ -38,7 +38,7 @@ export class ReportsService {
     private settingsService: SettingsService,
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
-  ) { }
+  ) {}
 
   // ─── SERVICES REPORT ───────────────────────────────────────────────────────
 
@@ -666,8 +666,13 @@ export class ReportsService {
     let completedCount = 0;
 
     for (const exp of expensesAggregated) {
-      const adminAmt = parseFloat(exp.admin_amount ? String(exp.admin_amount) : '0');
-      const amt = adminAmt > 0 ? adminAmt : parseFloat(exp.amount ? String(exp.amount) : '0');
+      const adminAmt = parseFloat(
+        exp.admin_amount ? String(exp.admin_amount) : '0',
+      );
+      const amt =
+        adminAmt > 0
+          ? adminAmt
+          : parseFloat(exp.amount ? String(exp.amount) : '0');
       totalAmount += amt;
 
       if (exp.status === 'PENDING') pendingCount++;
@@ -705,31 +710,93 @@ export class ReportsService {
         technicians: {
           include: { technician: { select: { id: true, full_name: true } } },
         },
+        expense_items: {
+          include: {
+            expenseCategory: { select: { id: true, name: true } },
+          },
+        },
       },
       orderBy: { visit_date: 'desc' },
     });
+
+    const activeCategories = await this.prisma.expenseCategory.findMany({
+      where: { deleted_at: null },
+      orderBy: { name: 'asc' },
+    });
+
+    const usedCategoriesSet = new Set<string>();
+    reports.forEach((r) => {
+      if (r.expenseCategory?.name) {
+        usedCategoriesSet.add(r.expenseCategory.name);
+      }
+      if (r.expense_items) {
+        r.expense_items.forEach((item) => {
+          if (item.expenseCategory?.name) {
+            usedCategoriesSet.add(item.expenseCategory.name);
+          }
+        });
+      }
+    });
+
+    const categoryNames = Array.from(
+      new Set([
+        ...activeCategories.map((c) => c.name),
+        ...Array.from(usedCategoriesSet),
+      ]),
+    ).sort();
 
     const headers = [
       'Expense No',
       'Mill Name / Details',
       'Place',
       'Visit Date',
-      'Category',
-      'Amount (INR)',
+      ...categoryNames,
+      'Total Amount (INR)',
       'Technicians',
       'Status',
     ];
 
     const data = reports.map((r) => {
-      const adminAmt = Number(r.admin_amount || 0);
-      const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+      const categoryAmounts: Record<string, number> = {};
+      categoryNames.forEach((cat) => {
+        categoryAmounts[cat] = 0;
+      });
+
+      if (r.expense_items && r.expense_items.length > 0) {
+        r.expense_items.forEach((item) => {
+          const catName = item.expenseCategory?.name;
+          if (catName) {
+            const itemAdminAmt = Number(item.admin_amount || 0);
+            const itemDisplayAmt =
+              itemAdminAmt > 0 ? itemAdminAmt : Number(item.amount || 0);
+            categoryAmounts[catName] =
+              (categoryAmounts[catName] || 0) + itemDisplayAmt;
+          }
+        });
+      } else {
+        const catName = r.expenseCategory?.name;
+        if (catName) {
+          const adminAmt = Number(r.admin_amount || 0);
+          const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+          categoryAmounts[catName] = displayAmt;
+        }
+      }
+
+      const totalDisplayAmt = Object.values(categoryAmounts).reduce(
+        (sum, val) => sum + val,
+        0,
+      );
+      const categoryCols = categoryNames.map((cat) =>
+        categoryAmounts[cat].toFixed(2),
+      );
+
       return [
         r.expense_number,
         r.mill?.name || r.others || '-',
         r.place || '-',
         r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
-        r.expenseCategory?.name || '-',
-        displayAmt.toFixed(2),
+        ...categoryCols,
+        totalDisplayAmt.toFixed(2),
         r.technicians
           .map((t) => t.technician?.full_name)
           .filter(Boolean)
@@ -765,8 +832,13 @@ export class ReportsService {
       let completed = 0;
 
       reports.forEach((r) => {
-        const adminAmt = parseFloat(r.admin_amount ? String(r.admin_amount) : '0');
-        const amt = adminAmt > 0 ? adminAmt : parseFloat(r.amount ? String(r.amount) : '0');
+        const adminAmt = parseFloat(
+          r.admin_amount ? String(r.admin_amount) : '0',
+        );
+        const amt =
+          adminAmt > 0
+            ? adminAmt
+            : parseFloat(r.amount ? String(r.amount) : '0');
         totalAmount += amt;
         if (r.status === 'PENDING') pending++;
         else if (r.status === 'IN_PROGRESS') inProgress++;
@@ -802,15 +874,48 @@ export class ReportsService {
         ],
         headers,
         rows: reports.map((r) => {
-          const adminAmt = Number(r.admin_amount || 0);
-          const displayAmt = adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+          const categoryAmounts: Record<string, number> = {};
+          categoryNames.forEach((cat) => {
+            categoryAmounts[cat] = 0;
+          });
+
+          if (r.expense_items && r.expense_items.length > 0) {
+            r.expense_items.forEach((item) => {
+              const catName = item.expenseCategory?.name;
+              if (catName) {
+                const itemAdminAmt = Number(item.admin_amount || 0);
+                const itemDisplayAmt =
+                  itemAdminAmt > 0 ? itemAdminAmt : Number(item.amount || 0);
+                categoryAmounts[catName] =
+                  (categoryAmounts[catName] || 0) + itemDisplayAmt;
+              }
+            });
+          } else {
+            const catName = r.expenseCategory?.name;
+            if (catName) {
+              const adminAmt = Number(r.admin_amount || 0);
+              const displayAmt =
+                adminAmt > 0 ? adminAmt : Number(r.amount || 0);
+              categoryAmounts[catName] = displayAmt;
+            }
+          }
+
+          const totalDisplayAmt = Object.values(categoryAmounts).reduce(
+            (sum, val) => sum + val,
+            0,
+          );
+          const categoryColsHtml = categoryNames.map(
+            (cat) =>
+              `₹${categoryAmounts[cat].toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+          );
+
           return [
             `<span class="font-semibold">${this.documentTemplateService.escape(r.expense_number)}</span>`,
             this.documentTemplateService.escape(r.mill?.name || r.others),
             this.documentTemplateService.escape(r.place),
             this.documentTemplateService.date(r.visit_date),
-            `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.expenseCategory?.name)}</span>`,
-            `<span class="font-semibold">₹${displayAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
+            ...categoryColsHtml,
+            `<span class="font-semibold">₹${totalDisplayAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>`,
             this.documentTemplateService.escape(
               r.technicians.map((t) => t.technician?.full_name).join(', '),
             ),
@@ -828,12 +933,21 @@ export class ReportsService {
         pdfData,
         this.documentTemplateService,
       );
+      // Make the PDF landscape to accommodate the extra category columns
+      const landscapeHtml = html.replace(
+        '@page { size: A4; }',
+        '@page { size: A4 landscape; }',
+      );
+
+      const pdfOptions = renderTabularReportPdfOptions(
+        pdfData.company,
+        this.documentTemplateService,
+      );
+      pdfOptions.landscape = true;
+
       const buffer = await this.pdfService.renderHtmlToPdf(
-        html,
-        renderTabularReportPdfOptions(
-          pdfData.company,
-          this.documentTemplateService,
-        ),
+        landscapeHtml,
+        pdfOptions,
       );
 
       return {
@@ -913,23 +1027,24 @@ export class ReportsService {
 
     // Compute status counts for metrics card based on the current filtered set
     const now = new Date();
-    const [underWarrantyCount, underAmcCount, nonWarrantyCount] = await Promise.all([
-      this.prisma.masterMill.count({
-        where: {
-          ...where,
-          all_warranty: 'Under Warranty',
-        },
-      }),
-      this.prisma.masterMill.count({
-        where: {
-          ...where,
-          all_warranty: 'Under AMC',
-        },
-      }),
-      this.prisma.masterMill.count({
-        where: { ...where, all_warranty: 'Non Warranty' },
-      }),
-    ]);
+    const [underWarrantyCount, underAmcCount, nonWarrantyCount] =
+      await Promise.all([
+        this.prisma.masterMill.count({
+          where: {
+            ...where,
+            all_warranty: 'Under Warranty',
+          },
+        }),
+        this.prisma.masterMill.count({
+          where: {
+            ...where,
+            all_warranty: 'Under AMC',
+          },
+        }),
+        this.prisma.masterMill.count({
+          where: { ...where, all_warranty: 'Non Warranty' },
+        }),
+      ]);
 
     const result = {
       reports,
@@ -976,7 +1091,9 @@ export class ReportsService {
       r.mill?.name || '-',
       r.place || '-',
       r.mc_model || '-',
-      r.installation_date ? r.installation_date.toISOString().slice(0, 10) : '-',
+      r.installation_date
+        ? r.installation_date.toISOString().slice(0, 10)
+        : '-',
       r.all_warranty || 'Non Warranty',
       r.amc_period ? `${r.amc_period} Months` : '-',
       r.status,

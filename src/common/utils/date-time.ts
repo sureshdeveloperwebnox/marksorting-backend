@@ -50,4 +50,3 @@ export function parseDuration(duration: string, fallbackMs: number): number {
       return fallbackMs;
   }
 }
-

@@ -57,7 +57,9 @@ __decorate([
 ], MasterMillsBulkController.prototype, "getTemplate", null);
 __decorate([
     (0, common_1.Post)('bulk-upload/preview'),
-    (0, swagger_1.ApiOperation)({ summary: 'Upload an Excel file and preview parsed rows before import' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Upload an Excel file and preview parsed rows before import',
+    }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {
@@ -76,7 +78,9 @@ __decorate([
 __decorate([
     (0, common_1.Post)('bulk-upload/import'),
     (0, common_1.HttpCode)(202),
-    (0, swagger_1.ApiOperation)({ summary: 'Confirm import of a previously previewed upload session' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Confirm import of a previously previewed upload session',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [bulk_upload_dto_1.BulkUploadImportDto]),
@@ -84,7 +88,9 @@ __decorate([
 ], MasterMillsBulkController.prototype, "confirmImport", null);
 __decorate([
     (0, common_1.Get)('bulk-upload/status/:importId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get the current status of an ongoing or completed import' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get the current status of an ongoing or completed import',
+    }),
     __param(0, (0, common_1.Param)('importId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

@@ -39,9 +39,13 @@ export class AuthService {
 
   async validateServiceEngineer(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    
-    const roleName = user?.role?.name || (typeof user?.role === 'string' ? user.role : undefined);
-    const isServiceEngineer = roleName?.toLowerCase() === 'service engineer' || roleName?.toLowerCase() === 'service_engineer';
+
+    const roleName =
+      user?.role?.name ||
+      (typeof user?.role === 'string' ? user.role : undefined);
+    const isServiceEngineer =
+      roleName?.toLowerCase() === 'service engineer' ||
+      roleName?.toLowerCase() === 'service_engineer';
     const isActive = user?.account_status?.toUpperCase() === 'ACTIVE';
 
     if (
@@ -190,7 +194,8 @@ export class AuthService {
   }
 
   async generateRefreshToken(userId: string): Promise<string> {
-    const refreshExpiresIn = this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
+    const refreshExpiresIn =
+      this.configService.get<string>('jwt.refreshExpiresIn') || '7d';
     const refreshToken = this.jwtService.sign(
       { sub: userId },
       {
@@ -250,7 +255,9 @@ export class AuthService {
           } else {
             // Potential token reuse breach! Revoke all tokens for safety
             await this.redisService.delByPrefix(`refresh_token:${userId}:`);
-            throw new UnauthorizedException('Refresh token expired and reused. Sessions revoked.');
+            throw new UnauthorizedException(
+              'Refresh token expired and reused. Sessions revoked.',
+            );
           }
         }
         throw new UnauthorizedException('Invalid refresh token');
@@ -392,7 +399,9 @@ export class AuthService {
     ]);
 
     // Invalidate user cache to ensure clean updates (must match UsersService cache keys)
-    await this.redisService.delByPrefix(`refresh_token:${resetRecord.user_id}:`);
+    await this.redisService.delByPrefix(
+      `refresh_token:${resetRecord.user_id}:`,
+    );
     await this.redisService.del(`user:email:${resetRecord.user.email}`);
     await this.redisService.del(`user:id:${resetRecord.user_id}`);
   }

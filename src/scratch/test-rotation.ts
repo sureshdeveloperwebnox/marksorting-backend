@@ -19,7 +19,9 @@ async function main() {
 
   // findFirst returns null if no matching role exists — guard against that.
   if (!role) {
-    throw new Error('Role "Super Admin" not found in the database. Seed it first.');
+    throw new Error(
+      'Role "Super Admin" not found in the database. Seed it first.',
+    );
   }
 
   const user = await usersService.create({
@@ -34,7 +36,10 @@ async function main() {
   const loginResult = await authService.login(user);
   let currentRefreshToken = loginResult.refresh_token;
 
-  console.log('Initial Refresh Token:', currentRefreshToken.substring(0, 15) + '...');
+  console.log(
+    'Initial Refresh Token:',
+    currentRefreshToken.substring(0, 15) + '...',
+  );
 
   // 2. Perform rotation 5 times sequentially
   for (let i = 1; i <= 5; i++) {
@@ -43,12 +48,17 @@ async function main() {
       const refreshResult = await authService.refresh(currentRefreshToken);
       const oldToken = currentRefreshToken;
       currentRefreshToken = refreshResult.refresh_token;
-      console.log(`Success! New Refresh Token: ${currentRefreshToken.substring(0, 15)}...`);
+      console.log(
+        `Success! New Refresh Token: ${currentRefreshToken.substring(0, 15)}...`,
+      );
 
       // Test reuse grace period immediately (within 60s)
       console.log('Testing reuse of old token in grace period...');
       const reuseResult = await authService.refresh(oldToken);
-      console.log('Grace period reuse succeeded! Returned tokens match:', reuseResult.refresh_token === currentRefreshToken);
+      console.log(
+        'Grace period reuse succeeded! Returned tokens match:',
+        reuseResult.refresh_token === currentRefreshToken,
+      );
     } catch (e: any) {
       console.error(`Rotation cycle ${i} failed:`, e.message);
     }

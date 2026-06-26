@@ -6,8 +6,12 @@ import { MasterMillsBulkService } from './master-mills-bulk.service';
 import { MasterMillsBulkController } from './master-mills-bulk.controller';
 
 @Module({
-  controllers: [MasterMillsController, MobileMasterMillsController, MasterMillsBulkController],
+  controllers: [
+    MasterMillsController,
+    MobileMasterMillsController,
+    MasterMillsBulkController,
+  ],
   providers: [MasterMillsService, MasterMillsBulkService],
   exports: [MasterMillsService],
 })
-export class MasterMillsModule { }
+export class MasterMillsModule {}

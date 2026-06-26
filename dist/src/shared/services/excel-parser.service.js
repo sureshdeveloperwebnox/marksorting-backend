@@ -111,7 +111,12 @@ const REQUIRED_FIELDS = [
     'customer_name',
     'place',
 ];
-const DATE_FIELDS = ['invoice_date', 'installation_date', 'amc_starting_date', 'amc_closing_date'];
+const DATE_FIELDS = [
+    'invoice_date',
+    'installation_date',
+    'amc_starting_date',
+    'amc_closing_date',
+];
 const NUMERIC_FIELDS = [
     'warranty_years',
     'warranty_months',
@@ -209,7 +214,8 @@ let ExcelParserService = class ExcelParserService {
                 const value = previewRow[field];
                 if (value && value.trim() !== '') {
                     if (!this.isValidDate(value)) {
-                        previewRow.errors[field] = `${field} must be a valid date`;
+                        previewRow.errors[field] =
+                            `${field} must be a valid date`;
                     }
                 }
             }
@@ -217,7 +223,8 @@ let ExcelParserService = class ExcelParserService {
                 const value = previewRow[field];
                 if (value && value.trim() !== '') {
                     if (!this.isNumeric(value)) {
-                        previewRow.errors[field] = `${field} must be a numeric value`;
+                        previewRow.errors[field] =
+                            `${field} must be a numeric value`;
                     }
                 }
             }

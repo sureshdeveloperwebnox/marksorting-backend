@@ -99,7 +99,10 @@ export class StoresService {
 
     // Set root quantity as sum of material quantities if provided
     if (material_quantities && material_quantities.length > 0) {
-      data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
+      data.quantity = material_quantities.reduce(
+        (sum, q) => sum + q.quantity,
+        0,
+      );
     }
 
     const store = await this.prisma.store.create({
@@ -109,7 +112,9 @@ export class StoresService {
         customer: { connect: { id: customer_id } },
         materials: {
           create: material_ids.map((id) => {
-            const qtyObj = material_quantities?.find((q) => q.material_id === id);
+            const qtyObj = material_quantities?.find(
+              (q) => q.material_id === id,
+            );
             return {
               material: { connect: { id } },
               quantity: qtyObj ? qtyObj.quantity : 1,
@@ -161,7 +166,10 @@ export class StoresService {
     }
 
     if (material_quantities && material_quantities.length > 0) {
-      data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
+      data.quantity = material_quantities.reduce(
+        (sum, q) => sum + q.quantity,
+        0,
+      );
     }
 
     const store = await this.prisma.store.update({
@@ -171,14 +179,14 @@ export class StoresService {
         service_engineer: service_engineer_id
           ? { connect: { id: service_engineer_id } }
           : undefined,
-        customer: customer_id
-          ? { connect: { id: customer_id } }
-          : undefined,
+        customer: customer_id ? { connect: { id: customer_id } } : undefined,
         materials: material_ids
           ? {
               deleteMany: {},
               create: material_ids.map((matId) => {
-                const qtyObj = material_quantities?.find((q) => q.material_id === matId);
+                const qtyObj = material_quantities?.find(
+                  (q) => q.material_id === matId,
+                );
                 return {
                   material: { connect: { id: matId } },
                   quantity: qtyObj ? qtyObj.quantity : 1,

@@ -7,4 +7,4 @@ import { ExcelParserService } from './services/excel-parser.service';
   providers: [S3Service, ExcelParserService],
   exports: [S3Service, ExcelParserService],
 })
-export class SharedModule { }
+export class SharedModule {}

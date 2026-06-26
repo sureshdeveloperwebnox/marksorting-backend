@@ -95,7 +95,9 @@ __decorate([
             const material = ctx.result;
             const name = material?.name || ctx.body.name || 'Unknown';
             const details = [
-                material?.unit || ctx.body.unit ? `Unit: ${material?.unit || ctx.body.unit}` : null,
+                material?.unit || ctx.body.unit
+                    ? `Unit: ${material?.unit || ctx.body.unit}`
+                    : null,
                 material?.status ? `Status: ${material.status}` : null,
             ]
                 .filter(Boolean)

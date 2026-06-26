@@ -15,7 +15,13 @@ const crypto_1 = require("crypto");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const installation_reports_excel_parser_service_1 = require("./installation-reports-excel-parser.service");
-const VALID_CHANNEL_VALUES = ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'];
+const VALID_CHANNEL_VALUES = [
+    'PRIMARY',
+    'SECONDARY',
+    'REJECTION_1',
+    'REJECTION_2',
+    'SPLIT',
+];
 let InstallationReportsBulkService = class InstallationReportsBulkService {
     excelParser;
     prisma;
@@ -101,7 +107,8 @@ let InstallationReportsBulkService = class InstallationReportsBulkService {
         }
         catch (error) {
             status.state = 'failed';
-            status.errorMessage = error instanceof Error ? error.message : String(error);
+            status.errorMessage =
+                error instanceof Error ? error.message : String(error);
             await this.redis.setJson(statusKey, status, 7200).catch(() => { });
         }
     }
@@ -164,7 +171,9 @@ let InstallationReportsBulkService = class InstallationReportsBulkService {
                 const n = parseInt(trimmed, 10);
                 return isNaN(n) ? undefined : n;
             };
-            const channelValRaw = row.running_channel_combination_value.trim().toUpperCase();
+            const channelValRaw = row.running_channel_combination_value
+                .trim()
+                .toUpperCase();
             const channelVal = VALID_CHANNEL_VALUES.includes(channelValRaw)
                 ? channelValRaw
                 : undefined;

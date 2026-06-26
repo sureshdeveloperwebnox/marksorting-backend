@@ -105,7 +105,10 @@ let ServiceReportsBulkService = class ServiceReportsBulkService {
         await this.prisma.$transaction(async (tx) => {
             const category = await tx.serviceCategory.findFirst({
                 where: {
-                    name: { equals: row.service_category_name.trim(), mode: 'insensitive' },
+                    name: {
+                        equals: row.service_category_name.trim(),
+                        mode: 'insensitive',
+                    },
                     deleted_at: null,
                 },
                 select: { id: true },

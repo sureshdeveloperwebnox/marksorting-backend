@@ -20,8 +20,10 @@ export class MobileMasterMillsController {
 
   @Get('prefill')
   @ApiOperation({
-    summary: '[Mobile] Search machine records by Ref No or Frame No for prefilling forms',
-    description: 'Returns a list of matching active Master Mill records with nested Mill and Customer details.',
+    summary:
+      '[Mobile] Search machine records by Ref No or Frame No for prefilling forms',
+    description:
+      'Returns a list of matching active Master Mill records with nested Mill and Customer details.',
   })
   @ApiQuery({
     name: 'search',
@@ -54,7 +56,8 @@ export class MobileMasterMillsController {
   @Post('quick-register')
   @ApiOperation({
     summary: '[Mobile] Quick register Customer, Mill, and Master Mill',
-    description: 'Creates or updates Customer, Mill, and Master Mill record based on the payload, ensuring reuse where they already exist.',
+    description:
+      'Creates or updates Customer, Mill, and Master Mill record based on the payload, ensuring reuse where they already exist.',
   })
   @ApiBody({ type: QuickRegisterDto })
   @ApiResponse({ status: 201, description: 'Quick registration successful' })

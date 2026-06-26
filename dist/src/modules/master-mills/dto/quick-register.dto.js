@@ -33,7 +33,10 @@ __decorate([
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "customer_name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'c10d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e5f', required: false }),
+    (0, swagger_1.ApiProperty)({
+        example: 'c10d2e3f-4a5b-6c7d-8e9f-0a1b2c3d4e5f',
+        required: false,
+    }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

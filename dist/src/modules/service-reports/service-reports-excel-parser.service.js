@@ -116,7 +116,7 @@ const EXAMPLE_ROW = [
 ];
 const HEADER_TO_FIELD_MAP = {
     'mill name': 'mill_name',
-    'place': 'place',
+    place: 'place',
     'service category': 'service_category_name',
     'technician names': 'technician_names',
     'visit date': 'visit_date',
@@ -134,11 +134,11 @@ const HEADER_TO_FIELD_MAP = {
     'nature of complaint': 'nature_of_complaint',
     'problem observed': 'problem_observed',
     'action taken': 'action_taken',
-    'commodity': 'commodity',
-    'contamination': 'contamination',
+    commodity: 'commodity',
+    contamination: 'contamination',
     'output capacity/hour': 'output_capacity_per_hour',
     'rejection ratio': 'rejection_ratio',
-    'purity': 'purity',
+    purity: 'purity',
     'no of programs set': 'no_of_programs_set',
     'ac provided (yes/no)': 'ac_provided',
     'compressor details': 'compressor_details',
@@ -148,7 +148,7 @@ const HEADER_TO_FIELD_MAP = {
     'auto drain valve working (yes/no)': 'auto_drain_valve_working',
     'engineer remarks': 'engineer_remarks',
     'customer remarks': 'customer_remarks',
-    'status': 'status',
+    status: 'status',
 };
 const REQUIRED_FIELDS = [
     'mill_name',
@@ -226,7 +226,9 @@ let ServiceReportsExcelParserService = class ServiceReportsExcelParserService {
         const headerRow = worksheet.getRow(1);
         const headerMap = {};
         headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
-            const normalized = String(cell.value ?? '').trim().toLowerCase();
+            const normalized = String(cell.value ?? '')
+                .trim()
+                .toLowerCase();
             const fieldKey = HEADER_TO_FIELD_MAP[normalized];
             if (fieldKey) {
                 headerMap[colNumber] = fieldKey;
@@ -292,13 +294,15 @@ let ServiceReportsExcelParserService = class ServiceReportsExcelParserService {
             for (const field of DATE_FIELDS) {
                 const value = previewRow[field];
                 if (value && value.trim() !== '' && !this.isValidDate(value)) {
-                    previewRow.errors[field] = `${field.replace(/_/g, ' ')} must be a valid date (DD/MM/YYYY)`;
+                    previewRow.errors[field] =
+                        `${field.replace(/_/g, ' ')} must be a valid date (DD/MM/YYYY)`;
                 }
             }
             for (const field of YES_NO_FIELDS) {
                 const value = previewRow[field].trim().toLowerCase();
                 if (value !== '' && value !== 'yes' && value !== 'no') {
-                    previewRow.errors[field] = `${field.replace(/_/g, ' ')} must be "Yes" or "No"`;
+                    previewRow.errors[field] =
+                        `${field.replace(/_/g, ' ')} must be "Yes" or "No"`;
                 }
             }
             if (previewRow.status.trim() !== '') {

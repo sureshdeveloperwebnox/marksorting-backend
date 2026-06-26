@@ -176,7 +176,8 @@ export class MobileStoresController {
     name: 'warranty_status',
     required: false,
     type: String,
-    description: 'Filter by warranty status (Non Warranty, Supplementary, AMC With Spare, AMC Without Spare)',
+    description:
+      'Filter by warranty status (Non Warranty, Supplementary, AMC With Spare, AMC Without Spare)',
   })
   @ApiResponse({ status: 200, description: 'Paginated list of store records' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
@@ -300,7 +301,10 @@ export class MobileStoresController {
     description: 'Registers a new store record under the logged-in technician.',
   })
   @ApiBody({ type: MobileCreateStoreDto })
-  @ApiResponse({ status: 201, description: 'Store record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Store record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @LogActivity({
@@ -310,7 +314,9 @@ export class MobileStoresController {
       const store = ctx.result;
       const frame = store?.frame_number || ctx.body.frame_number || 'N/A';
       const details = [
-        store?.barcode || ctx.body.barcode ? `Barcode: ${store?.barcode || ctx.body.barcode}` : null,
+        store?.barcode || ctx.body.barcode
+          ? `Barcode: ${store?.barcode || ctx.body.barcode}`
+          : null,
         store?.warranty_status ? `Warranty: ${store.warranty_status}` : null,
       ]
         .filter(Boolean)
@@ -333,11 +339,15 @@ export class MobileStoresController {
   @Get(':id')
   @ApiOperation({
     summary: '[Mobile] Get store record by ID',
-    description: 'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+    description:
+      'Retrieves the details of a single store record if it belongs to the logged-in technician.',
   })
   @ApiResponse({ status: 200, description: 'Store record found' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from accessing other engineers records' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden from accessing other engineers records',
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   findOne(@Param('id') id: string, @Request() req: any) {
     return this.storesService.findByIdAndTechnician(id, req.user.userId);
@@ -346,12 +356,19 @@ export class MobileStoresController {
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Update store record by ID',
-    description: 'Updates a store record if it belongs to the logged-in technician.',
+    description:
+      'Updates a store record if it belongs to the logged-in technician.',
   })
   @ApiBody({ type: MobileUpdateStoreDto })
-  @ApiResponse({ status: 200, description: 'Store record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store record updated successfully',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from updating other engineers records' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden from updating other engineers records',
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.UPDATE,
@@ -360,9 +377,13 @@ export class MobileStoresController {
     description: (ctx) => {
       const before = ctx.result?.before;
       const after = ctx.result?.after;
-      const frame = after?.frame_number || before?.frame_number || ctx.params.id;
-      const diff = before && after ? buildDiffSummary(before, after, ctx.body) : '';
-      const who = ctx.user.full_name ? `${ctx.user.full_name} updated` : 'Updated';
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} updated`
+        : 'Updated';
       return diff
         ? `${who} Store Record "Frame ${frame}" — ${diff}`
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
@@ -379,11 +400,18 @@ export class MobileStoresController {
   @Delete(':id')
   @ApiOperation({
     summary: '[Mobile] Delete store record by ID',
-    description: 'Soft deletes a store record if it belongs to the logged-in technician.',
+    description:
+      'Soft deletes a store record if it belongs to the logged-in technician.',
   })
-  @ApiResponse({ status: 200, description: 'Store record deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store record deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  @ApiResponse({ status: 403, description: 'Forbidden from deleting other engineers records' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden from deleting other engineers records',
+  })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({
     action: ActivityAction.DELETE,

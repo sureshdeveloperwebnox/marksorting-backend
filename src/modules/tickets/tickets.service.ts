@@ -49,7 +49,7 @@ export class TicketsService {
     private prisma: PrismaService,
     private redis: RedisService,
     private eventEmitter: EventEmitter2,
-  ) { }
+  ) {}
 
   async findAll(
     params: {
@@ -94,8 +94,20 @@ export class TicketsService {
         { customer: { email: { contains: search, mode: 'insensitive' } } },
         { mill: { name: { contains: search, mode: 'insensitive' } } },
         { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
-        { mill: { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } } },
-        { mill: { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } } },
+        {
+          mill: {
+            masterMills: {
+              some: { ref_no: { contains: search, mode: 'insensitive' } },
+            },
+          },
+        },
+        {
+          mill: {
+            masterMills: {
+              some: { frame_no: { contains: search, mode: 'insensitive' } },
+            },
+          },
+        },
       ];
     }
 
@@ -253,7 +265,7 @@ export class TicketsService {
     ];
 
     for (const field of fieldsToCompare) {
-      const oldVal = (existing as any)[field.key];
+      const oldVal = existing[field.key];
       const newVal = (ticket as any)[field.key];
       if (oldVal !== newVal) {
         changes.push(`${field.label}: "${oldVal ?? ''}" → "${newVal ?? ''}"`);
@@ -369,7 +381,7 @@ export class TicketsService {
     return Array.isArray(target)
       ? target.includes('ticket_number')
       : target === 'ticket_number' ||
-      target === 'support_tickets_ticket_number_key';
+          target === 'support_tickets_ticket_number_key';
   }
 
   private generateTicketNumber() {

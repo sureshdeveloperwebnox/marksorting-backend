@@ -36,7 +36,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('stores')
 export class StoresController {
-  constructor(private readonly storesService: StoresService) { }
+  constructor(private readonly storesService: StoresService) {}
 
   @Get()
   @ApiOperation({
@@ -229,7 +229,10 @@ export class StoresController {
   @Post()
   @ApiOperation({ summary: 'Create new store record' })
   @ApiBody({ type: CreateStoreDto })
-  @ApiResponse({ status: 201, description: 'Store record created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Store record created successfully',
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @LogActivity({
@@ -263,7 +266,10 @@ export class StoresController {
   @Put(':id')
   @ApiOperation({ summary: 'Update existing store record' })
   @ApiBody({ type: UpdateStoreDto })
-  @ApiResponse({ status: 200, description: 'Store record updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store record updated successfully',
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @ApiResponse({ status: 404, description: 'Store record not found' })
@@ -292,7 +298,10 @@ export class StoresController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Soft delete store record' })
-  @ApiResponse({ status: 200, description: 'Store record soft-deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Store record soft-deleted successfully',
+  })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @ApiResponse({ status: 404, description: 'Store record not found' })
   @LogActivity({

@@ -37,11 +37,21 @@ let MillsController = class MillsController {
                 { place: { contains: search, mode: 'insensitive' } },
                 { city: { contains: search, mode: 'insensitive' } },
                 { customer: { name: { contains: search, mode: 'insensitive' } } },
-                { masterMills: { some: { ref_no: { contains: search, mode: 'insensitive' } } } },
-                { masterMills: { some: { frame_no: { contains: search, mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: { ref_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
+                {
+                    masterMills: {
+                        some: { frame_no: { contains: search, mode: 'insensitive' } },
+                    },
+                },
             ];
             const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
-            if (cleanedPhoneSearch && cleanedPhoneSearch !== '+' && cleanedPhoneSearch.length >= 5) {
+            if (cleanedPhoneSearch &&
+                cleanedPhoneSearch !== '+' &&
+                cleanedPhoneSearch.length >= 5) {
                 orConditions.push({ phone: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_2: { contains: cleanedPhoneSearch, mode: 'insensitive' } }, { phone_3: { contains: cleanedPhoneSearch, mode: 'insensitive' } });
             }
             where.OR = orConditions;
@@ -50,13 +60,23 @@ let MillsController = class MillsController {
             where.OR = [
                 ...(where.OR || []),
                 { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
-                { masterMills: { some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: { ref_no: { contains: refNo.trim(), mode: 'insensitive' } },
+                    },
+                },
             ];
         }
         if (frameNo) {
             where.OR = [
                 ...(where.OR || []),
-                { masterMills: { some: { frame_no: { contains: frameNo.trim(), mode: 'insensitive' } } } },
+                {
+                    masterMills: {
+                        some: {
+                            frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+                        },
+                    },
+                },
             ];
         }
         if (status) {

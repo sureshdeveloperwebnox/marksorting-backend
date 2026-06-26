@@ -24,4 +24,4 @@ import { ServiceReportsExcelParserService } from './service-reports-excel-parser
   ],
   exports: [ServiceReportsService],
 })
-export class ServiceReportsModule { }
+export class ServiceReportsModule {}

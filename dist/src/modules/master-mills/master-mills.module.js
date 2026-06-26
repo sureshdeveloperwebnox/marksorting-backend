@@ -18,7 +18,11 @@ let MasterMillsModule = class MasterMillsModule {
 exports.MasterMillsModule = MasterMillsModule;
 exports.MasterMillsModule = MasterMillsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [master_mills_controller_1.MasterMillsController, mobile_master_mills_controller_1.MobileMasterMillsController, master_mills_bulk_controller_1.MasterMillsBulkController],
+        controllers: [
+            master_mills_controller_1.MasterMillsController,
+            mobile_master_mills_controller_1.MobileMasterMillsController,
+            master_mills_bulk_controller_1.MasterMillsBulkController,
+        ],
         providers: [master_mills_service_1.MasterMillsService, master_mills_bulk_service_1.MasterMillsBulkService],
         exports: [master_mills_service_1.MasterMillsService],
     })

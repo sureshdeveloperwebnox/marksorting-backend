@@ -1,1 +1,0 @@
-{"version":3,"file":"test-types.js","sourceRoot":"","sources":["../../../src/scratch/test-types.ts"],"names":[],"mappings":";;AAMA,MAAM,UAAU,GAAoB;IAClC,OAAO,EAAE,MAAM;IACf,gBAAgB,EAAE,EAAE,OAAO,EAAE,EAAE,EAAE,EAAE,SAAS,EAAE,EAAE;IAChD,QAAQ,EAAE,EAAE,OAAO,EAAE,EAAE,EAAE,EAAE,SAAS,EAAE,EAAE;CACzC,CAAC;AAEF,OAAO,CAAC,GAAG,CAAC,UAAU,CAAC,CAAC"}

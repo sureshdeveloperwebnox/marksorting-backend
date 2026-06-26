@@ -36,7 +36,7 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('service-reports')
 export class ServiceReportsController {
-  constructor(private readonly serviceReportsService: ServiceReportsService) { }
+  constructor(private readonly serviceReportsService: ServiceReportsService) {}
 
   @Get()
   @ApiOperation({

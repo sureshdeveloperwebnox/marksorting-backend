@@ -49,7 +49,9 @@ let ServiceReportsBulkController = class ServiceReportsBulkController {
 exports.ServiceReportsBulkController = ServiceReportsBulkController;
 __decorate([
     (0, common_1.Get)('bulk-upload/template'),
-    (0, swagger_1.ApiOperation)({ summary: 'Download the service report bulk upload Excel template' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Download the service report bulk upload Excel template',
+    }),
     __param(0, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -57,7 +59,9 @@ __decorate([
 ], ServiceReportsBulkController.prototype, "getTemplate", null);
 __decorate([
     (0, common_1.Post)('bulk-upload/preview'),
-    (0, swagger_1.ApiOperation)({ summary: 'Upload a service report Excel file and preview parsed rows' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Upload a service report Excel file and preview parsed rows',
+    }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {
@@ -84,7 +88,9 @@ __decorate([
 ], ServiceReportsBulkController.prototype, "confirmImport", null);
 __decorate([
     (0, common_1.Get)('bulk-upload/status/:importId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get the status of an ongoing or completed service report import' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get the status of an ongoing or completed service report import',
+    }),
     __param(0, (0, common_1.Param)('importId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

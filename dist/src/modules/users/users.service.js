@@ -231,10 +231,12 @@ let UsersService = class UsersService {
             await this.redis.del(`technician:id:${user.id}`);
         }
         const imageAclPromises = [];
-        if (user.profile_image && user.profile_image !== existingUser.profile_image) {
+        if (user.profile_image &&
+            user.profile_image !== existingUser.profile_image) {
             imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
         }
-        if (user.background_image && user.background_image !== existingUser.background_image) {
+        if (user.background_image &&
+            user.background_image !== existingUser.background_image) {
             imageAclPromises.push(this.s3Service.makeObjectPublic(user.background_image));
         }
         if (imageAclPromises.length > 0) {

@@ -137,10 +137,14 @@ export class UsersService {
 
     const imageAclPromises: Promise<void>[] = [];
     if (user.profile_image) {
-      imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
+      imageAclPromises.push(
+        this.s3Service.makeObjectPublic(user.profile_image),
+      );
     }
     if (user.background_image) {
-      imageAclPromises.push(this.s3Service.makeObjectPublic(user.background_image));
+      imageAclPromises.push(
+        this.s3Service.makeObjectPublic(user.background_image),
+      );
     }
     if (imageAclPromises.length > 0) {
       await Promise.all(imageAclPromises);
@@ -163,7 +167,8 @@ export class UsersService {
     const { password, ...data } = dto;
 
     // Security: restrict self-update from elevating privileges or modifying status
-    const hasUpdatePermission = requestingUser?.permissions?.includes('users.update');
+    const hasUpdatePermission =
+      requestingUser?.permissions?.includes('users.update');
     const isSelfUpdate = requestingUser?.userId === id;
 
     if (isSelfUpdate && !hasUpdatePermission) {
@@ -226,11 +231,21 @@ export class UsersService {
     }
 
     const imageAclPromises: Promise<void>[] = [];
-    if (user.profile_image && user.profile_image !== existingUser.profile_image) {
-      imageAclPromises.push(this.s3Service.makeObjectPublic(user.profile_image));
+    if (
+      user.profile_image &&
+      user.profile_image !== existingUser.profile_image
+    ) {
+      imageAclPromises.push(
+        this.s3Service.makeObjectPublic(user.profile_image),
+      );
     }
-    if (user.background_image && user.background_image !== existingUser.background_image) {
-      imageAclPromises.push(this.s3Service.makeObjectPublic(user.background_image));
+    if (
+      user.background_image &&
+      user.background_image !== existingUser.background_image
+    ) {
+      imageAclPromises.push(
+        this.s3Service.makeObjectPublic(user.background_image),
+      );
     }
     if (imageAclPromises.length > 0) {
       await Promise.all(imageAclPromises);

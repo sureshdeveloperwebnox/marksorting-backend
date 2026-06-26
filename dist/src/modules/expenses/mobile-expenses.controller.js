@@ -289,7 +289,7 @@ __decorate([
             'appended to `technician_ids` even if the field is omitted from the payload. ' +
             'You may therefore send a minimal body without `technician_ids` from the mobile app.\n\n' +
             '**Report Linkage:** Report linkage is optional. If `service_report_id` or `installation_report_id` is linked, ' +
-            'fields like `mill_id` and `place` are auto-populated from the report, and `visit_date` defaults to the report\'s date if omitted.\n\n' +
+            "fields like `mill_id` and `place` are auto-populated from the report, and `visit_date` defaults to the report's date if omitted.\n\n" +
             '**Required fields if unlinked:** If no report is linked, `visit_date` is required, and `mill_id` is required if `expense_type` is `MILL`.\n\n' +
             '**Validation:** All referenced IDs (`expense_category_id`, `mill_id`, `technician_ids`) are ' +
             'verified to exist in the database before creation. Invalid IDs return **400**.',
