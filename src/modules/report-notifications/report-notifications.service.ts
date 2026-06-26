@@ -36,8 +36,8 @@ export class ReportNotificationsService {
   async sendServiceReport(
     reportId: string,
     millName: string,
-    millEmail: string | null | undefined,
-    millWhatsappNumber: string,
+    _millEmail: string | null | undefined,
+    _millWhatsappNumber: string,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -62,6 +62,9 @@ export class ReportNotificationsService {
       }
 
       const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+      this.logger.debug(
+        `Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`,
+      );
 
       // Generate PDF
       this.logger.log(`Generating PDF for Service Report ${reportId}...`);
@@ -73,7 +76,9 @@ export class ReportNotificationsService {
         .filter(Boolean);
 
       if (assignedTechnicians.length === 0) {
-        this.logger.warn(`No assigned technicians for Service Report ${reportId}`);
+        this.logger.warn(
+          `No assigned technicians for Service Report ${reportId}`,
+        );
         return result;
       }
 
@@ -83,7 +88,7 @@ export class ReportNotificationsService {
         const techPhone = technician.phone;
 
         this.logger.log(
-          `Sending Service Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`
+          `Sending Service Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
         );
 
         // Send WhatsApp (PDF only, no text)
@@ -103,7 +108,9 @@ export class ReportNotificationsService {
             );
           } catch (error) {
             result.whatsappError =
-              error instanceof Error ? error.message : 'WhatsApp sending failed';
+              error instanceof Error
+                ? error.message
+                : 'WhatsApp sending failed';
             this.logger.error(
               `WhatsApp failed for Service Report ${reportId} to technician ${technician.full_name}`,
               error,
@@ -162,8 +169,8 @@ export class ReportNotificationsService {
   async sendInstallationReport(
     reportId: string,
     millName: string,
-    millEmail: string | null | undefined,
-    millWhatsappNumber: string,
+    _millEmail: string | null | undefined,
+    _millWhatsappNumber: string,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -188,6 +195,9 @@ export class ReportNotificationsService {
       }
 
       const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+      this.logger.debug(
+        `Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`,
+      );
 
       // Generate PDF
       this.logger.log(`Generating PDF for Installation Report ${reportId}...`);
@@ -199,7 +209,9 @@ export class ReportNotificationsService {
         .filter(Boolean);
 
       if (assignedTechnicians.length === 0) {
-        this.logger.warn(`No assigned technicians for Installation Report ${reportId}`);
+        this.logger.warn(
+          `No assigned technicians for Installation Report ${reportId}`,
+        );
         return result;
       }
 
@@ -209,7 +221,7 @@ export class ReportNotificationsService {
         const techPhone = technician.phone;
 
         this.logger.log(
-          `Sending Installation Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`
+          `Sending Installation Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
         );
 
         // Send WhatsApp (PDF only, no text)
@@ -229,7 +241,9 @@ export class ReportNotificationsService {
             );
           } catch (error) {
             result.whatsappError =
-              error instanceof Error ? error.message : 'WhatsApp sending failed';
+              error instanceof Error
+                ? error.message
+                : 'WhatsApp sending failed';
             this.logger.error(
               `WhatsApp failed for Installation Report ${reportId} to technician ${technician.full_name}`,
               error,
@@ -241,7 +255,8 @@ export class ReportNotificationsService {
         if (techEmail) {
           try {
             const subject = `${activeMillName} Installation Report`;
-            const html = this.getInstallationReportEmailTemplate(activeMillName);
+            const html =
+              this.getInstallationReportEmailTemplate(activeMillName);
 
             const sent = await this.sendEmailWithAttachment(
               techEmail,
@@ -289,37 +304,33 @@ export class ReportNotificationsService {
     fileName: string,
     pdfBuffer: Buffer,
   ): Promise<boolean> {
-    try {
-      await this.mailQueue.add(
-        'send-mail-with-attachment',
-        {
-          to,
-          subject,
-          html,
-          attachments: [
-            {
-              filename: fileName,
-              content: pdfBuffer.toString('base64'),
-              encoding: 'base64',
-              contentType: 'application/pdf',
-            },
-          ],
-        },
-        {
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 5000,
+    await this.mailQueue.add(
+      'send-mail-with-attachment',
+      {
+        to,
+        subject,
+        html,
+        attachments: [
+          {
+            filename: fileName,
+            content: pdfBuffer.toString('base64'),
+            encoding: 'base64',
+            contentType: 'application/pdf',
           },
-          removeOnComplete: false,
-          removeOnFail: false,
+        ],
+      },
+      {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
         },
-      );
+        removeOnComplete: false,
+        removeOnFail: false,
+      },
+    );
 
-      return true;
-    } catch (error) {
-      throw error;
-    }
+    return true;
   }
 
   /**

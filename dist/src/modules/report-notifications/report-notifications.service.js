@@ -38,7 +38,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
         this.installationReportsService = installationReportsService;
         this.mailQueue = mailQueue;
     }
-    async sendServiceReport(reportId, millName, millEmail, millWhatsappNumber) {
+    async sendServiceReport(reportId, millName, _millEmail, _millWhatsappNumber) {
         const result = {
             emailSent: false,
             whatsappSent: false,
@@ -59,6 +59,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 throw new Error(`Service Report ${reportId} not found`);
             }
             const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+            this.logger.debug(`Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`);
             this.logger.log(`Generating PDF for Service Report ${reportId}...`);
             const { buffer: pdfBuffer, fileName } = await this.serviceReportsService.generatePdf(reportId);
             const assignedTechnicians = report.technicians
@@ -81,7 +82,9 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     }
                     catch (error) {
                         result.whatsappError =
-                            error instanceof Error ? error.message : 'WhatsApp sending failed';
+                            error instanceof Error
+                                ? error.message
+                                : 'WhatsApp sending failed';
                         this.logger.error(`WhatsApp failed for Service Report ${reportId} to technician ${technician.full_name}`, error);
                     }
                 }
@@ -111,7 +114,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
             return result;
         }
     }
-    async sendInstallationReport(reportId, millName, millEmail, millWhatsappNumber) {
+    async sendInstallationReport(reportId, millName, _millEmail, _millWhatsappNumber) {
         const result = {
             emailSent: false,
             whatsappSent: false,
@@ -132,6 +135,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 throw new Error(`Installation Report ${reportId} not found`);
             }
             const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+            this.logger.debug(`Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`);
             this.logger.log(`Generating PDF for Installation Report ${reportId}...`);
             const { buffer: pdfBuffer, fileName } = await this.installationReportsService.generatePdf(reportId);
             const assignedTechnicians = report.technicians
@@ -154,7 +158,9 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     }
                     catch (error) {
                         result.whatsappError =
-                            error instanceof Error ? error.message : 'WhatsApp sending failed';
+                            error instanceof Error
+                                ? error.message
+                                : 'WhatsApp sending failed';
                         this.logger.error(`WhatsApp failed for Installation Report ${reportId} to technician ${technician.full_name}`, error);
                     }
                 }
@@ -185,33 +191,28 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
         }
     }
     async sendEmailWithAttachment(to, subject, html, fileName, pdfBuffer) {
-        try {
-            await this.mailQueue.add('send-mail-with-attachment', {
-                to,
-                subject,
-                html,
-                attachments: [
-                    {
-                        filename: fileName,
-                        content: pdfBuffer.toString('base64'),
-                        encoding: 'base64',
-                        contentType: 'application/pdf',
-                    },
-                ],
-            }, {
-                attempts: 3,
-                backoff: {
-                    type: 'exponential',
-                    delay: 5000,
+        await this.mailQueue.add('send-mail-with-attachment', {
+            to,
+            subject,
+            html,
+            attachments: [
+                {
+                    filename: fileName,
+                    content: pdfBuffer.toString('base64'),
+                    encoding: 'base64',
+                    contentType: 'application/pdf',
                 },
-                removeOnComplete: false,
-                removeOnFail: false,
-            });
-            return true;
-        }
-        catch (error) {
-            throw error;
-        }
+            ],
+        }, {
+            attempts: 3,
+            backoff: {
+                type: 'exponential',
+                delay: 5000,
+            },
+            removeOnComplete: false,
+            removeOnFail: false,
+        });
+        return true;
     }
     getServiceReportEmailTemplate(millName) {
         return `

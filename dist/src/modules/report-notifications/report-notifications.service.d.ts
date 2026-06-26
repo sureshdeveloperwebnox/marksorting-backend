@@ -19,8 +19,8 @@ export declare class ReportNotificationsService {
     private readonly mailQueue;
     private readonly logger;
     constructor(prisma: PrismaService, mailService: MailService, whatsAppService: WhatsAppService, serviceReportsService: ServiceReportsService, installationReportsService: InstallationReportsService, mailQueue: Queue);
-    sendServiceReport(reportId: string, millName: string, millEmail: string | null | undefined, millWhatsappNumber: string): Promise<ReportDeliveryResult>;
-    sendInstallationReport(reportId: string, millName: string, millEmail: string | null | undefined, millWhatsappNumber: string): Promise<ReportDeliveryResult>;
+    sendServiceReport(reportId: string, millName: string, _millEmail: string | null | undefined, _millWhatsappNumber: string): Promise<ReportDeliveryResult>;
+    sendInstallationReport(reportId: string, millName: string, _millEmail: string | null | undefined, _millWhatsappNumber: string): Promise<ReportDeliveryResult>;
     private sendEmailWithAttachment;
     private getServiceReportEmailTemplate;
     private getInstallationReportEmailTemplate;
