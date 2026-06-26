@@ -477,9 +477,13 @@ export class MasterMillsService {
       const resolvedMillId = mill.id;
 
       // 3. Resolve & Update Master Mill
-      const orConditions: Prisma.MasterMillWhereInput[] = [
-        { ref_no: { equals: cleanRefNo, mode: 'insensitive' } },
-      ];
+      // Match by mill_id AND (ref_no OR frame_no) to prevent cross-mill matching
+      const orConditions: Prisma.MasterMillWhereInput[] = [];
+      if (cleanRefNo) {
+        orConditions.push({
+          ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+        });
+      }
       if (cleanFrameNo) {
         orConditions.push({
           frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
@@ -489,7 +493,8 @@ export class MasterMillsService {
       let masterMill = await tx.masterMill.findFirst({
         where: {
           deleted_at: null,
-          OR: orConditions,
+          mill_id: resolvedMillId,
+          OR: orConditions.length > 0 ? orConditions : undefined,
         },
       });
 
@@ -611,21 +616,12 @@ export class MasterMillsService {
 
       if (!mill) return;
 
-      // Build OR conditions to find an existing master-mill record
-      const orConditions: Prisma.MasterMillWhereInput[] = [
-        { mill_id: millId },
-      ];
-      if (frameNo && frameNo.trim()) {
-        orConditions.push({
-          frame_no: { equals: frameNo.trim(), mode: 'insensitive' },
-        });
-      }
-
+      // Find an existing master-mill record for this mill
       const existing = await this.prisma.masterMill.findFirst({
         where: {
           deleted_at: null,
           type: 'Service',
-          OR: orConditions,
+          mill_id: millId,
         },
       });
 

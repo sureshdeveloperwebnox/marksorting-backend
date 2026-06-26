@@ -15,8 +15,8 @@ export declare class NotificationsService {
         created_at: Date;
         status: string;
         type: string;
-        message: string;
         title: string;
+        message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
     sendToUsers(userIds: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
@@ -31,8 +31,8 @@ export declare class NotificationsService {
             created_at: Date;
             status: string;
             type: string;
-            message: string;
             title: string;
+            message: string;
             meta_data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
         total: number;
@@ -44,8 +44,8 @@ export declare class NotificationsService {
         created_at: Date;
         status: string;
         type: string;
-        message: string;
         title: string;
+        message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
     markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;

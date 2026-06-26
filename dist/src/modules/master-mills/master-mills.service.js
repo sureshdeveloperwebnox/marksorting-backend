@@ -413,9 +413,12 @@ let MasterMillsService = class MasterMillsService {
                 });
             }
             const resolvedMillId = mill.id;
-            const orConditions = [
-                { ref_no: { equals: cleanRefNo, mode: 'insensitive' } },
-            ];
+            const orConditions = [];
+            if (cleanRefNo) {
+                orConditions.push({
+                    ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+                });
+            }
             if (cleanFrameNo) {
                 orConditions.push({
                     frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
@@ -424,7 +427,8 @@ let MasterMillsService = class MasterMillsService {
             let masterMill = await tx.masterMill.findFirst({
                 where: {
                     deleted_at: null,
-                    OR: orConditions,
+                    mill_id: resolvedMillId,
+                    OR: orConditions.length > 0 ? orConditions : undefined,
                 },
             });
             if (masterMill) {
@@ -509,19 +513,11 @@ let MasterMillsService = class MasterMillsService {
             });
             if (!mill)
                 return;
-            const orConditions = [
-                { mill_id: millId },
-            ];
-            if (frameNo && frameNo.trim()) {
-                orConditions.push({
-                    frame_no: { equals: frameNo.trim(), mode: 'insensitive' },
-                });
-            }
             const existing = await this.prisma.masterMill.findFirst({
                 where: {
                     deleted_at: null,
                     type: 'Service',
-                    OR: orConditions,
+                    mill_id: millId,
                 },
             });
             if (existing) {
