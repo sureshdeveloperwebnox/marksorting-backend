@@ -621,6 +621,7 @@ export class MasterMillsService {
       const existing = await this.prisma.masterMill.findFirst({
         where: {
           deleted_at: null,
+          type: 'Service',
           OR: orConditions,
         },
       });
@@ -668,7 +669,8 @@ export class MasterMillsService {
 
       // Invalidate master-mills list cache
       await this.redis.delByPrefix(this.LIST_CACHE_KEY);
-    } catch {
+    } catch (error) {
+      console.error('Error in syncFromServiceReport:', error);
       // Fire-and-forget — swallow errors so service report creation is unaffected
     }
   }

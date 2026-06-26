@@ -12,6 +12,7 @@ import {
   ServiceReportPreviewResponse,
   ServiceReportImportStatus,
 } from './interfaces/bulk-upload.interface';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 
 interface MulterFile {
   fieldname: string;
@@ -28,6 +29,7 @@ export class ServiceReportsBulkService {
     private readonly excelParser: ServiceReportsExcelParserService,
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    private readonly masterMillsService: MasterMillsService,
   ) {}
 
   // ─── Template ─────────────────────────────────────────────────────────────────
@@ -162,6 +164,9 @@ export class ServiceReportsBulkService {
    *                     (case-insensitive), skip unresolvable names gracefully
    */
   private async importSingleRow(row: ServiceReportPreviewRow): Promise<void> {
+    // Capture millId outside the transaction so it is accessible afterwards
+    let resolvedMillId: string | null = null;
+
     await this.prisma.$transaction(async (tx) => {
       // ── Resolve ServiceCategory ──────────────────────────────────────────
       const category = await tx.serviceCategory.findFirst({
@@ -191,6 +196,9 @@ export class ServiceReportsBulkService {
       if (!mill) {
         throw new Error(`Mill "${row.mill_name}" not found`);
       }
+
+      // Expose mill id to the outer scope for the post-transaction sync
+      resolvedMillId = mill.id;
 
       // ── Resolve Technicians ──────────────────────────────────────────────
       const rawNames = row.technician_names
@@ -303,5 +311,26 @@ export class ServiceReportsBulkService {
         })),
       });
     });
+
+    // Sync master-mills registry (fire-and-forget) — runs after transaction commits
+    if (resolvedMillId) {
+      void this.masterMillsService.syncFromServiceReport({
+        millId: resolvedMillId,
+        frameNo: row.serial_or_frame_no.trim() || undefined,
+        mcModel: row.machine_model.trim() || undefined,
+        installationDate: (() => {
+          const d = row.machine_installation_date?.trim();
+          if (!d) return null;
+          const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(d);
+          if (ddmmyyyy) {
+            const [, day, month, year] = ddmmyyyy;
+            return new Date(Number(year), Number(month) - 1, Number(day));
+          }
+          const parsed = new Date(d);
+          return isNaN(parsed.getTime()) ? null : parsed;
+        })(),
+        place: row.place.trim() || undefined,
+      });
+    }
   }
 }

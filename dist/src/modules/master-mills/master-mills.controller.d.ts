@@ -12,21 +12,21 @@ export declare class MasterMillsController {
         mill: ({
             customer: {
                 id: string;
-                name: string;
                 email: string | null;
+                name: string;
                 phone: string | null;
             } | null;
         } & {
             id: string;
-            ref_no: string | null;
-            address: string | null;
-            place: string | null;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            email: string | null;
+            place: string | null;
+            status: string;
+            ref_no: string | null;
+            address: string | null;
             phone: string | null;
             customer_id: string | null;
             city: string | null;
@@ -35,12 +35,16 @@ export declare class MasterMillsController {
         }) | null;
     } & {
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        mill_id: string | null;
+        place: string | null;
+        status: string;
         invoice_no: string;
         invoice_date: Date | null;
         ref_no: string | null;
-        mill_id: string | null;
         address: string | null;
-        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -55,21 +59,21 @@ export declare class MasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         type: string;
     })[]>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMasterMillDto): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        mill_id: string | null;
+        place: string | null;
+        status: string;
         invoice_no: string;
         invoice_date: Date | null;
         ref_no: string | null;
-        mill_id: string | null;
         address: string | null;
-        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -84,36 +88,32 @@ export declare class MasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         type: string;
     }>;
     quickRegister(dto: QuickRegisterDto): Promise<({
         mill: ({
             customer: {
                 id: string;
-                address: string | null;
-                status: string;
                 created_at: Date;
+                email: string | null;
                 updated_at: Date;
                 deleted_at: Date | null;
                 name: string;
-                email: string | null;
+                status: string;
+                address: string | null;
                 phone: string | null;
             } | null;
         } & {
             id: string;
-            ref_no: string | null;
-            address: string | null;
-            place: string | null;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            email: string | null;
+            place: string | null;
+            status: string;
+            ref_no: string | null;
+            address: string | null;
             phone: string | null;
             customer_id: string | null;
             city: string | null;
@@ -122,12 +122,16 @@ export declare class MasterMillsController {
         }) | null;
     } & {
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        mill_id: string | null;
+        place: string | null;
+        status: string;
         invoice_no: string;
         invoice_date: Date | null;
         ref_no: string | null;
-        mill_id: string | null;
         address: string | null;
-        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -142,21 +146,21 @@ export declare class MasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         type: string;
     }) | null>;
     update(id: string, dto: UpdateMasterMillDto): Promise<{
         before: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            mill_id: string | null;
+            place: string | null;
+            status: string;
             invoice_no: string;
             invoice_date: Date | null;
             ref_no: string | null;
-            mill_id: string | null;
             address: string | null;
-            place: string | null;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -171,20 +175,20 @@ export declare class MasterMillsController {
             amc_particular: string | null;
             amc_closing_date: Date | null;
             amc_amount: Prisma.Decimal | null;
-            status: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
             type: string;
         };
         after: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            mill_id: string | null;
+            place: string | null;
+            status: string;
             invoice_no: string;
             invoice_date: Date | null;
             ref_no: string | null;
-            mill_id: string | null;
             address: string | null;
-            place: string | null;
             state: string | null;
             phone_no: string | null;
             mc_model: string | null;
@@ -199,21 +203,21 @@ export declare class MasterMillsController {
             amc_particular: string | null;
             amc_closing_date: Date | null;
             amc_amount: Prisma.Decimal | null;
-            status: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
             type: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        mill_id: string | null;
+        place: string | null;
+        status: string;
         invoice_no: string;
         invoice_date: Date | null;
         ref_no: string | null;
-        mill_id: string | null;
         address: string | null;
-        place: string | null;
         state: string | null;
         phone_no: string | null;
         mc_model: string | null;
@@ -228,10 +232,6 @@ export declare class MasterMillsController {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
-        status: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         type: string;
     }>;
 }

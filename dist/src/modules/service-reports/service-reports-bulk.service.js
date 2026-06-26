@@ -15,14 +15,17 @@ const crypto_1 = require("crypto");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const service_reports_excel_parser_service_1 = require("./service-reports-excel-parser.service");
+const master_mills_service_1 = require("../master-mills/master-mills.service");
 let ServiceReportsBulkService = class ServiceReportsBulkService {
     excelParser;
     prisma;
     redis;
-    constructor(excelParser, prisma, redis) {
+    masterMillsService;
+    constructor(excelParser, prisma, redis, masterMillsService) {
         this.excelParser = excelParser;
         this.prisma = prisma;
         this.redis = redis;
+        this.masterMillsService = masterMillsService;
     }
     async generateTemplate() {
         return this.excelParser.generateTemplate();
@@ -102,6 +105,7 @@ let ServiceReportsBulkService = class ServiceReportsBulkService {
         }
     }
     async importSingleRow(row) {
+        let resolvedMillId = null;
         await this.prisma.$transaction(async (tx) => {
             const category = await tx.serviceCategory.findFirst({
                 where: {
@@ -126,6 +130,7 @@ let ServiceReportsBulkService = class ServiceReportsBulkService {
             if (!mill) {
                 throw new Error(`Mill "${row.mill_name}" not found`);
             }
+            resolvedMillId = mill.id;
             const rawNames = row.technician_names
                 .split(',')
                 .map((n) => n.trim())
@@ -215,6 +220,26 @@ let ServiceReportsBulkService = class ServiceReportsBulkService {
                 })),
             });
         });
+        if (resolvedMillId) {
+            void this.masterMillsService.syncFromServiceReport({
+                millId: resolvedMillId,
+                frameNo: row.serial_or_frame_no.trim() || undefined,
+                mcModel: row.machine_model.trim() || undefined,
+                installationDate: (() => {
+                    const d = row.machine_installation_date?.trim();
+                    if (!d)
+                        return null;
+                    const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(d);
+                    if (ddmmyyyy) {
+                        const [, day, month, year] = ddmmyyyy;
+                        return new Date(Number(year), Number(month) - 1, Number(day));
+                    }
+                    const parsed = new Date(d);
+                    return isNaN(parsed.getTime()) ? null : parsed;
+                })(),
+                place: row.place.trim() || undefined,
+            });
+        }
     }
 };
 exports.ServiceReportsBulkService = ServiceReportsBulkService;
@@ -222,6 +247,7 @@ exports.ServiceReportsBulkService = ServiceReportsBulkService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [service_reports_excel_parser_service_1.ServiceReportsExcelParserService,
         prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        master_mills_service_1.MasterMillsService])
 ], ServiceReportsBulkService);
 //# sourceMappingURL=service-reports-bulk.service.js.map

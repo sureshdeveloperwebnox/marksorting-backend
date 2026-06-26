@@ -2,6 +2,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { ServiceReportsExcelParserService } from './service-reports-excel-parser.service';
 import { ServiceReportPreviewResponse, ServiceReportImportStatus } from './interfaces/bulk-upload.interface';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 interface MulterFile {
     fieldname: string;
     originalname: string;
@@ -14,7 +15,8 @@ export declare class ServiceReportsBulkService {
     private readonly excelParser;
     private readonly prisma;
     private readonly redis;
-    constructor(excelParser: ServiceReportsExcelParserService, prisma: PrismaService, redis: RedisService);
+    private readonly masterMillsService;
+    constructor(excelParser: ServiceReportsExcelParserService, prisma: PrismaService, redis: RedisService, masterMillsService: MasterMillsService);
     generateTemplate(): Promise<Buffer>;
     previewUpload(file: MulterFile): Promise<ServiceReportPreviewResponse>;
     confirmImport(importId: string): Promise<void>;

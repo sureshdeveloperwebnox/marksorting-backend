@@ -517,6 +517,7 @@ let MasterMillsService = class MasterMillsService {
             const existing = await this.prisma.masterMill.findFirst({
                 where: {
                     deleted_at: null,
+                    type: 'Service',
                     OR: orConditions,
                 },
             });
@@ -561,7 +562,8 @@ let MasterMillsService = class MasterMillsService {
             }
             await this.redis.delByPrefix(this.LIST_CACHE_KEY);
         }
-        catch {
+        catch (error) {
+            console.error('Error in syncFromServiceReport:', error);
         }
     }
     async invalidateCache(id) {
