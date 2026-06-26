@@ -75,9 +75,54 @@ const expenseSchema = {
         },
         expenseCategory: {
             type: 'object',
+            nullable: true,
             properties: {
                 id: { type: 'string', format: 'uuid' },
                 name: { type: 'string', example: 'Travel' },
+            },
+        },
+        expense_items: {
+            type: 'array',
+            description: 'Per-category expense breakdown. Each item belongs to one expense category.',
+            items: {
+                type: 'object',
+                properties: {
+                    id: { type: 'string', format: 'uuid' },
+                    expense_id: { type: 'string', format: 'uuid' },
+                    expense_category_id: { type: 'string', format: 'uuid' },
+                    amount: { type: 'string', example: '1500', description: 'Amount claimed by the engineer' },
+                    admin_amount: {
+                        type: 'string',
+                        nullable: true,
+                        example: '1200',
+                        description: 'Amount approved by admin (may differ from claimed amount)',
+                    },
+                    remarks: {
+                        type: 'string',
+                        nullable: true,
+                        example: 'Taxi from station to mill',
+                        description: 'Engineer remarks for this category',
+                    },
+                    admin_remarks: {
+                        type: 'string',
+                        nullable: true,
+                        example: 'Approved at ₹1200 — receipt verified',
+                        description: 'Admin remarks / approval note for this category',
+                    },
+                    expense_images: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        example: ['https://s3.example.com/receipts/receipt-001.jpg'],
+                        description: 'Full S3 URLs of uploaded receipt images for this category',
+                    },
+                    expenseCategory: {
+                        type: 'object',
+                        properties: {
+                            id: { type: 'string', format: 'uuid' },
+                            name: { type: 'string', example: 'Travel' },
+                        },
+                    },
+                },
             },
         },
         technicians: {
