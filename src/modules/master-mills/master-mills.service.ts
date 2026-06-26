@@ -360,6 +360,42 @@ export class MasterMillsService {
     const cleanPhone = dto.phone?.trim();
     const cleanEmail = dto.email?.trim();
 
+    const cleanInvoiceNo = dto.invoice_no?.trim();
+    const invoiceDate = dto.invoice_date ? new Date(dto.invoice_date) : null;
+    const installationDate = dto.installation_date ? new Date(dto.installation_date) : null;
+    const warrantyYears = dto.warranty_years !== undefined ? Number(dto.warranty_years) : 1;
+    const warrantyMonths = dto.warranty_months !== undefined ? Number(dto.warranty_months) : 12;
+    const amcStartingDate = dto.amc_starting_date ? new Date(dto.amc_starting_date) : null;
+    let amcClosingDate = dto.amc_closing_date ? new Date(dto.amc_closing_date) : null;
+    const amcPeriod = dto.amc_period !== undefined && dto.amc_period !== null ? Number(dto.amc_period) : null;
+    const amcAmount = dto.amc_amount !== undefined && dto.amc_amount !== null ? Number(dto.amc_amount) : null;
+    const amcParticulars = dto.amc_particulars?.trim();
+
+    // Auto-calculate warranty closing date if installation date is provided
+    let warrantyClosingDate: Date | null = null;
+    if (installationDate) {
+      const closing = new Date(installationDate);
+      closing.setFullYear(closing.getFullYear() + warrantyYears);
+      closing.setMonth(closing.getMonth() + warrantyMonths);
+      warrantyClosingDate = closing;
+    }
+
+    // Auto-calculate AMC closing date if AMC starting date and period are provided
+    if (!amcClosingDate && amcStartingDate && amcPeriod) {
+      const closing = new Date(amcStartingDate);
+      closing.setMonth(closing.getMonth() + amcPeriod);
+      amcClosingDate = closing;
+    }
+
+    // Determine warranty status dynamically
+    let allWarranty = 'Non Warranty';
+    const now = new Date();
+    if (warrantyClosingDate && warrantyClosingDate > now) {
+      allWarranty = 'Under Warranty';
+    } else if (amcClosingDate && amcClosingDate > now) {
+      allWarranty = 'Under AMC';
+    }
+
     // Run lookups, updates, and creation inside a transaction
     const result = await this.prisma.$transaction(async (tx) => {
       // 1. Resolve & Update Customer
@@ -518,6 +554,32 @@ export class MasterMillsService {
         if (dto.type && masterMill.type !== dto.type)
           masterMillUpdates.type = dto.type;
 
+        // Bulk upload extra fields:
+        if (cleanInvoiceNo && masterMill.invoice_no !== cleanInvoiceNo)
+          masterMillUpdates.invoice_no = cleanInvoiceNo;
+        if (invoiceDate && masterMill.invoice_date?.getTime() !== invoiceDate.getTime())
+          masterMillUpdates.invoice_date = invoiceDate;
+        if (installationDate && masterMill.installation_date?.getTime() !== installationDate.getTime())
+          masterMillUpdates.installation_date = installationDate;
+        if (dto.warranty_years !== undefined && masterMill.warranty_years !== warrantyYears)
+          masterMillUpdates.warranty_years = warrantyYears;
+        if (dto.warranty_months !== undefined && masterMill.warranty_months !== warrantyMonths)
+          masterMillUpdates.warranty_months = warrantyMonths;
+        if (warrantyClosingDate && masterMill.warranty_closing_date?.getTime() !== warrantyClosingDate.getTime())
+          masterMillUpdates.warranty_closing_date = warrantyClosingDate;
+        if (amcStartingDate && masterMill.amc_starting_date?.getTime() !== amcStartingDate.getTime())
+          masterMillUpdates.amc_starting_date = amcStartingDate;
+        if (amcClosingDate && masterMill.amc_closing_date?.getTime() !== amcClosingDate.getTime())
+          masterMillUpdates.amc_closing_date = amcClosingDate;
+        if (amcPeriod !== null && masterMill.amc_period !== amcPeriod)
+          masterMillUpdates.amc_period = amcPeriod;
+        if (amcAmount !== null && masterMill.amc_amount?.toString() !== amcAmount?.toString())
+          masterMillUpdates.amc_amount = amcAmount;
+        if (amcParticulars && masterMill.amc_particular !== amcParticulars)
+          masterMillUpdates.amc_particular = amcParticulars;
+        if (allWarranty && masterMill.all_warranty !== allWarranty)
+          masterMillUpdates.all_warranty = allWarranty;
+
         // Ensure the Master Mill is linked to the resolved Mill
         if (masterMill.mill_id !== resolvedMillId)
           masterMillUpdates.mill_id = resolvedMillId;
@@ -531,10 +593,11 @@ export class MasterMillsService {
       } else {
         // Create new Master Mill
         // Generate a fallback invoice number (e.g. INV-QR-<refNo>-<timestamp>)
-        const fallbackInvoiceNo = `INV-QR-${cleanRefNo}-${Date.now()}`;
+        const invoiceNo = cleanInvoiceNo || `INV-QR-${cleanRefNo}-${Date.now()}`;
         masterMill = await tx.masterMill.create({
           data: {
-            invoice_no: fallbackInvoiceNo,
+            invoice_no: invoiceNo,
+            invoice_date: invoiceDate,
             ref_no: cleanRefNo,
             frame_no: cleanFrameNo,
             mc_model: cleanMcModel,
@@ -545,6 +608,16 @@ export class MasterMillsService {
             mill_id: resolvedMillId,
             status: 'ACTIVE',
             type: dto.type || 'Installation',
+            installation_date: installationDate,
+            warranty_years: warrantyYears,
+            warranty_months: warrantyMonths,
+            warranty_closing_date: warrantyClosingDate,
+            amc_starting_date: amcStartingDate,
+            amc_closing_date: amcClosingDate,
+            amc_period: amcPeriod,
+            amc_amount: amcAmount,
+            amc_particular: amcParticulars,
+            all_warranty: allWarranty,
           },
         });
       }

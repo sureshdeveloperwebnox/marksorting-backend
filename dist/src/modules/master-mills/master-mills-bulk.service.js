@@ -24,6 +24,27 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         this.masterMillsService = masterMillsService;
         this.redis = redis;
     }
+    parseExcelDate(value) {
+        if (!value)
+            return undefined;
+        const trimmed = value.trim();
+        if (!trimmed)
+            return undefined;
+        const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+        const match = trimmed.match(ddmmyyyy);
+        if (match) {
+            const [, day, month, year] = match;
+            const d = String(day).padStart(2, '0');
+            const m = String(month).padStart(2, '0');
+            const y = year;
+            return `${y}-${m}-${d}`;
+        }
+        const parsed = new Date(trimmed);
+        if (!isNaN(parsed.getTime())) {
+            return parsed.toISOString().split('T')[0];
+        }
+        return undefined;
+    }
     async generateTemplate() {
         return this.excelParser.generateTemplate();
     }
@@ -90,6 +111,16 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             state: row.state || undefined,
                             phone: row.phone_no || undefined,
                             type: row.type || undefined,
+                            invoice_no: row.invoice_no || undefined,
+                            invoice_date: this.parseExcelDate(row.invoice_date),
+                            installation_date: this.parseExcelDate(row.installation_date),
+                            warranty_years: row.warranty_years ? Number(row.warranty_years) : undefined,
+                            warranty_months: row.warranty_months ? Number(row.warranty_months) : undefined,
+                            amc_starting_date: this.parseExcelDate(row.amc_starting_date),
+                            amc_closing_date: this.parseExcelDate(row.amc_closing_date),
+                            amc_period: row.amc_period ? Number(row.amc_period) : undefined,
+                            amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
+                            amc_particulars: row.amc_particulars || undefined,
                         };
                         await this.masterMillsService.quickRegister(dto);
                         status.createdCount++;

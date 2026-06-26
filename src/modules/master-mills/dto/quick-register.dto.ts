@@ -4,8 +4,13 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  IsDateString,
+  IsInt,
+  IsNumber,
+  Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class QuickRegisterDto {
   @ApiProperty({ example: 'Ravi Kumar', required: false })
@@ -70,4 +75,62 @@ export class QuickRegisterDto {
   @IsString()
   @IsOptional()
   type?: string;
+
+  @ApiProperty({ example: 'INV-001', required: false })
+  @IsString()
+  @IsOptional()
+  invoice_no?: string;
+
+  @ApiProperty({ example: '2024-01-15', required: false })
+  @IsDateString()
+  @IsOptional()
+  invoice_date?: string;
+
+  @ApiProperty({ example: '2024-01-15', required: false })
+  @IsDateString()
+  @IsOptional()
+  installation_date?: string;
+
+  @ApiProperty({ example: 1, required: false })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  warranty_years?: number;
+
+  @ApiProperty({ example: 12, required: false })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  warranty_months?: number;
+
+  @ApiProperty({ example: '2024-02-01', required: false })
+  @IsDateString()
+  @IsOptional()
+  amc_starting_date?: string;
+
+  @ApiProperty({ example: '2025-02-01', required: false })
+  @IsDateString()
+  @IsOptional()
+  amc_closing_date?: string;
+
+  @ApiProperty({ example: 12, required: false })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  amc_period?: number;
+
+  @ApiProperty({ example: 5000, required: false })
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  @Type(() => Number)
+  amc_amount?: number;
+
+  @ApiProperty({ example: 'Annual Maintenance Contract', required: false })
+  @IsString()
+  @IsOptional()
+  amc_particulars?: string;
 }

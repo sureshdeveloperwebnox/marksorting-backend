@@ -15,6 +15,7 @@ export declare class MasterMillsBulkService {
     private readonly masterMillsService;
     private readonly redis;
     constructor(excelParser: ExcelParserService, masterMillsService: MasterMillsService, redis: RedisService);
+    private parseExcelDate;
     generateTemplate(): Promise<Buffer>;
     previewUpload(file: MulterFile): Promise<PreviewResponse>;
     confirmImport(importId: string): Promise<void>;

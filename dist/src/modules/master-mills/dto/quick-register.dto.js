@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.QuickRegisterDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
 class QuickRegisterDto {
     customer_name;
     customer_id;
@@ -25,6 +26,16 @@ class QuickRegisterDto {
     phone;
     email;
     type;
+    invoice_no;
+    invoice_date;
+    installation_date;
+    warranty_years;
+    warranty_months;
+    amc_starting_date;
+    amc_closing_date;
+    amc_period;
+    amc_amount;
+    amc_particulars;
 }
 exports.QuickRegisterDto = QuickRegisterDto;
 __decorate([
@@ -102,4 +113,72 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'INV-001', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "invoice_no", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "invoice_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "installation_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1, required: false }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], QuickRegisterDto.prototype, "warranty_years", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12, required: false }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], QuickRegisterDto.prototype, "warranty_months", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-02-01', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "amc_starting_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2025-02-01', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "amc_closing_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12, required: false }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], QuickRegisterDto.prototype, "amc_period", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 5000, required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Type)(() => Number),
+    __metadata("design:type", Number)
+], QuickRegisterDto.prototype, "amc_amount", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Annual Maintenance Contract', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "amc_particulars", void 0);
 //# sourceMappingURL=quick-register.dto.js.map
