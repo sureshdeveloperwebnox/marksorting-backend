@@ -298,7 +298,7 @@ let MasterMillsService = class MasterMillsService {
             take: 10,
         });
     }
-    async quickRegister(dto) {
+    async quickRegister(dto, options) {
         const customerIdInput = dto.customer_id?.trim();
         const customerNameInput = dto.customer_name?.trim();
         if (!customerIdInput && !customerNameInput) {
@@ -454,13 +454,16 @@ let MasterMillsService = class MasterMillsService {
                     frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
                 });
             }
-            let masterMill = await tx.masterMill.findFirst({
-                where: {
-                    deleted_at: null,
-                    mill_id: resolvedMillId,
-                    OR: orConditions.length > 0 ? orConditions : undefined,
-                },
-            });
+            let masterMill = null;
+            if (!options?.skipDuplicateCheck) {
+                masterMill = await tx.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        mill_id: resolvedMillId,
+                        OR: orConditions.length > 0 ? orConditions : undefined,
+                    },
+                });
+            }
             if (masterMill) {
                 const masterMillUpdates = {};
                 if (cleanRefNo && masterMill.ref_no !== cleanRefNo)

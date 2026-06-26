@@ -340,7 +340,7 @@ export class MasterMillsService {
     });
   }
 
-  async quickRegister(dto: QuickRegisterDto) {
+  async quickRegister(dto: QuickRegisterDto, options?: { skipDuplicateCheck?: boolean }) {
     const customerIdInput = dto.customer_id?.trim();
     const customerNameInput = dto.customer_name?.trim();
 
@@ -526,13 +526,16 @@ export class MasterMillsService {
         });
       }
 
-      let masterMill = await tx.masterMill.findFirst({
-        where: {
-          deleted_at: null,
-          mill_id: resolvedMillId,
-          OR: orConditions.length > 0 ? orConditions : undefined,
-        },
-      });
+      let masterMill = null;
+      if (!options?.skipDuplicateCheck) {
+        masterMill = await tx.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            mill_id: resolvedMillId,
+            OR: orConditions.length > 0 ? orConditions : undefined,
+          },
+        });
+      }
 
       if (masterMill) {
         // Checklist 3: Update master mill fields if provided and empty/different

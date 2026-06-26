@@ -182,7 +182,7 @@ export class MasterMillsBulkService {
               amc_particulars: row.amc_particulars || undefined,
             };
 
-            await this.masterMillsService.quickRegister(dto);
+            await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: true });
             status.createdCount++;
           } catch {
             status.errorCount++;

@@ -122,7 +122,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
                             amc_particulars: row.amc_particulars || undefined,
                         };
-                        await this.masterMillsService.quickRegister(dto);
+                        await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: true });
                         status.createdCount++;
                     }
                     catch {
