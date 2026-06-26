@@ -418,6 +418,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                         amount: String(it.amount || 0),
                         admin_amount: String(it.admin_amount || 0),
                         remarks: it.remarks || null,
+                        admin_remarks: it.admin_remarks || null,
                         expense_images: it.expense_images || [],
                     })),
                 });
@@ -776,6 +777,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                             amount: String(it.amount || 0),
                             admin_amount: String(it.admin_amount || 0),
                             remarks: it.remarks || null,
+                            admin_remarks: it.admin_remarks || null,
                             expense_images: it.expense_images || [],
                         })),
                     });

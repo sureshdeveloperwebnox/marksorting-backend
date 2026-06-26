@@ -18,6 +18,7 @@ class CreateExpenseItemDto {
     amount;
     admin_amount;
     remarks;
+    admin_remarks;
     expense_images;
 }
 exports.CreateExpenseItemDto = CreateExpenseItemDto;
@@ -62,6 +63,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateExpenseItemDto.prototype, "remarks", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Admin remarks for this category',
+        required: false,
+        description: 'Remarks of the admin for this category expense.',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateExpenseItemDto.prototype, "admin_remarks", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: ['receipts/2026/05/receipt-001.jpg'],

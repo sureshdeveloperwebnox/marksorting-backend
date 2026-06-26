@@ -565,6 +565,7 @@ model ExpenseItem {
   amount              Decimal         @default(0)
   admin_amount        Decimal         @default(0)
   remarks             String?
+  admin_remarks       String?
   expense_images      String[]        @default([])
   created_at          DateTime        @default(now())
   updated_at          DateTime        @updatedAt

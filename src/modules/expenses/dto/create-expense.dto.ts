@@ -52,6 +52,15 @@ export class CreateExpenseItemDto {
   remarks?: string;
 
   @ApiProperty({
+    example: 'Admin remarks for this category',
+    required: false,
+    description: 'Remarks of the admin for this category expense.',
+  })
+  @IsString()
+  @IsOptional()
+  admin_remarks?: string;
+
+  @ApiProperty({
     example: ['receipts/2026/05/receipt-001.jpg'],
     type: [String],
     required: false,

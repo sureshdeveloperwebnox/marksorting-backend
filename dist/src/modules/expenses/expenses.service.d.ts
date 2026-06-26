@@ -81,6 +81,7 @@ export declare class ExpensesService {
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            admin_remarks: string | null;
         })[];
     } & {
         id: string;
@@ -154,6 +155,7 @@ export declare class ExpensesService {
                 amount: import("@prisma/client/runtime/client").Decimal;
                 admin_amount: import("@prisma/client/runtime/client").Decimal;
                 expense_images: string[];
+                admin_remarks: string | null;
             })[];
         } & {
             id: string;
@@ -226,6 +228,7 @@ export declare class ExpensesService {
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
+            admin_remarks: string | null;
         })[];
     } & {
         id: string;

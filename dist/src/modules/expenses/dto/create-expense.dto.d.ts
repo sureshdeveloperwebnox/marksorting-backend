@@ -3,6 +3,7 @@ export declare class CreateExpenseItemDto {
     amount: number;
     admin_amount?: number;
     remarks?: string;
+    admin_remarks?: string;
     expense_images?: string[];
 }
 export declare class CreateExpenseDto {
