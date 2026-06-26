@@ -134,7 +134,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(result).toEqual(createdRecord);
     });
 
-    it('updates an existing MasterMill when matching within the same mill', async () => {
+    it('updates an existing MasterMill when matching within the same mill (non-bulk path)', async () => {
       const dto = {
         customer_name: 'Ravi Kumar',
         mill_name: 'Golden Valley Mill',
@@ -164,6 +164,36 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
           }),
         }),
       );
+    });
+
+    it('always creates a new MasterMill during bulk upload (skipDuplicateCheck=true)', async () => {
+      const dto = {
+        customer_name: 'Ravi Kumar',
+        mill_name: 'Golden Valley Mill',
+        ref_no: 'REF-001',
+        frame_no: 'FRM-123',
+        place: 'Chennai',
+        invoice_no: 'INV-BULK-01',
+      };
+
+      const existingRecord = {
+        id: 'mm-789',
+        invoice_no: 'INV-OLD-01',
+        ref_no: 'REF-001',
+        mill_id: 'mill-456',
+      };
+      const newRecord = { id: 'mm-999', invoice_no: 'INV-BULK-01', mill_id: 'mill-456' };
+
+      // findFirst is mocked with an existing record but it should NOT be called during bulk
+      prisma.masterMill.findFirst.mockResolvedValue(existingRecord);
+      prisma.masterMill.create.mockResolvedValue(newRecord);
+      prisma.masterMill.findUnique.mockResolvedValue(newRecord);
+
+      await masterMillsService.quickRegister(dto, { skipDuplicateCheck: true });
+
+      // create should be called, not update
+      expect(prisma.masterMill.create).toHaveBeenCalled();
+      expect(prisma.masterMill.update).not.toHaveBeenCalled();
     });
   });
 
