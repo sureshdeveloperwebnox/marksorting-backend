@@ -13,7 +13,7 @@ exports.CreateMasterMillDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
-const class_validator_2 = require("class-validator");
+const emptyStringToUndefined = (0, class_transformer_1.Transform)(({ value }) => value === '' || value === null ? undefined : value);
 class CreateMasterMillDto {
     invoice_no;
     type;
@@ -49,60 +49,70 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Installation', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "invoice_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'P-0005-17-18', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "ref_no", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'uuid-of-mill', required: false }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "mill_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Old Fatehpura, Udaipur-Jodhpur', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "address", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Udaipur-Jodhpur', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "place", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Rajasthan', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "state", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '+919876543210', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "phone_no", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'RX-40 B FOR ZX-40', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "mc_model", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'FN-123456', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "frame_no", void 0);
 __decorate([
@@ -125,24 +135,28 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "installation_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2025-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "warranty_closing_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Non Warranty', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "all_warranty", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2025-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "amc_starting_date", void 0);
 __decorate([
@@ -157,17 +171,19 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Annual Maintenance Contract', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "amc_particular", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2026-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "amc_closing_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 5000.0, required: false }),
-    (0, class_validator_2.IsNumber)(),
+    (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
     (0, class_transformer_1.Type)(() => Number),
@@ -177,6 +193,7 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 'ACTIVE', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
+    emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "status", void 0);
 //# sourceMappingURL=create-master-mill.dto.js.map

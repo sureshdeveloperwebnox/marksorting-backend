@@ -17,7 +17,20 @@ export declare class MasterMillsService {
         orderBy?: Prisma.MasterMillOrderByWithRelationInput;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateMasterMillDto): Promise<{
+    create(dto: CreateMasterMillDto): Promise<({
+        mill: {
+            id: string;
+            ref_no: string | null;
+            place: string | null;
+            name: string;
+            phone: string | null;
+            customer_id: string | null;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        } | null;
+    } & {
         id: string;
         invoice_no: string;
         invoice_date: Date | null;
@@ -44,7 +57,7 @@ export declare class MasterMillsService {
         updated_at: Date;
         deleted_at: Date | null;
         type: string;
-    }>;
+    }) | null>;
     update(id: string, dto: UpdateMasterMillDto): Promise<{
         before: {
             id: string;

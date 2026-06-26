@@ -99,26 +99,6 @@ export class MasterMillsService {
   }
 
   async create(dto: CreateMasterMillDto) {
-    const cleanFrameNo = dto.frame_no?.trim();
-    const cleanRefNo = dto.ref_no?.trim();
-
-    if (cleanFrameNo || cleanRefNo) {
-      const orConditions: Prisma.MasterMillWhereInput[] = [];
-      if (cleanFrameNo) orConditions.push({ frame_no: cleanFrameNo });
-      if (cleanRefNo) orConditions.push({ ref_no: cleanRefNo });
-
-      const existing = await this.prisma.masterMill.findFirst({
-        where: {
-          deleted_at: null,
-          OR: orConditions,
-        },
-      });
-
-      if (existing) {
-        return existing;
-      }
-    }
-
     const data: any = { ...dto };
 
     // Auto-calculate warranty_closing_date if not supplied
@@ -149,9 +129,32 @@ export class MasterMillsService {
     if (data.amc_closing_date)
       data.amc_closing_date = new Date(data.amc_closing_date);
 
-    const masterMill = await this.prisma.masterMill.create({ data });
+    await this.prisma.masterMill.create({ data });
     await this.invalidateCache();
-    return masterMill;
+
+    // Re-fetch with mill relation so the response shape matches findAll/findById
+    const created = await this.prisma.masterMill.findFirst({
+      where: { invoice_no: data.invoice_no, deleted_at: null },
+      include: {
+        mill: {
+          select: {
+            id: true,
+            name: true,
+            ref_no: true,
+            place: true,
+            phone: true,
+            customer_id: true,
+            customer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    return created;
   }
 
   async update(id: string, dto: UpdateMasterMillDto) {
