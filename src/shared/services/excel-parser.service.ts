@@ -199,6 +199,23 @@ export class ExcelParserService {
         }
       });
 
+      // Count non-empty fields and check if any required field is present
+      let nonEmptyCount = 0;
+      let hasRequiredField = false;
+
+      for (const [key, val] of Object.entries(rawData)) {
+        if (val && val.trim() !== '') {
+          nonEmptyCount++;
+          if (REQUIRED_FIELDS.includes(key as any)) {
+            hasRequiredField = true;
+          }
+        }
+      }
+
+      if (nonEmptyCount === 0 || (nonEmptyCount === 1 && !hasRequiredField)) {
+        return; // skip this empty or stray row
+      }
+
       // Normalize type
       const rawType = (rawData.type ?? '').trim();
       let normalizedType = 'Installation';

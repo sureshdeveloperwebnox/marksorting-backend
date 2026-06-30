@@ -246,6 +246,19 @@ let ServiceReportsExcelParserService = class ServiceReportsExcelParserService {
                     rawData[fieldKey] = this.getCellStringValue(cell);
                 }
             });
+            let nonEmptyCount = 0;
+            let hasRequiredField = false;
+            for (const [key, val] of Object.entries(rawData)) {
+                if (val && val.trim() !== '') {
+                    nonEmptyCount++;
+                    if (REQUIRED_FIELDS.includes(key)) {
+                        hasRequiredField = true;
+                    }
+                }
+            }
+            if (nonEmptyCount === 0 || (nonEmptyCount === 1 && !hasRequiredField)) {
+                return;
+            }
             const previewRow = {
                 mill_name: rawData.mill_name ?? '',
                 place: rawData.place ?? '',

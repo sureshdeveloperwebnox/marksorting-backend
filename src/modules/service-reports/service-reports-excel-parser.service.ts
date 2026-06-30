@@ -253,6 +253,23 @@ export class ServiceReportsExcelParserService {
         }
       });
 
+      // Count non-empty fields and check if any required field is present
+      let nonEmptyCount = 0;
+      let hasRequiredField = false;
+
+      for (const [key, val] of Object.entries(rawData)) {
+        if (val && val.trim() !== '') {
+          nonEmptyCount++;
+          if (REQUIRED_FIELDS.includes(key as any)) {
+            hasRequiredField = true;
+          }
+        }
+      }
+
+      if (nonEmptyCount === 0 || (nonEmptyCount === 1 && !hasRequiredField)) {
+        return; // skip this empty or stray row
+      }
+
       const previewRow: ServiceReportPreviewRow = {
         mill_name: rawData.mill_name ?? '',
         place: rawData.place ?? '',
