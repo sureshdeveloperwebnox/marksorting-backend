@@ -38,7 +38,7 @@ export class ReportsService {
     private settingsService: SettingsService,
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
-  ) {}
+  ) { }
 
   // ─── SERVICES REPORT ───────────────────────────────────────────────────────
 
@@ -160,16 +160,18 @@ export class ReportsService {
       this.prisma.serviceReport.count({ where }),
     ]);
 
-    // Compute status counts for metrics card
-    const [pendingCount, inProgressCount, completedCount] = await Promise.all([
+    // Compute status counts for metrics card without status filter
+    const { status, ...whereWithoutStatus } = where;
+    const [totalCount, pendingCount, inProgressCount, completedCount] = await Promise.all([
+      this.prisma.serviceReport.count({ where: whereWithoutStatus }),
       this.prisma.serviceReport.count({
-        where: { ...where, status: 'PENDING' },
+        where: { ...whereWithoutStatus, status: 'PENDING' },
       }),
       this.prisma.serviceReport.count({
-        where: { ...where, status: 'IN_PROGRESS' },
+        where: { ...whereWithoutStatus, status: 'IN_PROGRESS' },
       }),
       this.prisma.serviceReport.count({
-        where: { ...where, status: 'COMPLETED' },
+        where: { ...whereWithoutStatus, status: 'COMPLETED' },
       }),
     ]);
 
@@ -177,7 +179,7 @@ export class ReportsService {
       reports,
       total,
       metrics: {
-        totalCount: total,
+        totalCount,
         pendingCount,
         inProgressCount,
         completedCount,
@@ -409,16 +411,18 @@ export class ReportsService {
       this.prisma.installationReport.count({ where }),
     ]);
 
-    // Compute status counts for metrics card
-    const [pendingCount, inProgressCount, completedCount] = await Promise.all([
+    // Compute status counts for metrics card without status filter
+    const { status, ...whereWithoutStatus } = where;
+    const [totalCount, pendingCount, inProgressCount, completedCount] = await Promise.all([
+      this.prisma.installationReport.count({ where: whereWithoutStatus }),
       this.prisma.installationReport.count({
-        where: { ...where, status: 'PENDING' },
+        where: { ...whereWithoutStatus, status: 'PENDING' },
       }),
       this.prisma.installationReport.count({
-        where: { ...where, status: 'IN_PROGRESS' },
+        where: { ...whereWithoutStatus, status: 'IN_PROGRESS' },
       }),
       this.prisma.installationReport.count({
-        where: { ...where, status: 'COMPLETED' },
+        where: { ...whereWithoutStatus, status: 'COMPLETED' },
       }),
     ]);
 
@@ -426,7 +430,7 @@ export class ReportsService {
       reports,
       total,
       metrics: {
-        totalCount: total,
+        totalCount,
         pendingCount,
         inProgressCount,
         completedCount,
@@ -671,9 +675,11 @@ export class ReportsService {
       this.prisma.expense.count({ where }),
     ]);
 
-    // Compute status counts & total amount for statistics
+    const { status, ...whereWithoutStatus } = where;
+
+    // Compute status counts & total amount for statistics without status filter
     const expensesAggregated = await this.prisma.expense.findMany({
-      where,
+      where: whereWithoutStatus,
       select: {
         amount: true,
         admin_amount: true,
@@ -705,7 +711,7 @@ export class ReportsService {
       reports,
       total,
       metrics: {
-        totalCount: total,
+        totalCount: expensesAggregated.length,
         totalAmount,
         pendingCount,
         inProgressCount,
@@ -1046,24 +1052,28 @@ export class ReportsService {
       this.prisma.masterMill.count({ where }),
     ]);
 
-    // Compute status counts for metrics card based on the current filtered set
+    // Compute status counts for metrics card based on the current filtered set without status filter
+    const { status, ...whereWithoutStatus } = where;
     const now = new Date();
-    const [underWarrantyCount, underAmcCount, nonWarrantyCount] =
+    const [underWarrantyCount, underAmcCount, nonWarrantyCount, totalCount] =
       await Promise.all([
         this.prisma.masterMill.count({
           where: {
-            ...where,
+            ...whereWithoutStatus,
             all_warranty: 'Under Warranty',
           },
         }),
         this.prisma.masterMill.count({
           where: {
-            ...where,
+            ...whereWithoutStatus,
             all_warranty: 'Under AMC',
           },
         }),
         this.prisma.masterMill.count({
-          where: { ...where, all_warranty: 'Non Warranty' },
+          where: { ...whereWithoutStatus, all_warranty: 'Non Warranty' },
+        }),
+        this.prisma.masterMill.count({
+          where: whereWithoutStatus,
         }),
       ]);
 
@@ -1071,7 +1081,7 @@ export class ReportsService {
       reports,
       total,
       metrics: {
-        totalCount: total,
+        totalCount,
         underWarrantyCount,
         underAmcCount,
         nonWarrantyCount,

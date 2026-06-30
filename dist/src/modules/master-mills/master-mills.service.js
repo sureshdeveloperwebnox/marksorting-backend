@@ -111,6 +111,20 @@ let MasterMillsService = class MasterMillsService {
             amcStart.setMonth(amcStart.getMonth() + data.amc_period);
             data.amc_closing_date = amcStart.toISOString();
         }
+        let allWarranty = 'Non Warranty';
+        const now = new Date();
+        const warrantyClose = data.warranty_closing_date ? new Date(data.warranty_closing_date) : null;
+        const amcClose = data.amc_closing_date ? new Date(data.amc_closing_date) : null;
+        if (warrantyClose && warrantyClose > now) {
+            allWarranty = 'Under Warranty';
+        }
+        else if (amcClose && amcClose > now) {
+            allWarranty = 'Under AMC';
+        }
+        else if (warrantyClose || amcClose) {
+            allWarranty = 'Expired';
+        }
+        data.all_warranty = allWarranty;
         if (data.invoice_date)
             data.invoice_date = new Date(data.invoice_date);
         if (data.installation_date)
@@ -185,6 +199,20 @@ let MasterMillsService = class MasterMillsService {
             amcClose.setMonth(amcClose.getMonth() + amcPeriod);
             data.amc_closing_date = amcClose.toISOString();
         }
+        let allWarranty = 'Non Warranty';
+        const now = new Date();
+        const warrantyClose = data.warranty_closing_date ? new Date(data.warranty_closing_date) : (existing.warranty_closing_date ? new Date(existing.warranty_closing_date) : null);
+        const amcClose = data.amc_closing_date ? new Date(data.amc_closing_date) : (existing.amc_closing_date ? new Date(existing.amc_closing_date) : null);
+        if (warrantyClose && warrantyClose > now) {
+            allWarranty = 'Under Warranty';
+        }
+        else if (amcClose && amcClose > now) {
+            allWarranty = 'Under AMC';
+        }
+        else if (warrantyClose || amcClose) {
+            allWarranty = 'Expired';
+        }
+        data.all_warranty = allWarranty;
         if (data.invoice_date)
             data.invoice_date = new Date(data.invoice_date);
         if (data.installation_date)
