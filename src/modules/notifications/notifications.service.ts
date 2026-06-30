@@ -38,7 +38,7 @@ export class NotificationsService {
 
     await this.notificationsQueue.add(
       'send-push',
-      { userId, title, message, type, metaData },
+      { id: notification.id, userId, title, message, type, metaData },
       { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
     );
 

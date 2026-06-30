@@ -41,7 +41,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             },
         });
         this.gateway.emitToUser(userId, 'notification', notification);
-        await this.notificationsQueue.add('send-push', { userId, title, message, type, metaData }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
+        await this.notificationsQueue.add('send-push', { id: notification.id, userId, title, message, type, metaData }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
         return notification;
     }
     async sendToUsers(userIds, title, message, type, metaData) {

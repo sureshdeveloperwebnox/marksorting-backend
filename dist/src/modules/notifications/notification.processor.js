@@ -66,9 +66,9 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
     }
     async handleSendPush(job) {
         this.initFirebase();
-        const { userId, title, message } = job.data;
+        const { id, userId, title, message, type } = job.data;
         if (this.firebaseMockMode) {
-            this.logger.log(`[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}"`);
+            this.logger.log(`[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${type}, id: ${id})`);
             return;
         }
         const pushTokens = await this.prisma.pushToken.findMany({
@@ -82,10 +82,15 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
             const response = await this.firebaseApp.messaging().sendEachForMulticast({
                 tokens,
                 notification: { title, body: message },
-                data: job.data.metaData
-                    ? Object.fromEntries(Object.entries(job.data.metaData).map(([k, v]) => [k, String(v)]))
-                    : {},
+                data: {
+                    id: String(id || ''),
+                    type: String(type || ''),
+                    ...(job.data.metaData
+                        ? Object.fromEntries(Object.entries(job.data.metaData).map(([k, v]) => [k, String(v)]))
+                        : {}),
+                },
             });
+            this.logger.log(`Successfully sent FCM push to user ${userId} with ${tokens.length} tokens. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
             const failed = response.responses
                 .map((r, i) => (!r.success ? tokens[i] : null))
                 .filter(Boolean);
