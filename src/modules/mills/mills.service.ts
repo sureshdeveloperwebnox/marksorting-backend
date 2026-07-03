@@ -34,13 +34,31 @@ export class MillsService {
         skip,
         take,
         where: { ...where, deleted_at: null },
-        include: { customer: { select: { id: true, name: true } } },
+        include: {
+          customer: { select: { id: true, name: true } },
+          masterMills: {
+            where: { deleted_at: null },
+            select: { invoice_date: true },
+            orderBy: { created_at: 'desc' },
+            take: 1,
+          },
+        },
         orderBy,
       }),
       this.prisma.mill.count({ where: { ...where, deleted_at: null } }),
     ]);
 
-    const result = { mills, total };
+    const mappedMills = mills.map((mill) => {
+      const firstMasterMill = mill.masterMills?.[0];
+      const invoiceDate = firstMasterMill?.invoice_date || null;
+      return {
+        ...mill,
+        invoice_date: invoiceDate,
+        invoicedate: invoiceDate,
+      };
+    });
+
+    const result = { mills: mappedMills, total };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
   }
@@ -52,11 +70,29 @@ export class MillsService {
 
     const mill = await this.prisma.mill.findFirst({
       where: { id, deleted_at: null },
-      include: { customer: { select: { id: true, name: true } } },
+      include: {
+        customer: { select: { id: true, name: true } },
+        masterMills: {
+          where: { deleted_at: null },
+          select: { invoice_date: true },
+          orderBy: { created_at: 'desc' },
+          take: 1,
+        },
+      },
     });
 
-    if (mill) await this.redis.setJson(cacheKey, mill, 3600);
-    return mill;
+    if (mill) {
+      const firstMasterMill = mill.masterMills?.[0];
+      const invoiceDate = firstMasterMill?.invoice_date || null;
+      const mapped = {
+        ...mill,
+        invoice_date: invoiceDate,
+        invoicedate: invoiceDate,
+      };
+      await this.redis.setJson(cacheKey, mapped, 3600);
+      return mapped;
+    }
+    return null;
   }
 
   async create(dto: CreateMillDto) {

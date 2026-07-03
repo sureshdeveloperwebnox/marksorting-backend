@@ -149,7 +149,8 @@ export declare class MasterMillsService {
         amc_amount: Prisma.Decimal | null;
     }>;
     getStats(): Promise<any>;
-    findForPrefill(search?: string, refNo?: string, frameNo?: string): Promise<({
+    findForPrefill(search?: string, refNo?: string, frameNo?: string): Promise<{
+        warranty_start_date: Date | null;
         mill: ({
             customer: {
                 id: string;
@@ -174,7 +175,6 @@ export declare class MasterMillsService {
             phone_2: string | null;
             phone_3: string | null;
         }) | null;
-    } & {
         id: string;
         created_at: Date;
         updated_at: Date;
@@ -194,7 +194,6 @@ export declare class MasterMillsService {
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;
-        warranty_start_date: Date | null;
         warranty_closing_date: Date | null;
         all_warranty: string | null;
         amc_starting_date: Date | null;
@@ -202,7 +201,7 @@ export declare class MasterMillsService {
         amc_particular: string | null;
         amc_closing_date: Date | null;
         amc_amount: Prisma.Decimal | null;
-    })[]>;
+    }[]>;
     quickRegister(dto: QuickRegisterDto, options?: {
         skipDuplicateCheck?: boolean;
     }): Promise<({

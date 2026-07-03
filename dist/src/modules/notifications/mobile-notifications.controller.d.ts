@@ -5,22 +5,22 @@ export declare class MobileNotificationsController {
     constructor(notificationsService: NotificationsService);
     registerPushToken(req: any, dto: RegisterPushTokenDto): Promise<{
         id: string;
-        created_at: Date;
         user_id: string;
+        created_at: Date;
+        updated_at: Date;
         token: string;
         device_type: string;
-        updated_at: Date;
     }>;
     getNotifications(req: any, skip?: string, take?: string): Promise<{
         notifications: {
             id: string;
+            user_id: string | null;
+            created_at: Date;
+            status: string;
+            type: string;
             title: string;
             message: string;
-            type: string;
-            status: string;
             meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-            created_at: Date;
-            user_id: string | null;
         }[];
         total: number;
         unreadCount: number;
@@ -28,12 +28,12 @@ export declare class MobileNotificationsController {
     markAllAsRead(req: any): Promise<import("@prisma/client").Prisma.BatchPayload>;
     markAsRead(req: any, id: string): Promise<{
         id: string;
+        user_id: string | null;
+        created_at: Date;
+        status: string;
+        type: string;
         title: string;
         message: string;
-        type: string;
-        status: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-        created_at: Date;
-        user_id: string | null;
     }>;
 }

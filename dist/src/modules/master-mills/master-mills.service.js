@@ -323,7 +323,7 @@ let MasterMillsService = class MasterMillsService {
                 where.OR = orConditions;
             }
         }
-        return this.prisma.masterMill.findMany({
+        const records = await this.prisma.masterMill.findMany({
             where,
             include: {
                 mill: {
@@ -341,6 +341,10 @@ let MasterMillsService = class MasterMillsService {
             },
             take: 10,
         });
+        return records.map((record) => ({
+            ...record,
+            warranty_start_date: record.warranty_start_date || record.installation_date,
+        }));
     }
     async quickRegister(dto, options) {
         const customerIdInput = dto.customer_id?.trim();

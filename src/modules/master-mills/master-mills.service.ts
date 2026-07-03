@@ -367,7 +367,7 @@ export class MasterMillsService {
       }
     }
 
-    return this.prisma.masterMill.findMany({
+    const records = await this.prisma.masterMill.findMany({
       where,
       include: {
         mill: {
@@ -385,6 +385,11 @@ export class MasterMillsService {
       },
       take: 10,
     });
+
+    return records.map((record) => ({
+      ...record,
+      warranty_start_date: record.warranty_start_date || record.installation_date,
+    }));
   }
 
   async quickRegister(dto: QuickRegisterDto, options?: { skipDuplicateCheck?: boolean }) {
