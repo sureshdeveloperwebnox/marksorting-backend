@@ -43,14 +43,21 @@ export class MobileMasterMillsController {
     type: String,
     description: 'Specific Frame No to query (partial)',
   })
+  @ApiQuery({
+    name: 'context',
+    required: false,
+    type: String,
+    description: 'Context of the report: service_report or installation_report',
+  })
   @ApiResponse({ status: 200, description: 'Matched master mill records' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   findForPrefill(
     @Query('search') search?: string,
     @Query('ref_no') refNo?: string,
     @Query('frame_no') frameNo?: string,
+    @Query('context') context?: 'service_report' | 'installation_report',
   ) {
-    return this.masterMillsService.findForPrefill(search, refNo, frameNo);
+    return this.masterMillsService.findForPrefill(search, refNo, frameNo, context);
   }
 
   @Post('quick-register')

@@ -286,17 +286,19 @@ let MasterMillsService = class MasterMillsService {
         await this.redis.setJson(cacheKey, result, 120);
         return result;
     }
-    async findForPrefill(search, refNo, frameNo) {
+    async findForPrefill(search, refNo, frameNo, context) {
         if (!search && !refNo && !frameNo) {
-            return [];
+            return context ? { serviceBased: [], installationBased: [] } : [];
         }
-        const where = {
+        const cleanSearch = search ? search.trim() : '';
+        const cleanRefNo = refNo ? refNo.trim() : '';
+        const cleanFrameNo = frameNo ? frameNo.trim() : '';
+        const mmWhere = {
             deleted_at: null,
             status: 'ACTIVE',
         };
-        if (search) {
-            const cleanSearch = search.trim();
-            where.OR = [
+        if (cleanSearch) {
+            mmWhere.OR = [
                 { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
                 { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
                 { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
@@ -309,22 +311,22 @@ let MasterMillsService = class MasterMillsService {
         }
         else {
             const orConditions = [];
-            if (refNo) {
+            if (cleanRefNo) {
                 orConditions.push({
-                    ref_no: { contains: refNo.trim(), mode: 'insensitive' },
+                    ref_no: { contains: cleanRefNo, mode: 'insensitive' },
                 });
             }
-            if (frameNo) {
+            if (cleanFrameNo) {
                 orConditions.push({
-                    frame_no: { contains: frameNo.trim(), mode: 'insensitive' },
+                    frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
                 });
             }
             if (orConditions.length > 0) {
-                where.OR = orConditions;
+                mmWhere.OR = orConditions;
             }
         }
-        const records = await this.prisma.masterMill.findMany({
-            where,
+        const masterMills = await this.prisma.masterMill.findMany({
+            where: mmWhere,
             include: {
                 mill: {
                     include: {
@@ -339,12 +341,249 @@ let MasterMillsService = class MasterMillsService {
                     },
                 },
             },
-            take: 10,
+            take: 15,
         });
-        return records.map((record) => ({
-            ...record,
+        const srWhere = {
+            deleted_at: null,
+        };
+        if (cleanSearch) {
+            srWhere.OR = [
+                { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                    },
+                },
+            ];
+        }
+        else {
+            const orConditions = [];
+            if (cleanFrameNo) {
+                orConditions.push({
+                    serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                });
+            }
+            if (orConditions.length > 0) {
+                srWhere.OR = orConditions;
+            }
+        }
+        const serviceReports = await this.prisma.serviceReport.findMany({
+            where: srWhere,
+            include: {
+                mill: {
+                    include: {
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                phone: true,
+                            },
+                        },
+                    },
+                },
+            },
+            take: 15,
+        });
+        const irWhere = {
+            deleted_at: null,
+        };
+        if (cleanSearch) {
+            irWhere.OR = [
+                { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                    },
+                },
+            ];
+        }
+        else {
+            const orConditions = [];
+            if (cleanFrameNo) {
+                orConditions.push({
+                    serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                });
+            }
+            if (orConditions.length > 0) {
+                irWhere.OR = orConditions;
+            }
+        }
+        const installationReports = await this.prisma.installationReport.findMany({
+            where: irWhere,
+            include: {
+                mill: {
+                    include: {
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                phone: true,
+                            },
+                        },
+                    },
+                },
+            },
+            take: 15,
+        });
+        const mapMasterMill = (record) => ({
+            id: record.id,
+            invoice_no: record.invoice_no,
+            invoice_date: record.invoice_date,
+            ref_no: record.ref_no,
+            mill_id: record.mill_id,
+            address: record.address,
+            place: record.place,
+            state: record.state,
+            phone_no: record.phone_no,
+            mc_model: record.mc_model,
+            frame_no: record.frame_no,
+            warranty_years: record.warranty_years,
+            warranty_months: record.warranty_months,
+            installation_date: record.installation_date,
             warranty_start_date: record.warranty_start_date || record.installation_date,
-        }));
+            warranty_closing_date: record.warranty_closing_date,
+            all_warranty: record.all_warranty,
+            amc_starting_date: record.amc_starting_date,
+            amc_period: record.amc_period,
+            amc_particular: record.amc_particular,
+            amc_closing_date: record.amc_closing_date,
+            amc_amount: record.amc_amount,
+            status: record.status,
+            type: record.type,
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const mapServiceReport = (record) => ({
+            id: `sr-${record.id}`,
+            invoice_no: '',
+            invoice_date: null,
+            ref_no: record.mill?.ref_no || null,
+            mill_id: record.mill_id,
+            address: record.mill?.address || null,
+            place: record.place,
+            state: record.mill?.state || null,
+            phone_no: record.mill_whatsapp_number,
+            mc_model: record.machine_model,
+            frame_no: record.serial_or_frame_no,
+            warranty_years: 0,
+            warranty_months: 0,
+            installation_date: record.machine_installation_date || record.visit_date,
+            warranty_start_date: record.machine_installation_date || record.visit_date,
+            warranty_closing_date: null,
+            all_warranty: 'Non Warranty',
+            amc_starting_date: null,
+            amc_period: null,
+            amc_particular: null,
+            amc_closing_date: null,
+            amc_amount: 0,
+            status: 'ACTIVE',
+            type: 'Service',
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const mapInstallationReport = (record) => ({
+            id: `ir-${record.id}`,
+            invoice_no: record.invoice_number || '',
+            invoice_date: record.invoice_date,
+            ref_no: record.mill?.ref_no || null,
+            mill_id: record.mill_id,
+            address: record.mill?.address || null,
+            place: record.place,
+            state: record.mill?.state || null,
+            phone_no: record.mill_whatsapp_number,
+            mc_model: record.machine_model,
+            frame_no: record.serial_or_frame_no,
+            warranty_years: null,
+            warranty_months: null,
+            installation_date: record.visit_date,
+            warranty_start_date: record.warranty_start_date,
+            warranty_closing_date: record.warranty_end_date,
+            all_warranty: record.warranty_end_date && new Date(record.warranty_end_date) > new Date() ? 'Under Warranty' : 'Non Warranty',
+            amc_starting_date: null,
+            amc_period: null,
+            amc_particular: null,
+            amc_closing_date: null,
+            amc_amount: 0,
+            status: 'ACTIVE',
+            type: 'Installation',
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const buildDeduplicatedList = (mmList, srList, irList) => {
+            const result = [];
+            const seen = new Set();
+            const addToList = (items) => {
+                for (const item of items) {
+                    if (!item.frame_no) {
+                        result.push(item);
+                        continue;
+                    }
+                    const key = item.frame_no.trim().toLowerCase();
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        result.push(item);
+                    }
+                }
+            };
+            addToList(mmList);
+            addToList(srList);
+            addToList(irList);
+            return result;
+        };
+        const mappedMM = masterMills.map(mapMasterMill);
+        const mappedSR = serviceReports.map(mapServiceReport);
+        const mappedIR = installationReports.map(mapInstallationReport);
+        if (context) {
+            const serviceMM = mappedMM.filter((m) => m.type === 'Service');
+            const installationMM = mappedMM.filter((m) => m.type === 'Installation');
+            return {
+                serviceBased: buildDeduplicatedList(serviceMM, mappedSR, []),
+                installationBased: buildDeduplicatedList(installationMM, [], mappedIR),
+            };
+        }
+        return buildDeduplicatedList(mappedMM, mappedSR, mappedIR).slice(0, 10);
     }
     async quickRegister(dto, options) {
         const customerIdInput = dto.customer_id?.trim();

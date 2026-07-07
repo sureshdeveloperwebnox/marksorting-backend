@@ -30,6 +30,13 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       create: jest.fn(),
       update: jest.fn(),
       findUnique: jest.fn(),
+      findMany: jest.fn(),
+    },
+    serviceReport: {
+      findMany: jest.fn(),
+    },
+    installationReport: {
+      findMany: jest.fn(),
     },
   };
 
@@ -196,6 +203,123 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       // create should be called, not update
       expect(prisma.masterMill.create).toHaveBeenCalled();
       expect(prisma.masterMill.update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('findForPrefill', () => {
+    it('returns empty array or empty grouped object if no query params provided', async () => {
+      const resultFlat = await masterMillsService.findForPrefill();
+      expect(resultFlat).toEqual([]);
+
+      const resultGrouped = await masterMillsService.findForPrefill(undefined, undefined, undefined, 'service_report');
+      expect(resultGrouped).toEqual({ serviceBased: [], installationBased: [] });
+    });
+
+    it('returns flat de-duplicated mapped list when context is not specified', async () => {
+      const mockMasterMills = [
+        {
+          id: 'mm-1',
+          frame_no: 'FRM-123',
+          type: 'Installation',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+      ];
+      const mockServiceReports = [
+        {
+          id: '1', // Maps to sr-1
+          serial_or_frame_no: 'FRM-123', // duplicate
+          mill_id: 'mill-1',
+          place: 'Chennai',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+        {
+          id: '2', // Maps to sr-2
+          serial_or_frame_no: 'FRM-456', // unique service based
+          mill_id: 'mill-2',
+          place: 'Salem',
+          mill: { id: 'mill-2', name: 'Mill 2', customer: { id: 'c-2', name: 'Cust 2' } },
+        },
+      ];
+      const mockInstallationReports = [
+        {
+          id: '1', // Maps to ir-1
+          serial_or_frame_no: 'FRM-789', // unique installation based
+          mill_id: 'mill-3',
+          place: 'Madurai',
+          mill: { id: 'mill-3', name: 'Mill 3', customer: { id: 'c-3', name: 'Cust 3' } },
+        },
+      ];
+
+      prisma.masterMill.findMany.mockResolvedValue(mockMasterMills);
+      prisma.serviceReport.findMany.mockResolvedValue(mockServiceReports);
+      prisma.installationReport.findMany.mockResolvedValue(mockInstallationReports);
+
+      const result = (await masterMillsService.findForPrefill('FRM')) as any[];
+
+      // Check flat, de-duplicated output (FRM-123 from MasterMill, FRM-456, FRM-789)
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toEqual('mm-1');
+      expect(result[1].id).toEqual('sr-2');
+      expect(result[2].id).toEqual('ir-1');
+    });
+
+    it('returns grouped results when context is provided', async () => {
+      const mockMasterMills = [
+        {
+          id: 'mm-1',
+          frame_no: 'FRM-123',
+          type: 'Installation',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+        {
+          id: 'mm-2',
+          frame_no: 'FRM-999',
+          type: 'Service',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+      ];
+      const mockServiceReports = [
+        {
+          id: '1', // Maps to sr-1
+          serial_or_frame_no: 'FRM-456',
+          mill_id: 'mill-1',
+          place: 'Chennai',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+      ];
+      const mockInstallationReports = [
+        {
+          id: '1', // Maps to ir-1
+          serial_or_frame_no: 'FRM-789',
+          mill_id: 'mill-3',
+          place: 'Madurai',
+          mill: { id: 'mill-3', name: 'Mill 3', customer: { id: 'c-3', name: 'Cust 3' } },
+        },
+      ];
+
+      prisma.masterMill.findMany.mockResolvedValue(mockMasterMills);
+      prisma.serviceReport.findMany.mockResolvedValue(mockServiceReports);
+      prisma.installationReport.findMany.mockResolvedValue(mockInstallationReports);
+
+      const result = (await masterMillsService.findForPrefill(
+        'FRM',
+        undefined,
+        undefined,
+        'service_report',
+      )) as { serviceBased: any[]; installationBased: any[] };
+
+      expect(result).toHaveProperty('serviceBased');
+      expect(result).toHaveProperty('installationBased');
+
+      // serviceBased contains mm-2 (type: Service) and sr-1
+      expect(result.serviceBased).toHaveLength(2);
+      expect(result.serviceBased[0].id).toEqual('mm-2');
+      expect(result.serviceBased[1].id).toEqual('sr-1');
+
+      // installationBased contains mm-1 (type: Installation) and ir-1
+      expect(result.installationBased).toHaveLength(2);
+      expect(result.installationBased[0].id).toEqual('mm-1');
+      expect(result.installationBased[1].id).toEqual('ir-1');
     });
   });
 

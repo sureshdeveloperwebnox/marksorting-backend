@@ -23,8 +23,8 @@ let MobileMasterMillsController = class MobileMasterMillsController {
     constructor(masterMillsService) {
         this.masterMillsService = masterMillsService;
     }
-    findForPrefill(search, refNo, frameNo) {
-        return this.masterMillsService.findForPrefill(search, refNo, frameNo);
+    findForPrefill(search, refNo, frameNo, context) {
+        return this.masterMillsService.findForPrefill(search, refNo, frameNo, context);
     }
     quickRegister(dto) {
         return this.masterMillsService.quickRegister(dto);
@@ -55,13 +55,20 @@ __decorate([
         type: String,
         description: 'Specific Frame No to query (partial)',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'context',
+        required: false,
+        type: String,
+        description: 'Context of the report: service_report or installation_report',
+    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Matched master mill records' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
     __param(0, (0, common_1.Query)('search')),
     __param(1, (0, common_1.Query)('ref_no')),
     __param(2, (0, common_1.Query)('frame_no')),
+    __param(3, (0, common_1.Query)('context')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileMasterMillsController.prototype, "findForPrefill", null);
 __decorate([
