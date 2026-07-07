@@ -51,13 +51,24 @@ export class MobileMasterMillsController {
   })
   @ApiResponse({ status: 200, description: 'Matched master mill records' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
-  findForPrefill(
+  async findForPrefill(
     @Query('search') search?: string,
     @Query('ref_no') refNo?: string,
     @Query('frame_no') frameNo?: string,
     @Query('context') context?: 'service_report' | 'installation_report',
   ) {
-    return this.masterMillsService.findForPrefill(search, refNo, frameNo, context);
+    const result = await this.masterMillsService.findForPrefill(
+      search,
+      refNo,
+      frameNo,
+      context,
+    );
+    if (context && typeof result === 'object' && !Array.isArray(result)) {
+      return context === 'service_report'
+        ? result.serviceBased
+        : result.installationBased;
+    }
+    return result;
   }
 
   @Post('quick-register')
