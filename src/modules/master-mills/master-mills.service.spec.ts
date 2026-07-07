@@ -263,14 +263,8 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(result[2].id).toEqual('ir-1');
     });
 
-    it('returns grouped results when context is provided', async () => {
+    it('returns only service-based results when service_report context is provided', async () => {
       const mockMasterMills = [
-        {
-          id: 'mm-1',
-          frame_no: 'FRM-123',
-          type: 'Installation',
-          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
-        },
         {
           id: 'mm-2',
           frame_no: 'FRM-999',
@@ -287,19 +281,10 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
           mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
         },
       ];
-      const mockInstallationReports = [
-        {
-          id: '1', // Maps to ir-1
-          serial_or_frame_no: 'FRM-789',
-          mill_id: 'mill-3',
-          place: 'Madurai',
-          mill: { id: 'mill-3', name: 'Mill 3', customer: { id: 'c-3', name: 'Cust 3' } },
-        },
-      ];
 
       prisma.masterMill.findMany.mockResolvedValue(mockMasterMills);
       prisma.serviceReport.findMany.mockResolvedValue(mockServiceReports);
-      prisma.installationReport.findMany.mockResolvedValue(mockInstallationReports);
+      prisma.installationReport.findMany.mockResolvedValue([]);
 
       const result = (await masterMillsService.findForPrefill(
         'FRM',
@@ -315,6 +300,46 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(result.serviceBased).toHaveLength(2);
       expect(result.serviceBased[0].id).toEqual('mm-2');
       expect(result.serviceBased[1].id).toEqual('sr-1');
+
+      // installationBased is strictly empty
+      expect(result.installationBased).toHaveLength(0);
+    });
+
+    it('returns only installation-based results when installation_report context is provided', async () => {
+      const mockMasterMills = [
+        {
+          id: 'mm-1',
+          frame_no: 'FRM-123',
+          type: 'Installation',
+          mill: { id: 'mill-1', name: 'Mill 1', customer: { id: 'c-1', name: 'Cust 1' } },
+        },
+      ];
+      const mockInstallationReports = [
+        {
+          id: '1', // Maps to ir-1
+          serial_or_frame_no: 'FRM-789',
+          mill_id: 'mill-3',
+          place: 'Madurai',
+          mill: { id: 'mill-3', name: 'Mill 3', customer: { id: 'c-3', name: 'Cust 3' } },
+        },
+      ];
+
+      prisma.masterMill.findMany.mockResolvedValue(mockMasterMills);
+      prisma.serviceReport.findMany.mockResolvedValue([]);
+      prisma.installationReport.findMany.mockResolvedValue(mockInstallationReports);
+
+      const result = (await masterMillsService.findForPrefill(
+        'FRM',
+        undefined,
+        undefined,
+        'installation_report',
+      )) as { serviceBased: any[]; installationBased: any[] };
+
+      expect(result).toHaveProperty('serviceBased');
+      expect(result).toHaveProperty('installationBased');
+
+      // serviceBased is strictly empty
+      expect(result.serviceBased).toHaveLength(0);
 
       // installationBased contains mm-1 (type: Installation) and ir-1
       expect(result.installationBased).toHaveLength(2);

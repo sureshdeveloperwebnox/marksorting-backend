@@ -343,148 +343,164 @@ export class MasterMillsService {
     const cleanFrameNo = frameNo ? frameNo.trim() : '';
 
     // 1. Fetch from MasterMill
-    const mmWhere: Prisma.MasterMillWhereInput = {
-      deleted_at: null,
-      status: 'ACTIVE',
-    };
-    if (cleanSearch) {
-      mmWhere.OR = [
-        { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
-        { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-        { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-        {
-          mill: {
-            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
-          },
-        },
-      ];
-    } else {
-      const orConditions: Prisma.MasterMillWhereInput[] = [];
-      if (cleanRefNo) {
-        orConditions.push({
-          ref_no: { contains: cleanRefNo, mode: 'insensitive' },
-        });
+    let masterMills: any[] = [];
+    if (!context || context === 'service_report' || context === 'installation_report') {
+      const mmWhere: Prisma.MasterMillWhereInput = {
+        deleted_at: null,
+        status: 'ACTIVE',
+      };
+      
+      if (context === 'service_report') {
+        mmWhere.type = 'Service';
+      } else if (context === 'installation_report') {
+        mmWhere.type = 'Installation';
       }
-      if (cleanFrameNo) {
-        orConditions.push({
-          frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-        });
-      }
-      if (orConditions.length > 0) {
-        mmWhere.OR = orConditions;
-      }
-    }
 
-    const masterMills = await this.prisma.masterMill.findMany({
-      where: mmWhere,
-      include: {
-        mill: {
-          include: {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
+      if (cleanSearch) {
+        mmWhere.OR = [
+          { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+          { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+          { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+          {
+            mill: {
+              customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+            },
+          },
+        ];
+      } else {
+        const orConditions: Prisma.MasterMillWhereInput[] = [];
+        if (cleanRefNo) {
+          orConditions.push({
+            ref_no: { contains: cleanRefNo, mode: 'insensitive' },
+          });
+        }
+        if (cleanFrameNo) {
+          orConditions.push({
+            frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+          });
+        }
+        if (orConditions.length > 0) {
+          mmWhere.OR = orConditions;
+        }
+      }
+
+      masterMills = await this.prisma.masterMill.findMany({
+        where: mmWhere,
+        include: {
+          mill: {
+            include: {
+              customer: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
               },
             },
           },
         },
-      },
-      take: 15,
-    });
+        take: 15,
+      });
+    }
 
     // 2. Fetch from ServiceReport
-    const srWhere: Prisma.ServiceReportWhereInput = {
-      deleted_at: null,
-    };
-    if (cleanSearch) {
-      srWhere.OR = [
-        { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-        { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-        { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-        {
-          mill: {
-            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+    let serviceReports: any[] = [];
+    if (!context || context === 'service_report') {
+      const srWhere: Prisma.ServiceReportWhereInput = {
+        deleted_at: null,
+      };
+      if (cleanSearch) {
+        srWhere.OR = [
+          { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+          { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+          { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+          {
+            mill: {
+              customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+            },
           },
-        },
-      ];
-    } else {
-      const orConditions: Prisma.ServiceReportWhereInput[] = [];
-      if (cleanFrameNo) {
-        orConditions.push({
-          serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-        });
+        ];
+      } else {
+        const orConditions: Prisma.ServiceReportWhereInput[] = [];
+        if (cleanFrameNo) {
+          orConditions.push({
+            serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+          });
+        }
+        if (orConditions.length > 0) {
+          srWhere.OR = orConditions;
+        }
       }
-      if (orConditions.length > 0) {
-        srWhere.OR = orConditions;
-      }
-    }
 
-    const serviceReports = await this.prisma.serviceReport.findMany({
-      where: srWhere,
-      include: {
-        mill: {
-          include: {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
+      serviceReports = await this.prisma.serviceReport.findMany({
+        where: srWhere,
+        include: {
+          mill: {
+            include: {
+              customer: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
               },
             },
           },
         },
-      },
-      take: 15,
-    });
+        take: 15,
+      });
+    }
 
     // 3. Fetch from InstallationReport
-    const irWhere: Prisma.InstallationReportWhereInput = {
-      deleted_at: null,
-    };
-    if (cleanSearch) {
-      irWhere.OR = [
-        { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-        { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-        { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-        {
-          mill: {
-            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+    let installationReports: any[] = [];
+    if (!context || context === 'installation_report') {
+      const irWhere: Prisma.InstallationReportWhereInput = {
+        deleted_at: null,
+      };
+      if (cleanSearch) {
+        irWhere.OR = [
+          { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+          { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+          { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+          {
+            mill: {
+              customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+            },
           },
-        },
-      ];
-    } else {
-      const orConditions: Prisma.InstallationReportWhereInput[] = [];
-      if (cleanFrameNo) {
-        orConditions.push({
-          serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-        });
+        ];
+      } else {
+        const orConditions: Prisma.InstallationReportWhereInput[] = [];
+        if (cleanFrameNo) {
+          orConditions.push({
+            serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+          });
+        }
+        if (orConditions.length > 0) {
+          irWhere.OR = orConditions;
+        }
       }
-      if (orConditions.length > 0) {
-        irWhere.OR = orConditions;
-      }
-    }
 
-    const installationReports = await this.prisma.installationReport.findMany({
-      where: irWhere,
-      include: {
-        mill: {
-          include: {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true,
+      installationReports = await this.prisma.installationReport.findMany({
+        where: irWhere,
+        include: {
+          mill: {
+            include: {
+              customer: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                },
               },
             },
           },
         },
-      },
-      take: 15,
-    });
+        take: 15,
+      });
+    }
 
     // Mapping Helpers
     const mapMasterMill = (record: any) => ({
@@ -644,14 +660,17 @@ export class MasterMillsService {
     const mappedIR = installationReports.map(mapInstallationReport);
 
     if (context) {
-      // Split into service and installation records
-      const serviceMM = mappedMM.filter((m) => m.type === 'Service');
-      const installationMM = mappedMM.filter((m) => m.type === 'Installation');
-
-      return {
-        serviceBased: buildDeduplicatedList(serviceMM, mappedSR, []),
-        installationBased: buildDeduplicatedList(installationMM, [], mappedIR),
-      };
+      if (context === 'service_report') {
+        return {
+          serviceBased: buildDeduplicatedList(mappedMM, mappedSR, []),
+          installationBased: [],
+        };
+      } else {
+        return {
+          serviceBased: [],
+          installationBased: buildDeduplicatedList(mappedMM, [], mappedIR),
+        };
+      }
     }
 
     // Default backward-compatible flat list
