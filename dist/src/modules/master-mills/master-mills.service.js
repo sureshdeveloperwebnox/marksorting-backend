@@ -293,144 +293,159 @@ let MasterMillsService = class MasterMillsService {
         const cleanSearch = search ? search.trim() : '';
         const cleanRefNo = refNo ? refNo.trim() : '';
         const cleanFrameNo = frameNo ? frameNo.trim() : '';
-        const mmWhere = {
-            deleted_at: null,
-            status: 'ACTIVE',
-        };
-        if (cleanSearch) {
-            mmWhere.OR = [
-                { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
-                { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                {
-                    mill: {
-                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+        let masterMills = [];
+        if (!context || context === 'service_report' || context === 'installation_report') {
+            const mmWhere = {
+                deleted_at: null,
+                status: 'ACTIVE',
+            };
+            if (context === 'service_report') {
+                mmWhere.type = 'Service';
+            }
+            else if (context === 'installation_report') {
+                mmWhere.type = 'Installation';
+            }
+            if (cleanSearch) {
+                mmWhere.OR = [
+                    { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
                     },
-                },
-            ];
-        }
-        else {
-            const orConditions = [];
-            if (cleanRefNo) {
-                orConditions.push({
-                    ref_no: { contains: cleanRefNo, mode: 'insensitive' },
-                });
+                ];
             }
-            if (cleanFrameNo) {
-                orConditions.push({
-                    frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-                });
+            else {
+                const orConditions = [];
+                if (cleanRefNo) {
+                    orConditions.push({
+                        ref_no: { contains: cleanRefNo, mode: 'insensitive' },
+                    });
+                }
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    mmWhere.OR = orConditions;
+                }
             }
-            if (orConditions.length > 0) {
-                mmWhere.OR = orConditions;
-            }
-        }
-        const masterMills = await this.prisma.masterMill.findMany({
-            where: mmWhere,
-            include: {
-                mill: {
-                    include: {
-                        customer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                phone: true,
+            masterMills = await this.prisma.masterMill.findMany({
+                where: mmWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            take: 15,
-        });
-        const srWhere = {
-            deleted_at: null,
-        };
-        if (cleanSearch) {
-            srWhere.OR = [
-                { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                {
-                    mill: {
-                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                take: 15,
+            });
+        }
+        let serviceReports = [];
+        if (!context || context === 'service_report') {
+            const srWhere = {
+                deleted_at: null,
+            };
+            if (cleanSearch) {
+                srWhere.OR = [
+                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
                     },
-                },
-            ];
-        }
-        else {
-            const orConditions = [];
-            if (cleanFrameNo) {
-                orConditions.push({
-                    serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-                });
+                ];
             }
-            if (orConditions.length > 0) {
-                srWhere.OR = orConditions;
+            else {
+                const orConditions = [];
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    srWhere.OR = orConditions;
+                }
             }
-        }
-        const serviceReports = await this.prisma.serviceReport.findMany({
-            where: srWhere,
-            include: {
-                mill: {
-                    include: {
-                        customer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                phone: true,
+            serviceReports = await this.prisma.serviceReport.findMany({
+                where: srWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            take: 15,
-        });
-        const irWhere = {
-            deleted_at: null,
-        };
-        if (cleanSearch) {
-            irWhere.OR = [
-                { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-                { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                {
-                    mill: {
-                        customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                take: 15,
+            });
+        }
+        let installationReports = [];
+        if (!context || context === 'installation_report') {
+            const irWhere = {
+                deleted_at: null,
+            };
+            if (cleanSearch) {
+                irWhere.OR = [
+                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
                     },
-                },
-            ];
-        }
-        else {
-            const orConditions = [];
-            if (cleanFrameNo) {
-                orConditions.push({
-                    serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
-                });
+                ];
             }
-            if (orConditions.length > 0) {
-                irWhere.OR = orConditions;
+            else {
+                const orConditions = [];
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    irWhere.OR = orConditions;
+                }
             }
-        }
-        const installationReports = await this.prisma.installationReport.findMany({
-            where: irWhere,
-            include: {
-                mill: {
-                    include: {
-                        customer: {
-                            select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                phone: true,
+            installationReports = await this.prisma.installationReport.findMany({
+                where: irWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-            take: 15,
-        });
+                take: 15,
+            });
+        }
         const mapMasterMill = (record) => ({
             id: record.id,
             invoice_no: record.invoice_no,
@@ -576,12 +591,18 @@ let MasterMillsService = class MasterMillsService {
         const mappedSR = serviceReports.map(mapServiceReport);
         const mappedIR = installationReports.map(mapInstallationReport);
         if (context) {
-            const serviceMM = mappedMM.filter((m) => m.type === 'Service');
-            const installationMM = mappedMM.filter((m) => m.type === 'Installation');
-            return {
-                serviceBased: buildDeduplicatedList(serviceMM, mappedSR, []),
-                installationBased: buildDeduplicatedList(installationMM, [], mappedIR),
-            };
+            if (context === 'service_report') {
+                return {
+                    serviceBased: buildDeduplicatedList(mappedMM, mappedSR, []),
+                    installationBased: [],
+                };
+            }
+            else {
+                return {
+                    serviceBased: [],
+                    installationBased: buildDeduplicatedList(mappedMM, [], mappedIR),
+                };
+            }
         }
         return buildDeduplicatedList(mappedMM, mappedSR, mappedIR).slice(0, 10);
     }

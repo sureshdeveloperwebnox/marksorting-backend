@@ -1166,7 +1166,7 @@ let DashboardService = class DashboardService {
             expenseRatio,
         };
         try {
-            await this.redis.setJson(this.CACHE_KEY, result, 15);
+            await this.redis.setJson(cacheKey, result, 15);
         }
         catch (e) {
             console.warn('Redis Cache Write Failed:', e.message);

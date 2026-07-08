@@ -23,8 +23,14 @@ let MobileMasterMillsController = class MobileMasterMillsController {
     constructor(masterMillsService) {
         this.masterMillsService = masterMillsService;
     }
-    findForPrefill(search, refNo, frameNo, context) {
-        return this.masterMillsService.findForPrefill(search, refNo, frameNo, context);
+    async findForPrefill(search, refNo, frameNo, context) {
+        const result = await this.masterMillsService.findForPrefill(search, refNo, frameNo, context);
+        if (context && typeof result === 'object' && !Array.isArray(result)) {
+            return context === 'service_report'
+                ? result.serviceBased
+                : result.installationBased;
+        }
+        return result;
     }
     quickRegister(dto) {
         return this.masterMillsService.quickRegister(dto);
@@ -69,7 +75,7 @@ __decorate([
     __param(3, (0, common_1.Query)('context')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MobileMasterMillsController.prototype, "findForPrefill", null);
 __decorate([
     (0, common_1.Post)('quick-register'),
