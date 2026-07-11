@@ -24,6 +24,7 @@ export class ReportNotificationsEventListener {
     millName: string;
     millWhatsappNumber?: string;
     millEmail?: string;
+    authorizedPersonPhone?: string;
   }) {
     try {
       const {
@@ -33,6 +34,7 @@ export class ReportNotificationsEventListener {
         millName,
         millWhatsappNumber,
         millEmail,
+        authorizedPersonPhone,
       } = payload;
 
       this.logger.log(
@@ -42,13 +44,15 @@ export class ReportNotificationsEventListener {
       // If contact details not provided in payload, fetch from database
       let whatsappNumber = millWhatsappNumber;
       let email = millEmail;
+      let authPersonPhone = authorizedPersonPhone;
 
-      if (!whatsappNumber || !email) {
+      if (!whatsappNumber || !email || !authPersonPhone) {
         const report = await this.prisma.serviceReport.findUnique({
           where: { id: reportId },
           select: {
             mill_whatsapp_number: true,
             mill_email: true,
+            authorized_person_phone: true,
           },
         });
 
@@ -56,10 +60,12 @@ export class ReportNotificationsEventListener {
           whatsappNumber =
             whatsappNumber || report.mill_whatsapp_number || undefined;
           email = email || report.mill_email || undefined;
+          authPersonPhone =
+            authPersonPhone || report.authorized_person_phone || undefined;
         }
       }
 
-      if (!whatsappNumber && !email) {
+      if (!whatsappNumber && !email && !authPersonPhone) {
         this.logger.warn(
           `No contact information available for Service Report ${reportNumber}. Skipping PDF delivery.`,
         );
@@ -72,6 +78,7 @@ export class ReportNotificationsEventListener {
         millName,
         email,
         whatsappNumber || '',
+        authPersonPhone || '',
       );
 
       if (result.whatsappSent || result.emailSent) {
@@ -106,6 +113,7 @@ export class ReportNotificationsEventListener {
     millName: string;
     millWhatsappNumber?: string;
     millEmail?: string;
+    authorizedPersonPhone?: string;
   }) {
     try {
       const {
@@ -115,6 +123,7 @@ export class ReportNotificationsEventListener {
         millName,
         millWhatsappNumber,
         millEmail,
+        authorizedPersonPhone,
       } = payload;
 
       this.logger.log(
@@ -124,13 +133,15 @@ export class ReportNotificationsEventListener {
       // If contact details not provided in payload, fetch from database
       let whatsappNumber = millWhatsappNumber;
       let email = millEmail;
+      let authPersonPhone = authorizedPersonPhone;
 
-      if (!whatsappNumber || !email) {
+      if (!whatsappNumber || !email || !authPersonPhone) {
         const report = await this.prisma.installationReport.findUnique({
           where: { id: reportId },
           select: {
             mill_whatsapp_number: true,
             mill_email: true,
+            authorized_person_phone: true,
           },
         });
 
@@ -138,10 +149,12 @@ export class ReportNotificationsEventListener {
           whatsappNumber =
             whatsappNumber || report.mill_whatsapp_number || undefined;
           email = email || report.mill_email || undefined;
+          authPersonPhone =
+            authPersonPhone || report.authorized_person_phone || undefined;
         }
       }
 
-      if (!whatsappNumber && !email) {
+      if (!whatsappNumber && !email && !authPersonPhone) {
         this.logger.warn(
           `No contact information available for Installation Report ${reportNumber}. Skipping PDF delivery.`,
         );
@@ -155,6 +168,7 @@ export class ReportNotificationsEventListener {
           millName,
           email,
           whatsappNumber || '',
+          authPersonPhone || '',
         );
 
       if (result.whatsappSent || result.emailSent) {

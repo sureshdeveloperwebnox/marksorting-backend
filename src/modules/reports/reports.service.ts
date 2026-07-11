@@ -215,6 +215,8 @@ export class ReportsService {
       'Visit Date',
       'Category',
       'Complaint',
+      'Service',
+      'Remark',
       'Technicians',
       'Status',
     ];
@@ -226,6 +228,8 @@ export class ReportsService {
       r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
       r.serviceCategory?.name || '-',
       r.nature_of_complaint || '-',
+      r.action_taken || '-',
+      r.engineer_remarks || '-',
       r.technicians
         .map((t) => t.technician?.full_name)
         .filter(Boolean)
@@ -293,6 +297,8 @@ export class ReportsService {
           this.documentTemplateService.date(r.visit_date),
           `<span class="status-badge" style="background:#f3f4f6; color:#4b5563;">${this.documentTemplateService.escape(r.serviceCategory?.name)}</span>`,
           this.documentTemplateService.escape(r.nature_of_complaint),
+          this.documentTemplateService.escape(r.action_taken),
+          this.documentTemplateService.escape(r.engineer_remarks),
           this.documentTemplateService.escape(
             r.technicians.map((t) => t.technician?.full_name).join(', '),
           ),

@@ -396,7 +396,7 @@ model ServiceReport {
   visit_time                String
   call_registered_date      DateTime
   machine_model             String
-  machine_mfg_date          DateTime?
+  machine_mfg_date          DateTime
   machine_installation_date DateTime?
   serial_or_frame_no        String
   authorized_person         String
@@ -455,6 +455,7 @@ model InstallationReport {
   visit_time               String
   call_registered_date     DateTime
   machine_model            String
+  machine_mfg_date         DateTime
   serial_or_frame_no       String
   authorized_person        String
   invoice_number           String?

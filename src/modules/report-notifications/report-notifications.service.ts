@@ -38,6 +38,7 @@ export class ReportNotificationsService {
     millName: string,
     _millEmail: string | null | undefined,
     _millWhatsappNumber: string,
+    _authorizedPersonPhone?: string,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -147,6 +148,36 @@ export class ReportNotificationsService {
         }
       }
 
+      // Send WhatsApp to authorized person if phone number is provided
+      if (_authorizedPersonPhone) {
+        try {
+          this.logger.log(
+            `Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+          );
+          const sent = await this.whatsAppService.sendReportPdf(
+            _authorizedPersonPhone,
+            pdfBuffer,
+            fileName,
+            reportId,
+            'SERVICE',
+            activeMillName,
+          );
+          if (sent) result.whatsappSent = true;
+          this.logger.log(
+            `WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
+          );
+        } catch (error) {
+          result.whatsappError =
+            error instanceof Error
+              ? error.message
+              : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Service Report ${reportId} to authorized person`,
+            error,
+          );
+        }
+      }
+
       return result;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
@@ -171,6 +202,7 @@ export class ReportNotificationsService {
     millName: string,
     _millEmail: string | null | undefined,
     _millWhatsappNumber: string,
+    _authorizedPersonPhone?: string,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -278,6 +310,36 @@ export class ReportNotificationsService {
               error,
             );
           }
+        }
+      }
+
+      // Send WhatsApp to authorized person if phone number is provided
+      if (_authorizedPersonPhone) {
+        try {
+          this.logger.log(
+            `Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+          );
+          const sent = await this.whatsAppService.sendReportPdf(
+            _authorizedPersonPhone,
+            pdfBuffer,
+            fileName,
+            reportId,
+            'INSTALLATION',
+            activeMillName,
+          );
+          if (sent) result.whatsappSent = true;
+          this.logger.log(
+            `WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
+          );
+        } catch (error) {
+          result.whatsappError =
+            error instanceof Error
+              ? error.message
+              : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Installation Report ${reportId} to authorized person`,
+            error,
+          );
         }
       }
 

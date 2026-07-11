@@ -61,6 +61,10 @@ export class CreateInstallationReportDto {
   @IsNotEmpty()
   machine_model: string;
 
+  @ApiProperty({ example: '2020-03-01' })
+  @IsDateString()
+  machine_mfg_date: string;
+
   @ApiProperty({ example: 'SN-2026-00123' })
   @IsString()
   @IsNotEmpty()

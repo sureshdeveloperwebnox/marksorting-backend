@@ -103,7 +103,7 @@ const documentFooter = (
 ): string => `
   <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:10px;">
     <div style="border-top:1px solid #777; padding-top:7mm; text-align:center; font-weight:800; letter-spacing:0.3px;">
-      ${company.gstNo ? `GSTIN : ${template.escape(company.gstNo)}` : '&nbsp;'}
+      ${company.gstNo ? `GSTIN : <span style="font-weight:800">${template.escape(company.gstNo)}</span>` : '&nbsp;'}
     </div>
   </div>
 `;
@@ -117,11 +117,13 @@ export function renderServiceReportPdfOptions(
     headerTemplate: '<div></div>',
     footerTemplate: documentFooter(company, template),
     margin: {
-      top: '10mm',
-      right: '10mm',
-      bottom: '22mm',
-      left: '10mm',
+      top: '8mm',
+      right: '8mm',
+      bottom: '20mm',
+      left: '8mm',
     },
+    format: 'A4',
+    printBackground: true,
   };
 }
 
@@ -141,10 +143,16 @@ export function renderServiceReportTemplate(
 <head>
   <meta charset="utf-8" />
   <style>
-    @page { size: A4; }
-    * { box-sizing: border-box; }
-    body {
+    @page { 
+      size: A4;
       margin: 0;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 210mm;
+      height: 297mm;
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
       font-size: 14px;
@@ -152,7 +160,8 @@ export function renderServiceReportTemplate(
       background: #fff;
     }
     .print-frame {
-      width: 100%;
+      width: 210mm;
+      height: 297mm;
       border-collapse: collapse;
       table-layout: fixed;
     }
@@ -166,23 +175,23 @@ export function renderServiceReportTemplate(
       vertical-align: top;
     }
     .document-header {
-      height: 38mm;
+      height: 40mm;
       display: grid;
-      grid-template-columns: 45mm 1fr;
-      column-gap: 8mm;
+      grid-template-columns: 50mm 1fr;
+      column-gap: 6mm;
       row-gap: 1mm;
       align-items: start;
       background: #fff;
-      padding-bottom: 6mm;
+      padding-bottom: 4mm;
     }
     .header-logo-wrap {
-      width: 45mm;
-      height: 22mm;
+      width: 50mm;
+      height: 24mm;
     }
     .header-logo {
       display: block;
-      width: 38mm;
-      height: 18mm;
+      width: 45mm;
+      height: 20mm;
       object-fit: contain;
       margin-top: 2px;
     }
@@ -232,6 +241,7 @@ export function renderServiceReportTemplate(
       table-layout: fixed;
       break-inside: auto;
       page-break-inside: auto;
+      margin: 0;
     }
     table.report + table.report,
     .notice + table.report {
@@ -245,15 +255,16 @@ export function renderServiceReportTemplate(
     .report td {
       border: 1px solid #111;
       vertical-align: top;
-      padding: 4px 6px;
+      padding: 3px 5px;
       word-break: break-word;
       overflow-wrap: anywhere;
     }
     .report th {
       text-align: center;
       font-weight: 800;
-      font-size: 15px;
+      font-size: 14px;
       background: #fff;
+      padding: 4px 5px;
     }
     .label {
       font-weight: 800;

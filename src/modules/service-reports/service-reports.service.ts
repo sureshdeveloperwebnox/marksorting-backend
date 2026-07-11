@@ -371,6 +371,7 @@ export class ServiceReportsService {
         millName: serviceReport.mill?.name || '',
         millWhatsappNumber: rawDto.mill_whatsapp_number,
         millEmail: rawDto.mill_email,
+        authorizedPersonPhone: rawDto.authorized_person_phone,
       });
     }
 
