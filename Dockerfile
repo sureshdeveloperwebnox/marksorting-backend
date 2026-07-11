@@ -3,10 +3,10 @@ WORKDIR /app
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 RUN npm install -g pnpm
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml prisma ./
 RUN pnpm install --no-frozen-lockfile
-COPY . .
 RUN npx prisma generate
+COPY . .
 RUN pnpm run build
 
 FROM node:20-alpine

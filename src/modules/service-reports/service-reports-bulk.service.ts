@@ -266,7 +266,7 @@ export class ServiceReportsBulkService {
           call_registered_date:
             parseDate(row.call_registered_date) ?? new Date(),
           machine_model: row.machine_model.trim(),
-          machine_mfg_date: parseDate(row.machine_mfg_date),
+          machine_mfg_date: parseDate(row.machine_mfg_date) ?? new Date(),
           machine_installation_date: parseDate(row.machine_installation_date),
           serial_or_frame_no: row.serial_or_frame_no.trim(),
           authorized_person: row.authorized_person.trim(),
