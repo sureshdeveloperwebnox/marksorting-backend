@@ -67,9 +67,10 @@ export class CreateServiceReportDto {
   @IsNotEmpty()
   machine_model: string;
 
-  @ApiProperty({ example: '2020-03-01' })
+  @ApiProperty({ example: '2020-03-01', required: false })
   @IsDateString()
-  machine_mfg_date: string;
+  @IsOptional()
+  machine_mfg_date?: string;
 
   @ApiProperty({ example: 'SN-2024-00123' })
   @IsString()
