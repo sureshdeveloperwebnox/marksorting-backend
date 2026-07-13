@@ -661,6 +661,7 @@ let MasterMillsService = class MasterMillsService {
         else if (amcClosingDate && amcClosingDate > now) {
             allWarranty = 'Under AMC';
         }
+        let isUpdate = false;
         const result = await this.prisma.$transaction(async (tx) => {
             let customer = null;
             if (customerIdInput) {
@@ -783,6 +784,7 @@ let MasterMillsService = class MasterMillsService {
                 });
             }
             if (masterMill) {
+                isUpdate = true;
                 const masterMillUpdates = {};
                 if (cleanRefNo && masterMill.ref_no !== cleanRefNo)
                     masterMillUpdates.ref_no = cleanRefNo;
@@ -880,7 +882,10 @@ let MasterMillsService = class MasterMillsService {
             });
         });
         await this.invalidateAllRelatedCaches(result?.mill?.customer_id ?? undefined, result?.mill_id ?? undefined, result?.id ?? undefined);
-        return result;
+        return {
+            ...result,
+            _isUpdate: isUpdate,
+        };
     }
     async invalidateAllRelatedCaches(customerId, millId, masterMillId) {
         const promises = [

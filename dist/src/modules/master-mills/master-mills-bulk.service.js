@@ -15,14 +15,17 @@ const crypto_1 = require("crypto");
 const excel_parser_service_1 = require("../../shared/services/excel-parser.service");
 const master_mills_service_1 = require("./master-mills.service");
 const redis_service_1 = require("../../redis/redis.service");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let MasterMillsBulkService = class MasterMillsBulkService {
     excelParser;
     masterMillsService;
     redis;
-    constructor(excelParser, masterMillsService, redis) {
+    prisma;
+    constructor(excelParser, masterMillsService, redis, prisma) {
         this.excelParser = excelParser;
         this.masterMillsService = masterMillsService;
         this.redis = redis;
+        this.prisma = prisma;
     }
     parseExcelDate(value) {
         if (!value)
@@ -55,6 +58,47 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         const rows = await this.excelParser.parseAndValidate(file.buffer);
         if (rows.length === 0) {
             throw new common_1.BadRequestException('The uploaded file contains no data rows');
+        }
+        const dbMasterMills = await this.prisma.masterMill.findMany({
+            where: { deleted_at: null },
+            select: { ref_no: true, frame_no: true },
+        });
+        const dbRefNos = new Set(dbMasterMills.map((m) => m.ref_no?.trim().toLowerCase()).filter(Boolean));
+        const dbFrameNos = new Set(dbMasterMills.map((m) => m.frame_no?.trim().toLowerCase()).filter(Boolean));
+        const sheetRefNos = new Set();
+        const sheetFrameNos = new Set();
+        for (const row of rows) {
+            const cleanRef = row.ref_no?.trim().toLowerCase();
+            const cleanFrame = row.frame_no?.trim().toLowerCase();
+            if (cleanRef) {
+                if (sheetRefNos.has(cleanRef)) {
+                    row.errors.ref_no = 'Duplicate Ref No in Excel sheet';
+                }
+            }
+            if (cleanFrame) {
+                if (sheetFrameNos.has(cleanFrame)) {
+                    row.errors.frame_no = 'Duplicate Frame No in Excel sheet';
+                }
+            }
+            if (cleanRef && !row.errors.ref_no) {
+                if (dbRefNos.has(cleanRef)) {
+                    row.errors.ref_no = 'Ref No already exists in database';
+                }
+            }
+            if (cleanFrame && !row.errors.frame_no) {
+                if (dbFrameNos.has(cleanFrame)) {
+                    row.errors.frame_no = 'Frame No already exists in database';
+                }
+            }
+            if (row.errors.ref_no || row.errors.frame_no) {
+                row.isValid = false;
+            }
+            if (cleanRef && !row.errors.ref_no) {
+                sheetRefNos.add(cleanRef);
+            }
+            if (cleanFrame && !row.errors.frame_no) {
+                sheetFrameNos.add(cleanFrame);
+            }
         }
         const importId = (0, crypto_1.randomUUID)();
         await this.redis.setJson(`bulk_upload:preview:${importId}`, rows, 1800);
@@ -124,8 +168,13 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
                             amc_particulars: row.amc_particulars || undefined,
                         };
-                        await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: true });
-                        status.createdCount++;
+                        const result = await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: false });
+                        if (result?._isUpdate) {
+                            status.updatedCount++;
+                        }
+                        else {
+                            status.createdCount++;
+                        }
                     }
                     catch {
                         status.errorCount++;
@@ -153,6 +202,7 @@ exports.MasterMillsBulkService = MasterMillsBulkService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [excel_parser_service_1.ExcelParserService,
         master_mills_service_1.MasterMillsService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        prisma_service_1.PrismaService])
 ], MasterMillsBulkService);
 //# sourceMappingURL=master-mills-bulk.service.js.map

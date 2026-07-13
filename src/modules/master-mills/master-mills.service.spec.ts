@@ -83,7 +83,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
     prisma.mill.findUnique.mockResolvedValue(mockMill);
 
     masterMillsService = new MasterMillsService(prisma as any, redis as any);
-    bulkService = new MasterMillsBulkService(excelParser as any, masterMillsService, redis as any);
+    bulkService = new MasterMillsBulkService(excelParser as any, masterMillsService, redis as any, prisma as any);
   });
 
   describe('quickRegister', () => {
@@ -142,7 +142,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
           }),
         }),
       );
-      expect(result).toEqual(createdRecord);
+      expect(result).toEqual({ ...createdRecord, _isUpdate: false });
     });
 
     it('updates an existing MasterMill when matching within the same mill (non-bulk path)', async () => {

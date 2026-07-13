@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto';
 import { ExcelParserService } from '../../shared/services/excel-parser.service';
 import { MasterMillsService } from './master-mills.service';
 import { RedisService } from '../../redis/redis.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { QuickRegisterDto } from './dto/quick-register.dto';
 import {
   PreviewRow,
@@ -29,6 +30,7 @@ export class MasterMillsBulkService {
     private readonly excelParser: ExcelParserService,
     private readonly masterMillsService: MasterMillsService,
     private readonly redis: RedisService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private parseExcelDate(value: string | undefined | null): string | undefined {
@@ -75,6 +77,65 @@ export class MasterMillsBulkService {
 
     if (rows.length === 0) {
       throw new BadRequestException('The uploaded file contains no data rows');
+    }
+
+    // Retrieve all active master mills from database to check for duplicates
+    const dbMasterMills = await this.prisma.masterMill.findMany({
+      where: { deleted_at: null },
+      select: { ref_no: true, frame_no: true },
+    });
+
+    const dbRefNos = new Set(
+      dbMasterMills.map((m) => m.ref_no?.trim().toLowerCase()).filter(Boolean),
+    );
+    const dbFrameNos = new Set(
+      dbMasterMills.map((m) => m.frame_no?.trim().toLowerCase()).filter(Boolean),
+    );
+
+    // Track duplicates within the Excel sheet itself (intra-sheet check)
+    const sheetRefNos = new Set<string>();
+    const sheetFrameNos = new Set<string>();
+
+    for (const row of rows) {
+      const cleanRef = row.ref_no?.trim().toLowerCase();
+      const cleanFrame = row.frame_no?.trim().toLowerCase();
+
+      // 1. Check for duplicates in the spreadsheet itself
+      if (cleanRef) {
+        if (sheetRefNos.has(cleanRef)) {
+          row.errors.ref_no = 'Duplicate Ref No in Excel sheet';
+        }
+      }
+      if (cleanFrame) {
+        if (sheetFrameNos.has(cleanFrame)) {
+          row.errors.frame_no = 'Duplicate Frame No in Excel sheet';
+        }
+      }
+
+      // 2. Check for duplicates in the database (only if not already marked as sheet duplicate)
+      if (cleanRef && !row.errors.ref_no) {
+        if (dbRefNos.has(cleanRef)) {
+          row.errors.ref_no = 'Ref No already exists in database';
+        }
+      }
+      if (cleanFrame && !row.errors.frame_no) {
+        if (dbFrameNos.has(cleanFrame)) {
+          row.errors.frame_no = 'Frame No already exists in database';
+        }
+      }
+
+      // 3. Mark invalid if new errors were found
+      if (row.errors.ref_no || row.errors.frame_no) {
+        row.isValid = false;
+      }
+
+      // 4. If unique in sheet so far, add to sheet tracking
+      if (cleanRef && !row.errors.ref_no) {
+        sheetRefNos.add(cleanRef);
+      }
+      if (cleanFrame && !row.errors.frame_no) {
+        sheetFrameNos.add(cleanFrame);
+      }
     }
 
     const importId = randomUUID();
@@ -184,8 +245,12 @@ export class MasterMillsBulkService {
               amc_particulars: row.amc_particulars || undefined,
             };
 
-            await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: true });
-            status.createdCount++;
+            const result = await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: false });
+            if (result?._isUpdate) {
+              status.updatedCount++;
+            } else {
+              status.createdCount++;
+            }
           } catch {
             status.errorCount++;
           }

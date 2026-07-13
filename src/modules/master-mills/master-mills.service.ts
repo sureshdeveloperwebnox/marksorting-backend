@@ -741,6 +741,7 @@ export class MasterMillsService {
       allWarranty = 'Under AMC';
     }
 
+    let isUpdate = false;
     // Run lookups, updates, and creation inside a transaction
     const result = await this.prisma.$transaction(async (tx) => {
       // 1. Resolve & Update Customer
@@ -883,6 +884,7 @@ export class MasterMillsService {
       }
 
       if (masterMill) {
+        isUpdate = true;
         // Checklist 3: Update master mill fields if provided and empty/different
         const masterMillUpdates: any = {};
         if (cleanRefNo && masterMill.ref_no !== cleanRefNo)
@@ -996,7 +998,10 @@ export class MasterMillsService {
       result?.id ?? undefined,
     );
 
-    return result;
+    return {
+      ...result,
+      _isUpdate: isUpdate,
+    };
   }
 
   private async invalidateAllRelatedCaches(

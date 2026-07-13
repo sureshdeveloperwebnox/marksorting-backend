@@ -7,8 +7,9 @@ export declare class MobileMasterMillsController {
         serviceBased: any[];
         installationBased: any[];
     }>;
-    quickRegister(dto: QuickRegisterDto): Promise<({
-        mill: ({
+    quickRegister(dto: QuickRegisterDto): Promise<{
+        _isUpdate: boolean;
+        mill?: ({
             customer: {
                 id: string;
                 created_at: Date;
@@ -36,35 +37,34 @@ export declare class MobileMasterMillsController {
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
-        }) | null;
-    } & {
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        mill_id: string | null;
-        place: string | null;
-        status: string;
-        type: string;
-        invoice_no: string;
-        invoice_date: Date | null;
-        ref_no: string | null;
-        address: string | null;
-        state: string | null;
-        phone_no: string | null;
-        mc_model: string | null;
-        frame_no: string | null;
-        mfg_date: Date | null;
-        warranty_years: number | null;
-        warranty_months: number | null;
-        installation_date: Date | null;
-        warranty_start_date: Date | null;
-        warranty_closing_date: Date | null;
-        all_warranty: string | null;
-        amc_starting_date: Date | null;
-        amc_period: number | null;
-        amc_particular: string | null;
-        amc_closing_date: Date | null;
-        amc_amount: import("@prisma/client/runtime/client").Decimal | null;
-    }) | null>;
+        }) | null | undefined;
+        id?: string | undefined;
+        created_at?: Date | undefined;
+        updated_at?: Date | undefined;
+        deleted_at?: Date | null | undefined;
+        mill_id?: string | null | undefined;
+        place?: string | null | undefined;
+        status?: string | undefined;
+        type?: string | undefined;
+        invoice_no?: string | undefined;
+        invoice_date?: Date | null | undefined;
+        ref_no?: string | null | undefined;
+        address?: string | null | undefined;
+        state?: string | null | undefined;
+        phone_no?: string | null | undefined;
+        mc_model?: string | null | undefined;
+        frame_no?: string | null | undefined;
+        mfg_date?: Date | null | undefined;
+        warranty_years?: number | null | undefined;
+        warranty_months?: number | null | undefined;
+        installation_date?: Date | null | undefined;
+        warranty_start_date?: Date | null | undefined;
+        warranty_closing_date?: Date | null | undefined;
+        all_warranty?: string | null | undefined;
+        amc_starting_date?: Date | null | undefined;
+        amc_period?: number | null | undefined;
+        amc_particular?: string | null | undefined;
+        amc_closing_date?: Date | null | undefined;
+        amc_amount?: import("@prisma/client/runtime/client").Decimal | null | undefined;
+    }>;
 }
