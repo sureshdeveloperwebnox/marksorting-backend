@@ -37,7 +37,7 @@ __decorate([
         minimum: 0,
         description: 'Amount for this category.',
     }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateExpenseItemDto.prototype, "amount", void 0);
@@ -48,7 +48,7 @@ __decorate([
         required: false,
         description: 'Admin approved amount for this category.',
     }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -228,7 +228,7 @@ __decorate([
         minimum: 0,
         description: 'Expense amount in INR (₹). Defaults to `0` if omitted. Must be ≥ 0.',
     }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
@@ -240,7 +240,7 @@ __decorate([
         minimum: 0,
         description: 'Admin approved expense amount in INR (₹).',
     }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)

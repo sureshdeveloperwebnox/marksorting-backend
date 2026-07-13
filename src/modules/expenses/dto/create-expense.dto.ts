@@ -2,6 +2,7 @@ import {
   IsArray,
   IsDateString,
   IsIn,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -27,7 +28,7 @@ export class CreateExpenseItemDto {
     minimum: 0,
     description: 'Amount for this category.',
   })
-  @IsNumber()
+  @IsInt()
   @Min(0)
   amount: number;
 
@@ -37,7 +38,7 @@ export class CreateExpenseItemDto {
     required: false,
     description: 'Admin approved amount for this category.',
   })
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @IsOptional()
   admin_amount?: number;
@@ -192,7 +193,7 @@ export class CreateExpenseDto {
     description:
       'Expense amount in INR (₹). Defaults to `0` if omitted. Must be ≥ 0.',
   })
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @IsOptional()
   amount?: number;
@@ -203,7 +204,7 @@ export class CreateExpenseDto {
     minimum: 0,
     description: 'Admin approved expense amount in INR (₹).',
   })
-  @IsNumber()
+  @IsInt()
   @Min(0)
   @IsOptional()
   admin_amount?: number;
