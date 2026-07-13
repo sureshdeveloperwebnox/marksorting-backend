@@ -199,6 +199,7 @@ model MasterMill {
   phone_no              String?
   mc_model              String?
   frame_no              String?
+  mfg_date              DateTime?
   warranty_years        Int?      @default(0)
   warranty_months       Int?      @default(0)
   installation_date     DateTime?

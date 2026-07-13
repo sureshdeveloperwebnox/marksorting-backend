@@ -47,6 +47,7 @@ export declare class MasterMillsService {
         phone_no: string | null;
         mc_model: string | null;
         frame_no: string | null;
+        mfg_date: Date | null;
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;
@@ -77,6 +78,7 @@ export declare class MasterMillsService {
             phone_no: string | null;
             mc_model: string | null;
             frame_no: string | null;
+            mfg_date: Date | null;
             warranty_years: number | null;
             warranty_months: number | null;
             installation_date: Date | null;
@@ -106,6 +108,7 @@ export declare class MasterMillsService {
             phone_no: string | null;
             mc_model: string | null;
             frame_no: string | null;
+            mfg_date: Date | null;
             warranty_years: number | null;
             warranty_months: number | null;
             installation_date: Date | null;
@@ -136,6 +139,7 @@ export declare class MasterMillsService {
         phone_no: string | null;
         mc_model: string | null;
         frame_no: string | null;
+        mfg_date: Date | null;
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;
@@ -202,6 +206,7 @@ export declare class MasterMillsService {
         phone_no: string | null;
         mc_model: string | null;
         frame_no: string | null;
+        mfg_date: Date | null;
         warranty_years: number | null;
         warranty_months: number | null;
         installation_date: Date | null;

@@ -38,7 +38,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
         this.installationReportsService = installationReportsService;
         this.mailQueue = mailQueue;
     }
-    async sendServiceReport(reportId, millName, _millEmail, _millWhatsappNumber) {
+    async sendServiceReport(reportId, millName, _millEmail, _millWhatsappNumber, _authorizedPersonPhone) {
         const result = {
             emailSent: false,
             whatsappSent: false,
@@ -104,6 +104,22 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                     }
                 }
             }
+            if (_authorizedPersonPhone) {
+                try {
+                    this.logger.log(`Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
+                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName);
+                    if (sent)
+                        result.whatsappSent = true;
+                    this.logger.log(`WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                }
+                catch (error) {
+                    result.whatsappError =
+                        error instanceof Error
+                            ? error.message
+                            : 'WhatsApp sending failed';
+                    this.logger.error(`WhatsApp failed for Service Report ${reportId} to authorized person`, error);
+                }
+            }
             return result;
         }
         catch (error) {
@@ -114,7 +130,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
             return result;
         }
     }
-    async sendInstallationReport(reportId, millName, _millEmail, _millWhatsappNumber) {
+    async sendInstallationReport(reportId, millName, _millEmail, _millWhatsappNumber, _authorizedPersonPhone) {
         const result = {
             emailSent: false,
             whatsappSent: false,
@@ -178,6 +194,22 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                             error instanceof Error ? error.message : 'Email sending failed';
                         this.logger.error(`Email failed for Installation Report ${reportId} to technician ${technician.full_name}`, error);
                     }
+                }
+            }
+            if (_authorizedPersonPhone) {
+                try {
+                    this.logger.log(`Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
+                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName);
+                    if (sent)
+                        result.whatsappSent = true;
+                    this.logger.log(`WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                }
+                catch (error) {
+                    result.whatsappError =
+                        error instanceof Error
+                            ? error.message
+                            : 'WhatsApp sending failed';
+                    this.logger.error(`WhatsApp failed for Installation Report ${reportId} to authorized person`, error);
                 }
             }
             return result;

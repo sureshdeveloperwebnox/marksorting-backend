@@ -279,6 +279,7 @@ let InstallationReportsService = class InstallationReportsService {
                 millName: installationReport.mill?.name || '',
                 millWhatsappNumber: rawDto.mill_whatsapp_number,
                 millEmail: rawDto.mill_email,
+                authorizedPersonPhone: rawDto.authorized_person_phone,
             });
         }
         return installationReport;

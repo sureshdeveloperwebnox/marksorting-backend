@@ -22,6 +22,7 @@ class CreateInstallationReportDto {
     visit_time;
     call_registered_date;
     machine_model;
+    machine_mfg_date;
     serial_or_frame_no;
     authorized_person;
     authorized_person_phone;
@@ -108,6 +109,12 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "machine_model", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2020-03-01', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInstallationReportDto.prototype, "machine_mfg_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'SN-2026-00123' }),
     (0, class_validator_1.IsString)(),

@@ -64,22 +64,27 @@ const documentHeader = (
   ].filter(Boolean);
 
   return `
-    <div class="document-header">
-      <div class="header-logo-wrap">
-        ${logoSrc ? `<img class="header-logo" src="${logoSrc}" alt="Company logo" />` : ''}
-      </div>
-      <div class="header-company">
-        <div class="header-company-name">${template.text(company.name, 'Company')}</div>
-        <div class="header-partner">(${template.text(company.partnerDescription, '')})</div>
-        <div class="header-address">${companyLines.map((line) => template.escape(line)).join('<br />')}</div>
-        <div class="header-contact">${company.email ? `E-mail : ${template.escape(company.email)}` : ''}</div>
-        <div class="header-contact">
-          ${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}
-          ${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}
-        </div>
-      </div>
-      <div class="header-serial">SI.NO: ${template.text(reportNumber)}</div>
-    </div>
+    <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 4mm; background: #fff;">
+      <tr>
+        <td style="width: 50mm; vertical-align: top; border: 0; padding: 0;">
+          ${logoSrc ? `<img src="${logoSrc}" alt="Company logo" style="display: block; width: 45mm; height: 18mm; object-fit: contain;" />` : ''}
+        </td>
+        <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
+          <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
+          <div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${template.text(company.partnerDescription, '')})</div>
+          <div style="font-size: 11px; color: #111827; line-height: 1.3;">
+            ${companyLines.map((line) => template.escape(line)).join('<br />')}
+            ${company.email ? `<br />E-mail : ${template.escape(company.email)}` : ''}
+            ${company.tollFree || company.cellNumbers ? `<br />${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}` : ''}
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2" style="border: 0; padding: 4px 0 0; font-weight: 700; font-size: 13px; text-align: left;">
+          SI.NO: ${template.text(reportNumber)}
+        </td>
+      </tr>
+    </table>
   `;
 };
 
@@ -87,9 +92,9 @@ const documentFooter = (
   company: CompanyPdfSettings,
   template: DocumentTemplateService,
 ): string => `
-  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:10px;">
-    <div style="border-top:1px solid #777; padding-top:7mm; text-align:center; font-weight:800; letter-spacing:0.3px;">
-      ${company.gstNo ? `GSTIN : <span style="font-weight:800">${template.escape(company.gstNo)}</span>` : '&nbsp;'}
+  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:12px; font-weight:800;">
+    <div style="border-top:1px solid #777; padding-top:5mm; text-align:center; letter-spacing:0.5px;">
+      ${company.gstNo ? `GSTIN : ${template.escape(company.gstNo)}` : '&nbsp;'}
     </div>
   </div>
 `;
@@ -103,10 +108,10 @@ export function renderInstallationReportPdfOptions(
     headerTemplate: '<div></div>',
     footerTemplate: documentFooter(company, template),
     margin: {
-      top: '8mm',
-      right: '8mm',
-      bottom: '20mm',
-      left: '8mm',
+      top: '10mm',
+      right: '10mm',
+      bottom: '18mm',
+      left: '10mm',
     },
     format: 'A4',
     printBackground: true,
@@ -143,23 +148,21 @@ export function renderInstallationReportTemplate(
   <style>
     @page { 
       size: A4;
-      margin: 0;
+      margin: 10mm 10mm 18mm 10mm;
     }
     * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
-      width: 210mm;
-      height: 297mm;
+      width: 100%;
       color: #111827;
       font-family: Arial, Helvetica, sans-serif;
-      font-size: 14px;
-      line-height: 1.35;
+      font-size: 12.5px;
+      line-height: 1.3;
       background: #fff;
     }
     .print-frame {
-      width: 210mm;
-      height: 297mm;
+      width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
     }
@@ -173,23 +176,23 @@ export function renderInstallationReportTemplate(
       vertical-align: top;
     }
     .document-header {
-      height: 40mm;
+      width: 100%;
       display: grid;
-      grid-template-columns: 50mm 1fr;
+      grid-template-columns: 45mm 1fr;
       column-gap: 6mm;
-      row-gap: 1mm;
+      row-gap: 1.5mm;
       align-items: start;
       background: #fff;
       padding-bottom: 4mm;
     }
     .header-logo-wrap {
-      width: 50mm;
-      height: 24mm;
+      width: 45mm;
+      height: 18mm;
     }
     .header-logo {
       display: block;
-      width: 45mm;
-      height: 20mm;
+      width: 42mm;
+      height: 16mm;
       object-fit: contain;
       margin-top: 2px;
     }
@@ -205,14 +208,14 @@ export function renderInstallationReportTemplate(
     }
     .header-company-name {
       color: #00664d;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 800;
       line-height: 1;
       margin-bottom: 0.6mm;
     }
     .header-partner {
       color: #f05a00;
-      font-size: 11.5px;
+      font-size: 11px;
       line-height: 1.15;
     }
     .header-address,
@@ -222,7 +225,7 @@ export function renderInstallationReportTemplate(
     .header-serial {
       grid-column: 1 / -1;
       font-weight: 700;
-      font-size: 13.5px;
+      font-size: 13px;
       margin-top: 0;
     }
     .document {
@@ -244,7 +247,7 @@ export function renderInstallationReportTemplate(
     .report th,
     .report td {
       border: 1px solid #111;
-      vertical-align: top;
+      vertical-align: middle;
       padding: 3px 5px;
       word-break: break-word;
       overflow-wrap: anywhere;
@@ -323,8 +326,8 @@ export function renderInstallationReportTemplate(
     }
     .maintenance td {
       color: #f05a00;
-      font-size: 13.5px;
-      height: 9.5mm;
+      font-size: 11px;
+      height: 8.5mm;
       vertical-align: middle;
     }
     .signature-cell {

@@ -177,6 +177,7 @@ async function seedMasterMills(prisma) {
                     phone_no: item.phone_no,
                     mc_model: item.mc_model,
                     frame_no: item.frame_no,
+                    mfg_date: new Date('2026-01-01'),
                     type: item.ref_no.startsWith('S') ? 'Service' : 'Installation',
                 },
             });
@@ -195,6 +196,7 @@ async function seedMasterMills(prisma) {
                     phone_no: item.phone_no,
                     mc_model: item.mc_model,
                     frame_no: item.frame_no,
+                    mfg_date: new Date('2026-01-01'),
                     warranty_years: 1,
                     warranty_months: 0,
                     installation_date: new Date('2026-06-13'),

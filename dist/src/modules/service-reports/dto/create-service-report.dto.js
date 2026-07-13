@@ -24,6 +24,7 @@ class CreateServiceReportDto {
     visit_time;
     call_registered_date;
     machine_model;
+    machine_mfg_date;
     serial_or_frame_no;
     authorized_person;
     authorized_person_phone;
@@ -33,7 +34,6 @@ class CreateServiceReportDto {
     engineer_signature;
     customer_signature;
     mill_email;
-    machine_mfg_date;
     machine_installation_date;
     previous_visit_engineer;
     problem_observed;
@@ -114,6 +114,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "machine_model", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: '2020-03-01', required: false }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateServiceReportDto.prototype, "machine_mfg_date", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ example: 'SN-2024-00123' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
@@ -169,12 +175,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "mill_email", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: '2020-03-01', required: false }),
-    (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateServiceReportDto.prototype, "machine_mfg_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2020-06-15', required: false }),
     (0, class_validator_1.IsDateString)(),

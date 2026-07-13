@@ -9,6 +9,7 @@ export declare class CreateServiceReportDto {
     visit_time?: string;
     call_registered_date: string;
     machine_model: string;
+    machine_mfg_date?: string;
     serial_or_frame_no: string;
     authorized_person: string;
     authorized_person_phone?: string;
@@ -18,7 +19,6 @@ export declare class CreateServiceReportDto {
     engineer_signature: string;
     customer_signature: string;
     mill_email?: string;
-    machine_mfg_date?: string;
     machine_installation_date?: string;
     previous_visit_engineer?: string;
     problem_observed?: string;

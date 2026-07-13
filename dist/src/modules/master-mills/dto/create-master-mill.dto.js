@@ -26,6 +26,7 @@ class CreateMasterMillDto {
     phone_no;
     mc_model;
     frame_no;
+    mfg_date;
     warranty_years;
     warranty_months;
     installation_date;
@@ -116,6 +117,12 @@ __decorate([
     emptyStringToUndefined,
     __metadata("design:type", String)
 ], CreateMasterMillDto.prototype, "frame_no", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: true }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateMasterMillDto.prototype, "mfg_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1, required: false }),
     (0, class_validator_1.IsInt)(),

@@ -188,6 +188,7 @@ let InstallationReportsBulkService = class InstallationReportsBulkService {
                     visit_time: row.visit_time.trim() || '00:00',
                     call_registered_date: parseDate(row.call_registered_date) ?? new Date(),
                     machine_model: row.machine_model.trim(),
+                    machine_mfg_date: parseDate(row.machine_mfg_date) ?? new Date(),
                     serial_or_frame_no: row.serial_or_frame_no.trim(),
                     authorized_person: row.authorized_person.trim(),
                     authorized_person_phone: row.authorized_person_phone.trim() || undefined,

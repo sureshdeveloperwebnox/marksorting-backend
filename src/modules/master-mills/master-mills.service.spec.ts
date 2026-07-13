@@ -102,6 +102,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
         invoice_date: '2024-01-15',
         installation_date: '2024-01-20',
         warranty_start_date: '2024-01-25',
+        mfg_date: '2024-01-10',
         warranty_years: 2,
         warranty_months: 6,
         amc_starting_date: '2026-02-01',
@@ -129,6 +130,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
             invoice_date: new Date('2024-01-15'),
             installation_date: new Date('2024-01-20'),
             warranty_start_date: new Date('2024-01-25'),
+            mfg_date: new Date('2024-01-10'),
             warranty_years: 2,
             warranty_months: 6,
             amc_starting_date: new Date('2026-02-01'),
@@ -151,6 +153,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
         frame_no: 'FRM-123',
         place: 'Chennai',
         invoice_no: 'INV-NEW-99',
+        mfg_date: '2024-01-10',
       };
 
       const existingRecord = {
@@ -183,6 +186,7 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
         frame_no: 'FRM-123',
         place: 'Chennai',
         invoice_no: 'INV-BULK-01',
+        mfg_date: '2024-01-10',
       };
 
       const existingRecord = {

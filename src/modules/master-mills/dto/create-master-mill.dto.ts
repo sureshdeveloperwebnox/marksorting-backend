@@ -83,6 +83,11 @@ export class CreateMasterMillDto {
   @emptyStringToUndefined
   frame_no?: string;
 
+  @ApiProperty({ example: '2024-01-15', required: true })
+  @IsDateString()
+  @IsNotEmpty()
+  mfg_date: string;
+
   @ApiProperty({ example: 1, required: false })
   @IsInt()
   @Min(0)

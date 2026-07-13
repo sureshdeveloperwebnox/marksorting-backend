@@ -73,6 +73,7 @@ export declare class InstallationReportsService {
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
+        machine_mfg_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
         commodity: string | null;
@@ -140,6 +141,7 @@ export declare class InstallationReportsService {
             visit_time: string;
             call_registered_date: Date;
             machine_model: string;
+            machine_mfg_date: Date | null;
             serial_or_frame_no: string;
             authorized_person: string;
             commodity: string | null;
@@ -206,6 +208,7 @@ export declare class InstallationReportsService {
         visit_time: string;
         call_registered_date: Date;
         machine_model: string;
+        machine_mfg_date: Date | null;
         serial_or_frame_no: string;
         authorized_person: string;
         commodity: string | null;

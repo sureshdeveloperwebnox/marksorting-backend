@@ -19,6 +19,7 @@ class QuickRegisterDto {
     mill_name;
     ref_no;
     frame_no;
+    mfg_date;
     mc_model;
     address;
     place;
@@ -72,6 +73,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "frame_no", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: true }),
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], QuickRegisterDto.prototype, "mfg_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'RX-40 B FOR ZX-40', required: false }),
     (0, class_validator_1.IsString)(),

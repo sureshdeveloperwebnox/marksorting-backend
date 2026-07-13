@@ -25,29 +25,33 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
     }
     async onServiceReportCreatedForPdf(payload) {
         try {
-            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, } = payload;
+            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, authorizedPersonPhone, } = payload;
             this.logger.log(`Processing service-report.created.send-pdf event for report ${reportNumber}`);
             let whatsappNumber = millWhatsappNumber;
             let email = millEmail;
-            if (!whatsappNumber || !email) {
+            let authPersonPhone = authorizedPersonPhone;
+            if (!whatsappNumber || !email || !authPersonPhone) {
                 const report = await this.prisma.serviceReport.findUnique({
                     where: { id: reportId },
                     select: {
                         mill_whatsapp_number: true,
                         mill_email: true,
+                        authorized_person_phone: true,
                     },
                 });
                 if (report) {
                     whatsappNumber =
                         whatsappNumber || report.mill_whatsapp_number || undefined;
                     email = email || report.mill_email || undefined;
+                    authPersonPhone =
+                        authPersonPhone || report.authorized_person_phone || undefined;
                 }
             }
-            if (!whatsappNumber && !email) {
+            if (!whatsappNumber && !email && !authPersonPhone) {
                 this.logger.warn(`No contact information available for Service Report ${reportNumber}. Skipping PDF delivery.`);
                 return;
             }
-            const result = await this.reportNotificationsService.sendServiceReport(reportId, millName, email, whatsappNumber || '');
+            const result = await this.reportNotificationsService.sendServiceReport(reportId, millName, email, whatsappNumber || '', authPersonPhone || '');
             if (result.whatsappSent || result.emailSent) {
                 this.logger.log(`Service Report ${reportNumber} PDF delivery initiated. ` +
                     `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`);
@@ -64,29 +68,33 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
     }
     async onInstallationReportCreatedForPdf(payload) {
         try {
-            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, } = payload;
+            const { reportId, reportNumber, millId, millName, millWhatsappNumber, millEmail, authorizedPersonPhone, } = payload;
             this.logger.log(`Processing installation-report.created.send-pdf event for report ${reportNumber}`);
             let whatsappNumber = millWhatsappNumber;
             let email = millEmail;
-            if (!whatsappNumber || !email) {
+            let authPersonPhone = authorizedPersonPhone;
+            if (!whatsappNumber || !email || !authPersonPhone) {
                 const report = await this.prisma.installationReport.findUnique({
                     where: { id: reportId },
                     select: {
                         mill_whatsapp_number: true,
                         mill_email: true,
+                        authorized_person_phone: true,
                     },
                 });
                 if (report) {
                     whatsappNumber =
                         whatsappNumber || report.mill_whatsapp_number || undefined;
                     email = email || report.mill_email || undefined;
+                    authPersonPhone =
+                        authPersonPhone || report.authorized_person_phone || undefined;
                 }
             }
-            if (!whatsappNumber && !email) {
+            if (!whatsappNumber && !email && !authPersonPhone) {
                 this.logger.warn(`No contact information available for Installation Report ${reportNumber}. Skipping PDF delivery.`);
                 return;
             }
-            const result = await this.reportNotificationsService.sendInstallationReport(reportId, millName, email, whatsappNumber || '');
+            const result = await this.reportNotificationsService.sendInstallationReport(reportId, millName, email, whatsappNumber || '', authPersonPhone || '');
             if (result.whatsappSent || result.emailSent) {
                 this.logger.log(`Installation Report ${reportNumber} PDF delivery initiated. ` +
                     `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`);

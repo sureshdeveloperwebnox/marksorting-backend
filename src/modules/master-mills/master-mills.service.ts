@@ -139,6 +139,7 @@ export class MasterMillsService {
     data.all_warranty = allWarranty;
 
     // Convert date strings to Date objects for Prisma
+    if (data.mfg_date) data.mfg_date = new Date(data.mfg_date);
     if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
     if (data.installation_date)
       data.installation_date = new Date(data.installation_date);
@@ -241,6 +242,7 @@ export class MasterMillsService {
 
 
     // Convert date strings to Date objects for Prisma
+    if (data.mfg_date) data.mfg_date = new Date(data.mfg_date);
     if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
     if (data.installation_date)
       data.installation_date = new Date(data.installation_date);
@@ -528,6 +530,7 @@ export class MasterMillsService {
       amc_amount: record.amc_amount,
       status: record.status,
       type: record.type,
+      mfg_date: record.mfg_date,
       mill: record.mill ? {
         id: record.mill.id,
         name: record.mill.name,
@@ -569,6 +572,7 @@ export class MasterMillsService {
       amc_amount: 0,
       status: 'ACTIVE',
       type: 'Service',
+      mfg_date: record.machine_mfg_date || null,
       mill: record.mill ? {
         id: record.mill.id,
         name: record.mill.name,
@@ -610,6 +614,7 @@ export class MasterMillsService {
       amc_amount: 0,
       status: 'ACTIVE',
       type: 'Installation',
+      mfg_date: record.machine_mfg_date || null,
       mill: record.mill ? {
         id: record.mill.id,
         name: record.mill.name,
@@ -698,6 +703,7 @@ export class MasterMillsService {
     const cleanEmail = dto.email?.trim();
 
     const cleanInvoiceNo = dto.invoice_no?.trim();
+    const mfgDate = dto.mfg_date ? new Date(dto.mfg_date) : null;
     const invoiceDate = dto.invoice_date ? new Date(dto.invoice_date) : null;
     const installationDate = dto.installation_date ? new Date(dto.installation_date) : null;
     const warrantyStartDate = dto.warranty_start_date ? new Date(dto.warranty_start_date) : null;
@@ -899,6 +905,8 @@ export class MasterMillsService {
         // Bulk upload extra fields:
         if (cleanInvoiceNo && masterMill.invoice_no !== cleanInvoiceNo)
           masterMillUpdates.invoice_no = cleanInvoiceNo;
+        if (mfgDate && masterMill.mfg_date?.getTime() !== mfgDate.getTime())
+          masterMillUpdates.mfg_date = mfgDate;
         if (invoiceDate && masterMill.invoice_date?.getTime() !== invoiceDate.getTime())
           masterMillUpdates.invoice_date = invoiceDate;
         if (installationDate && masterMill.installation_date?.getTime() !== installationDate.getTime())
@@ -945,6 +953,7 @@ export class MasterMillsService {
             ref_no: cleanRefNo,
             frame_no: cleanFrameNo,
             mc_model: cleanMcModel,
+            mfg_date: mfgDate,
             address: cleanAddress,
             place: cleanPlace,
             state: cleanState,

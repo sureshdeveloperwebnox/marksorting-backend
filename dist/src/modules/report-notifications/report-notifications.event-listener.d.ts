@@ -12,6 +12,7 @@ export declare class ReportNotificationsEventListener {
         millName: string;
         millWhatsappNumber?: string;
         millEmail?: string;
+        authorizedPersonPhone?: string;
     }): Promise<void>;
     onInstallationReportCreatedForPdf(payload: {
         reportId: string;
@@ -20,6 +21,7 @@ export declare class ReportNotificationsEventListener {
         millName: string;
         millWhatsappNumber?: string;
         millEmail?: string;
+        authorizedPersonPhone?: string;
     }): Promise<void>;
     onServiceReportSendPdf(payload: {
         reportId: string;
