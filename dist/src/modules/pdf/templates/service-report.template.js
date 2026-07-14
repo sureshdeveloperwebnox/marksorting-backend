@@ -68,7 +68,7 @@ const documentHeader = (company, template, reportNumber) => {
   `;
 };
 const documentFooter = (company, template) => `
-  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:12px; font-weight:800;">
+  <div style="width:100%; padding:0 10mm; font-family:Arial, Helvetica, sans-serif; color:#111827; font-size:15px; font-weight:900;">
     <div style="border-top:1px solid #777; padding-top:5mm; text-align:center; letter-spacing:0.5px;">
       ${company.gstNo ? `GSTIN : ${template.escape(company.gstNo)}` : '&nbsp;'}
     </div>
