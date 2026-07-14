@@ -33,10 +33,10 @@ export declare class MobileTicketsController {
         mill_id: string | null;
         status: string;
         customer_id: string | null;
-        ticket_number: string | null;
-        service_engineer_id: string | null;
-        subject: string;
         priority: string;
+        subject: string;
+        service_engineer_id: string | null;
+        ticket_number: string | null;
     }>;
     update(id: string, dto: UpdateMobileTicketDto, req: any): Promise<{
         before: any;
@@ -67,10 +67,10 @@ export declare class MobileTicketsController {
             mill_id: string | null;
             status: string;
             customer_id: string | null;
-            ticket_number: string | null;
-            service_engineer_id: string | null;
-            subject: string;
             priority: string;
+            subject: string;
+            service_engineer_id: string | null;
+            ticket_number: string | null;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -100,9 +100,9 @@ export declare class MobileTicketsController {
         mill_id: string | null;
         status: string;
         customer_id: string | null;
-        ticket_number: string | null;
-        service_engineer_id: string | null;
-        subject: string;
         priority: string;
+        subject: string;
+        service_engineer_id: string | null;
+        ticket_number: string | null;
     }>;
 }

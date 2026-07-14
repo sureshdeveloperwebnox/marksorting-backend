@@ -20,12 +20,12 @@ export class WhatsAppRabbitMQProcessor implements OnModuleInit {
     private readonly configService: ConfigService,
   ) {
     this.ultramsgApiUrl = this.configService.get<string>(
-      'ULTRAMSG_API_URL',
+      'whatsapp.baseUrl',
       'https://api.ultramsg.com',
     );
-    this.ultramsgToken = this.configService.get<string>('ULTRAMSG_TOKEN', '');
+    this.ultramsgToken = this.configService.get<string>('whatsapp.apiToken', '');
     this.ultramsgInstance = this.configService.get<string>(
-      'ULTRAMSG_INSTANCE',
+      'whatsapp.instanceId',
       '',
     );
   }

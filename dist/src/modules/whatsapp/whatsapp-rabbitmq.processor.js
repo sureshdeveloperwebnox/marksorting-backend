@@ -28,9 +28,9 @@ let WhatsAppRabbitMQProcessor = WhatsAppRabbitMQProcessor_1 = class WhatsAppRabb
         this.rabbitMQService = rabbitMQService;
         this.httpService = httpService;
         this.configService = configService;
-        this.ultramsgApiUrl = this.configService.get('ULTRAMSG_API_URL', 'https://api.ultramsg.com');
-        this.ultramsgToken = this.configService.get('ULTRAMSG_TOKEN', '');
-        this.ultramsgInstance = this.configService.get('ULTRAMSG_INSTANCE', '');
+        this.ultramsgApiUrl = this.configService.get('whatsapp.baseUrl', 'https://api.ultramsg.com');
+        this.ultramsgToken = this.configService.get('whatsapp.apiToken', '');
+        this.ultramsgInstance = this.configService.get('whatsapp.instanceId', '');
     }
     async onModuleInit() {
         await this.delay(3000);

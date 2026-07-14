@@ -34,9 +34,9 @@ export declare class MobileMasterMillsController {
             address: string | null;
             phone: string | null;
             customer_id: string | null;
-            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
+            city: string | null;
         }) | null | undefined;
         id?: string | undefined;
         created_at?: Date | undefined;
