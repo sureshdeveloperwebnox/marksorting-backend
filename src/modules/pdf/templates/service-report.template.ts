@@ -251,8 +251,8 @@ export function renderServiceReportTemplate(
       margin-top: 0;
     }
     tr {
-      break-inside: auto;
-      page-break-inside: auto;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     .report th,
     .report td {
