@@ -117,19 +117,30 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 }
             }
             if (_authorizedPersonPhone) {
-                try {
-                    this.logger.log(`Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
-                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName, caption);
-                    if (sent)
-                        result.whatsappSent = true;
-                    this.logger.log(`WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
+                const alreadySentPhones = assignedTechnicians
+                    .map((t) => t.phone)
+                    .filter(Boolean)
+                    .map((p) => this.normalizePhone(p));
+                const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
+                if (alreadyNotified) {
+                    this.logger.log(`Skipping Service Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`);
                 }
-                catch (error) {
-                    result.whatsappError =
-                        error instanceof Error
-                            ? error.message
-                            : 'WhatsApp sending failed';
-                    this.logger.error(`WhatsApp failed for Service Report ${reportId} to authorized person`, error);
+                else {
+                    try {
+                        this.logger.log(`Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
+                        const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName, caption);
+                        if (sent)
+                            result.whatsappSent = true;
+                        this.logger.log(`WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                    }
+                    catch (error) {
+                        result.whatsappError =
+                            error instanceof Error
+                                ? error.message
+                                : 'WhatsApp sending failed';
+                        this.logger.error(`WhatsApp failed for Service Report ${reportId} to authorized person`, error);
+                    }
                 }
             }
             return result;
@@ -221,19 +232,30 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 }
             }
             if (_authorizedPersonPhone) {
-                try {
-                    this.logger.log(`Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
-                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName, caption);
-                    if (sent)
-                        result.whatsappSent = true;
-                    this.logger.log(`WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
+                const alreadySentPhones = assignedTechnicians
+                    .map((t) => t.phone)
+                    .filter(Boolean)
+                    .map((p) => this.normalizePhone(p));
+                const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
+                if (alreadyNotified) {
+                    this.logger.log(`Skipping Installation Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`);
                 }
-                catch (error) {
-                    result.whatsappError =
-                        error instanceof Error
-                            ? error.message
-                            : 'WhatsApp sending failed';
-                    this.logger.error(`WhatsApp failed for Installation Report ${reportId} to authorized person`, error);
+                else {
+                    try {
+                        this.logger.log(`Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
+                        const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName, caption);
+                        if (sent)
+                            result.whatsappSent = true;
+                        this.logger.log(`WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
+                    }
+                    catch (error) {
+                        result.whatsappError =
+                            error instanceof Error
+                                ? error.message
+                                : 'WhatsApp sending failed';
+                        this.logger.error(`WhatsApp failed for Installation Report ${reportId} to authorized person`, error);
+                    }
                 }
             }
             return result;
@@ -245,6 +267,10 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
             result.whatsappError = result.whatsappError || errorMsg;
             return result;
         }
+    }
+    normalizePhone(phone) {
+        const digits = phone.replace(/\D/g, '');
+        return digits.slice(-10);
     }
     async sendEmailWithAttachment(to, subject, html, fileName, pdfBuffer) {
         await this.mailQueue.add('send-mail-with-attachment', {

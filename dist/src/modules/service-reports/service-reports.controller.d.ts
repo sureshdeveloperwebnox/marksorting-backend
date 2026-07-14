@@ -35,6 +35,7 @@ export declare class ServiceReportsController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -69,7 +70,6 @@ export declare class ServiceReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
     }) | null>;
@@ -102,6 +102,7 @@ export declare class ServiceReportsController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
             report_number: string;
             service_category_id: string;
             mill_id: string;
@@ -136,7 +137,6 @@ export declare class ServiceReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
-            status: string;
             authorized_person_phone: string | null;
             expense_id: string | null;
         };
@@ -168,6 +168,7 @@ export declare class ServiceReportsController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         report_number: string;
         service_category_id: string;
         mill_id: string;
@@ -202,7 +203,6 @@ export declare class ServiceReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
     }>;

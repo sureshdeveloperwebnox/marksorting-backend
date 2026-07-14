@@ -162,34 +162,48 @@ export class ReportNotificationsService {
         }
       }
 
-      // Send WhatsApp to authorized person if phone number is provided
+      // Send WhatsApp to authorized person if phone number is provided,
+      // but only if they haven't already been notified as a technician
       if (_authorizedPersonPhone) {
-        try {
+        const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
+        const alreadySentPhones = assignedTechnicians
+          .map((t) => t.phone)
+          .filter(Boolean)
+          .map((p) => this.normalizePhone(p!));
+        const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
+
+        if (alreadyNotified) {
           this.logger.log(
-            `Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+            `Skipping Service Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`,
           );
-          const sent = await this.whatsAppService.sendReportPdf(
-            _authorizedPersonPhone,
-            pdfBuffer,
-            fileName,
-            reportId,
-            'SERVICE',
-            activeMillName,
-            caption,
-          );
-          if (sent) result.whatsappSent = true;
-          this.logger.log(
-            `WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
-          );
-        } catch (error) {
-          result.whatsappError =
-            error instanceof Error
-              ? error.message
-              : 'WhatsApp sending failed';
-          this.logger.error(
-            `WhatsApp failed for Service Report ${reportId} to authorized person`,
-            error,
-          );
+        } else {
+          try {
+            this.logger.log(
+              `Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+            );
+            const sent = await this.whatsAppService.sendReportPdf(
+              _authorizedPersonPhone,
+              pdfBuffer,
+              fileName,
+              reportId,
+              'SERVICE',
+              activeMillName,
+              caption,
+            );
+            if (sent) result.whatsappSent = true;
+            this.logger.log(
+              `WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
+            );
+          } catch (error) {
+            result.whatsappError =
+              error instanceof Error
+                ? error.message
+                : 'WhatsApp sending failed';
+            this.logger.error(
+              `WhatsApp failed for Service Report ${reportId} to authorized person`,
+              error,
+            );
+          }
         }
       }
 
@@ -342,34 +356,48 @@ export class ReportNotificationsService {
         }
       }
 
-      // Send WhatsApp to authorized person if phone number is provided
+      // Send WhatsApp to authorized person if phone number is provided,
+      // but only if they haven't already been notified as a technician
       if (_authorizedPersonPhone) {
-        try {
+        const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
+        const alreadySentPhones = assignedTechnicians
+          .map((t) => t.phone)
+          .filter(Boolean)
+          .map((p) => this.normalizePhone(p!));
+        const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
+
+        if (alreadyNotified) {
           this.logger.log(
-            `Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+            `Skipping Installation Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`,
           );
-          const sent = await this.whatsAppService.sendReportPdf(
-            _authorizedPersonPhone,
-            pdfBuffer,
-            fileName,
-            reportId,
-            'INSTALLATION',
-            activeMillName,
-            caption,
-          );
-          if (sent) result.whatsappSent = true;
-          this.logger.log(
-            `WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
-          );
-        } catch (error) {
-          result.whatsappError =
-            error instanceof Error
-              ? error.message
-              : 'WhatsApp sending failed';
-          this.logger.error(
-            `WhatsApp failed for Installation Report ${reportId} to authorized person`,
-            error,
-          );
+        } else {
+          try {
+            this.logger.log(
+              `Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
+            );
+            const sent = await this.whatsAppService.sendReportPdf(
+              _authorizedPersonPhone,
+              pdfBuffer,
+              fileName,
+              reportId,
+              'INSTALLATION',
+              activeMillName,
+              caption,
+            );
+            if (sent) result.whatsappSent = true;
+            this.logger.log(
+              `WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
+            );
+          } catch (error) {
+            result.whatsappError =
+              error instanceof Error
+                ? error.message
+                : 'WhatsApp sending failed';
+            this.logger.error(
+              `WhatsApp failed for Installation Report ${reportId} to authorized person`,
+              error,
+            );
+          }
         }
       }
 
@@ -384,6 +412,17 @@ export class ReportNotificationsService {
       result.whatsappError = result.whatsappError || errorMsg;
       return result;
     }
+  }
+
+  /**
+   * Normalize a phone number to digits only for deduplication comparison.
+   * Strips leading +, country codes (91 for India), spaces, dashes etc.
+   * Returns the last 10 digits so both "7358921423" and "+917358921423" compare equal.
+   */
+  private normalizePhone(phone: string): string {
+    const digits = phone.replace(/\D/g, '');
+    // Return last 10 digits to handle country-code variations
+    return digits.slice(-10);
   }
 
   /**

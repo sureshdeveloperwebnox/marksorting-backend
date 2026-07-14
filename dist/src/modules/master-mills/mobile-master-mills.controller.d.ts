@@ -18,8 +18,8 @@ export declare class MobileMasterMillsController {
                 deleted_at: Date | null;
                 name: string;
                 status: string;
-                address: string | null;
                 phone: string | null;
+                address: string | null;
             } | null;
         } & {
             id: string;
@@ -28,11 +28,11 @@ export declare class MobileMasterMillsController {
             updated_at: Date;
             deleted_at: Date | null;
             name: string;
-            place: string | null;
             status: string;
+            place: string | null;
+            phone: string | null;
             ref_no: string | null;
             address: string | null;
-            phone: string | null;
             customer_id: string | null;
             city: string | null;
             phone_2: string | null;
@@ -42,12 +42,13 @@ export declare class MobileMasterMillsController {
         created_at?: Date | undefined;
         updated_at?: Date | undefined;
         deleted_at?: Date | null | undefined;
-        mill_id?: string | null | undefined;
-        place?: string | null | undefined;
         status?: string | undefined;
         type?: string | undefined;
-        invoice_no?: string | undefined;
+        mill_id?: string | null | undefined;
+        place?: string | null | undefined;
         invoice_date?: Date | null | undefined;
+        warranty_start_date?: Date | null | undefined;
+        invoice_no?: string | undefined;
         ref_no?: string | null | undefined;
         address?: string | null | undefined;
         state?: string | null | undefined;
@@ -58,7 +59,6 @@ export declare class MobileMasterMillsController {
         warranty_years?: number | null | undefined;
         warranty_months?: number | null | undefined;
         installation_date?: Date | null | undefined;
-        warranty_start_date?: Date | null | undefined;
         warranty_closing_date?: Date | null | undefined;
         all_warranty?: string | null | undefined;
         amc_starting_date?: Date | null | undefined;

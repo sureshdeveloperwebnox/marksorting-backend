@@ -88,11 +88,13 @@ export declare class ExpensesService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        status: string;
+        service_report_id: string | null;
+        installation_report_id: string | null;
         expense_number: string;
         expense_type: string;
         report_type: string;
@@ -102,8 +104,6 @@ export declare class ExpensesService {
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        service_report_id: string | null;
-        installation_report_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateExpenseDto | UpdateMobileExpenseDto, user?: {
         userId: string;
@@ -162,11 +162,13 @@ export declare class ExpensesService {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
             mill_id: string | null;
             place: string | null;
             visit_date: Date;
             visit_time: string;
-            status: string;
+            service_report_id: string | null;
+            installation_report_id: string | null;
             expense_number: string;
             expense_type: string;
             report_type: string;
@@ -176,8 +178,6 @@ export declare class ExpensesService {
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
-            service_report_id: string | null;
-            installation_report_id: string | null;
         }) | null;
     }>;
     remove(id: string, user?: {
@@ -235,11 +235,13 @@ export declare class ExpensesService {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         mill_id: string | null;
         place: string | null;
         visit_date: Date;
         visit_time: string;
-        status: string;
+        service_report_id: string | null;
+        installation_report_id: string | null;
         expense_number: string;
         expense_type: string;
         report_type: string;
@@ -249,8 +251,6 @@ export declare class ExpensesService {
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];
-        service_report_id: string | null;
-        installation_report_id: string | null;
     }>;
     checkEligibility(user: {
         userId: string;

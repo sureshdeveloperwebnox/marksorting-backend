@@ -14,8 +14,8 @@ export declare class MobileInstallationReportsController {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;
@@ -30,6 +30,7 @@ export declare class MobileInstallationReportsController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         report_number: string;
         mill_id: string;
         place: string;
@@ -57,12 +58,11 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
+        invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
-        invoice_number: string | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
@@ -79,8 +79,8 @@ export declare class MobileInstallationReportsController {
                     full_name: string;
                 };
             } & {
-                installation_report_id: string;
                 technician_id: string;
+                installation_report_id: string;
             })[];
             mill: {
                 id: string;
@@ -95,6 +95,7 @@ export declare class MobileInstallationReportsController {
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
             report_number: string;
             mill_id: string;
             place: string;
@@ -122,12 +123,11 @@ export declare class MobileInstallationReportsController {
             engineer_signature: string;
             customer_remarks: string | null;
             customer_signature: string;
-            status: string;
             authorized_person_phone: string | null;
             expense_id: string | null;
+            invoice_number: string | null;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
-            invoice_number: string | null;
             warranty_end_date: Date | null;
             ground_earth_provided: boolean;
             running_channel_combination: number | null;
@@ -143,8 +143,8 @@ export declare class MobileInstallationReportsController {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;
@@ -159,6 +159,7 @@ export declare class MobileInstallationReportsController {
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
         report_number: string;
         mill_id: string;
         place: string;
@@ -186,12 +187,11 @@ export declare class MobileInstallationReportsController {
         engineer_signature: string;
         customer_remarks: string | null;
         customer_signature: string;
-        status: string;
         authorized_person_phone: string | null;
         expense_id: string | null;
+        invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
-        invoice_number: string | null;
         warranty_end_date: Date | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;

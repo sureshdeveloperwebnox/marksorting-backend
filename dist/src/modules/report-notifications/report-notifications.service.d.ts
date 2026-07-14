@@ -21,6 +21,7 @@ export declare class ReportNotificationsService {
     constructor(prisma: PrismaService, mailService: MailService, whatsAppService: WhatsAppService, serviceReportsService: ServiceReportsService, installationReportsService: InstallationReportsService, mailQueue: Queue);
     sendServiceReport(reportId: string, millName: string, _millEmail: string | null | undefined, _millWhatsappNumber: string, _authorizedPersonPhone?: string): Promise<ReportDeliveryResult>;
     sendInstallationReport(reportId: string, millName: string, _millEmail: string | null | undefined, _millWhatsappNumber: string, _authorizedPersonPhone?: string): Promise<ReportDeliveryResult>;
+    private normalizePhone;
     private sendEmailWithAttachment;
     private getServiceReportEmailTemplate;
     private getInstallationReportEmailTemplate;

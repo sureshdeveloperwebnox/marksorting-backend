@@ -24,8 +24,8 @@ export declare class CustomersService {
         deleted_at: Date | null;
         name: string;
         status: string;
-        address: string | null;
         phone: string | null;
+        address: string | null;
     }>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
         before: {
@@ -36,8 +36,8 @@ export declare class CustomersService {
             deleted_at: Date | null;
             name: string;
             status: string;
-            address: string | null;
             phone: string | null;
+            address: string | null;
         };
         after: {
             id: string;
@@ -47,8 +47,8 @@ export declare class CustomersService {
             deleted_at: Date | null;
             name: string;
             status: string;
-            address: string | null;
             phone: string | null;
+            address: string | null;
         };
     }>;
     remove(id: string): Promise<{
@@ -59,8 +59,8 @@ export declare class CustomersService {
         deleted_at: Date | null;
         name: string;
         status: string;
-        address: string | null;
         phone: string | null;
+        address: string | null;
     }>;
     private invalidateCache;
 }

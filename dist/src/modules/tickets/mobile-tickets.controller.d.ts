@@ -30,8 +30,8 @@ export declare class MobileTicketsController {
         description: string;
         created_at: Date;
         updated_at: Date;
-        mill_id: string | null;
         status: string;
+        mill_id: string | null;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;
@@ -64,8 +64,8 @@ export declare class MobileTicketsController {
             description: string;
             created_at: Date;
             updated_at: Date;
-            mill_id: string | null;
             status: string;
+            mill_id: string | null;
             customer_id: string | null;
             ticket_number: string | null;
             service_engineer_id: string | null;
@@ -97,8 +97,8 @@ export declare class MobileTicketsController {
         description: string;
         created_at: Date;
         updated_at: Date;
-        mill_id: string | null;
         status: string;
+        mill_id: string | null;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;
