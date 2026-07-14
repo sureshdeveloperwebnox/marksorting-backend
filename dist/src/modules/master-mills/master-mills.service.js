@@ -1,0 +1,981 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MasterMillsService = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../../prisma/prisma.service");
+const redis_service_1 = require("../../redis/redis.service");
+let MasterMillsService = class MasterMillsService {
+    prisma;
+    redis;
+    CACHE_PREFIX = 'master_mill:';
+    LIST_CACHE_KEY = 'master_mills:list:';
+    constructor(prisma, redis) {
+        this.prisma = prisma;
+        this.redis = redis;
+    }
+    async findAll(params) {
+        const { skip, take, where, orderBy } = params;
+        const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
+        const cachedData = await this.redis.getJson(cacheKey);
+        if (cachedData)
+            return cachedData;
+        const [masterMills, total] = await Promise.all([
+            this.prisma.masterMill.findMany({
+                skip,
+                take,
+                where: { ...where, deleted_at: null },
+                include: {
+                    mill: {
+                        select: {
+                            id: true,
+                            name: true,
+                            ref_no: true,
+                            place: true,
+                            phone: true,
+                            customer_id: true,
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                orderBy,
+            }),
+            this.prisma.masterMill.count({ where: { ...where, deleted_at: null } }),
+        ]);
+        const result = { masterMills, total };
+        await this.redis.setJson(cacheKey, result, 300);
+        return result;
+    }
+    async findById(id) {
+        const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
+        const cached = await this.redis.getJson(cacheKey);
+        if (cached)
+            return cached;
+        const masterMill = await this.prisma.masterMill.findFirst({
+            where: { id, deleted_at: null },
+            include: {
+                mill: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ref_no: true,
+                        place: true,
+                        phone: true,
+                        customer_id: true,
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        if (!masterMill)
+            throw new common_1.NotFoundException('Master Mill record not found');
+        await this.redis.setJson(cacheKey, masterMill, 3600);
+        return masterMill;
+    }
+    async create(dto) {
+        const data = { ...dto };
+        if (!data.warranty_closing_date) {
+            const baseDate = data.warranty_start_date
+                ? new Date(data.warranty_start_date)
+                : data.installation_date
+                    ? new Date(data.installation_date)
+                    : null;
+            if (baseDate) {
+                const years = data.warranty_years ?? 0;
+                const months = data.warranty_months ?? 0;
+                baseDate.setFullYear(baseDate.getFullYear() + years);
+                baseDate.setMonth(baseDate.getMonth() + months);
+                data.warranty_closing_date = baseDate.toISOString();
+            }
+        }
+        if (!data.amc_closing_date && data.amc_starting_date && data.amc_period) {
+            const amcStart = new Date(data.amc_starting_date);
+            amcStart.setMonth(amcStart.getMonth() + data.amc_period);
+            data.amc_closing_date = amcStart.toISOString();
+        }
+        let allWarranty = 'Non Warranty';
+        const now = new Date();
+        const warrantyClose = data.warranty_closing_date ? new Date(data.warranty_closing_date) : null;
+        const amcClose = data.amc_closing_date ? new Date(data.amc_closing_date) : null;
+        if (warrantyClose && warrantyClose > now) {
+            allWarranty = 'Under Warranty';
+        }
+        else if (amcClose && amcClose > now) {
+            allWarranty = 'Under AMC';
+        }
+        else if (warrantyClose || amcClose) {
+            allWarranty = 'Expired';
+        }
+        data.all_warranty = allWarranty;
+        if (data.mfg_date)
+            data.mfg_date = new Date(data.mfg_date);
+        if (data.invoice_date)
+            data.invoice_date = new Date(data.invoice_date);
+        if (data.installation_date)
+            data.installation_date = new Date(data.installation_date);
+        if (data.warranty_start_date)
+            data.warranty_start_date = new Date(data.warranty_start_date);
+        if (data.warranty_closing_date)
+            data.warranty_closing_date = new Date(data.warranty_closing_date);
+        if (data.amc_starting_date)
+            data.amc_starting_date = new Date(data.amc_starting_date);
+        if (data.amc_closing_date)
+            data.amc_closing_date = new Date(data.amc_closing_date);
+        await this.prisma.masterMill.create({ data });
+        await this.invalidateCache();
+        const created = await this.prisma.masterMill.findFirst({
+            where: { invoice_no: data.invoice_no, deleted_at: null },
+            include: {
+                mill: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ref_no: true,
+                        place: true,
+                        phone: true,
+                        customer_id: true,
+                        customer: {
+                            select: {
+                                id: true,
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+        return created;
+    }
+    async update(id, dto) {
+        const existing = await this.prisma.masterMill.findFirst({
+            where: { id, deleted_at: null },
+        });
+        if (!existing)
+            throw new common_1.NotFoundException('Master Mill record not found');
+        const data = { ...dto };
+        const installDate = data.installation_date
+            ? new Date(data.installation_date)
+            : existing.installation_date
+                ? new Date(existing.installation_date)
+                : null;
+        const startOfWarranty = data.warranty_start_date
+            ? new Date(data.warranty_start_date)
+            : existing.warranty_start_date
+                ? new Date(existing.warranty_start_date)
+                : null;
+        const baseDate = startOfWarranty || installDate;
+        if (baseDate && !data.warranty_closing_date) {
+            const years = data.warranty_years ?? existing.warranty_years ?? 0;
+            const months = data.warranty_months ?? existing.warranty_months ?? 0;
+            const closing = new Date(baseDate);
+            closing.setFullYear(closing.getFullYear() + years);
+            closing.setMonth(closing.getMonth() + months);
+            data.warranty_closing_date = closing.toISOString();
+        }
+        const amcStart = data.amc_starting_date
+            ? new Date(data.amc_starting_date)
+            : existing.amc_starting_date
+                ? new Date(existing.amc_starting_date)
+                : null;
+        const amcPeriod = data.amc_period ?? existing.amc_period;
+        if (amcStart && amcPeriod && !data.amc_closing_date) {
+            const amcClose = new Date(amcStart);
+            amcClose.setMonth(amcClose.getMonth() + amcPeriod);
+            data.amc_closing_date = amcClose.toISOString();
+        }
+        let allWarranty = 'Non Warranty';
+        const now = new Date();
+        const warrantyClose = data.warranty_closing_date ? new Date(data.warranty_closing_date) : (existing.warranty_closing_date ? new Date(existing.warranty_closing_date) : null);
+        const amcClose = data.amc_closing_date ? new Date(data.amc_closing_date) : (existing.amc_closing_date ? new Date(existing.amc_closing_date) : null);
+        if (warrantyClose && warrantyClose > now) {
+            allWarranty = 'Under Warranty';
+        }
+        else if (amcClose && amcClose > now) {
+            allWarranty = 'Under AMC';
+        }
+        else if (warrantyClose || amcClose) {
+            allWarranty = 'Expired';
+        }
+        data.all_warranty = allWarranty;
+        if (data.mfg_date)
+            data.mfg_date = new Date(data.mfg_date);
+        if (data.invoice_date)
+            data.invoice_date = new Date(data.invoice_date);
+        if (data.installation_date)
+            data.installation_date = new Date(data.installation_date);
+        if (data.warranty_start_date)
+            data.warranty_start_date = new Date(data.warranty_start_date);
+        if (data.warranty_closing_date)
+            data.warranty_closing_date = new Date(data.warranty_closing_date);
+        if (data.amc_starting_date)
+            data.amc_starting_date = new Date(data.amc_starting_date);
+        if (data.amc_closing_date)
+            data.amc_closing_date = new Date(data.amc_closing_date);
+        const updated = await this.prisma.masterMill.update({
+            where: { id },
+            data,
+        });
+        await this.invalidateCache(id);
+        return { before: existing, after: updated };
+    }
+    async remove(id) {
+        const existing = await this.prisma.masterMill.findFirst({
+            where: { id, deleted_at: null },
+        });
+        if (!existing)
+            throw new common_1.NotFoundException('Master Mill record not found');
+        const deleted = await this.prisma.masterMill.update({
+            where: { id },
+            data: { deleted_at: new Date(), status: 'DELETED' },
+        });
+        await this.invalidateCache(id);
+        return deleted;
+    }
+    async getStats() {
+        const cacheKey = `${this.LIST_CACHE_KEY}stats`;
+        const cached = await this.redis.getJson(cacheKey);
+        if (cached)
+            return cached;
+        const now = new Date();
+        const [total, underWarranty, underAmc, nonWarranty, installationCount, serviceCount,] = await Promise.all([
+            this.prisma.masterMill.count({ where: { deleted_at: null } }),
+            this.prisma.masterMill.count({
+                where: {
+                    deleted_at: null,
+                    all_warranty: 'Under Warranty',
+                },
+            }),
+            this.prisma.masterMill.count({
+                where: {
+                    deleted_at: null,
+                    all_warranty: 'Under AMC',
+                },
+            }),
+            this.prisma.masterMill.count({
+                where: { deleted_at: null, all_warranty: 'Non Warranty' },
+            }),
+            this.prisma.masterMill.count({
+                where: { deleted_at: null, type: 'Installation' },
+            }),
+            this.prisma.masterMill.count({
+                where: { deleted_at: null, type: 'Service' },
+            }),
+        ]);
+        const result = {
+            total,
+            underWarranty,
+            underAmc,
+            nonWarranty,
+            installationCount,
+            serviceCount,
+        };
+        await this.redis.setJson(cacheKey, result, 120);
+        return result;
+    }
+    async findForPrefill(search, refNo, frameNo, context) {
+        if (!search && !refNo && !frameNo) {
+            return context ? { serviceBased: [], installationBased: [] } : [];
+        }
+        const cleanSearch = search ? search.trim() : '';
+        const cleanRefNo = refNo ? refNo.trim() : '';
+        const cleanFrameNo = frameNo ? frameNo.trim() : '';
+        let masterMills = [];
+        if (!context || context === 'service_report' || context === 'installation_report') {
+            const mmWhere = {
+                deleted_at: null,
+                status: 'ACTIVE',
+            };
+            if (context === 'service_report') {
+                mmWhere.type = 'Service';
+            }
+            else if (context === 'installation_report') {
+                mmWhere.type = 'Installation';
+            }
+            if (cleanSearch) {
+                mmWhere.OR = [
+                    { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
+                    },
+                ];
+            }
+            else {
+                const orConditions = [];
+                if (cleanRefNo) {
+                    orConditions.push({
+                        ref_no: { contains: cleanRefNo, mode: 'insensitive' },
+                    });
+                }
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    mmWhere.OR = orConditions;
+                }
+            }
+            masterMills = await this.prisma.masterMill.findMany({
+                where: mmWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                take: 15,
+            });
+        }
+        let serviceReports = [];
+        if (!context || context === 'service_report') {
+            const srWhere = {
+                deleted_at: null,
+            };
+            if (cleanSearch) {
+                srWhere.OR = [
+                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
+                    },
+                ];
+            }
+            else {
+                const orConditions = [];
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    srWhere.OR = orConditions;
+                }
+            }
+            serviceReports = await this.prisma.serviceReport.findMany({
+                where: srWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                take: 15,
+            });
+        }
+        let installationReports = [];
+        if (!context || context === 'installation_report') {
+            const irWhere = {
+                deleted_at: null,
+            };
+            if (cleanSearch) {
+                irWhere.OR = [
+                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
+                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
+                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+                    {
+                        mill: {
+                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                        },
+                    },
+                ];
+            }
+            else {
+                const orConditions = [];
+                if (cleanFrameNo) {
+                    orConditions.push({
+                        serial_or_frame_no: { contains: cleanFrameNo, mode: 'insensitive' },
+                    });
+                }
+                if (orConditions.length > 0) {
+                    irWhere.OR = orConditions;
+                }
+            }
+            installationReports = await this.prisma.installationReport.findMany({
+                where: irWhere,
+                include: {
+                    mill: {
+                        include: {
+                            customer: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    email: true,
+                                    phone: true,
+                                },
+                            },
+                        },
+                    },
+                },
+                take: 15,
+            });
+        }
+        const mapMasterMill = (record) => ({
+            id: record.id,
+            invoice_no: record.invoice_no,
+            invoice_date: record.invoice_date,
+            ref_no: record.ref_no,
+            mill_id: record.mill_id,
+            address: record.address,
+            place: record.place,
+            state: record.state,
+            phone_no: record.phone_no,
+            mc_model: record.mc_model,
+            frame_no: record.frame_no,
+            warranty_years: record.warranty_years,
+            warranty_months: record.warranty_months,
+            installation_date: record.installation_date,
+            warranty_start_date: record.warranty_start_date || record.installation_date,
+            warranty_closing_date: record.warranty_closing_date,
+            all_warranty: record.all_warranty,
+            amc_starting_date: record.amc_starting_date,
+            amc_period: record.amc_period,
+            amc_particular: record.amc_particular,
+            amc_closing_date: record.amc_closing_date,
+            amc_amount: record.amc_amount,
+            status: record.status,
+            type: record.type,
+            mfg_date: record.mfg_date,
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const mapServiceReport = (record) => ({
+            id: `sr-${record.id}`,
+            invoice_no: '',
+            invoice_date: null,
+            ref_no: record.mill?.ref_no || null,
+            mill_id: record.mill_id,
+            address: record.mill?.address || null,
+            place: record.place,
+            state: record.mill?.state || null,
+            phone_no: record.mill_whatsapp_number,
+            mc_model: record.machine_model,
+            frame_no: record.serial_or_frame_no,
+            warranty_years: 0,
+            warranty_months: 0,
+            installation_date: record.machine_installation_date || record.visit_date,
+            warranty_start_date: record.machine_installation_date || record.visit_date,
+            warranty_closing_date: null,
+            all_warranty: 'Non Warranty',
+            amc_starting_date: null,
+            amc_period: null,
+            amc_particular: null,
+            amc_closing_date: null,
+            amc_amount: 0,
+            status: 'ACTIVE',
+            type: 'Service',
+            mfg_date: record.machine_mfg_date || null,
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const mapInstallationReport = (record) => ({
+            id: `ir-${record.id}`,
+            invoice_no: record.invoice_number || '',
+            invoice_date: record.invoice_date,
+            ref_no: record.mill?.ref_no || null,
+            mill_id: record.mill_id,
+            address: record.mill?.address || null,
+            place: record.place,
+            state: record.mill?.state || null,
+            phone_no: record.mill_whatsapp_number,
+            mc_model: record.machine_model,
+            frame_no: record.serial_or_frame_no,
+            warranty_years: null,
+            warranty_months: null,
+            installation_date: record.visit_date,
+            warranty_start_date: record.warranty_start_date,
+            warranty_closing_date: record.warranty_end_date,
+            all_warranty: record.warranty_end_date && new Date(record.warranty_end_date) > new Date() ? 'Under Warranty' : 'Non Warranty',
+            amc_starting_date: null,
+            amc_period: null,
+            amc_particular: null,
+            amc_closing_date: null,
+            amc_amount: 0,
+            status: 'ACTIVE',
+            type: 'Installation',
+            mfg_date: record.machine_mfg_date || null,
+            mill: record.mill ? {
+                id: record.mill.id,
+                name: record.mill.name,
+                place: record.mill.place,
+                phone: record.mill.phone,
+                email: record.mill.email,
+                customer_id: record.mill.customer_id,
+                customer: record.mill.customer ? {
+                    id: record.mill.customer.id,
+                    name: record.mill.customer.name,
+                    email: record.mill.customer.email,
+                    phone: record.mill.customer.phone,
+                } : null,
+            } : null,
+        });
+        const buildDeduplicatedList = (mmList, srList, irList) => {
+            const result = [];
+            const seen = new Set();
+            const addToList = (items) => {
+                for (const item of items) {
+                    if (!item.frame_no) {
+                        result.push(item);
+                        continue;
+                    }
+                    const key = item.frame_no.trim().toLowerCase();
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        result.push(item);
+                    }
+                }
+            };
+            addToList(mmList);
+            addToList(srList);
+            addToList(irList);
+            return result;
+        };
+        const mappedMM = masterMills.map(mapMasterMill);
+        const mappedSR = serviceReports.map(mapServiceReport);
+        const mappedIR = installationReports.map(mapInstallationReport);
+        if (context) {
+            if (context === 'service_report') {
+                return {
+                    serviceBased: buildDeduplicatedList(mappedMM, mappedSR, []),
+                    installationBased: [],
+                };
+            }
+            else {
+                return {
+                    serviceBased: [],
+                    installationBased: buildDeduplicatedList(mappedMM, [], mappedIR),
+                };
+            }
+        }
+        return buildDeduplicatedList(mappedMM, mappedSR, mappedIR).slice(0, 10);
+    }
+    async quickRegister(dto, options) {
+        const customerIdInput = dto.customer_id?.trim();
+        const customerNameInput = dto.customer_name?.trim();
+        if (!customerIdInput && !customerNameInput) {
+            throw new common_1.BadRequestException('Either customer_id or customer_name must be provided');
+        }
+        const cleanMillName = dto.mill_name.trim();
+        const cleanRefNo = dto.ref_no.trim();
+        const cleanFrameNo = dto.frame_no?.trim();
+        const cleanMcModel = dto.mc_model?.trim();
+        const cleanAddress = dto.address?.trim();
+        const cleanPlace = dto.place.trim();
+        const cleanState = dto.state?.trim();
+        const cleanPhone = dto.phone?.trim();
+        const cleanEmail = dto.email?.trim();
+        const cleanInvoiceNo = dto.invoice_no?.trim();
+        const mfgDate = dto.mfg_date ? new Date(dto.mfg_date) : null;
+        const invoiceDate = dto.invoice_date ? new Date(dto.invoice_date) : null;
+        const installationDate = dto.installation_date ? new Date(dto.installation_date) : null;
+        const warrantyStartDate = dto.warranty_start_date ? new Date(dto.warranty_start_date) : null;
+        const warrantyYears = dto.warranty_years !== undefined ? Number(dto.warranty_years) : 1;
+        const warrantyMonths = dto.warranty_months !== undefined ? Number(dto.warranty_months) : 0;
+        const amcStartingDate = dto.amc_starting_date ? new Date(dto.amc_starting_date) : null;
+        let amcClosingDate = dto.amc_closing_date ? new Date(dto.amc_closing_date) : null;
+        const amcPeriod = dto.amc_period !== undefined && dto.amc_period !== null ? Number(dto.amc_period) : null;
+        const amcAmount = dto.amc_amount !== undefined && dto.amc_amount !== null ? Number(dto.amc_amount) : null;
+        const amcParticulars = dto.amc_particulars?.trim();
+        let warrantyClosingDate = null;
+        const baseDateForWarranty = warrantyStartDate || installationDate;
+        if (baseDateForWarranty) {
+            const closing = new Date(baseDateForWarranty);
+            closing.setFullYear(closing.getFullYear() + warrantyYears);
+            closing.setMonth(closing.getMonth() + warrantyMonths);
+            warrantyClosingDate = closing;
+        }
+        if (!amcClosingDate && amcStartingDate && amcPeriod) {
+            const closing = new Date(amcStartingDate);
+            closing.setMonth(closing.getMonth() + amcPeriod);
+            amcClosingDate = closing;
+        }
+        let allWarranty = 'Non Warranty';
+        const now = new Date();
+        if (warrantyClosingDate && warrantyClosingDate > now) {
+            allWarranty = 'Under Warranty';
+        }
+        else if (amcClosingDate && amcClosingDate > now) {
+            allWarranty = 'Under AMC';
+        }
+        let isUpdate = false;
+        const result = await this.prisma.$transaction(async (tx) => {
+            let customer = null;
+            if (customerIdInput) {
+                customer = await tx.customer.findFirst({
+                    where: { id: customerIdInput, deleted_at: null },
+                });
+                if (!customer) {
+                    throw new common_1.BadRequestException('Provided Customer ID does not exist');
+                }
+                const customerUpdates = {};
+                if (cleanAddress && customer.address !== cleanAddress)
+                    customerUpdates.address = cleanAddress;
+                if (cleanPhone && customer.phone !== cleanPhone)
+                    customerUpdates.phone = cleanPhone;
+                if (cleanEmail && customer.email !== cleanEmail)
+                    customerUpdates.email = cleanEmail;
+                if (Object.keys(customerUpdates).length > 0) {
+                    customer = await tx.customer.update({
+                        where: { id: customer.id },
+                        data: customerUpdates,
+                    });
+                }
+            }
+            else {
+                const cleanCustName = customerNameInput;
+                customer = await tx.customer.findFirst({
+                    where: {
+                        name: { equals: cleanCustName, mode: 'insensitive' },
+                        deleted_at: null,
+                    },
+                });
+                if (customer) {
+                    const customerUpdates = {};
+                    if (cleanAddress && customer.address !== cleanAddress)
+                        customerUpdates.address = cleanAddress;
+                    if (cleanPhone && customer.phone !== cleanPhone)
+                        customerUpdates.phone = cleanPhone;
+                    if (cleanEmail && customer.email !== cleanEmail)
+                        customerUpdates.email = cleanEmail;
+                    if (Object.keys(customerUpdates).length > 0) {
+                        customer = await tx.customer.update({
+                            where: { id: customer.id },
+                            data: customerUpdates,
+                        });
+                    }
+                }
+                else {
+                    customer = await tx.customer.create({
+                        data: {
+                            name: cleanCustName,
+                            address: cleanAddress,
+                            phone: cleanPhone,
+                            email: cleanEmail,
+                            status: 'ACTIVE',
+                        },
+                    });
+                }
+            }
+            const resolvedCustomerId = customer.id;
+            let mill = await tx.mill.findFirst({
+                where: {
+                    name: { equals: cleanMillName, mode: 'insensitive' },
+                    customer_id: resolvedCustomerId,
+                    deleted_at: null,
+                },
+            });
+            if (mill) {
+                const millUpdates = {};
+                if (cleanAddress && mill.address !== cleanAddress)
+                    millUpdates.address = cleanAddress;
+                if (cleanPhone && mill.phone !== cleanPhone)
+                    millUpdates.phone = cleanPhone;
+                if (cleanEmail && mill.email !== cleanEmail)
+                    millUpdates.email = cleanEmail;
+                if (cleanPlace && mill.place !== cleanPlace)
+                    millUpdates.place = cleanPlace;
+                if (cleanRefNo && mill.ref_no !== cleanRefNo)
+                    millUpdates.ref_no = cleanRefNo;
+                if (Object.keys(millUpdates).length > 0) {
+                    mill = await tx.mill.update({
+                        where: { id: mill.id },
+                        data: millUpdates,
+                    });
+                }
+            }
+            else {
+                mill = await tx.mill.create({
+                    data: {
+                        name: cleanMillName,
+                        customer_id: resolvedCustomerId,
+                        address: cleanAddress,
+                        phone: cleanPhone,
+                        place: cleanPlace,
+                        ref_no: cleanRefNo,
+                        email: cleanEmail,
+                        status: 'ACTIVE',
+                    },
+                });
+            }
+            const resolvedMillId = mill.id;
+            const orConditions = [];
+            if (cleanRefNo) {
+                orConditions.push({
+                    ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+                });
+            }
+            if (cleanFrameNo) {
+                orConditions.push({
+                    frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
+                });
+            }
+            let masterMill = null;
+            if (!options?.skipDuplicateCheck) {
+                masterMill = await tx.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        mill_id: resolvedMillId,
+                        OR: orConditions.length > 0 ? orConditions : undefined,
+                    },
+                });
+            }
+            if (masterMill) {
+                isUpdate = true;
+                const masterMillUpdates = {};
+                if (cleanRefNo && masterMill.ref_no !== cleanRefNo)
+                    masterMillUpdates.ref_no = cleanRefNo;
+                if (cleanFrameNo && masterMill.frame_no !== cleanFrameNo)
+                    masterMillUpdates.frame_no = cleanFrameNo;
+                if (cleanMcModel && masterMill.mc_model !== cleanMcModel)
+                    masterMillUpdates.mc_model = cleanMcModel;
+                if (cleanAddress && masterMill.address !== cleanAddress)
+                    masterMillUpdates.address = cleanAddress;
+                if (cleanPlace && masterMill.place !== cleanPlace)
+                    masterMillUpdates.place = cleanPlace;
+                if (cleanState && masterMill.state !== cleanState)
+                    masterMillUpdates.state = cleanState;
+                if (cleanPhone && masterMill.phone_no !== cleanPhone)
+                    masterMillUpdates.phone_no = cleanPhone;
+                if (dto.type && masterMill.type !== dto.type)
+                    masterMillUpdates.type = dto.type;
+                if (cleanInvoiceNo && masterMill.invoice_no !== cleanInvoiceNo)
+                    masterMillUpdates.invoice_no = cleanInvoiceNo;
+                if (mfgDate && masterMill.mfg_date?.getTime() !== mfgDate.getTime())
+                    masterMillUpdates.mfg_date = mfgDate;
+                if (invoiceDate && masterMill.invoice_date?.getTime() !== invoiceDate.getTime())
+                    masterMillUpdates.invoice_date = invoiceDate;
+                if (installationDate && masterMill.installation_date?.getTime() !== installationDate.getTime())
+                    masterMillUpdates.installation_date = installationDate;
+                if (warrantyStartDate && masterMill.warranty_start_date?.getTime() !== warrantyStartDate.getTime())
+                    masterMillUpdates.warranty_start_date = warrantyStartDate;
+                if (dto.warranty_years !== undefined && masterMill.warranty_years !== warrantyYears)
+                    masterMillUpdates.warranty_years = warrantyYears;
+                if (dto.warranty_months !== undefined && masterMill.warranty_months !== warrantyMonths)
+                    masterMillUpdates.warranty_months = warrantyMonths;
+                if (warrantyClosingDate && masterMill.warranty_closing_date?.getTime() !== warrantyClosingDate.getTime())
+                    masterMillUpdates.warranty_closing_date = warrantyClosingDate;
+                if (amcStartingDate && masterMill.amc_starting_date?.getTime() !== amcStartingDate.getTime())
+                    masterMillUpdates.amc_starting_date = amcStartingDate;
+                if (amcClosingDate && masterMill.amc_closing_date?.getTime() !== amcClosingDate.getTime())
+                    masterMillUpdates.amc_closing_date = amcClosingDate;
+                if (amcPeriod !== null && masterMill.amc_period !== amcPeriod)
+                    masterMillUpdates.amc_period = amcPeriod;
+                if (amcAmount !== null && masterMill.amc_amount?.toString() !== amcAmount?.toString())
+                    masterMillUpdates.amc_amount = amcAmount;
+                if (amcParticulars && masterMill.amc_particular !== amcParticulars)
+                    masterMillUpdates.amc_particular = amcParticulars;
+                if (allWarranty && masterMill.all_warranty !== allWarranty)
+                    masterMillUpdates.all_warranty = allWarranty;
+                if (masterMill.mill_id !== resolvedMillId)
+                    masterMillUpdates.mill_id = resolvedMillId;
+                if (Object.keys(masterMillUpdates).length > 0) {
+                    masterMill = await tx.masterMill.update({
+                        where: { id: masterMill.id },
+                        data: masterMillUpdates,
+                    });
+                }
+            }
+            else {
+                const invoiceNo = cleanInvoiceNo || `INV-QR-${cleanRefNo}-${Date.now()}`;
+                masterMill = await tx.masterMill.create({
+                    data: {
+                        invoice_no: invoiceNo,
+                        invoice_date: invoiceDate,
+                        ref_no: cleanRefNo,
+                        frame_no: cleanFrameNo,
+                        mc_model: cleanMcModel,
+                        mfg_date: mfgDate,
+                        address: cleanAddress,
+                        place: cleanPlace,
+                        state: cleanState,
+                        phone_no: cleanPhone,
+                        mill_id: resolvedMillId,
+                        status: 'ACTIVE',
+                        type: dto.type || 'Installation',
+                        installation_date: installationDate,
+                        warranty_start_date: warrantyStartDate,
+                        warranty_years: warrantyYears,
+                        warranty_months: warrantyMonths,
+                        warranty_closing_date: warrantyClosingDate,
+                        amc_starting_date: amcStartingDate,
+                        amc_closing_date: amcClosingDate,
+                        amc_period: amcPeriod,
+                        amc_amount: amcAmount,
+                        amc_particular: amcParticulars,
+                        all_warranty: allWarranty,
+                    },
+                });
+            }
+            return tx.masterMill.findUnique({
+                where: { id: masterMill.id },
+                include: {
+                    mill: {
+                        include: {
+                            customer: true,
+                        },
+                    },
+                },
+            });
+        });
+        await this.invalidateAllRelatedCaches(result?.mill?.customer_id ?? undefined, result?.mill_id ?? undefined, result?.id ?? undefined);
+        return {
+            ...result,
+            _isUpdate: isUpdate,
+        };
+    }
+    async invalidateAllRelatedCaches(customerId, millId, masterMillId) {
+        const promises = [
+            this.redis.delByPrefix('customers:list:'),
+            this.redis.delByPrefix('mills:list:'),
+            this.redis.delByPrefix('master_mills:list:'),
+        ];
+        if (customerId)
+            promises.push(this.redis.del(`customer:id:${customerId}`));
+        if (millId)
+            promises.push(this.redis.del(`mill:id:${millId}`));
+        if (masterMillId)
+            promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${masterMillId}`));
+        await Promise.all(promises);
+    }
+    async syncFromServiceReport(params) {
+        try {
+            const { millId, frameNo, mcModel, installationDate, place } = params;
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: millId },
+                include: { customer: true },
+            });
+            if (!mill)
+                return;
+            const existing = await this.prisma.masterMill.findFirst({
+                where: {
+                    deleted_at: null,
+                    type: 'Service',
+                    mill_id: millId,
+                },
+            });
+            if (existing) {
+                const updates = {};
+                if (frameNo && frameNo.trim() && existing.frame_no !== frameNo.trim())
+                    updates.frame_no = frameNo.trim();
+                if (mcModel && mcModel.trim() && existing.mc_model !== mcModel.trim())
+                    updates.mc_model = mcModel.trim();
+                if (installationDate && !existing.installation_date)
+                    updates.installation_date = installationDate;
+                if (place && place.trim() && existing.place !== place.trim())
+                    updates.place = place.trim();
+                if (existing.mill_id !== millId)
+                    updates.mill_id = millId;
+                if (existing.type !== 'Installation')
+                    updates.type = 'Service';
+                if (Object.keys(updates).length > 0) {
+                    await this.prisma.masterMill.update({
+                        where: { id: existing.id },
+                        data: updates,
+                    });
+                }
+            }
+            else {
+                const fallbackInvoiceNo = `INV-SR-${mill.ref_no || millId.slice(0, 8)}-${Date.now()}`;
+                await this.prisma.masterMill.create({
+                    data: {
+                        invoice_no: fallbackInvoiceNo,
+                        ref_no: mill.ref_no || undefined,
+                        frame_no: frameNo?.trim() || undefined,
+                        mc_model: mcModel?.trim() || undefined,
+                        installation_date: installationDate || undefined,
+                        address: mill.address || undefined,
+                        place: place?.trim() || mill.place || undefined,
+                        phone_no: mill.phone || undefined,
+                        mill_id: millId,
+                        status: 'ACTIVE',
+                        type: 'Service',
+                    },
+                });
+            }
+            await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+        }
+        catch (error) {
+            console.error('Error in syncFromServiceReport:', error);
+        }
+    }
+    async invalidateCache(id) {
+        const promises = [
+            this.redis.delByPrefix(this.LIST_CACHE_KEY),
+        ];
+        if (id) {
+            promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
+        }
+        await Promise.all(promises);
+    }
+};
+exports.MasterMillsService = MasterMillsService;
+exports.MasterMillsService = MasterMillsService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        redis_service_1.RedisService])
+], MasterMillsService);
+//# sourceMappingURL=master-mills.service.js.map
