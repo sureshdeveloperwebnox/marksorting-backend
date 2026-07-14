@@ -82,15 +82,21 @@ export class MasterMillsBulkService {
     // Retrieve all active master mills from database to check for duplicates
     const dbMasterMills = await this.prisma.masterMill.findMany({
       where: { deleted_at: null },
-      select: { ref_no: true, frame_no: true },
+      select: {
+        ref_no: true,
+        frame_no: true,
+        mill: {
+          select: {
+            name: true,
+            customer: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
-
-    const dbRefNos = new Set(
-      dbMasterMills.map((m) => m.ref_no?.trim().toLowerCase()).filter(Boolean),
-    );
-    const dbFrameNos = new Set(
-      dbMasterMills.map((m) => m.frame_no?.trim().toLowerCase()).filter(Boolean),
-    );
 
     // Track duplicates within the Excel sheet itself (intra-sheet check)
     const sheetRefNos = new Set<string>();
@@ -99,6 +105,8 @@ export class MasterMillsBulkService {
     for (const row of rows) {
       const cleanRef = row.ref_no?.trim().toLowerCase();
       const cleanFrame = row.frame_no?.trim().toLowerCase();
+      const cleanMillName = row.mill_name?.trim().toLowerCase();
+      const cleanCustomerName = row.customer_name?.trim().toLowerCase();
 
       // 1. Check for duplicates in the spreadsheet itself
       if (cleanRef) {
@@ -114,13 +122,29 @@ export class MasterMillsBulkService {
 
       // 2. Check for duplicates in the database (only if not already marked as sheet duplicate)
       if (cleanRef && !row.errors.ref_no) {
-        if (dbRefNos.has(cleanRef)) {
-          row.errors.ref_no = 'Ref No already exists in database';
+        const matchingMM = dbMasterMills.find(
+          (m) => m.ref_no?.trim().toLowerCase() === cleanRef,
+        );
+        if (matchingMM) {
+          const isSameMill =
+            matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
+            matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName;
+          if (!isSameMill) {
+            row.errors.ref_no = 'Ref No already exists under a different customer or mill';
+          }
         }
       }
       if (cleanFrame && !row.errors.frame_no) {
-        if (dbFrameNos.has(cleanFrame)) {
-          row.errors.frame_no = 'Frame No already exists in database';
+        const matchingMM = dbMasterMills.find(
+          (m) => m.frame_no?.trim().toLowerCase() === cleanFrame,
+        );
+        if (matchingMM) {
+          const isSameMill =
+            matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
+            matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName;
+          if (!isSameMill) {
+            row.errors.frame_no = 'Frame No already exists under a different customer or mill';
+          }
         }
       }
 

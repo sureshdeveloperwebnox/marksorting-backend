@@ -708,7 +708,7 @@ export class MasterMillsService {
     const installationDate = dto.installation_date ? new Date(dto.installation_date) : null;
     const warrantyStartDate = dto.warranty_start_date ? new Date(dto.warranty_start_date) : null;
     const warrantyYears = dto.warranty_years !== undefined ? Number(dto.warranty_years) : 1;
-    const warrantyMonths = dto.warranty_months !== undefined ? Number(dto.warranty_months) : 12;
+    const warrantyMonths = dto.warranty_months !== undefined ? Number(dto.warranty_months) : 0;
     const amcStartingDate = dto.amc_starting_date ? new Date(dto.amc_starting_date) : null;
     let amcClosingDate = dto.amc_closing_date ? new Date(dto.amc_closing_date) : null;
     const amcPeriod = dto.amc_period !== undefined && dto.amc_period !== null ? Number(dto.amc_period) : null;
