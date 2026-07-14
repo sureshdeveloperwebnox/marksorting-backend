@@ -227,6 +227,7 @@ export class ReportNotificationsEventListener {
         millName,
         report.mill_email,
         report.mill_whatsapp_number,
+        report.authorized_person_phone || undefined,
       );
 
       this.logger.log(
@@ -275,6 +276,7 @@ export class ReportNotificationsEventListener {
           millName,
           report.mill_email,
           report.mill_whatsapp_number,
+          report.authorized_person_phone || undefined,
         );
 
       this.logger.log(

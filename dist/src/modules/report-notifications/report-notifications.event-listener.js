@@ -124,7 +124,7 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
                 return;
             }
             const millName = report.mill?.name || 'Unknown Mill';
-            const result = await this.reportNotificationsService.sendServiceReport(reportId, millName, report.mill_email, report.mill_whatsapp_number);
+            const result = await this.reportNotificationsService.sendServiceReport(reportId, millName, report.mill_email, report.mill_whatsapp_number, report.authorized_person_phone || undefined);
             this.logger.log(`Manual Service Report PDF send completed. ` +
                 `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`);
         }
@@ -147,7 +147,7 @@ let ReportNotificationsEventListener = ReportNotificationsEventListener_1 = clas
                 return;
             }
             const millName = report.mill?.name || 'Unknown Mill';
-            const result = await this.reportNotificationsService.sendInstallationReport(reportId, millName, report.mill_email, report.mill_whatsapp_number);
+            const result = await this.reportNotificationsService.sendInstallationReport(reportId, millName, report.mill_email, report.mill_whatsapp_number, report.authorized_person_phone || undefined);
             this.logger.log(`Manual Installation Report PDF send completed. ` +
                 `WhatsApp: ${result.whatsappSent}, Email: ${result.emailSent}`);
         }
