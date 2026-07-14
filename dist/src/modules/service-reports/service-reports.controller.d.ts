@@ -15,8 +15,8 @@ export declare class ServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;
@@ -82,8 +82,8 @@ export declare class ServiceReportsController {
                     full_name: string;
                 };
             } & {
-                technician_id: string;
                 service_report_id: string;
+                technician_id: string;
             })[];
             mill: {
                 id: string;
@@ -148,8 +148,8 @@ export declare class ServiceReportsController {
                 full_name: string;
             };
         } & {
-            technician_id: string;
             service_report_id: string;
+            technician_id: string;
         })[];
         mill: {
             id: string;

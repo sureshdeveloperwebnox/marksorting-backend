@@ -23,12 +23,12 @@ export declare class MasterMillsService {
             name: string;
             place: string | null;
             ref_no: string | null;
+            phone: string | null;
+            customer_id: string | null;
             customer: {
                 id: string;
                 name: string;
             } | null;
-            phone: string | null;
-            customer_id: string | null;
         } | null;
     } & {
         id: string;
@@ -186,9 +186,9 @@ export declare class MasterMillsService {
             address: string | null;
             phone: string | null;
             customer_id: string | null;
+            city: string | null;
             phone_2: string | null;
             phone_3: string | null;
-            city: string | null;
         }) | null | undefined;
         id?: string | undefined;
         created_at?: Date | undefined;
