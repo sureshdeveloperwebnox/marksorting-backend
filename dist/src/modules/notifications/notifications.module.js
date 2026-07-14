@@ -1,0 +1,48 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NotificationsModule = void 0;
+const common_1 = require("@nestjs/common");
+const bullmq_1 = require("@nestjs/bullmq");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
+const prisma_module_1 = require("../../prisma/prisma.module");
+const notifications_gateway_1 = require("./notifications.gateway");
+const notifications_service_1 = require("./notifications.service");
+const notification_processor_1 = require("./notification.processor");
+const notifications_controller_1 = require("./notifications.controller");
+const mobile_notifications_controller_1 = require("./mobile-notifications.controller");
+const notifications_event_listener_1 = require("./notifications.event-listener");
+let NotificationsModule = class NotificationsModule {
+};
+exports.NotificationsModule = NotificationsModule;
+exports.NotificationsModule = NotificationsModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            prisma_module_1.PrismaModule,
+            bullmq_1.BullModule.registerQueue({ name: 'notifications' }),
+            jwt_1.JwtModule.registerAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => ({
+                    secret: configService.get('jwt.secret'),
+                    signOptions: { expiresIn: configService.get('jwt.expiresIn') },
+                }),
+                inject: [config_1.ConfigService],
+            }),
+        ],
+        controllers: [notifications_controller_1.NotificationsController, mobile_notifications_controller_1.MobileNotificationsController],
+        providers: [
+            notifications_gateway_1.NotificationsGateway,
+            notifications_service_1.NotificationsService,
+            notification_processor_1.NotificationProcessor,
+            notifications_event_listener_1.NotificationsEventListener,
+        ],
+        exports: [notifications_service_1.NotificationsService],
+    })
+], NotificationsModule);
+//# sourceMappingURL=notifications.module.js.map
