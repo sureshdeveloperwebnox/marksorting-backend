@@ -30,6 +30,7 @@ const INCLUDE_SHAPE = {
         include: {
             expenseCategory: { select: { id: true, name: true } },
         },
+        orderBy: { created_at: 'asc' },
     },
     technicians: {
         include: { technician: { select: { id: true, full_name: true } } },

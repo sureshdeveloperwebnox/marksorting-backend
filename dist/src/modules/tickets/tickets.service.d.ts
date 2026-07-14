@@ -39,25 +39,25 @@ export declare class TicketsService {
         } | null;
         customer: {
             id: string;
-            email: string | null;
             name: string;
+            email: string | null;
             phone: string | null;
         } | null;
         service_engineer: {
             id: string;
+            status: string;
             full_name: string;
             email: string | null;
-            status: string;
             phone: string | null;
         } | null;
     } & {
         id: string;
-        user_id: string | null;
         description: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        status: string;
         mill_id: string | null;
+        user_id: string | null;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;
@@ -76,25 +76,25 @@ export declare class TicketsService {
             } | null;
             customer: {
                 id: string;
-                email: string | null;
                 name: string;
+                email: string | null;
                 phone: string | null;
             } | null;
             service_engineer: {
                 id: string;
+                status: string;
                 full_name: string;
                 email: string | null;
-                status: string;
                 phone: string | null;
             } | null;
         } & {
             id: string;
-            user_id: string | null;
             description: string;
+            status: string;
             created_at: Date;
             updated_at: Date;
-            status: string;
             mill_id: string | null;
+            user_id: string | null;
             customer_id: string | null;
             ticket_number: string | null;
             service_engineer_id: string | null;
@@ -112,25 +112,25 @@ export declare class TicketsService {
         } | null;
         customer: {
             id: string;
-            email: string | null;
             name: string;
+            email: string | null;
             phone: string | null;
         } | null;
         service_engineer: {
             id: string;
+            status: string;
             full_name: string;
             email: string | null;
-            status: string;
             phone: string | null;
         } | null;
     } & {
         id: string;
-        user_id: string | null;
         description: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
-        status: string;
         mill_id: string | null;
+        user_id: string | null;
         customer_id: string | null;
         ticket_number: string | null;
         service_engineer_id: string | null;
@@ -155,10 +155,10 @@ export declare class TicketsService {
         };
     } & {
         id: string;
-        user_id: string;
+        status: string | null;
         created_at: Date;
         updated_at: Date;
-        status: string | null;
+        user_id: string;
         ticket_id: string;
         notes: string;
         timeline_date: Date;
@@ -172,10 +172,10 @@ export declare class TicketsService {
         };
     } & {
         id: string;
-        user_id: string;
+        status: string | null;
         created_at: Date;
         updated_at: Date;
-        status: string | null;
+        user_id: string;
         ticket_id: string;
         notes: string;
         timeline_date: Date;

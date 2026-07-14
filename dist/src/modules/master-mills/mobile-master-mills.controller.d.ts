@@ -12,24 +12,24 @@ export declare class MobileMasterMillsController {
         mill?: ({
             customer: {
                 id: string;
-                created_at: Date;
-                email: string | null;
-                updated_at: Date;
-                deleted_at: Date | null;
                 name: string;
                 status: string;
+                created_at: Date;
+                updated_at: Date;
+                deleted_at: Date | null;
+                email: string | null;
                 phone: string | null;
                 address: string | null;
             } | null;
         } & {
             id: string;
-            created_at: Date;
-            email: string | null;
-            updated_at: Date;
-            deleted_at: Date | null;
             name: string;
             status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
             place: string | null;
+            email: string | null;
             phone: string | null;
             ref_no: string | null;
             address: string | null;
@@ -39,13 +39,13 @@ export declare class MobileMasterMillsController {
             phone_3: string | null;
         }) | null | undefined;
         id?: string | undefined;
+        status?: string | undefined;
         created_at?: Date | undefined;
         updated_at?: Date | undefined;
         deleted_at?: Date | null | undefined;
-        status?: string | undefined;
-        type?: string | undefined;
         mill_id?: string | null | undefined;
         place?: string | null | undefined;
+        type?: string | undefined;
         invoice_date?: Date | null | undefined;
         warranty_start_date?: Date | null | undefined;
         invoice_no?: string | undefined;

@@ -68,18 +68,19 @@ export declare class ServiceReportsService {
         };
     } & {
         id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
-        report_number: string;
-        service_category_id: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
+        expense_id: string | null;
+        report_number: string;
+        service_category_id: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -107,7 +108,6 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
-        expense_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateServiceReportDto | UpdateMobileServiceReportDto, user?: {
         userId: string;
@@ -138,18 +138,19 @@ export declare class ServiceReportsService {
             };
         } & {
             id: string;
+            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            status: string;
-            report_number: string;
-            service_category_id: string;
             mill_id: string;
             place: string;
-            mill_whatsapp_number: string;
-            mill_email: string | null;
             visit_date: Date;
             visit_time: string;
+            expense_id: string | null;
+            report_number: string;
+            service_category_id: string;
+            mill_whatsapp_number: string;
+            mill_email: string | null;
             call_registered_date: Date;
             machine_model: string;
             machine_mfg_date: Date | null;
@@ -177,7 +178,6 @@ export declare class ServiceReportsService {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
-            expense_id: string | null;
         };
     }>;
     remove(id: string, user?: {
@@ -207,18 +207,19 @@ export declare class ServiceReportsService {
         };
     } & {
         id: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
-        report_number: string;
-        service_category_id: string;
         mill_id: string;
         place: string;
-        mill_whatsapp_number: string;
-        mill_email: string | null;
         visit_date: Date;
         visit_time: string;
+        expense_id: string | null;
+        report_number: string;
+        service_category_id: string;
+        mill_whatsapp_number: string;
+        mill_email: string | null;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -246,7 +247,6 @@ export declare class ServiceReportsService {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
-        expense_id: string | null;
     }>;
     generatePdf(id: string, user?: {
         userId: string;
