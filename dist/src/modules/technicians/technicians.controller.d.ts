@@ -6,12 +6,12 @@ export declare class TechniciansController {
     findOne(id: string): Promise<any>;
     updateStatus(id: string, status: string): Promise<{
         id: string;
-        status: string;
         created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
         full_name: string;
         email: string | null;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
         phone: string | null;
     }>;
 }

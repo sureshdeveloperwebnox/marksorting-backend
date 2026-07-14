@@ -17,33 +17,33 @@ export declare class ExpenseCategoriesService {
     findById(id: string): Promise<any>;
     create(dto: CreateExpenseCategoryDto): Promise<{
         id: string;
-        name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
     update(id: string, dto: UpdateExpenseCategoryDto): Promise<{
         before: any;
         after: {
             id: string;
-            name: string;
             description: string | null;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
         };
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
         description: string | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
     }>;
     private invalidateCache;
 }

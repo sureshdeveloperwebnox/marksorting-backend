@@ -28,13 +28,13 @@ export declare class MasterMillsController {
         } | null;
     } & {
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        type: string;
         mill_id: string | null;
         place: string | null;
-        type: string;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
         invoice_no: string;
@@ -61,24 +61,24 @@ export declare class MasterMillsController {
         mill?: ({
             customer: {
                 id: string;
-                name: string;
-                status: string;
                 created_at: Date;
+                email: string | null;
                 updated_at: Date;
                 deleted_at: Date | null;
-                email: string | null;
+                name: string;
+                status: string;
                 phone: string | null;
                 address: string | null;
             } | null;
         } & {
             id: string;
-            name: string;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
             place: string | null;
-            email: string | null;
             phone: string | null;
             ref_no: string | null;
             address: string | null;
@@ -88,13 +88,13 @@ export declare class MasterMillsController {
             phone_3: string | null;
         }) | null | undefined;
         id?: string | undefined;
-        status?: string | undefined;
         created_at?: Date | undefined;
         updated_at?: Date | undefined;
         deleted_at?: Date | null | undefined;
+        status?: string | undefined;
+        type?: string | undefined;
         mill_id?: string | null | undefined;
         place?: string | null | undefined;
-        type?: string | undefined;
         invoice_date?: Date | null | undefined;
         warranty_start_date?: Date | null | undefined;
         invoice_no?: string | undefined;
@@ -119,13 +119,13 @@ export declare class MasterMillsController {
     update(id: string, dto: UpdateMasterMillDto): Promise<{
         before: {
             id: string;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
+            type: string;
             mill_id: string | null;
             place: string | null;
-            type: string;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
             invoice_no: string;
@@ -149,13 +149,13 @@ export declare class MasterMillsController {
         };
         after: {
             id: string;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
+            type: string;
             mill_id: string | null;
             place: string | null;
-            type: string;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
             invoice_no: string;
@@ -180,13 +180,13 @@ export declare class MasterMillsController {
     }>;
     remove(id: string): Promise<{
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        type: string;
         mill_id: string | null;
         place: string | null;
-        type: string;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
         invoice_no: string;

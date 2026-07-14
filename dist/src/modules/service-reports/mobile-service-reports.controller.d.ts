@@ -31,19 +31,18 @@ export declare class MobileServiceReportsController {
         };
     } & {
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        mill_id: string;
-        place: string;
-        visit_date: Date;
-        visit_time: string;
-        expense_id: string | null;
+        status: string;
         report_number: string;
         service_category_id: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -71,6 +70,7 @@ export declare class MobileServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }) | null>;
     update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         before: any;
@@ -98,19 +98,18 @@ export declare class MobileServiceReportsController {
             };
         } & {
             id: string;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            mill_id: string;
-            place: string;
-            visit_date: Date;
-            visit_time: string;
-            expense_id: string | null;
+            status: string;
             report_number: string;
             service_category_id: string;
+            mill_id: string;
+            place: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
+            visit_date: Date;
+            visit_time: string;
             call_registered_date: Date;
             machine_model: string;
             machine_mfg_date: Date | null;
@@ -138,6 +137,7 @@ export declare class MobileServiceReportsController {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
         };
     }>;
     remove(id: string, req: any): Promise<{
@@ -164,19 +164,18 @@ export declare class MobileServiceReportsController {
         };
     } & {
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        mill_id: string;
-        place: string;
-        visit_date: Date;
-        visit_time: string;
-        expense_id: string | null;
+        status: string;
         report_number: string;
         service_category_id: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -204,6 +203,7 @@ export declare class MobileServiceReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
     }>;
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
 }

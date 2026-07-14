@@ -15,8 +15,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;
@@ -28,18 +28,17 @@ export declare class InstallationReportsController {
         };
     } & {
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        report_number: string;
         mill_id: string;
         place: string;
-        visit_date: Date;
-        visit_time: string;
-        expense_id: string | null;
-        report_number: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -61,6 +60,7 @@ export declare class InstallationReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
@@ -80,8 +80,8 @@ export declare class InstallationReportsController {
                     full_name: string;
                 };
             } & {
-                installation_report_id: string;
                 technician_id: string;
+                installation_report_id: string;
             })[];
             mill: {
                 id: string;
@@ -93,18 +93,17 @@ export declare class InstallationReportsController {
             };
         } & {
             id: string;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            status: string;
+            report_number: string;
             mill_id: string;
             place: string;
-            visit_date: Date;
-            visit_time: string;
-            expense_id: string | null;
-            report_number: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
+            visit_date: Date;
+            visit_time: string;
             call_registered_date: Date;
             machine_model: string;
             machine_mfg_date: Date | null;
@@ -126,6 +125,7 @@ export declare class InstallationReportsController {
             customer_remarks: string | null;
             customer_signature: string;
             authorized_person_phone: string | null;
+            expense_id: string | null;
             invoice_number: string | null;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
@@ -144,8 +144,8 @@ export declare class InstallationReportsController {
                 full_name: string;
             };
         } & {
-            installation_report_id: string;
             technician_id: string;
+            installation_report_id: string;
         })[];
         mill: {
             id: string;
@@ -157,18 +157,17 @@ export declare class InstallationReportsController {
         };
     } & {
         id: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        status: string;
+        report_number: string;
         mill_id: string;
         place: string;
-        visit_date: Date;
-        visit_time: string;
-        expense_id: string | null;
-        report_number: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
+        visit_date: Date;
+        visit_time: string;
         call_registered_date: Date;
         machine_model: string;
         machine_mfg_date: Date | null;
@@ -190,6 +189,7 @@ export declare class InstallationReportsController {
         customer_remarks: string | null;
         customer_signature: string;
         authorized_person_phone: string | null;
+        expense_id: string | null;
         invoice_number: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;

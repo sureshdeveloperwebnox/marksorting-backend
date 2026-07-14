@@ -13,12 +13,12 @@ export declare class PermissionsService {
     invalidateUserPermissionsCache(userId: string): Promise<void>;
     getAllPermissions(): Promise<{
         id: string;
-        name: string;
         description: string | null;
+        name: string;
     }[]>;
     getPermissionsByModule(module: string): Promise<{
         id: string;
-        name: string;
         description: string | null;
+        name: string;
     }[]>;
 }

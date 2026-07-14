@@ -7,18 +7,18 @@ export declare class RolesController {
     findAll(skip?: string, take?: string, search?: string): Promise<any>;
     getAllPermissions(): Promise<{
         id: string;
-        name: string;
         description: string | null;
+        name: string;
     }[]>;
     findOne(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
     update(id: string, dto: UpdateRoleDto): Promise<{
         before: {
             id: string;
-            name: string;
             description: string | null;
             created_at: Date;
             updated_at: Date;
+            name: string;
         };
         after: any;
     }>;

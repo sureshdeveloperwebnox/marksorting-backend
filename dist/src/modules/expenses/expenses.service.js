@@ -363,11 +363,11 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 ? firstItem.expense_category_id
                 : expenseData.expense_category_id || null;
             const totalAmount = items.length
-                ? items.reduce((sum, it) => sum + (it.amount || 0), 0)
-                : expenseData.amount || 0;
+                ? items.reduce((sum, it) => sum + Number(it.amount || 0), 0)
+                : Number(expenseData.amount || 0);
             const totalAdminAmount = items.length
-                ? items.reduce((sum, it) => sum + (it.admin_amount || 0), 0)
-                : expenseData.admin_amount || 0;
+                ? items.reduce((sum, it) => sum + Number(it.admin_amount || 0), 0)
+                : Number(expenseData.admin_amount || 0);
             const rootRemarks = firstItem
                 ? firstItem.remarks || expenseData.remarks || null
                 : expenseData.remarks || null;
@@ -416,8 +416,8 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                     data: items.map((it) => ({
                         expense_id: created.id,
                         expense_category_id: it.expense_category_id,
-                        amount: String(it.amount || 0),
-                        admin_amount: String(it.admin_amount || 0),
+                        amount: String(Number(it.amount || 0)),
+                        admin_amount: String(Number(it.admin_amount || 0)),
                         remarks: it.remarks || null,
                         admin_remarks: it.admin_remarks || null,
                         expense_images: it.expense_images || [],
@@ -691,9 +691,9 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             updateData.expense_category_id = firstItem
                 ? firstItem.expense_category_id
                 : null;
-            const totalAmount = items.reduce((sum, it) => sum + (it.amount || 0), 0);
+            const totalAmount = items.reduce((sum, it) => sum + Number(it.amount || 0), 0);
             updateData.amount = String(totalAmount);
-            const totalAdminAmount = items.reduce((sum, it) => sum + (it.admin_amount || 0), 0);
+            const totalAdminAmount = items.reduce((sum, it) => sum + Number(it.admin_amount || 0), 0);
             updateData.admin_amount = String(totalAdminAmount);
             updateData.remarks = firstItem ? firstItem.remarks || null : null;
             updateData.expense_images = Array.from(new Set(items.flatMap((it) => it.expense_images || [])));
@@ -775,8 +775,8 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                         data: expenseData.expense_items.map((it) => ({
                             expense_id: id,
                             expense_category_id: it.expense_category_id,
-                            amount: String(it.amount || 0),
-                            admin_amount: String(it.admin_amount || 0),
+                            amount: String(Number(it.amount || 0)),
+                            admin_amount: String(Number(it.admin_amount || 0)),
                             remarks: it.remarks || null,
                             admin_remarks: it.admin_remarks || null,
                             expense_images: it.expense_images || [],

@@ -11,9 +11,9 @@ export declare class NotificationsService {
     constructor(prisma: PrismaService, notificationsQueue: Queue, gateway: NotificationsGateway);
     createNotification(userId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
         id: string;
-        status: string;
-        created_at: Date;
         user_id: string | null;
+        created_at: Date;
+        status: string;
         type: string;
         title: string;
         message: string;
@@ -27,9 +27,9 @@ export declare class NotificationsService {
     getUserNotifications(userId: string, skip?: number, take?: number): Promise<{
         notifications: {
             id: string;
-            status: string;
-            created_at: Date;
             user_id: string | null;
+            created_at: Date;
+            status: string;
             type: string;
             title: string;
             message: string;
@@ -40,9 +40,9 @@ export declare class NotificationsService {
     }>;
     markAsRead(userId: string, notificationId: string): Promise<{
         id: string;
-        status: string;
-        created_at: Date;
         user_id: string | null;
+        created_at: Date;
+        status: string;
         type: string;
         title: string;
         message: string;
@@ -52,9 +52,9 @@ export declare class NotificationsService {
     notifyStakeholders(technicianUserIds: string[], creatorUserId: string | undefined, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     registerPushToken(userId: string, token: string, deviceType: DeviceType): Promise<{
         id: string;
+        user_id: string;
         created_at: Date;
         updated_at: Date;
-        user_id: string;
         token: string;
         device_type: string;
     }>;

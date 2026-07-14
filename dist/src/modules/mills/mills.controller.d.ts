@@ -8,13 +8,13 @@ export declare class MillsController {
     findOne(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
         id: string;
-        name: string;
-        status: string;
         created_at: Date;
+        email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
         place: string | null;
-        email: string | null;
         phone: string | null;
         ref_no: string | null;
         address: string | null;
@@ -26,13 +26,13 @@ export declare class MillsController {
     update(id: string, dto: UpdateMillDto): Promise<{
         before: {
             id: string;
-            name: string;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
             place: string | null;
-            email: string | null;
             phone: string | null;
             ref_no: string | null;
             address: string | null;
@@ -43,13 +43,13 @@ export declare class MillsController {
         };
         after: {
             id: string;
-            name: string;
-            status: string;
             created_at: Date;
+            email: string | null;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
             place: string | null;
-            email: string | null;
             phone: string | null;
             ref_no: string | null;
             address: string | null;
@@ -61,13 +61,13 @@ export declare class MillsController {
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
-        status: string;
         created_at: Date;
+        email: string | null;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
         place: string | null;
-        email: string | null;
         phone: string | null;
         ref_no: string | null;
         address: string | null;
