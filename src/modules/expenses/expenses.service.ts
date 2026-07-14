@@ -255,6 +255,12 @@ export class ExpensesService {
       const categoryIds = expenseData.expense_items.map(
         (it: any) => it.expense_category_id,
       );
+      // Check for duplicate categories within the same expense (unique constraint)
+      if (categoryIds.length !== new Set(categoryIds).size) {
+        throw new BadRequestException(
+          'Each expense category can only be used once per expense. Please remove duplicate categories.',
+        );
+      }
       const categoriesCount = await this.prisma.expenseCategory.count({
         where: { id: { in: categoryIds }, deleted_at: null },
       });
@@ -438,7 +444,9 @@ export class ExpensesService {
       }
     }
 
-    const expense = await this.prisma.$transaction(async (tx) => {
+    let expense: any;
+    try {
+    expense = await this.prisma.$transaction(async (tx) => {
       // Compute today's UTC date boundaries
       const todayStart = new Date();
       todayStart.setUTCHours(0, 0, 0, 0);
@@ -565,6 +573,20 @@ export class ExpensesService {
         include: INCLUDE_SHAPE,
       });
     });
+    } catch (err: any) {
+      this.logger.error(`Expense create failed: ${err?.message}`, err?.stack);
+      if (err?.code === 'P2002') {
+        throw new BadRequestException(
+          'Each expense category can only be used once per expense.',
+        );
+      }
+      if (err instanceof BadRequestException || err instanceof ForbiddenException || err instanceof NotFoundException) {
+        throw err;
+      }
+      throw new BadRequestException(
+        `Failed to create expense: ${err?.message || 'Unknown error'}`,
+      );
+    }
 
     await this.invalidateCache();
 

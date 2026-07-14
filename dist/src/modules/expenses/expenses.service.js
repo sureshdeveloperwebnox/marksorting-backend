@@ -200,6 +200,9 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         }
         if (expenseData.expense_items && expenseData.expense_items.length > 0) {
             const categoryIds = expenseData.expense_items.map((it) => it.expense_category_id);
+            if (categoryIds.length !== new Set(categoryIds).size) {
+                throw new common_1.BadRequestException('Each expense category can only be used once per expense. Please remove duplicate categories.');
+            }
             const categoriesCount = await this.prisma.expenseCategory.count({
                 where: { id: { in: categoryIds }, deleted_at: null },
             });
@@ -346,107 +349,120 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 throw new common_1.BadRequestException('Expense date cannot be in the future');
             }
         }
-        const expense = await this.prisma.$transaction(async (tx) => {
-            const todayStart = new Date();
-            todayStart.setUTCHours(0, 0, 0, 0);
-            const todayEnd = new Date();
-            todayEnd.setUTCHours(23, 59, 59, 999);
-            const count = await tx.expense.count({
-                where: { created_at: { gte: todayStart, lte: todayEnd } },
-            });
-            const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
-            const seq = String(count + 1);
-            const expense_number = `EXP-${dateStr}-${seq}`;
-            const items = expenseData.expense_items || [];
-            const firstItem = items[0];
-            const rootCategoryId = firstItem
-                ? firstItem.expense_category_id
-                : expenseData.expense_category_id || null;
-            const totalAmount = items.length
-                ? items.reduce((sum, it) => sum + Number(it.amount || 0), 0)
-                : Number(expenseData.amount || 0);
-            const totalAdminAmount = items.length
-                ? items.reduce((sum, it) => sum + Number(it.admin_amount || 0), 0)
-                : Number(expenseData.admin_amount || 0);
-            const rootRemarks = firstItem
-                ? firstItem.remarks || expenseData.remarks || null
-                : expenseData.remarks || null;
-            const rootImages = items.length
-                ? Array.from(new Set(items.flatMap((it) => it.expense_images || [])))
-                : expenseData.expense_images || [];
-            const report_type = expenseData.service_report_id
-                ? 'SERVICE'
-                : expenseData.installation_report_id
-                    ? 'INSTALLATION'
-                    : 'NONE';
-            const created = await tx.expense.create({
-                data: {
-                    expense_number,
-                    expense_type: expenseData.expense_type || 'MILL',
-                    report_type,
-                    visit_date: new Date(linkedVisitDate),
-                    visit_time: (0, date_time_1.getAutoVisitTime)(),
-                    expense_category_id: rootCategoryId,
-                    place: linkedPlace || null,
-                    others: expenseData.others || null,
-                    remarks: rootRemarks,
-                    amount: String(totalAmount),
-                    admin_amount: String(totalAdminAmount),
-                    status: expenseData.status || 'PENDING',
-                    expense_images: rootImages,
-                    mill_id: linkedMillId || null,
-                    service_report_id: expenseData.service_report_id || null,
-                    installation_report_id: expenseData.installation_report_id || null,
-                },
-            });
-            if (expenseData.service_report_id) {
-                await tx.serviceReport.update({
-                    where: { id: expenseData.service_report_id },
-                    data: { expense_id: created.id },
+        let expense;
+        try {
+            expense = await this.prisma.$transaction(async (tx) => {
+                const todayStart = new Date();
+                todayStart.setUTCHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setUTCHours(23, 59, 59, 999);
+                const count = await tx.expense.count({
+                    where: { created_at: { gte: todayStart, lte: todayEnd } },
                 });
-            }
-            else if (expenseData.installation_report_id) {
-                await tx.installationReport.update({
-                    where: { id: expenseData.installation_report_id },
-                    data: { expense_id: created.id },
-                });
-            }
-            if (items.length > 0) {
-                await tx.expenseItem.createMany({
-                    data: items.map((it) => ({
-                        expense_id: created.id,
-                        expense_category_id: it.expense_category_id,
-                        amount: String(Number(it.amount || 0)),
-                        admin_amount: String(Number(it.admin_amount || 0)),
-                        remarks: it.remarks || null,
-                        admin_remarks: it.admin_remarks || null,
-                        expense_images: it.expense_images || [],
-                    })),
-                });
-            }
-            else if (rootCategoryId) {
-                await tx.expenseItem.create({
+                const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
+                const seq = String(count + 1);
+                const expense_number = `EXP-${dateStr}-${seq}`;
+                const items = expenseData.expense_items || [];
+                const firstItem = items[0];
+                const rootCategoryId = firstItem
+                    ? firstItem.expense_category_id
+                    : expenseData.expense_category_id || null;
+                const totalAmount = items.length
+                    ? items.reduce((sum, it) => sum + Number(it.amount || 0), 0)
+                    : Number(expenseData.amount || 0);
+                const totalAdminAmount = items.length
+                    ? items.reduce((sum, it) => sum + Number(it.admin_amount || 0), 0)
+                    : Number(expenseData.admin_amount || 0);
+                const rootRemarks = firstItem
+                    ? firstItem.remarks || expenseData.remarks || null
+                    : expenseData.remarks || null;
+                const rootImages = items.length
+                    ? Array.from(new Set(items.flatMap((it) => it.expense_images || [])))
+                    : expenseData.expense_images || [];
+                const report_type = expenseData.service_report_id
+                    ? 'SERVICE'
+                    : expenseData.installation_report_id
+                        ? 'INSTALLATION'
+                        : 'NONE';
+                const created = await tx.expense.create({
                     data: {
-                        expense_id: created.id,
+                        expense_number,
+                        expense_type: expenseData.expense_type || 'MILL',
+                        report_type,
+                        visit_date: new Date(linkedVisitDate),
+                        visit_time: (0, date_time_1.getAutoVisitTime)(),
                         expense_category_id: rootCategoryId,
-                        amount: String(expenseData.amount || 0),
-                        admin_amount: String(expenseData.admin_amount || 0),
+                        place: linkedPlace || null,
+                        others: expenseData.others || null,
                         remarks: rootRemarks,
+                        amount: String(totalAmount),
+                        admin_amount: String(totalAdminAmount),
+                        status: expenseData.status || 'PENDING',
                         expense_images: rootImages,
+                        mill_id: linkedMillId || null,
+                        service_report_id: expenseData.service_report_id || null,
+                        installation_report_id: expenseData.installation_report_id || null,
                     },
                 });
+                if (expenseData.service_report_id) {
+                    await tx.serviceReport.update({
+                        where: { id: expenseData.service_report_id },
+                        data: { expense_id: created.id },
+                    });
+                }
+                else if (expenseData.installation_report_id) {
+                    await tx.installationReport.update({
+                        where: { id: expenseData.installation_report_id },
+                        data: { expense_id: created.id },
+                    });
+                }
+                if (items.length > 0) {
+                    await tx.expenseItem.createMany({
+                        data: items.map((it) => ({
+                            expense_id: created.id,
+                            expense_category_id: it.expense_category_id,
+                            amount: String(Number(it.amount || 0)),
+                            admin_amount: String(Number(it.admin_amount || 0)),
+                            remarks: it.remarks || null,
+                            admin_remarks: it.admin_remarks || null,
+                            expense_images: it.expense_images || [],
+                        })),
+                    });
+                }
+                else if (rootCategoryId) {
+                    await tx.expenseItem.create({
+                        data: {
+                            expense_id: created.id,
+                            expense_category_id: rootCategoryId,
+                            amount: String(expenseData.amount || 0),
+                            admin_amount: String(expenseData.admin_amount || 0),
+                            remarks: rootRemarks,
+                            expense_images: rootImages,
+                        },
+                    });
+                }
+                await tx.expenseTechnician.createMany({
+                    data: finalTechnicianIds.map((tid) => ({
+                        expense_id: created.id,
+                        technician_id: tid,
+                    })),
+                });
+                return tx.expense.findFirst({
+                    where: { id: created.id },
+                    include: INCLUDE_SHAPE,
+                });
+            });
+        }
+        catch (err) {
+            this.logger.error(`Expense create failed: ${err?.message}`, err?.stack);
+            if (err?.code === 'P2002') {
+                throw new common_1.BadRequestException('Each expense category can only be used once per expense.');
             }
-            await tx.expenseTechnician.createMany({
-                data: finalTechnicianIds.map((tid) => ({
-                    expense_id: created.id,
-                    technician_id: tid,
-                })),
-            });
-            return tx.expense.findFirst({
-                where: { id: created.id },
-                include: INCLUDE_SHAPE,
-            });
-        });
+            if (err instanceof common_1.BadRequestException || err instanceof common_1.ForbiddenException || err instanceof common_1.NotFoundException) {
+                throw err;
+            }
+            throw new common_1.BadRequestException(`Failed to create expense: ${err?.message || 'Unknown error'}`);
+        }
         await this.invalidateCache();
         if (expense?.expense_images && expense.expense_images.length > 0) {
             const imageAclPromises = expense.expense_images.map((img) => this.s3Service.makeObjectPublic(img));
