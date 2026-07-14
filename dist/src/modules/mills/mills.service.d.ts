@@ -1,0 +1,90 @@
+import { PrismaService } from '../../prisma/prisma.service';
+import { RedisService } from '../../redis/redis.service';
+import { Prisma } from '@prisma/client';
+import { CreateMillDto } from './dto/create-mill.dto';
+import { UpdateMillDto } from './dto/update-mill.dto';
+export declare class MillsService {
+    private prisma;
+    private redis;
+    private readonly CACHE_PREFIX;
+    private readonly LIST_CACHE_KEY;
+    constructor(prisma: PrismaService, redis: RedisService);
+    findAll(params: {
+        skip?: number;
+        take?: number;
+        where?: Prisma.MillWhereInput;
+        orderBy?: Prisma.MillOrderByWithRelationInput;
+    }): Promise<any>;
+    findById(id: string): Promise<any>;
+    create(dto: CreateMillDto): Promise<{
+        id: string;
+        name: string;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        place: string | null;
+        email: string | null;
+        phone: string | null;
+        ref_no: string | null;
+        address: string | null;
+        customer_id: string | null;
+        city: string | null;
+        phone_2: string | null;
+        phone_3: string | null;
+    }>;
+    update(id: string, dto: UpdateMillDto): Promise<{
+        before: {
+            id: string;
+            name: string;
+            status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            place: string | null;
+            email: string | null;
+            phone: string | null;
+            ref_no: string | null;
+            address: string | null;
+            customer_id: string | null;
+            city: string | null;
+            phone_2: string | null;
+            phone_3: string | null;
+        };
+        after: {
+            id: string;
+            name: string;
+            status: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            place: string | null;
+            email: string | null;
+            phone: string | null;
+            ref_no: string | null;
+            address: string | null;
+            customer_id: string | null;
+            city: string | null;
+            phone_2: string | null;
+            phone_3: string | null;
+        };
+    }>;
+    remove(id: string): Promise<{
+        id: string;
+        name: string;
+        status: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        place: string | null;
+        email: string | null;
+        phone: string | null;
+        ref_no: string | null;
+        address: string | null;
+        customer_id: string | null;
+        city: string | null;
+        phone_2: string | null;
+        phone_3: string | null;
+    }>;
+    private invalidateCache;
+}
