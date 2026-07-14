@@ -240,6 +240,9 @@ let InstallationReportsService = class InstallationReportsService {
                         ? new Date(reportData.visit_date)
                         : new Date(),
                     call_registered_date: new Date(reportData.call_registered_date),
+                    machine_mfg_date: reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
+                        ? new Date(reportData.machine_mfg_date)
+                        : undefined,
                     invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
                         ? new Date(reportData.invoice_date)
                         : undefined,
@@ -332,6 +335,12 @@ let InstallationReportsService = class InstallationReportsService {
             updateData.invoice_date =
                 reportData.invoice_date && reportData.invoice_date.trim()
                     ? new Date(reportData.invoice_date)
+                    : null;
+        }
+        if (reportData.machine_mfg_date !== undefined) {
+            updateData.machine_mfg_date =
+                reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
+                    ? new Date(reportData.machine_mfg_date)
                     : null;
         }
         if (reportData.warranty_start_date !== undefined) {
