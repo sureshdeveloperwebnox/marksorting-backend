@@ -74,9 +74,9 @@ __decorate([
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "frame_no", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: true }),
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], QuickRegisterDto.prototype, "mfg_date", void 0);
 __decorate([

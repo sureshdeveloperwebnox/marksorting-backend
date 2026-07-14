@@ -255,7 +255,7 @@ export class MasterMillsBulkService {
               state: row.state || undefined,
               phone: row.phone_no || undefined,
               type: row.type || undefined,
-              mfg_date: this.parseExcelDate(row.mfg_date) || this.parseExcelDate(row.installation_date) || new Date().toISOString().split('T')[0],
+              mfg_date: this.parseExcelDate(row.mfg_date) || undefined,
               invoice_no: row.invoice_no || undefined,
               invoice_date: this.parseExcelDate(row.invoice_date),
               installation_date: this.parseExcelDate(row.installation_date),

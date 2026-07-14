@@ -4,7 +4,7 @@ export declare class QuickRegisterDto {
     mill_name: string;
     ref_no: string;
     frame_no?: string;
-    mfg_date: string;
+    mfg_date?: string;
     mc_model?: string;
     address?: string;
     place: string;

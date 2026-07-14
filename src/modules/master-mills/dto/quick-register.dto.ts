@@ -41,10 +41,10 @@ export class QuickRegisterDto {
   @IsOptional()
   frame_no?: string;
 
-  @ApiProperty({ example: '2024-01-15', required: true })
+  @ApiProperty({ example: '2024-01-15', required: false })
   @IsDateString()
-  @IsNotEmpty()
-  mfg_date: string;
+  @IsOptional()
+  mfg_date?: string;
 
   @ApiProperty({ example: 'RX-40 B FOR ZX-40', required: false })
   @IsString()
