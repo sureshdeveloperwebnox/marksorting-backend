@@ -11,7 +11,6 @@ export declare class UsersController {
     update(id: string, dto: UpdateUserDto, req: any): Promise<any>;
     remove(id: string): Promise<{
         id: string;
-        created_at: Date;
         full_name: string;
         email: string;
         phone_number: string | null;
@@ -25,6 +24,7 @@ export declare class UsersController {
         last_login_at: Date | null;
         failed_login_attempts: number;
         locked_until: Date | null;
+        created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
         created_by: string | null;

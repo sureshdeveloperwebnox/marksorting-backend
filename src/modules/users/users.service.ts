@@ -101,8 +101,90 @@ export class UsersService {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
+
+    // Check if phone number already exists (among active users/technicians)
+    if (data.phone_number) {
+      const [existingPhoneUser, existingPhoneTechnician] = await Promise.all([
+        this.prisma.user.findFirst({
+          where: { 
+            phone_number: data.phone_number,
+            deleted_at: null,
+          },
+        }),
+        this.prisma.technician.findFirst({
+          where: { 
+            phone: data.phone_number,
+            deleted_at: null,
+          },
+        }),
+      ]);
+      if (
+        (existingPhoneUser && (!existingUser || existingPhoneUser.id !== existingUser.id)) ||
+        (existingPhoneTechnician && (!existingUser || existingPhoneTechnician.id !== existingUser.id))
+      ) {
+        throw new ConflictException('User with this phone number already exists');
+      }
+    }
+
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      if (existingUser.deleted_at === null) {
+        throw new ConflictException('User with this email already exists');
+      }
+
+      // If the user was soft-deleted, we can reuse/reactivate this record
+      const password_hash = await bcrypt.hash(password, 10);
+      
+      // Update/restore the soft-deleted user
+      const user = await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          ...data,
+          password_hash,
+          deleted_at: null, // restore the user
+          email_verified: false,
+          phone_verified: false,
+        },
+        include: { role: true },
+      });
+
+      if (user.role?.name === 'Service Engineer') {
+        await this.prisma.technician.upsert({
+          where: { id: user.id },
+          update: {
+            full_name: user.full_name,
+            email: user.email,
+            phone: user.phone_number,
+            deleted_at: null, // restore the technician if soft-deleted
+          },
+          create: {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            phone: user.phone_number,
+            status: 'AVAILABLE',
+          },
+        });
+        await this.redis.delByPrefix('technicians:list:');
+        await this.redis.del(`technician:id:${user.id}`);
+      }
+
+      const imageAclPromises: Promise<void>[] = [];
+      if (user.profile_image) {
+        imageAclPromises.push(
+          this.s3Service.makeObjectPublic(user.profile_image),
+        );
+      }
+      if (user.background_image) {
+        imageAclPromises.push(
+          this.s3Service.makeObjectPublic(user.background_image),
+        );
+      }
+      if (imageAclPromises.length > 0) {
+        await Promise.all(imageAclPromises);
+      }
+
+      await this.invalidateCache(user.id, user.email);
+      return this.formatUser(user);
     }
 
     const password_hash = await bcrypt.hash(password, 10);
@@ -189,6 +271,30 @@ export class UsersService {
     if (updateData.phone_number === '') {
       updateData.phone_number = null;
     }
+
+    // Check if phone number already exists (among active users/technicians)
+    if (updateData.phone_number) {
+      const [phoneConflictUser, phoneConflictTechnician] = await Promise.all([
+        this.prisma.user.findFirst({
+          where: { 
+            phone_number: updateData.phone_number,
+            deleted_at: null,
+          },
+        }),
+        this.prisma.technician.findFirst({
+          where: { 
+            phone: updateData.phone_number,
+            deleted_at: null,
+          },
+        }),
+      ]);
+      if (
+        (phoneConflictUser && phoneConflictUser.id !== id) ||
+        (phoneConflictTechnician && phoneConflictTechnician.id !== id)
+      ) {
+        throw new ConflictException('User with this phone number already exists');
+      }
+    }
     if (password) {
       updateData.password_hash = await bcrypt.hash(password, 10);
     }
@@ -259,9 +365,27 @@ export class UsersService {
   }
 
   async remove(id: string) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const timestamp = Date.now();
+    const deletedEmail = `${existingUser.email}_deleted_${timestamp}`;
+    const deletedPhone = existingUser.phone_number
+      ? `${existingUser.phone_number}_deleted_${timestamp}`
+      : null;
+
     const user = await this.prisma.user.update({
       where: { id },
-      data: { deleted_at: new Date(), account_status: 'DELETED' },
+      data: {
+        deleted_at: new Date(),
+        account_status: 'DELETED',
+        email: deletedEmail,
+        phone_number: deletedPhone,
+      },
     });
 
     await this.prisma.technician.updateMany({
@@ -269,12 +393,14 @@ export class UsersService {
       data: {
         deleted_at: new Date(),
         status: 'INACTIVE',
+        email: deletedEmail,
+        phone: deletedPhone,
       },
     });
     await this.redis.delByPrefix('technicians:list:');
     await this.redis.del(`technician:id:${id}`);
 
-    await this.invalidateCache(id, user.email);
+    await this.invalidateCache(id, existingUser.email); // Invalidate using the old email to clear correct cache entries
     return user;
   }
 
