@@ -56,7 +56,7 @@ let WhatsAppService = WhatsAppService_1 = class WhatsAppService {
             return false;
         }
     }
-    async sendReportPdf(to, pdfBuffer, fileName, reportId, reportType, millName) {
+    async sendReportPdf(to, pdfBuffer, fileName, reportId, reportType, millName, caption) {
         try {
             const base64Data = pdfBuffer.toString('base64');
             const dataUrl = `data:application/pdf;base64,${base64Data}`;
@@ -64,7 +64,7 @@ let WhatsAppService = WhatsAppService_1 = class WhatsAppService {
                 to: this.formatPhoneNumber(to),
                 documentUrl: dataUrl,
                 fileName,
-                caption: '',
+                caption: caption || '',
                 reportId,
                 reportType,
                 retryCount: 0,

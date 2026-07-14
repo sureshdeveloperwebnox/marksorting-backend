@@ -80,6 +80,7 @@ export class WhatsAppService {
     reportId: string,
     reportType: 'SERVICE' | 'INSTALLATION',
     millName: string,
+    caption?: string,
   ): Promise<boolean> {
     try {
       // Convert buffer to base64 for sending via Ultramsg
@@ -90,7 +91,7 @@ export class WhatsAppService {
         to: this.formatPhoneNumber(to),
         documentUrl: dataUrl,
         fileName,
-        caption: '', // Per requirements: WhatsApp sends PDF only (no text)
+        caption: caption || '',
         reportId,
         reportType,
         retryCount: 0,

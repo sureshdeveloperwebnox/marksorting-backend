@@ -90,14 +90,15 @@ export class WhatsAppProcessor extends WorkerHost {
   }
 
   private async handleSendReportPdf(job: Job<WhatsAppMessageJob>) {
-    const { to, documentUrl, fileName, reportId, reportType } = job.data;
+    const { to, documentUrl, fileName, reportId, reportType, caption } = job.data;
 
     if (this.isMockMode) {
       this.logger.log(
         `[Mock WhatsApp] Would send ${reportType} report PDF:\n` +
           `  To: ${to}\n` +
           `  File: ${fileName}\n` +
-          `  Report ID: ${reportId}`,
+          `  Report ID: ${reportId}\n` +
+          `  Caption: ${caption || '(none)'}`,
       );
 
       // Log to notification logs even in mock mode for testing
@@ -120,7 +121,7 @@ export class WhatsAppProcessor extends WorkerHost {
     const docUrl: string = documentUrl || '';
 
     try {
-      await this.sendDocumentViaUltramsg(phoneNumber, docUrl, docName, '', job);
+      await this.sendDocumentViaUltramsg(phoneNumber, docUrl, docName, caption || '', job);
 
       // Log successful notification
       if (reportId) {

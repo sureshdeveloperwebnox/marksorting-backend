@@ -83,6 +83,19 @@ export class ReportNotificationsService {
         return result;
       }
 
+      const formattedDate = report.visit_date
+        ? new Date(report.visit_date).toLocaleDateString('en-GB')
+        : '—';
+      const caption = `*Service Report Created*\n\n` +
+        `*Report No:* ${report.report_number || '—'}\n` +
+        `*Mill Name:* ${activeMillName}\n` +
+        `*Place:* ${report.place || '—'}\n` +
+        `*Date:* ${formattedDate}\n` +
+        `*Model:* ${report.machine_model || '—'}\n` +
+        `*Serial/Frame No:* ${report.serial_or_frame_no || '—'}\n` +
+        `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
+        `Please find the attached Service Report PDF.`;
+
       // Loop and send to each assigned technician
       for (const technician of assignedTechnicians) {
         const techEmail = technician.email;
@@ -92,7 +105,7 @@ export class ReportNotificationsService {
           `Sending Service Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
         );
 
-        // Send WhatsApp (PDF only, no text)
+        // Send WhatsApp
         if (techPhone) {
           try {
             const sent = await this.whatsAppService.sendReportPdf(
@@ -102,6 +115,7 @@ export class ReportNotificationsService {
               reportId,
               'SERVICE',
               activeMillName,
+              caption,
             );
             if (sent) result.whatsappSent = true;
             this.logger.log(
@@ -161,6 +175,7 @@ export class ReportNotificationsService {
             reportId,
             'SERVICE',
             activeMillName,
+            caption,
           );
           if (sent) result.whatsappSent = true;
           this.logger.log(
@@ -247,6 +262,19 @@ export class ReportNotificationsService {
         return result;
       }
 
+      const formattedDate = report.visit_date
+        ? new Date(report.visit_date).toLocaleDateString('en-GB')
+        : '—';
+      const caption = `*Installation Report Created*\n\n` +
+        `*Report No:* ${report.report_number || '—'}\n` +
+        `*Mill Name:* ${activeMillName}\n` +
+        `*Place:* ${report.place || '—'}\n` +
+        `*Date:* ${formattedDate}\n` +
+        `*Model:* ${report.machine_model || '—'}\n` +
+        `*Serial/Frame No:* ${report.serial_or_frame_no || '—'}\n` +
+        `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
+        `Please find the attached Installation Report PDF.`;
+
       // Loop and send to each assigned technician
       for (const technician of assignedTechnicians) {
         const techEmail = technician.email;
@@ -256,7 +284,7 @@ export class ReportNotificationsService {
           `Sending Installation Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
         );
 
-        // Send WhatsApp (PDF only, no text)
+        // Send WhatsApp
         if (techPhone) {
           try {
             const sent = await this.whatsAppService.sendReportPdf(
@@ -266,6 +294,7 @@ export class ReportNotificationsService {
               reportId,
               'INSTALLATION',
               activeMillName,
+              caption,
             );
             if (sent) result.whatsappSent = true;
             this.logger.log(
@@ -326,6 +355,7 @@ export class ReportNotificationsService {
             reportId,
             'INSTALLATION',
             activeMillName,
+            caption,
           );
           if (sent) result.whatsappSent = true;
           this.logger.log(

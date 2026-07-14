@@ -69,13 +69,25 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 this.logger.warn(`No assigned technicians for Service Report ${reportId}`);
                 return result;
             }
+            const formattedDate = report.visit_date
+                ? new Date(report.visit_date).toLocaleDateString('en-GB')
+                : '—';
+            const caption = `*Service Report Created*\n\n` +
+                `*Report No:* ${report.report_number || '—'}\n` +
+                `*Mill Name:* ${activeMillName}\n` +
+                `*Place:* ${report.place || '—'}\n` +
+                `*Date:* ${formattedDate}\n` +
+                `*Model:* ${report.machine_model || '—'}\n` +
+                `*Serial/Frame No:* ${report.serial_or_frame_no || '—'}\n` +
+                `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
+                `Please find the attached Service Report PDF.`;
             for (const technician of assignedTechnicians) {
                 const techEmail = technician.email;
                 const techPhone = technician.phone;
                 this.logger.log(`Sending Service Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`);
                 if (techPhone) {
                     try {
-                        const sent = await this.whatsAppService.sendReportPdf(techPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName);
+                        const sent = await this.whatsAppService.sendReportPdf(techPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName, caption);
                         if (sent)
                             result.whatsappSent = true;
                         this.logger.log(`WhatsApp queued for Service Report ${reportId} to technician ${technician.full_name} (${techPhone})`);
@@ -107,7 +119,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
             if (_authorizedPersonPhone) {
                 try {
                     this.logger.log(`Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
-                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName);
+                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'SERVICE', activeMillName, caption);
                     if (sent)
                         result.whatsappSent = true;
                     this.logger.log(`WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`);
@@ -161,13 +173,25 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
                 this.logger.warn(`No assigned technicians for Installation Report ${reportId}`);
                 return result;
             }
+            const formattedDate = report.visit_date
+                ? new Date(report.visit_date).toLocaleDateString('en-GB')
+                : '—';
+            const caption = `*Installation Report Created*\n\n` +
+                `*Report No:* ${report.report_number || '—'}\n` +
+                `*Mill Name:* ${activeMillName}\n` +
+                `*Place:* ${report.place || '—'}\n` +
+                `*Date:* ${formattedDate}\n` +
+                `*Model:* ${report.machine_model || '—'}\n` +
+                `*Serial/Frame No:* ${report.serial_or_frame_no || '—'}\n` +
+                `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
+                `Please find the attached Installation Report PDF.`;
             for (const technician of assignedTechnicians) {
                 const techEmail = technician.email;
                 const techPhone = technician.phone;
                 this.logger.log(`Sending Installation Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`);
                 if (techPhone) {
                     try {
-                        const sent = await this.whatsAppService.sendReportPdf(techPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName);
+                        const sent = await this.whatsAppService.sendReportPdf(techPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName, caption);
                         if (sent)
                             result.whatsappSent = true;
                         this.logger.log(`WhatsApp queued for Installation Report ${reportId} to technician ${technician.full_name} (${techPhone})`);
@@ -199,7 +223,7 @@ let ReportNotificationsService = ReportNotificationsService_1 = class ReportNoti
             if (_authorizedPersonPhone) {
                 try {
                     this.logger.log(`Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`);
-                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName);
+                    const sent = await this.whatsAppService.sendReportPdf(_authorizedPersonPhone, pdfBuffer, fileName, reportId, 'INSTALLATION', activeMillName, caption);
                     if (sent)
                         result.whatsappSent = true;
                     this.logger.log(`WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`);

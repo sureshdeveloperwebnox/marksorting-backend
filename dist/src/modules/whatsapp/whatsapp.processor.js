@@ -74,12 +74,13 @@ let WhatsAppProcessor = WhatsAppProcessor_1 = class WhatsAppProcessor extends bu
         await this.sendDocumentViaUltramsg(phoneNumber, documentUrl, fileName || '', docCaption, job);
     }
     async handleSendReportPdf(job) {
-        const { to, documentUrl, fileName, reportId, reportType } = job.data;
+        const { to, documentUrl, fileName, reportId, reportType, caption } = job.data;
         if (this.isMockMode) {
             this.logger.log(`[Mock WhatsApp] Would send ${reportType} report PDF:\n` +
                 `  To: ${to}\n` +
                 `  File: ${fileName}\n` +
-                `  Report ID: ${reportId}`);
+                `  Report ID: ${reportId}\n` +
+                `  Caption: ${caption || '(none)'}`);
             await this.logNotificationAttempt(reportId || '', reportType || 'SERVICE', to || '', 'FAILED', 'Mock mode - not sent');
             return;
         }
@@ -90,7 +91,7 @@ let WhatsAppProcessor = WhatsAppProcessor_1 = class WhatsAppProcessor extends bu
         const docName = fileName || '';
         const docUrl = documentUrl || '';
         try {
-            await this.sendDocumentViaUltramsg(phoneNumber, docUrl, docName, '', job);
+            await this.sendDocumentViaUltramsg(phoneNumber, docUrl, docName, caption || '', job);
             if (reportId) {
                 await this.logNotificationAttempt(reportId, reportType || 'SERVICE', phoneNumber, 'SENT');
             }
