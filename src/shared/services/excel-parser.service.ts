@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { PreviewRow } from '../../modules/master-mills/interfaces/bulk-upload.interface';
 
-// Column order for template (19 headers)
+// Column order for template (21 headers)
 const TEMPLATE_HEADERS = [
   'Invoice No',
   'Record Type',
@@ -10,6 +10,7 @@ const TEMPLATE_HEADERS = [
   'Ref No',
   'Frame No',
   'MC Model',
+  'MFG Date',
   'Mill Name',
   'Customer Name',
   'Place',
@@ -34,6 +35,7 @@ const EXAMPLE_ROW = [
   'REF-001',
   'FRM-001',
   'Model XYZ',
+  '01/01/2024',
   'ABC Mills',
   'John Doe',
   'Chennai',
