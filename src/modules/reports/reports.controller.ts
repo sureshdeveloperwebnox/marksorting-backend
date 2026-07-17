@@ -26,6 +26,15 @@ import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
+  @Get('filter-options')
+  @ApiOperation({ summary: 'Get distinct Ref No and Frame No values for filter dropdowns' })
+  @ApiQuery({ name: 'type', required: false, type: String, description: 'services | installations | expenses | master-mills' })
+  async getFilterOptions(
+    @Query('type') type?: string,
+  ) {
+    return this.reportsService.getFilterOptions(type);
+  }
+
   @Get('services')
   @ApiOperation({ summary: 'Get service reports log or export it' })
   @LogActivity({

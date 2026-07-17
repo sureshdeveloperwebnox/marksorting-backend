@@ -24,6 +24,9 @@ let ReportsController = class ReportsController {
     constructor(reportsService) {
         this.reportsService = reportsService;
     }
+    async getFilterOptions(type) {
+        return this.reportsService.getFilterOptions(type);
+    }
     async getServices(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, refNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
@@ -151,6 +154,15 @@ let ReportsController = class ReportsController {
     }
 };
 exports.ReportsController = ReportsController;
+__decorate([
+    (0, common_1.Get)('filter-options'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get distinct Ref No and Frame No values for filter dropdowns' }),
+    (0, swagger_1.ApiQuery)({ name: 'type', required: false, type: String, description: 'services | installations | expenses | master-mills' }),
+    __param(0, (0, common_1.Query)('type')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ReportsController.prototype, "getFilterOptions", null);
 __decorate([
     (0, common_1.Get)('services'),
     (0, swagger_1.ApiOperation)({ summary: 'Get service reports log or export it' }),

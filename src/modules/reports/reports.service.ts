@@ -1738,6 +1738,82 @@ export class ReportsService {
     return null;
   }
 
+  /**
+   * Returns distinct Ref No and Frame No values for filter dropdowns.
+   * type: 'services' | 'installations' | 'expenses' | 'master-mills'
+   */
+  async getFilterOptions(type?: string): Promise<{
+    refNos: string[];
+    frameNos: string[];
+  }> {
+    const cacheKey = `${this.CACHE_PREFIX}filter-options:${type || 'all'}`;
+    const cached = await this.redis.getJson<{ refNos: string[]; frameNos: string[] }>(cacheKey);
+    if (cached) return cached;
+
+    let refNos: string[] = [];
+    let frameNos: string[] = [];
+
+    if (!type || type === 'master-mills') {
+      // Master Mills: ref_no and frame_no are direct columns
+      const [refRows, frameRows] = await Promise.all([
+        this.prisma.masterMill.findMany({
+          where: { deleted_at: null, ref_no: { not: null } },
+          select: { ref_no: true },
+          distinct: ['ref_no'],
+          orderBy: { ref_no: 'asc' },
+        }),
+        this.prisma.masterMill.findMany({
+          where: { deleted_at: null, frame_no: { not: null } },
+          select: { frame_no: true },
+          distinct: ['frame_no'],
+          orderBy: { frame_no: 'asc' },
+        }),
+      ]);
+      refNos = refRows.map((r) => r.ref_no!).filter(Boolean);
+      frameNos = frameRows.map((r) => r.frame_no!).filter(Boolean);
+    } else if (type === 'services' || type === 'expenses') {
+      // Services / Expenses: refNo comes from mill.ref_no, frameNo from serial_or_frame_no
+      const [millRows, frameRows] = await Promise.all([
+        this.prisma.mill.findMany({
+          where: { deleted_at: null, ref_no: { not: null } },
+          select: { ref_no: true },
+          distinct: ['ref_no'],
+          orderBy: { ref_no: 'asc' },
+        }),
+        this.prisma.serviceReport.findMany({
+          where: { deleted_at: null, serial_or_frame_no: { gt: '' } },
+          select: { serial_or_frame_no: true },
+          distinct: ['serial_or_frame_no'],
+          orderBy: { serial_or_frame_no: 'asc' },
+        }),
+      ]);
+      refNos = millRows.map((r) => r.ref_no!).filter(Boolean);
+      frameNos = frameRows.map((r) => r.serial_or_frame_no!).filter(Boolean);
+    } else if (type === 'installations') {
+      const [millRows, frameRows] = await Promise.all([
+        this.prisma.mill.findMany({
+          where: { deleted_at: null, ref_no: { not: null } },
+          select: { ref_no: true },
+          distinct: ['ref_no'],
+          orderBy: { ref_no: 'asc' },
+        }),
+        this.prisma.installationReport.findMany({
+          where: { deleted_at: null, serial_or_frame_no: { gt: '' } },
+          select: { serial_or_frame_no: true },
+          distinct: ['serial_or_frame_no'],
+          orderBy: { serial_or_frame_no: 'asc' },
+        }),
+      ]);
+      refNos = millRows.map((r) => r.ref_no!).filter(Boolean);
+      frameNos = frameRows.map((r) => r.serial_or_frame_no!).filter(Boolean);
+    }
+
+    const result = { refNos, frameNos };
+    // Cache for 5 minutes
+    await this.redis.setJson(cacheKey, result, 300);
+    return result;
+  }
+
   public async invalidateCache() {
     await this.redis.delByPrefix(this.CACHE_PREFIX);
   }

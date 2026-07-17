@@ -74,6 +74,10 @@ export declare class ReportsService {
         fileName: string;
         contentType: string;
     } | null>;
+    getFilterOptions(type?: string): Promise<{
+        refNos: string[];
+        frameNos: string[];
+    }>;
     invalidateCache(): Promise<void>;
 }
 export {};
