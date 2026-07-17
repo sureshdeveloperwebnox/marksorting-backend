@@ -48,6 +48,29 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         }
         return undefined;
     }
+    formatPhoneNumber(phone) {
+        if (!phone)
+            return undefined;
+        let cleaned = phone.trim().replace(/[-\s()]/g, '');
+        if (cleaned === '')
+            return undefined;
+        if (cleaned.startsWith('+')) {
+            return cleaned;
+        }
+        if (cleaned.startsWith('0') && cleaned.length === 11) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.length === 10 && /^\d+$/.test(cleaned)) {
+            return `+91${cleaned}`;
+        }
+        if (cleaned.length === 12 && cleaned.startsWith('91') && /^\d+$/.test(cleaned)) {
+            return `+${cleaned}`;
+        }
+        if (/^\d+$/.test(cleaned)) {
+            return `+91${cleaned}`;
+        }
+        return cleaned;
+    }
     async generateTemplate() {
         return this.excelParser.generateTemplate();
     }
@@ -80,6 +103,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         const sheetRefKeys = new Set();
         const sheetFrameKeys = new Set();
         for (const row of rows) {
+            row.phone_no = this.formatPhoneNumber(row.phone_no) || '';
             const cleanRef = row.ref_no?.trim().toLowerCase();
             const cleanFrame = row.frame_no?.trim().toLowerCase();
             const cleanMillName = row.mill_name?.trim().toLowerCase();

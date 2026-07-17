@@ -100,6 +100,9 @@ export class MasterMillsService {
 
   async create(dto: CreateMasterMillDto) {
     const data: any = { ...dto };
+    if (data.phone_no) {
+      data.phone_no = this.formatPhoneNumber(data.phone_no);
+    }
 
     // Auto-calculate warranty_closing_date if not supplied
     if (!data.warranty_closing_date) {
@@ -187,6 +190,9 @@ export class MasterMillsService {
     if (!existing) throw new NotFoundException('Master Mill record not found');
 
     const data: any = { ...dto };
+    if (data.phone_no) {
+      data.phone_no = this.formatPhoneNumber(data.phone_no);
+    }
 
     // Re-calculate warranty_closing_date if relevant fields change and not overridden
     const installDate = data.installation_date
@@ -699,7 +705,7 @@ export class MasterMillsService {
     const cleanAddress = dto.address?.trim();
     const cleanPlace = dto.place.trim();
     const cleanState = dto.state?.trim();
-    const cleanPhone = dto.phone?.trim();
+    const cleanPhone = this.formatPhoneNumber(dto.phone?.trim());
     const cleanEmail = dto.email?.trim();
 
     const cleanInvoiceNo = dto.invoice_no?.trim();
@@ -1115,5 +1121,33 @@ export class MasterMillsService {
       promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
     }
     await Promise.all(promises);
+  }
+
+  private formatPhoneNumber(phone: string | undefined): string | undefined {
+    if (!phone) return undefined;
+    let cleaned = phone.trim().replace(/[-\s()]/g, '');
+    if (cleaned === '') return undefined;
+
+    if (cleaned.startsWith('+')) {
+      return cleaned;
+    }
+
+    if (cleaned.startsWith('0') && cleaned.length === 11) {
+      cleaned = cleaned.substring(1);
+    }
+
+    if (cleaned.length === 10 && /^\d+$/.test(cleaned)) {
+      return `+91${cleaned}`;
+    }
+
+    if (cleaned.length === 12 && cleaned.startsWith('91') && /^\d+$/.test(cleaned)) {
+      return `+${cleaned}`;
+    }
+
+    if (/^\d+$/.test(cleaned)) {
+      return `+91${cleaned}`;
+    }
+
+    return cleaned;
   }
 }

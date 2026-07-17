@@ -18,6 +18,7 @@ export declare class MasterMillsBulkService {
     private readonly prisma;
     constructor(excelParser: ExcelParserService, masterMillsService: MasterMillsService, redis: RedisService, prisma: PrismaService);
     private parseExcelDate;
+    private formatPhoneNumber;
     generateTemplate(): Promise<Buffer>;
     previewUpload(file: MulterFile): Promise<PreviewResponse>;
     confirmImport(importId: string): Promise<void>;

@@ -92,6 +92,9 @@ let MasterMillsService = class MasterMillsService {
     }
     async create(dto) {
         const data = { ...dto };
+        if (data.phone_no) {
+            data.phone_no = this.formatPhoneNumber(data.phone_no);
+        }
         if (!data.warranty_closing_date) {
             const baseDate = data.warranty_start_date
                 ? new Date(data.warranty_start_date)
@@ -171,6 +174,9 @@ let MasterMillsService = class MasterMillsService {
         if (!existing)
             throw new common_1.NotFoundException('Master Mill record not found');
         const data = { ...dto };
+        if (data.phone_no) {
+            data.phone_no = this.formatPhoneNumber(data.phone_no);
+        }
         const installDate = data.installation_date
             ? new Date(data.installation_date)
             : existing.installation_date
@@ -626,7 +632,7 @@ let MasterMillsService = class MasterMillsService {
         const cleanAddress = dto.address?.trim();
         const cleanPlace = dto.place.trim();
         const cleanState = dto.state?.trim();
-        const cleanPhone = dto.phone?.trim();
+        const cleanPhone = this.formatPhoneNumber(dto.phone?.trim());
         const cleanEmail = dto.email?.trim();
         const cleanInvoiceNo = dto.invoice_no?.trim();
         const mfgDate = dto.mfg_date ? new Date(dto.mfg_date) : null;
@@ -971,6 +977,29 @@ let MasterMillsService = class MasterMillsService {
             promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));
         }
         await Promise.all(promises);
+    }
+    formatPhoneNumber(phone) {
+        if (!phone)
+            return undefined;
+        let cleaned = phone.trim().replace(/[-\s()]/g, '');
+        if (cleaned === '')
+            return undefined;
+        if (cleaned.startsWith('+')) {
+            return cleaned;
+        }
+        if (cleaned.startsWith('0') && cleaned.length === 11) {
+            cleaned = cleaned.substring(1);
+        }
+        if (cleaned.length === 10 && /^\d+$/.test(cleaned)) {
+            return `+91${cleaned}`;
+        }
+        if (cleaned.length === 12 && cleaned.startsWith('91') && /^\d+$/.test(cleaned)) {
+            return `+${cleaned}`;
+        }
+        if (/^\d+$/.test(cleaned)) {
+            return `+91${cleaned}`;
+        }
+        return cleaned;
     }
 };
 exports.MasterMillsService = MasterMillsService;

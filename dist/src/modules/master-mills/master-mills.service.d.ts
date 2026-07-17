@@ -228,4 +228,5 @@ export declare class MasterMillsService {
         place?: string;
     }): Promise<void>;
     private invalidateCache;
+    private formatPhoneNumber;
 }
