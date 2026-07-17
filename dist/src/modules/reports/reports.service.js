@@ -693,16 +693,34 @@ let ReportsService = class ReportsService {
             ...activeCategories.map((c) => c.name),
             ...Array.from(usedCategoriesSet),
         ])).sort();
-        const headers = [
-            'Expense No',
-            'Mill Name / Details',
-            'Place',
-            'Visit Date',
-            ...categoryNames,
-            'Total Amount (INR)',
-            'Technicians',
-            'Status',
-        ];
+        let technicianName = '';
+        const targetTechId = params.technicianId || (user.role === 'Service Engineer' ? user.userId : undefined);
+        if (targetTechId) {
+            const tech = await this.prisma.technician.findUnique({
+                where: { id: targetTechId },
+            });
+            if (tech) {
+                technicianName = tech.full_name.toUpperCase();
+            }
+        }
+        const headers = technicianName
+            ? [
+                'Date',
+                'Name',
+                'place',
+                ...categoryNames.map((name) => name.toUpperCase()),
+                'Total',
+            ]
+            : [
+                'Expense No',
+                'Mill Name / Details',
+                'Place',
+                'Visit Date',
+                ...categoryNames,
+                'Total Amount (INR)',
+                'Technicians',
+                'Status',
+            ];
         const data = reports.map((r) => {
             const categoryAmounts = {};
             categoryNames.forEach((cat) => {
@@ -729,6 +747,15 @@ let ReportsService = class ReportsService {
             }
             const totalDisplayAmt = Object.values(categoryAmounts).reduce((sum, val) => sum + val, 0);
             const categoryCols = categoryNames.map((cat) => Math.round(categoryAmounts[cat] || 0));
+            if (technicianName) {
+                return [
+                    r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
+                    r.mill?.name || r.others || '-',
+                    r.place || '-',
+                    ...categoryCols,
+                    Math.round(totalDisplayAmt),
+                ];
+            }
             return [
                 r.expense_number,
                 r.mill?.name || r.others || '-',
@@ -744,18 +771,38 @@ let ReportsService = class ReportsService {
             ];
         });
         if (formatType === 'csv') {
+            const fileName = technicianName
+                ? `${technicianName}_expense_report_${Date.now()}.csv`
+                : `expense_reports_${Date.now()}.csv`;
             const buffer = this.generateCsv(headers, data);
             return {
                 buffer,
-                fileName: `expense_reports_${Date.now()}.csv`,
+                fileName,
                 contentType: 'text/csv',
             };
         }
         if (formatType === 'excel') {
-            const buffer = this.generateExcel('Expenses', headers, data);
+            let headerBlock = undefined;
+            let sheetName = 'Expenses';
+            let fileName = `expense_reports_${Date.now()}.xlsx`;
+            if (technicianName) {
+                const company = await this.getCompanyPdfSettings();
+                headerBlock = [
+                    [],
+                    [company.name, '', '', '', '', 'Mark Sorting System Travelling Expense'],
+                    [company.addressLine1 || ''],
+                    [company.addressLine2 || ''],
+                    [company.region || ''],
+                    [`Name:${technicianName}`],
+                    [],
+                ];
+                sheetName = `${technicianName}_expense_report`;
+                fileName = `${technicianName}_expense_report_${Date.now()}.xlsx`;
+            }
+            const buffer = this.generateExcel(sheetName, headers, data, headerBlock);
             return {
                 buffer,
-                fileName: `expense_reports_${Date.now()}.xlsx`,
+                fileName,
                 contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             };
         }
@@ -1066,9 +1113,9 @@ let ReportsService = class ReportsService {
         const csvContent = [headerLine, ...bodyLines].join('\n');
         return Buffer.from(csvContent, 'utf-8');
     }
-    generateExcel(sheetName, headers, rows) {
+    generateExcel(sheetName, headers, rows, headerBlock) {
         const workbook = XLSX.utils.book_new();
-        const sheetData = [headers, ...rows];
+        const sheetData = headerBlock ? [...headerBlock, headers, ...rows] : [headers, ...rows];
         const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
         const colWidths = headers.map((h, i) => {
             const maxLength = Math.max(h.length, ...rows.map((row) => (row[i] ? String(row[i]).length : 0)));
