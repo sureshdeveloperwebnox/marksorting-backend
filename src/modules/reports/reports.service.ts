@@ -24,6 +24,7 @@ interface ReportParams {
   technicianId?: string;
   millName?: string;
   frameNo?: string;
+  refNo?: string;
   // Store filters
   serviceEngineerId?: string;
   customerId?: string;
@@ -66,6 +67,7 @@ export class ReportsService {
       technicianId,
       millName,
       frameNo,
+      refNo,
     } = params;
     const where: any = { deleted_at: null };
 
@@ -130,6 +132,13 @@ export class ReportsService {
 
     if (frameNo) {
       where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
+    }
+
+    if (refNo) {
+      where.mill = {
+        ...where.mill,
+        ref_no: { contains: refNo, mode: 'insensitive' },
+      };
     }
 
     if (technicianId) {
@@ -361,7 +370,7 @@ export class ReportsService {
     params: ReportParams,
     user: UserSessionPayload,
   ) {
-    const { search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo } = params;
+    const { search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo, refNo } = params;
     const where: any = { deleted_at: null };
 
     if (user && user.role === 'Service Engineer') {
@@ -399,6 +408,13 @@ export class ReportsService {
 
     if (frameNo) {
       where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
+    }
+
+    if (refNo) {
+      where.mill = {
+        ...where.mill,
+        ref_no: { contains: refNo, mode: 'insensitive' },
+      };
     }
 
     if (technicianId) {
@@ -631,6 +647,7 @@ export class ReportsService {
       technicianId,
       millName,
       frameNo,
+      refNo,
     } = params;
     const where: any = { deleted_at: null };
 
@@ -669,6 +686,13 @@ export class ReportsService {
     if (millName) {
       where.mill = {
         name: { contains: millName, mode: 'insensitive' },
+      };
+    }
+
+    if (refNo) {
+      where.mill = {
+        ...where.mill,
+        ref_no: { contains: refNo, mode: 'insensitive' },
       };
     }
 
@@ -1110,7 +1134,7 @@ export class ReportsService {
     params: ReportParams,
     user: UserSessionPayload,
   ) {
-    const { search, status, dateFrom, dateTo, millId, millName, frameNo } = params;
+    const { search, status, dateFrom, dateTo, millId, millName, frameNo, refNo } = params;
     const where: any = { deleted_at: null };
 
     if (search) {
@@ -1140,6 +1164,10 @@ export class ReportsService {
 
     if (frameNo) {
       where.frame_no = { contains: frameNo, mode: 'insensitive' };
+    }
+
+    if (refNo) {
+      where.ref_no = { contains: refNo, mode: 'insensitive' };
     }
 
     if (dateFrom || dateTo) {

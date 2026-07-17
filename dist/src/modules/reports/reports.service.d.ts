@@ -15,6 +15,7 @@ interface ReportParams {
     technicianId?: string;
     millName?: string;
     frameNo?: string;
+    refNo?: string;
     serviceEngineerId?: string;
     customerId?: string;
     materialId?: string;

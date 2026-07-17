@@ -50,6 +50,7 @@ export class ReportsController {
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
   @ApiQuery({ name: 'frameNo', required: false, type: String })
+  @ApiQuery({ name: 'refNo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -70,6 +71,7 @@ export class ReportsController {
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
     @Query('frameNo') frameNo?: string,
+    @Query('refNo') refNo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -84,6 +86,7 @@ export class ReportsController {
       technicianId,
       millName,
       frameNo,
+      refNo,
     };
 
     if (exportType) {
@@ -125,6 +128,7 @@ export class ReportsController {
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
   @ApiQuery({ name: 'frameNo', required: false, type: String })
+  @ApiQuery({ name: 'refNo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -144,6 +148,7 @@ export class ReportsController {
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
     @Query('frameNo') frameNo?: string,
+    @Query('refNo') refNo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -157,6 +162,7 @@ export class ReportsController {
       technicianId,
       millName,
       frameNo,
+      refNo,
     };
 
     if (exportType) {
@@ -203,6 +209,7 @@ export class ReportsController {
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
   @ApiQuery({ name: 'frameNo', required: false, type: String })
+  @ApiQuery({ name: 'refNo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -223,6 +230,7 @@ export class ReportsController {
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
     @Query('frameNo') frameNo?: string,
+    @Query('refNo') refNo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -237,6 +245,7 @@ export class ReportsController {
       technicianId,
       millName,
       frameNo,
+      refNo,
     };
 
     if (exportType) {
@@ -277,6 +286,7 @@ export class ReportsController {
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
   @ApiQuery({ name: 'frameNo', required: false, type: String })
+  @ApiQuery({ name: 'refNo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -295,6 +305,7 @@ export class ReportsController {
     @Query('millId') millId?: string,
     @Query('millName') millName?: string,
     @Query('frameNo') frameNo?: string,
+    @Query('refNo') refNo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -307,6 +318,7 @@ export class ReportsController {
       millId,
       millName,
       frameNo,
+      refNo,
     };
 
     if (exportType) {
