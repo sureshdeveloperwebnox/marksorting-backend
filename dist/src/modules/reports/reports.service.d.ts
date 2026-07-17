@@ -15,6 +15,12 @@ interface ReportParams {
     technicianId?: string;
     millName?: string;
     frameNo?: string;
+    serviceEngineerId?: string;
+    customerId?: string;
+    materialId?: string;
+    warrantyStatus?: string;
+    returnStatus?: string;
+    inflowStatus?: string;
 }
 interface UserSessionPayload {
     userId: string;
@@ -60,6 +66,13 @@ export declare class ReportsService {
     private generateExcel;
     private getFiltersSummary;
     private getCompanyPdfSettings;
+    private getStoresWhereClause;
+    getStores(params: ReportParams, user: UserSessionPayload): Promise<any>;
+    exportStores(params: ReportParams, user: UserSessionPayload, formatType: 'pdf' | 'csv' | 'excel'): Promise<{
+        buffer: Buffer;
+        fileName: string;
+        contentType: string;
+    } | null>;
     invalidateCache(): Promise<void>;
 }
 export {};

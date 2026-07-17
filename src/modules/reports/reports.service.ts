@@ -10,6 +10,7 @@ import {
   CompanyPdfSettings,
 } from './templates/reports.template';
 import * as XLSX from 'xlsx';
+import { Prisma } from '@prisma/client';
 
 interface ReportParams {
   skip?: number;
@@ -23,6 +24,13 @@ interface ReportParams {
   technicianId?: string;
   millName?: string;
   frameNo?: string;
+  // Store filters
+  serviceEngineerId?: string;
+  customerId?: string;
+  materialId?: string;
+  warrantyStatus?: string;
+  returnStatus?: string;
+  inflowStatus?: string;
 }
 
 interface UserSessionPayload {
@@ -1440,6 +1448,266 @@ export class ReportsService {
       cellNumbers: settings.get('COMPANY_CELL_NUMBERS') || '',
       gstNo: settings.get('COMPANY_GST_NO') || '',
     };
+  }
+
+  private getStoresWhereClause(
+    params: ReportParams,
+    user: UserSessionPayload,
+  ) {
+    const {
+      search,
+      serviceEngineerId,
+      customerId,
+      materialId,
+      warrantyStatus,
+      returnStatus,
+      inflowStatus,
+      dateFrom,
+      dateTo,
+    } = params;
+    const where: Prisma.StoreWhereInput = { deleted_at: null };
+
+    // Service Engineers can only see stores assigned to them
+    if (user && user.role === 'Service Engineer') {
+      where.service_engineer_id = user.userId;
+    } else if (serviceEngineerId) {
+      where.service_engineer_id = serviceEngineerId;
+    }
+
+    if (customerId) {
+      where.customer_id = customerId;
+    }
+
+    if (warrantyStatus) {
+      where.warranty_status = warrantyStatus;
+    }
+
+    if (returnStatus) {
+      where.return_status = returnStatus;
+    }
+
+    if (inflowStatus) {
+      where.inflow_status = inflowStatus;
+    }
+
+    if (materialId) {
+      where.materials = {
+        some: {
+          material_id: materialId,
+        },
+      };
+    }
+
+    if (dateFrom || dateTo) {
+      where.created_at = {};
+      if (dateFrom) {
+        where.created_at.gte = new Date(dateFrom);
+      }
+      if (dateTo) {
+        const toDate = new Date(dateTo);
+        toDate.setUTCHours(23, 59, 59, 999);
+        where.created_at.lte = toDate;
+      }
+    }
+
+    if (search) {
+      where.OR = [
+        { frame_number: { contains: search, mode: 'insensitive' } },
+        { barcode: { contains: search, mode: 'insensitive' } },
+        {
+          service_engineer: {
+            full_name: { contains: search, mode: 'insensitive' },
+          },
+        },
+        {
+          customer: {
+            name: { contains: search, mode: 'insensitive' },
+          },
+        },
+      ];
+    }
+
+    return where;
+  }
+
+  async getStores(params: ReportParams, user: UserSessionPayload) {
+    const cacheKey = `${this.CACHE_PREFIX}stores:${JSON.stringify(params)}:${JSON.stringify(user)}`;
+    const cached = await this.redis.getJson<any>(cacheKey);
+    if (cached) return cached;
+
+    const where = this.getStoresWhereClause(params, user);
+
+    const [total, stores, returnedCount, pendingCount, notReturnedCount, completedCount] = await Promise.all([
+      this.prisma.store.count({ where }),
+      this.prisma.store.findMany({
+        where,
+        include: {
+          service_engineer: { select: { id: true, full_name: true } },
+          customer: { select: { id: true, name: true } },
+          materials: {
+            include: {
+              material: { select: { id: true, name: true } },
+            },
+          },
+        },
+        orderBy: { created_at: 'desc' },
+        skip: params.skip || 0,
+        take: params.take || 10,
+      }),
+      this.prisma.store.count({ where: { ...where, return_status: 'Returned' } }),
+      this.prisma.store.count({ where: { ...where, return_status: 'Pending' } }),
+      this.prisma.store.count({ where: { ...where, return_status: 'Not Returned' } }),
+      this.prisma.store.count({ where: { ...where, return_status: 'Completed' } }),
+    ]);
+
+    const result = {
+      total,
+      stores,
+      metrics: {
+        totalCount: total,
+        returnedCount,
+        pendingCount,
+        notReturnedCount,
+        completedCount,
+      },
+    };
+    await this.redis.setJson(cacheKey, result, 300); // 5 mins cache
+    return result;
+  }
+
+  async exportStores(
+    params: ReportParams,
+    user: UserSessionPayload,
+    formatType: 'pdf' | 'csv' | 'excel',
+  ): Promise<{ buffer: Buffer; fileName: string; contentType: string } | null> {
+    const where = this.getStoresWhereClause(params, user);
+    const reports = await this.prisma.store.findMany({
+      where,
+      include: {
+        service_engineer: { select: { id: true, full_name: true } },
+        customer: { select: { id: true, name: true } },
+        materials: {
+          include: {
+            material: { select: { id: true, name: true } },
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    const headers = [
+      'Service Engineer',
+      'Customer',
+      'Materials',
+      'Qty',
+      'Warranty Status',
+      'Return Status',
+      'Stock Status',
+      'Barcode',
+      'Created At',
+    ];
+
+    const data = reports.map((r) => {
+      const materialsStr = r.materials
+        .map((m) => `${m.material.name} (x${m.quantity || 1})`)
+        .join(', ') || '-';
+      return [
+        r.service_engineer?.full_name || '-',
+        r.customer?.name || '-',
+        materialsStr,
+        String(r.quantity),
+        r.warranty_status || '-',
+        r.return_status || '-',
+        r.inflow_status || '-',
+        r.barcode || '-',
+        r.created_at ? r.created_at.toISOString().slice(0, 10) : '-',
+      ];
+    });
+
+    if (formatType === 'csv') {
+      const buffer = this.generateCsv(headers, data);
+      return {
+        buffer,
+        fileName: `stores_report_${Date.now()}.csv`,
+        contentType: 'text/csv',
+      };
+    }
+
+    if (formatType === 'excel') {
+      const buffer = this.generateExcel('Stores', headers, data);
+      return {
+        buffer,
+        fileName: `stores_report_${Date.now()}.xlsx`,
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      };
+    }
+
+    if (formatType === 'pdf') {
+      const now = new Date();
+      const returnedCount = reports.filter((r) => r.return_status === 'Returned').length;
+      const pendingCount = reports.filter((r) => r.return_status === 'Pending').length;
+      const notReturnedCount = reports.filter((r) => r.return_status === 'Not Returned').length;
+      const completedCount = reports.filter((r) => r.return_status === 'Completed').length;
+
+      const pdfData = {
+        title: 'Store Inventory Report Log',
+        filters: this.getFiltersSummary(params),
+        metrics: [
+          {
+            label: 'Total Records',
+            value: String(reports.length),
+            colorClass: 'text-primary',
+          },
+          {
+            label: 'Returned',
+            value: String(returnedCount),
+            colorClass: 'text-emerald-600',
+          },
+          {
+            label: 'Pending',
+            value: String(pendingCount),
+            colorClass: 'text-amber-600',
+          },
+          {
+            label: 'Not Returned',
+            value: String(notReturnedCount),
+            colorClass: 'text-rose-600',
+          },
+          {
+            label: 'Completed',
+            value: String(completedCount),
+            colorClass: 'text-teal-600',
+          },
+        ],
+        headers,
+        rows: data,
+        company: await this.getCompanyPdfSettings(),
+        generatedAt: now.toLocaleString(),
+      };
+
+      pdfData.company.logoUrl = await this.pdfService.embedImageAsDataUrl(
+        pdfData.company.logoUrl,
+      );
+      const html = renderTabularReportTemplate(
+        pdfData,
+        this.documentTemplateService,
+      );
+      const buffer = await this.pdfService.renderHtmlToPdf(
+        html,
+        renderTabularReportPdfOptions(
+          pdfData.company,
+          this.documentTemplateService,
+        ),
+      );
+      return {
+        buffer,
+        fileName: `stores_report_${Date.now()}.pdf`,
+        contentType: 'application/pdf',
+      };
+    }
+
+    return null;
   }
 
   public async invalidateCache() {

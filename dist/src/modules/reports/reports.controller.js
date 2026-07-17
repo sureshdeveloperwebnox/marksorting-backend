@@ -117,6 +117,34 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getMasterMills(params, req.user);
         return res.json(data);
     }
+    async getStores(req, res, skip, take, search, serviceEngineerId, customerId, materialId, warrantyStatus, returnStatus, inflowStatus, dateFrom, dateTo, exportType) {
+        const params = {
+            skip: skip ? parseInt(skip, 10) : 0,
+            take: take ? parseInt(take, 10) : 10,
+            search,
+            serviceEngineerId,
+            customerId,
+            materialId,
+            warrantyStatus,
+            returnStatus,
+            inflowStatus,
+            dateFrom,
+            dateTo,
+        };
+        if (exportType) {
+            const resData = await this.reportsService.exportStores(params, req.user, exportType);
+            if (resData) {
+                const { buffer, fileName, contentType } = resData;
+                res.setHeader('Content-Type', contentType);
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+                res.setHeader('Content-Length', buffer.length);
+                return res.end(buffer);
+            }
+            return res.status(400).json({ message: 'Failed to export store reports' });
+        }
+        const data = await this.reportsService.getStores(params, req.user);
+        return res.json(data);
+    }
 };
 exports.ReportsController = ReportsController;
 __decorate([
@@ -309,6 +337,55 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getMasterMills", null);
+__decorate([
+    (0, common_1.Get)('stores'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get store reports log or export it' }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.EXPORT,
+        entityType: 'reports',
+        description: (ctx) => {
+            const exportType = ctx.query.export;
+            return exportType
+                ? `Exported store reports as ${exportType.toUpperCase()}`
+                : 'Viewed store reports list';
+        },
+        ignoreNullEntity: true,
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'serviceEngineerId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'customerId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'materialId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'warrantyStatus', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'returnStatus', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'inflowStatus', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({
+        name: 'export',
+        required: false,
+        type: String,
+        description: 'pdf, csv, excel',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Res)()),
+    __param(2, (0, common_1.Query)('skip')),
+    __param(3, (0, common_1.Query)('take')),
+    __param(4, (0, common_1.Query)('search')),
+    __param(5, (0, common_1.Query)('serviceEngineerId')),
+    __param(6, (0, common_1.Query)('customerId')),
+    __param(7, (0, common_1.Query)('materialId')),
+    __param(8, (0, common_1.Query)('warrantyStatus')),
+    __param(9, (0, common_1.Query)('returnStatus')),
+    __param(10, (0, common_1.Query)('inflowStatus')),
+    __param(11, (0, common_1.Query)('dateFrom')),
+    __param(12, (0, common_1.Query)('dateTo')),
+    __param(13, (0, common_1.Query)('export')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], ReportsController.prototype, "getStores", null);
 exports.ReportsController = ReportsController = __decorate([
     (0, swagger_1.ApiTags)('reports'),
     (0, swagger_1.ApiBearerAuth)(),
