@@ -37,6 +37,8 @@ export declare class MasterMillsController {
         place: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
+        warranty_years: number | null;
+        warranty_months: number | null;
         invoice_no: string;
         ref_no: string | null;
         address: string | null;
@@ -45,8 +47,6 @@ export declare class MasterMillsController {
         mc_model: string | null;
         frame_no: string | null;
         mfg_date: Date | null;
-        warranty_years: number | null;
-        warranty_months: number | null;
         installation_date: Date | null;
         warranty_closing_date: Date | null;
         all_warranty: string | null;
@@ -97,6 +97,8 @@ export declare class MasterMillsController {
         place?: string | null | undefined;
         invoice_date?: Date | null | undefined;
         warranty_start_date?: Date | null | undefined;
+        warranty_years?: number | null | undefined;
+        warranty_months?: number | null | undefined;
         invoice_no?: string | undefined;
         ref_no?: string | null | undefined;
         address?: string | null | undefined;
@@ -105,8 +107,6 @@ export declare class MasterMillsController {
         mc_model?: string | null | undefined;
         frame_no?: string | null | undefined;
         mfg_date?: Date | null | undefined;
-        warranty_years?: number | null | undefined;
-        warranty_months?: number | null | undefined;
         installation_date?: Date | null | undefined;
         warranty_closing_date?: Date | null | undefined;
         all_warranty?: string | null | undefined;
@@ -128,6 +128,8 @@ export declare class MasterMillsController {
             place: string | null;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
+            warranty_years: number | null;
+            warranty_months: number | null;
             invoice_no: string;
             ref_no: string | null;
             address: string | null;
@@ -136,8 +138,6 @@ export declare class MasterMillsController {
             mc_model: string | null;
             frame_no: string | null;
             mfg_date: Date | null;
-            warranty_years: number | null;
-            warranty_months: number | null;
             installation_date: Date | null;
             warranty_closing_date: Date | null;
             all_warranty: string | null;
@@ -158,6 +158,8 @@ export declare class MasterMillsController {
             place: string | null;
             invoice_date: Date | null;
             warranty_start_date: Date | null;
+            warranty_years: number | null;
+            warranty_months: number | null;
             invoice_no: string;
             ref_no: string | null;
             address: string | null;
@@ -166,8 +168,6 @@ export declare class MasterMillsController {
             mc_model: string | null;
             frame_no: string | null;
             mfg_date: Date | null;
-            warranty_years: number | null;
-            warranty_months: number | null;
             installation_date: Date | null;
             warranty_closing_date: Date | null;
             all_warranty: string | null;
@@ -189,6 +189,8 @@ export declare class MasterMillsController {
         place: string | null;
         invoice_date: Date | null;
         warranty_start_date: Date | null;
+        warranty_years: number | null;
+        warranty_months: number | null;
         invoice_no: string;
         ref_no: string | null;
         address: string | null;
@@ -197,8 +199,6 @@ export declare class MasterMillsController {
         mc_model: string | null;
         frame_no: string | null;
         mfg_date: Date | null;
-        warranty_years: number | null;
-        warranty_months: number | null;
         installation_date: Date | null;
         warranty_closing_date: Date | null;
         all_warranty: string | null;

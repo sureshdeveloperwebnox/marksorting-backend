@@ -338,10 +338,12 @@ export class InstallationReportsService {
             reportData.warranty_start_date.trim()
               ? new Date(reportData.warranty_start_date)
               : undefined,
-          warranty_end_date:
+           warranty_end_date:
             reportData.warranty_end_date && reportData.warranty_end_date.trim()
               ? new Date(reportData.warranty_end_date)
               : undefined,
+          warranty_years: reportData.warranty_years ?? 0,
+          warranty_months: reportData.warranty_months ?? 0,
         },
         include: INCLUDE_SHAPE,
       });
@@ -470,6 +472,13 @@ export class InstallationReportsService {
           ? new Date(reportData.warranty_end_date)
           : null;
     }
+    if (reportData.warranty_years !== undefined) {
+      updateData.warranty_years = reportData.warranty_years ?? 0;
+    }
+    if (reportData.warranty_months !== undefined) {
+      updateData.warranty_months = reportData.warranty_months ?? 0;
+    }
+
 
     const installationReport = await this.prisma.installationReport.update({
       where: { id },

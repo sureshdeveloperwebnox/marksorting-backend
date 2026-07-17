@@ -463,6 +463,8 @@ model InstallationReport {
   invoice_date             DateTime?
   warranty_start_date      DateTime?
   warranty_end_date        DateTime?
+  warranty_years           Int?                           @default(0)
+  warranty_months          Int?                           @default(0)
   commodity                String?
   contamination            String?
   output_capacity_per_hour String?

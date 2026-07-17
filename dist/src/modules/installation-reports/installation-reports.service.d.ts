@@ -98,6 +98,8 @@ export declare class InstallationReportsService {
         invoice_date: Date | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
+        warranty_years: number | null;
+        warranty_months: number | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
         running_channel_combination_value: string | null;
@@ -166,6 +168,8 @@ export declare class InstallationReportsService {
             invoice_date: Date | null;
             warranty_start_date: Date | null;
             warranty_end_date: Date | null;
+            warranty_years: number | null;
+            warranty_months: number | null;
             ground_earth_provided: boolean;
             running_channel_combination: number | null;
             running_channel_combination_value: string | null;
@@ -233,6 +237,8 @@ export declare class InstallationReportsService {
         invoice_date: Date | null;
         warranty_start_date: Date | null;
         warranty_end_date: Date | null;
+        warranty_years: number | null;
+        warranty_months: number | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
         running_channel_combination_value: string | null;

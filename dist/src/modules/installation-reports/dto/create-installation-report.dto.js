@@ -30,6 +30,8 @@ class CreateInstallationReportDto {
     invoice_date;
     warranty_start_date;
     warranty_end_date;
+    warranty_years;
+    warranty_months;
     commodity;
     contamination;
     output_capacity_per_hour;
@@ -157,6 +159,20 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "warranty_end_date", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1, required: false }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateInstallationReportDto.prototype, "warranty_years", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 0, required: false }),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateInstallationReportDto.prototype, "warranty_months", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Rice', required: false }),
     (0, class_validator_1.IsString)(),

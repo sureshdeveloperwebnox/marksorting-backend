@@ -101,6 +101,18 @@ export class CreateInstallationReportDto {
   @IsOptional()
   warranty_end_date?: string;
 
+  @ApiProperty({ example: 1, required: false })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  warranty_years?: number;
+
+  @ApiProperty({ example: 0, required: false })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  warranty_months?: number;
+
   @ApiProperty({ example: 'Rice', required: false })
   @IsString()
   @IsOptional()
