@@ -139,9 +139,10 @@ export function renderTabularReportTemplate(
     }
     .company-details {
       text-align: right;
-      font-size: 8.5px;
-      color: #4b5563;
-      line-height: 1.3;
+      font-size: 10.5px;
+      color: #111827;
+      line-height: 1.35;
+      font-weight: 800;
     }
     .company-name {
       color: #ea580c; /* Orange branding */

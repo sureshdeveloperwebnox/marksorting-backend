@@ -72,7 +72,7 @@ const documentHeader = (
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
           <div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${template.text(company.partnerDescription, '')})</div>
-          <div style="font-size: 11px; color: #111827; line-height: 1.3;">
+          <div style="font-size: 13px; color: #111827; line-height: 1.35; font-weight: 800;">
             ${companyLines.map((line) => template.escape(line)).join('<br />')}
             ${company.email ? `<br />E-mail : ${template.escape(company.email)}` : ''}
             ${company.tollFree || company.cellNumbers ? `<br />${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}` : ''}

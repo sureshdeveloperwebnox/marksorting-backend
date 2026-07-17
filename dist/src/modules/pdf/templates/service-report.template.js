@@ -11,6 +11,7 @@ const maintenanceItems = [
     'Frequently make sure that there is no oil or water spillage in the filter bowl of the sorter machine and compressor filter bowls, if there is any spillage immediately turn off the machine. Because it will entirely harm the machine performance and lead to the replacement of valves and all the pneumatic parts. You can run the machine only if the problem has been solved.',
 ];
 const labelCell = (label, extraClass = '') => `<td class="label-cell ${extraClass}">${label}</td>`;
+const labelCellRegular = (label, extraClass = '') => `<td class="label-cell-regular ${extraClass}">${label}</td>`;
 const valueCell = (value, extraClass = '') => `<td class="value-cell ${extraClass}">${value}</td>`;
 const pairRow = (leftLabel, leftValue, rightLabel, rightValue) => `
   <tr>
@@ -20,9 +21,17 @@ const pairRow = (leftLabel, leftValue, rightLabel, rightValue) => `
     ${valueCell(rightValue, 'nowrap')}
   </tr>
 `;
+const pairRowRegular = (leftLabel, leftValue, rightLabel, rightValue) => `
+  <tr>
+    ${labelCellRegular(leftLabel)}
+    ${valueCell(leftValue)}
+    ${labelCellRegular(rightLabel)}
+    ${valueCell(rightValue, 'nowrap')}
+  </tr>
+`;
 const twoColumnRow = (label, value) => `
   <tr>
-    <td colspan="2" class="label-cell">${label}</td>
+    <td colspan="2" class="label-cell-regular">${label}</td>
     <td colspan="2" class="value-cell">${value}</td>
   </tr>
 `;
@@ -52,7 +61,7 @@ const documentHeader = (company, template, reportNumber) => {
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
           <div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${template.text(company.partnerDescription, '')})</div>
-          <div style="font-size: 11px; color: #111827; line-height: 1.3;">
+          <div style="font-size: 13px; color: #111827; line-height: 1.35; font-weight: 800;">
             ${companyLines.map((line) => template.escape(line)).join('<br />')}
             ${company.email ? `<br />E-mail : ${template.escape(company.email)}` : ''}
             ${company.tollFree || company.cellNumbers ? `<br />${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}` : ''}
@@ -230,6 +239,10 @@ function renderServiceReportTemplate(data, template) {
       font-weight: 800;
       white-space: nowrap;
     }
+    .label-cell-regular {
+      font-weight: 400;
+      white-space: nowrap;
+    }
     .value-cell {
       font-weight: 400;
     }
@@ -339,7 +352,7 @@ function renderServiceReportTemplate(data, template) {
           <col style="width: 20%;" />
         </colgroup>
         <tr><th colspan="4">SERVICE REPORT</th></tr>
-        <tr><th colspan="4">${template.text(category)}</th></tr>
+        <tr><th colspan="4" style="font-weight: 400;">${template.text(category)}</th></tr>
         ${pairRow('Service Engineer Name :', template.text(technicians), 'Date :', template.date(report.visit_date))}
         <tr>
           <td rowspan="6" colspan="2" class="company-details-cell">
@@ -379,13 +392,13 @@ function renderServiceReportTemplate(data, template) {
           <col style="width: 32%;" />
           <col style="width: 19%;" />
         </colgroup>
-        ${pairRow('No. Of Program Set', template.text(report.no_of_programs_set), 'Air Conditioner Provided', template.yesNo(report.ac_provided))}
-        ${pairRow('Compressor Details', template.text(report.compressor_details), 'Air Drier Details', template.text(report.air_drier_details))}
-        ${pairRow('Line Filter Condition', template.text(report.line_filter_condition), 'Machine Filter Condition', template.text(report.machine_filter_condition))}
+        ${pairRowRegular('No. Of Program Set', template.text(report.no_of_programs_set), 'Air Conditioner Provided', template.yesNo(report.ac_provided))}
+        ${pairRowRegular('Compressor Details', template.text(report.compressor_details), 'Air Drier Details', template.text(report.air_drier_details))}
+        ${pairRowRegular('Line Filter Condition', template.text(report.line_filter_condition), 'Machine Filter Condition', template.text(report.machine_filter_condition))}
         <tr>
-          ${labelCell('')}
+          ${labelCellRegular('')}
           ${valueCell('')}
-          ${labelCell('Auto Drain Valve Working')}
+          ${labelCellRegular('Auto Drain Valve Working')}
           ${valueCell(template.yesNo(report.auto_drain_valve_working), 'nowrap')}
         </tr>
         ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 28)}
@@ -402,8 +415,7 @@ function renderServiceReportTemplate(data, template) {
       </table>
       <table class="report">
         <tr class="signature-top-spacer"><td colspan="4"></td></tr>
-        ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
-        ${fullRow('Work Status :', template.status(report.status), 24)}
+        ${fullRow('Work Status Remarks :', template.text(report.customer_remarks), 26)}
         <tr class="signature-spacer"><td colspan="4"></td></tr>
         <tr>
           <td colspan="2" class="signature-cell">
