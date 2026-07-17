@@ -66,7 +66,7 @@ let ReportsService = class ReportsService {
         this.documentTemplateService = documentTemplateService;
     }
     getServicesWhereClause(params, user) {
-        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, } = params;
+        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -115,6 +115,14 @@ let ReportsService = class ReportsService {
         }
         if (millId) {
             where.mill_id = millId;
+        }
+        if (millName) {
+            where.mill = {
+                name: { contains: millName, mode: 'insensitive' },
+            };
+        }
+        if (frameNo) {
+            where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
         }
         if (technicianId) {
             if (where.technicians) {
@@ -299,7 +307,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getInstallationsWhereClause(params, user) {
-        const { search, status, dateFrom, dateTo, millId, technicianId } = params;
+        const { search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -323,6 +331,14 @@ let ReportsService = class ReportsService {
         }
         if (millId) {
             where.mill_id = millId;
+        }
+        if (millName) {
+            where.mill = {
+                name: { contains: millName, mode: 'insensitive' },
+            };
+        }
+        if (frameNo) {
+            where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
         }
         if (technicianId) {
             if (where.technicians) {
@@ -499,7 +515,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getExpensesWhereClause(params, user) {
-        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, } = params;
+        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -527,6 +543,31 @@ let ReportsService = class ReportsService {
         }
         if (millId) {
             where.mill_id = millId;
+        }
+        if (millName) {
+            where.mill = {
+                name: { contains: millName, mode: 'insensitive' },
+            };
+        }
+        if (frameNo) {
+            if (where.OR) {
+                where.AND = [
+                    { OR: where.OR },
+                    {
+                        OR: [
+                            { serviceReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+                            { installationReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+                        ]
+                    }
+                ];
+                delete where.OR;
+            }
+            else {
+                where.OR = [
+                    { serviceReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+                    { installationReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+                ];
+            }
         }
         if (technicianId) {
             if (where.technicians) {
@@ -817,7 +858,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getMasterMillsWhereClause(params, user) {
-        const { search, status, dateFrom, dateTo, millId } = params;
+        const { search, status, dateFrom, dateTo, millId, millName, frameNo } = params;
         const where = { deleted_at: null };
         if (search) {
             where.OR = [
@@ -834,6 +875,14 @@ let ReportsService = class ReportsService {
         }
         if (millId) {
             where.mill_id = millId;
+        }
+        if (millName) {
+            where.mill = {
+                name: { contains: millName, mode: 'insensitive' },
+            };
+        }
+        if (frameNo) {
+            where.frame_no = { contains: frameNo, mode: 'insensitive' };
         }
         if (dateFrom || dateTo) {
             where.installation_date = {};

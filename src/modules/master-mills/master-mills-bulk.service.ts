@@ -85,6 +85,7 @@ export class MasterMillsBulkService {
       select: {
         ref_no: true,
         frame_no: true,
+        type: true,
         mill: {
           select: {
             name: true,
@@ -99,31 +100,36 @@ export class MasterMillsBulkService {
     });
 
     // Track duplicates within the Excel sheet itself (intra-sheet check)
-    const sheetRefNos = new Set<string>();
-    const sheetFrameNos = new Set<string>();
+    const sheetRefKeys = new Set<string>();
+    const sheetFrameKeys = new Set<string>();
 
     for (const row of rows) {
       const cleanRef = row.ref_no?.trim().toLowerCase();
       const cleanFrame = row.frame_no?.trim().toLowerCase();
       const cleanMillName = row.mill_name?.trim().toLowerCase();
       const cleanCustomerName = row.customer_name?.trim().toLowerCase();
+      const rowType = (row.type || 'Installation').trim().toLowerCase();
 
       // 1. Check for duplicates in the spreadsheet itself
       if (cleanRef) {
-        if (sheetRefNos.has(cleanRef)) {
-          row.errors.ref_no = 'Duplicate Ref No in Excel sheet';
+        const key = `${cleanRef}:${rowType}`;
+        if (sheetRefKeys.has(key)) {
+          row.errors.ref_no = `Duplicate ${row.type || 'Installation'} Ref No in Excel sheet`;
         }
       }
       if (cleanFrame) {
-        if (sheetFrameNos.has(cleanFrame)) {
-          row.errors.frame_no = 'Duplicate Frame No in Excel sheet';
+        const key = `${cleanFrame}:${rowType}`;
+        if (sheetFrameKeys.has(key)) {
+          row.errors.frame_no = `Duplicate ${row.type || 'Installation'} Frame No in Excel sheet`;
         }
       }
 
       // 2. Check for duplicates in the database (only if not already marked as sheet duplicate)
       if (cleanRef && !row.errors.ref_no) {
         const matchingMM = dbMasterMills.find(
-          (m) => m.ref_no?.trim().toLowerCase() === cleanRef,
+          (m) =>
+            m.ref_no?.trim().toLowerCase() === cleanRef &&
+            (m.type || 'Installation').trim().toLowerCase() === rowType,
         );
         if (matchingMM) {
           const isSameMill =
@@ -136,7 +142,9 @@ export class MasterMillsBulkService {
       }
       if (cleanFrame && !row.errors.frame_no) {
         const matchingMM = dbMasterMills.find(
-          (m) => m.frame_no?.trim().toLowerCase() === cleanFrame,
+          (m) =>
+            m.frame_no?.trim().toLowerCase() === cleanFrame &&
+            (m.type || 'Installation').trim().toLowerCase() === rowType,
         );
         if (matchingMM) {
           const isSameMill =
@@ -155,10 +163,10 @@ export class MasterMillsBulkService {
 
       // 4. If unique in sheet so far, add to sheet tracking
       if (cleanRef && !row.errors.ref_no) {
-        sheetRefNos.add(cleanRef);
+        sheetRefKeys.add(`${cleanRef}:${rowType}`);
       }
       if (cleanFrame && !row.errors.frame_no) {
-        sheetFrameNos.add(cleanFrame);
+        sheetFrameKeys.add(`${cleanFrame}:${rowType}`);
       }
     }
 

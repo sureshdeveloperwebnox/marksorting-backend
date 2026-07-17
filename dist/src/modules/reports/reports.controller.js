@@ -24,7 +24,7 @@ let ReportsController = class ReportsController {
     constructor(reportsService) {
         this.reportsService = reportsService;
     }
-    async getServices(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, exportType) {
+    async getServices(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -35,6 +35,8 @@ let ReportsController = class ReportsController {
             dateTo,
             millId,
             technicianId,
+            millName,
+            frameNo,
         };
         if (exportType) {
             const { buffer, fileName, contentType } = await this.reportsService.exportServices(params, req.user, exportType);
@@ -46,7 +48,7 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getServices(params, req.user);
         return res.json(data);
     }
-    async getInstallations(req, res, skip, take, search, status, dateFrom, dateTo, millId, technicianId, exportType) {
+    async getInstallations(req, res, skip, take, search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -56,6 +58,8 @@ let ReportsController = class ReportsController {
             dateTo,
             millId,
             technicianId,
+            millName,
+            frameNo,
         };
         if (exportType) {
             const { buffer, fileName, contentType } = await this.reportsService.exportInstallations(params, req.user, exportType);
@@ -67,7 +71,7 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getInstallations(params, req.user);
         return res.json(data);
     }
-    async getExpenses(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, exportType) {
+    async getExpenses(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -78,6 +82,8 @@ let ReportsController = class ReportsController {
             dateTo,
             millId,
             technicianId,
+            millName,
+            frameNo,
         };
         if (exportType) {
             const { buffer, fileName, contentType } = await this.reportsService.exportExpenses(params, req.user, exportType);
@@ -89,7 +95,7 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getExpenses(params, req.user);
         return res.json(data);
     }
-    async getMasterMills(req, res, skip, take, search, status, dateFrom, dateTo, millId, exportType) {
+    async getMasterMills(req, res, skip, take, search, status, dateFrom, dateTo, millId, millName, frameNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -98,6 +104,8 @@ let ReportsController = class ReportsController {
             dateFrom,
             dateTo,
             millId,
+            millName,
+            frameNo,
         };
         if (exportType) {
             const { buffer, fileName, contentType } = await this.reportsService.exportMasterMills(params, req.user, exportType);
@@ -134,6 +142,8 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'technicianId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'millName', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'frameNo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({
         name: 'export',
         required: false,
@@ -151,9 +161,11 @@ __decorate([
     __param(8, (0, common_1.Query)('dateTo')),
     __param(9, (0, common_1.Query)('millId')),
     __param(10, (0, common_1.Query)('technicianId')),
-    __param(11, (0, common_1.Query)('export')),
+    __param(11, (0, common_1.Query)('millName')),
+    __param(12, (0, common_1.Query)('frameNo')),
+    __param(13, (0, common_1.Query)('export')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getServices", null);
 __decorate([
@@ -178,6 +190,8 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'technicianId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'millName', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'frameNo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({
         name: 'export',
         required: false,
@@ -194,9 +208,11 @@ __decorate([
     __param(7, (0, common_1.Query)('dateTo')),
     __param(8, (0, common_1.Query)('millId')),
     __param(9, (0, common_1.Query)('technicianId')),
-    __param(10, (0, common_1.Query)('export')),
+    __param(10, (0, common_1.Query)('millName')),
+    __param(11, (0, common_1.Query)('frameNo')),
+    __param(12, (0, common_1.Query)('export')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getInstallations", null);
 __decorate([
@@ -222,6 +238,8 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'technicianId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'millName', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'frameNo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({
         name: 'export',
         required: false,
@@ -239,9 +257,11 @@ __decorate([
     __param(8, (0, common_1.Query)('dateTo')),
     __param(9, (0, common_1.Query)('millId')),
     __param(10, (0, common_1.Query)('technicianId')),
-    __param(11, (0, common_1.Query)('export')),
+    __param(11, (0, common_1.Query)('millName')),
+    __param(12, (0, common_1.Query)('frameNo')),
+    __param(13, (0, common_1.Query)('export')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getExpenses", null);
 __decorate([
@@ -265,6 +285,8 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'millName', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'frameNo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({
         name: 'export',
         required: false,
@@ -280,9 +302,11 @@ __decorate([
     __param(6, (0, common_1.Query)('dateFrom')),
     __param(7, (0, common_1.Query)('dateTo')),
     __param(8, (0, common_1.Query)('millId')),
-    __param(9, (0, common_1.Query)('export')),
+    __param(9, (0, common_1.Query)('millName')),
+    __param(10, (0, common_1.Query)('frameNo')),
+    __param(11, (0, common_1.Query)('export')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getMasterMills", null);
 exports.ReportsController = ReportsController = __decorate([

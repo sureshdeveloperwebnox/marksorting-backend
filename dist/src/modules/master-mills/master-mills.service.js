@@ -779,6 +779,7 @@ let MasterMillsService = class MasterMillsService {
                     where: {
                         deleted_at: null,
                         mill_id: resolvedMillId,
+                        type: dto.type || 'Installation',
                         OR: orConditions.length > 0 ? orConditions : undefined,
                     },
                 });

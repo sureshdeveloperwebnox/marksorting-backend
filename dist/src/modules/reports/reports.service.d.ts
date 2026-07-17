@@ -13,6 +13,8 @@ interface ReportParams {
     dateTo?: string;
     millId?: string;
     technicianId?: string;
+    millName?: string;
+    frameNo?: string;
 }
 interface UserSessionPayload {
     userId: string;

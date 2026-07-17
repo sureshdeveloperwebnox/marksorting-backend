@@ -21,6 +21,8 @@ interface ReportParams {
   dateTo?: string;
   millId?: string;
   technicianId?: string;
+  millName?: string;
+  frameNo?: string;
 }
 
 interface UserSessionPayload {
@@ -54,6 +56,8 @@ export class ReportsService {
       dateTo,
       millId,
       technicianId,
+      millName,
+      frameNo,
     } = params;
     const where: any = { deleted_at: null };
 
@@ -108,6 +112,16 @@ export class ReportsService {
 
     if (millId) {
       where.mill_id = millId;
+    }
+
+    if (millName) {
+      where.mill = {
+        name: { contains: millName, mode: 'insensitive' },
+      };
+    }
+
+    if (frameNo) {
+      where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
     }
 
     if (technicianId) {
@@ -339,7 +353,7 @@ export class ReportsService {
     params: ReportParams,
     user: UserSessionPayload,
   ) {
-    const { search, status, dateFrom, dateTo, millId, technicianId } = params;
+    const { search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo } = params;
     const where: any = { deleted_at: null };
 
     if (user && user.role === 'Service Engineer') {
@@ -367,6 +381,16 @@ export class ReportsService {
 
     if (millId) {
       where.mill_id = millId;
+    }
+
+    if (millName) {
+      where.mill = {
+        name: { contains: millName, mode: 'insensitive' },
+      };
+    }
+
+    if (frameNo) {
+      where.serial_or_frame_no = { contains: frameNo, mode: 'insensitive' };
     }
 
     if (technicianId) {
@@ -597,6 +621,8 @@ export class ReportsService {
       dateTo,
       millId,
       technicianId,
+      millName,
+      frameNo,
     } = params;
     const where: any = { deleted_at: null };
 
@@ -630,6 +656,32 @@ export class ReportsService {
 
     if (millId) {
       where.mill_id = millId;
+    }
+
+    if (millName) {
+      where.mill = {
+        name: { contains: millName, mode: 'insensitive' },
+      };
+    }
+
+    if (frameNo) {
+      if (where.OR) {
+        where.AND = [
+          { OR: where.OR },
+          {
+            OR: [
+              { serviceReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+              { installationReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+            ]
+          }
+        ];
+        delete where.OR;
+      } else {
+        where.OR = [
+          { serviceReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+          { installationReport: { serial_or_frame_no: { contains: frameNo, mode: 'insensitive' } } },
+        ];
+      }
     }
 
     if (technicianId) {
@@ -999,7 +1051,7 @@ export class ReportsService {
     params: ReportParams,
     user: UserSessionPayload,
   ) {
-    const { search, status, dateFrom, dateTo, millId } = params;
+    const { search, status, dateFrom, dateTo, millId, millName, frameNo } = params;
     const where: any = { deleted_at: null };
 
     if (search) {
@@ -1019,6 +1071,16 @@ export class ReportsService {
 
     if (millId) {
       where.mill_id = millId;
+    }
+
+    if (millName) {
+      where.mill = {
+        name: { contains: millName, mode: 'insensitive' },
+      };
+    }
+
+    if (frameNo) {
+      where.frame_no = { contains: frameNo, mode: 'insensitive' };
     }
 
     if (dateFrom || dateTo) {
