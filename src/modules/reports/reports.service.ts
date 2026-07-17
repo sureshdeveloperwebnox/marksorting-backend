@@ -872,7 +872,7 @@ export class ReportsService {
         0,
       );
       const categoryCols = categoryNames.map((cat) =>
-        categoryAmounts[cat].toFixed(2),
+        Math.round(categoryAmounts[cat] || 0),
       );
 
       return [
@@ -881,7 +881,7 @@ export class ReportsService {
         r.place || '-',
         r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
         ...categoryCols,
-        totalDisplayAmt.toFixed(2),
+        Math.round(totalDisplayAmt),
         r.technicians
           .map((t) => t.technician?.full_name)
           .filter(Boolean)
@@ -1296,7 +1296,7 @@ export class ReportsService {
 
   // ─── HELPERS ───────────────────────────────────────────────────────────────
 
-  private generateCsv(headers: string[], rows: string[][]): Buffer {
+  private generateCsv(headers: string[], rows: any[][]): Buffer {
     const escapeCsvCell = (val: string) => {
       const str = String(val);
       if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -1314,7 +1314,7 @@ export class ReportsService {
   private generateExcel(
     sheetName: string,
     headers: string[],
-    rows: string[][],
+    rows: any[][],
   ): Buffer {
     const workbook = XLSX.utils.book_new();
     const sheetData = [headers, ...rows];

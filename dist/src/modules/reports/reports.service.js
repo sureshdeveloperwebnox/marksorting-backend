@@ -728,14 +728,14 @@ let ReportsService = class ReportsService {
                 }
             }
             const totalDisplayAmt = Object.values(categoryAmounts).reduce((sum, val) => sum + val, 0);
-            const categoryCols = categoryNames.map((cat) => categoryAmounts[cat].toFixed(2));
+            const categoryCols = categoryNames.map((cat) => Math.round(categoryAmounts[cat] || 0));
             return [
                 r.expense_number,
                 r.mill?.name || r.others || '-',
                 r.place || '-',
                 r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
                 ...categoryCols,
-                totalDisplayAmt.toFixed(2),
+                Math.round(totalDisplayAmt),
                 r.technicians
                     .map((t) => t.technician?.full_name)
                     .filter(Boolean)
