@@ -230,10 +230,11 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             }
         }
         if (finalTechnicianIds.length > 0) {
+            const uniqueIds = Array.from(new Set(finalTechnicianIds));
             const techniciansCount = await this.prisma.technician.count({
-                where: { id: { in: finalTechnicianIds }, deleted_at: null },
+                where: { id: { in: uniqueIds }, deleted_at: null },
             });
-            if (techniciansCount !== finalTechnicianIds.length) {
+            if (techniciansCount !== uniqueIds.length) {
                 throw new common_1.BadRequestException('One or more technician IDs are invalid');
             }
         }
@@ -605,11 +606,16 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
             }
         }
         if (finalTechnicianIds !== undefined && finalTechnicianIds.length > 0) {
-            const techniciansCount = await this.prisma.technician.count({
-                where: { id: { in: finalTechnicianIds }, deleted_at: null },
-            });
-            if (techniciansCount !== finalTechnicianIds.length) {
-                throw new common_1.BadRequestException('One or more technician IDs are invalid');
+            const existingTechIds = existingExpense.technicians.map((t) => t.technician_id);
+            const newTechIds = finalTechnicianIds.filter((id) => !existingTechIds.includes(id));
+            if (newTechIds.length > 0) {
+                const uniqueNewIds = Array.from(new Set(newTechIds));
+                const techniciansCount = await this.prisma.technician.count({
+                    where: { id: { in: uniqueNewIds }, deleted_at: null },
+                });
+                if (techniciansCount !== uniqueNewIds.length) {
+                    throw new common_1.BadRequestException('One or more technician IDs are invalid');
+                }
             }
         }
         const updateData = {};
