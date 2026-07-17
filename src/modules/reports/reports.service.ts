@@ -1631,6 +1631,8 @@ export class ReportsService {
       'Warranty Status',
       'Return Status',
       'Stock Status',
+      'Provider Name',
+      'Invoice/Receipt Number',
       'Barcode',
       'Created At',
     ];
@@ -1647,6 +1649,8 @@ export class ReportsService {
         r.warranty_status || '-',
         r.return_status || '-',
         r.inflow_status || '-',
+        r.provider_name || '-',
+        r.invoice_number || '-',
         r.barcode || '-',
         r.created_at ? r.created_at.toISOString().slice(0, 10) : '-',
       ];
@@ -1721,12 +1725,20 @@ export class ReportsService {
         pdfData,
         this.documentTemplateService,
       );
+      const landscapeHtml = html.replace(
+        '@page { size: A4; }',
+        '@page { size: A4 landscape; }',
+      );
+
+      const pdfOptions = renderTabularReportPdfOptions(
+        pdfData.company,
+        this.documentTemplateService,
+      );
+      pdfOptions.landscape = true;
+
       const buffer = await this.pdfService.renderHtmlToPdf(
-        html,
-        renderTabularReportPdfOptions(
-          pdfData.company,
-          this.documentTemplateService,
-        ),
+        landscapeHtml,
+        pdfOptions,
       );
       return {
         buffer,

@@ -1317,6 +1317,8 @@ let ReportsService = class ReportsService {
             'Warranty Status',
             'Return Status',
             'Stock Status',
+            'Provider Name',
+            'Invoice/Receipt Number',
             'Barcode',
             'Created At',
         ];
@@ -1332,6 +1334,8 @@ let ReportsService = class ReportsService {
                 r.warranty_status || '-',
                 r.return_status || '-',
                 r.inflow_status || '-',
+                r.provider_name || '-',
+                r.invoice_number || '-',
                 r.barcode || '-',
                 r.created_at ? r.created_at.toISOString().slice(0, 10) : '-',
             ];
@@ -1395,7 +1399,10 @@ let ReportsService = class ReportsService {
             };
             pdfData.company.logoUrl = await this.pdfService.embedImageAsDataUrl(pdfData.company.logoUrl);
             const html = (0, reports_template_1.renderTabularReportTemplate)(pdfData, this.documentTemplateService);
-            const buffer = await this.pdfService.renderHtmlToPdf(html, (0, reports_template_1.renderTabularReportPdfOptions)(pdfData.company, this.documentTemplateService));
+            const landscapeHtml = html.replace('@page { size: A4; }', '@page { size: A4 landscape; }');
+            const pdfOptions = (0, reports_template_1.renderTabularReportPdfOptions)(pdfData.company, this.documentTemplateService);
+            pdfOptions.landscape = true;
+            const buffer = await this.pdfService.renderHtmlToPdf(landscapeHtml, pdfOptions);
             return {
                 buffer,
                 fileName: `stores_report_${Date.now()}.pdf`,
