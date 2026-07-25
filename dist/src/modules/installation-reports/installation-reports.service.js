@@ -229,6 +229,21 @@ let InstallationReportsService = class InstallationReportsService {
             const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
             const seq = String(count + 1);
             const report_number = `IR-${dateStr}-${seq}`;
+            const wYears = reportData.warranty_years ?? 0;
+            const wMonths = reportData.warranty_months ?? 0;
+            const wStartDate = reportData.warranty_start_date && reportData.warranty_start_date.trim()
+                ? new Date(reportData.warranty_start_date)
+                : undefined;
+            let wEndDate = reportData.warranty_end_date && reportData.warranty_end_date.trim()
+                ? new Date(reportData.warranty_end_date)
+                : undefined;
+            if (!wEndDate && wStartDate && (wYears > 0 || wMonths > 0)) {
+                const calcDate = new Date(wStartDate);
+                calcDate.setFullYear(calcDate.getFullYear() + wYears);
+                calcDate.setMonth(calcDate.getMonth() + wMonths);
+                calcDate.setDate(calcDate.getDate() - 1);
+                wEndDate = calcDate;
+            }
             const created = await tx.installationReport.create({
                 data: {
                     ...reportData,
@@ -246,15 +261,10 @@ let InstallationReportsService = class InstallationReportsService {
                     invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
                         ? new Date(reportData.invoice_date)
                         : undefined,
-                    warranty_start_date: reportData.warranty_start_date &&
-                        reportData.warranty_start_date.trim()
-                        ? new Date(reportData.warranty_start_date)
-                        : undefined,
-                    warranty_end_date: reportData.warranty_end_date && reportData.warranty_end_date.trim()
-                        ? new Date(reportData.warranty_end_date)
-                        : undefined,
-                    warranty_years: reportData.warranty_years ?? 0,
-                    warranty_months: reportData.warranty_months ?? 0,
+                    warranty_start_date: wStartDate,
+                    warranty_end_date: wEndDate,
+                    warranty_years: wYears,
+                    warranty_months: wMonths,
                 },
                 include: INCLUDE_SHAPE,
             });
@@ -357,11 +367,29 @@ let InstallationReportsService = class InstallationReportsService {
                     ? new Date(reportData.warranty_end_date)
                     : null;
         }
-        if (reportData.warranty_years !== undefined) {
-            updateData.warranty_years = reportData.warranty_years ?? 0;
-        }
         if (reportData.warranty_months !== undefined) {
             updateData.warranty_months = reportData.warranty_months ?? 0;
+        }
+        if (!updateData.warranty_end_date &&
+            (reportData.warranty_start_date !== undefined ||
+                reportData.warranty_years !== undefined ||
+                reportData.warranty_months !== undefined)) {
+            const startDate = updateData.warranty_start_date !== undefined
+                ? updateData.warranty_start_date
+                : existingReport.warranty_start_date;
+            const years = updateData.warranty_years !== undefined
+                ? updateData.warranty_years
+                : (existingReport.warranty_years ?? 0);
+            const months = updateData.warranty_months !== undefined
+                ? updateData.warranty_months
+                : (existingReport.warranty_months ?? 0);
+            if (startDate && (years > 0 || months > 0)) {
+                const calcDate = new Date(startDate);
+                calcDate.setFullYear(calcDate.getFullYear() + years);
+                calcDate.setMonth(calcDate.getMonth() + months);
+                calcDate.setDate(calcDate.getDate() - 1);
+                updateData.warranty_end_date = calcDate;
+            }
         }
         const installationReport = await this.prisma.installationReport.update({
             where: { id },
