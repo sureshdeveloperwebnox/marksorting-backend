@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { PreviewRow } from '../../modules/master-mills/interfaces/bulk-upload.interface';
 
-// Column order for template (21 headers)
+// Column order for template (22 headers)
 const TEMPLATE_HEADERS = [
   'Invoice No',
   'Record Type',
@@ -20,6 +20,7 @@ const TEMPLATE_HEADERS = [
   'Installation Date',
   'Warranty Start Date',
   'Warranty Years',
+  'Warranty Months',
   'AMC Starting Date',
   'AMC Closing Date',
   'AMC Period (Months)',
@@ -45,6 +46,7 @@ const EXAMPLE_ROW = [
   '15/01/2024',
   '15/01/2024',
   '2',
+  '0',
   '01/02/2024',
   '01/02/2025',
   '12',

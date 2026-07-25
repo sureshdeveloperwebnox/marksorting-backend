@@ -116,6 +116,7 @@ export class MasterMillsService {
         const months = data.warranty_months ?? 0;
         baseDate.setFullYear(baseDate.getFullYear() + years);
         baseDate.setMonth(baseDate.getMonth() + months);
+        baseDate.setDate(baseDate.getDate() - 1);
         data.warranty_closing_date = baseDate.toISOString();
       }
     }
@@ -215,6 +216,7 @@ export class MasterMillsService {
       const closing = new Date(baseDate);
       closing.setFullYear(closing.getFullYear() + years);
       closing.setMonth(closing.getMonth() + months);
+      closing.setDate(closing.getDate() - 1);
       data.warranty_closing_date = closing.toISOString();
     }
 
@@ -728,6 +730,7 @@ export class MasterMillsService {
       const closing = new Date(baseDateForWarranty);
       closing.setFullYear(closing.getFullYear() + warrantyYears);
       closing.setMonth(closing.getMonth() + warrantyMonths);
+      closing.setDate(closing.getDate() - 1);
       warrantyClosingDate = closing;
     }
 

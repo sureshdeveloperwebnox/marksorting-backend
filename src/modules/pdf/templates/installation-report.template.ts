@@ -40,6 +40,15 @@ const row = (label: string, value: string, extraValueClass = '') => `
   </tr>
 `;
 
+const formatWarrantyDuration = (years?: number, months?: number) => {
+  const y = years ?? 0;
+  const m = months ?? 0;
+  const parts = [];
+  if (y > 0) parts.push(`${y} Year${y > 1 ? 's' : ''}`);
+  if (m > 0) parts.push(`${m} Month${m > 1 ? 's' : ''}`);
+  return parts.join(' ') || '-';
+};
+
 const fullRow = (label: string, value: string, minHeight = 34) => `
   <tr>
     <td colspan="2" class="full-row" style="height: ${minHeight}px;">
@@ -388,6 +397,7 @@ export function renderInstallationReportTemplate(
               ${row('Invoice Number', template.text(report.invoice_number))}
               ${row('Invoice Date', template.date(report.invoice_date))}
               ${row('Warranty Start Date', template.date(report.warranty_start_date))}
+              ${row('Warranty Duration', formatWarrantyDuration(report.warranty_years, report.warranty_months))}
               ${row('Warranty End Date', template.date(report.warranty_end_date))}
               ${row('Commodity', template.text(report.commodity))}
               ${row('Contamination', template.text(report.contamination))}

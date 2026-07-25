@@ -195,6 +195,8 @@ let InstallationReportsBulkService = class InstallationReportsBulkService {
                     invoice_number: row.invoice_number.trim() || undefined,
                     invoice_date: parseDate(row.invoice_date),
                     warranty_start_date: parseDate(row.warranty_start_date),
+                    warranty_years: parseOptionalInt(row.warranty_years),
+                    warranty_months: parseOptionalInt(row.warranty_months),
                     warranty_end_date: parseDate(row.warranty_end_date),
                     commodity: row.commodity.trim() || undefined,
                     contamination: row.contamination.trim() || undefined,
