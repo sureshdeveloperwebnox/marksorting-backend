@@ -45,6 +45,11 @@ export class CreateStoreDto {
   @IsNotEmpty()
   warranty_status: string;
 
+  @ApiProperty({ example: 'Payment', required: false })
+  @IsString()
+  @IsOptional()
+  service_type?: string;
+
   @ApiProperty({ example: 'FRM10245' })
   @IsString()
   @IsNotEmpty()

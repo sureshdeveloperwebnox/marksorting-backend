@@ -72,7 +72,13 @@ let StoresService = class StoresService {
         return store;
     }
     async create(dto) {
-        const { material_ids, material_quantities, service_engineer_id, customer_id, ...data } = dto;
+        const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, ...data } = dto;
+        if (service_type && !data.remarks?.includes(`Service Type:`)) {
+            const serviceTypeText = `Service Type: ${service_type}`;
+            data.remarks = data.remarks
+                ? `${data.remarks} | ${serviceTypeText}`
+                : serviceTypeText;
+        }
         const existingFrame = await this.prisma.store.findFirst({
             where: { frame_number: data.frame_number },
         });
@@ -117,7 +123,13 @@ let StoresService = class StoresService {
         if (!existing) {
             throw new common_1.NotFoundException('Store record not found');
         }
-        const { material_ids, material_quantities, service_engineer_id, customer_id, ...data } = dto;
+        const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, ...data } = dto;
+        if (service_type && !data.remarks?.includes(`Service Type:`)) {
+            const serviceTypeText = `Service Type: ${service_type}`;
+            data.remarks = data.remarks
+                ? `${data.remarks} | ${serviceTypeText}`
+                : serviceTypeText;
+        }
         if (data.frame_number) {
             const existingFrame = await this.prisma.store.findFirst({
                 where: {

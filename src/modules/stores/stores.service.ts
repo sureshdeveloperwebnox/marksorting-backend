@@ -87,8 +87,16 @@ export class StoresService {
       material_quantities,
       service_engineer_id,
       customer_id,
+      service_type,
       ...data
     } = dto;
+
+    if (service_type && !data.remarks?.includes(`Service Type:`)) {
+      const serviceTypeText = `Service Type: ${service_type}`;
+      data.remarks = data.remarks
+        ? `${data.remarks} | ${serviceTypeText}`
+        : serviceTypeText;
+    }
 
     const existingFrame = await this.prisma.store.findFirst({
       where: { frame_number: data.frame_number },
@@ -150,8 +158,16 @@ export class StoresService {
       material_quantities,
       service_engineer_id,
       customer_id,
+      service_type,
       ...data
     } = dto;
+
+    if (service_type && !data.remarks?.includes(`Service Type:`)) {
+      const serviceTypeText = `Service Type: ${service_type}`;
+      data.remarks = data.remarks
+        ? `${data.remarks} | ${serviceTypeText}`
+        : serviceTypeText;
+    }
 
     if (data.frame_number) {
       const existingFrame = await this.prisma.store.findFirst({

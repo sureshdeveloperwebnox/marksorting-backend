@@ -80,7 +80,7 @@ export class InstallationReportsBulkController {
     },
   })
   @UseInterceptors(
-    FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }),
+    FileInterceptor('file', { limits: { fileSize: 15 * 1024 * 1024 } }),
   )
   previewUpload(@UploadedFile() file: MulterFile) {
     if (!file) {

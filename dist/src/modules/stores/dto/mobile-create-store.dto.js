@@ -18,6 +18,7 @@ class MobileCreateStoreDto {
     material_quantities;
     quantity;
     warranty_status;
+    service_type;
     frame_number;
     return_status;
     inflow_status;
@@ -61,6 +62,12 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], MobileCreateStoreDto.prototype, "warranty_status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Payment', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], MobileCreateStoreDto.prototype, "service_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'FRM10245' }),
     (0, class_validator_1.IsString)(),

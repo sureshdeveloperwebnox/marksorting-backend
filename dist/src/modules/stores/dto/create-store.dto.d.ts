@@ -8,6 +8,7 @@ export declare class CreateStoreDto {
     }[];
     quantity: number;
     warranty_status: string;
+    service_type?: string;
     frame_number: string;
     return_status: string;
     inflow_status: string;
