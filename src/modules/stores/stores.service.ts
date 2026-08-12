@@ -91,7 +91,13 @@ export class StoresService {
       ...data
     } = dto;
 
-    if (service_type && !data.remarks?.includes(`Service Type:`)) {
+    if (service_type) {
+      if (data.remarks) {
+        data.remarks = data.remarks
+          .replace(/\s*\|\s*Service Type:\s*[^\s|)]*/gi, '')
+          .replace(/\s*Service Type:\s*[^\s|)]*/gi, '')
+          .trim();
+      }
       const serviceTypeText = `Service Type: ${service_type}`;
       data.remarks = data.remarks
         ? `${data.remarks} | ${serviceTypeText}`
@@ -162,7 +168,13 @@ export class StoresService {
       ...data
     } = dto;
 
-    if (service_type && !data.remarks?.includes(`Service Type:`)) {
+    if (service_type) {
+      if (data.remarks) {
+        data.remarks = data.remarks
+          .replace(/\s*\|\s*Service Type:\s*[^\s|)]*/gi, '')
+          .replace(/\s*Service Type:\s*[^\s|)]*/gi, '')
+          .trim();
+      }
       const serviceTypeText = `Service Type: ${service_type}`;
       data.remarks = data.remarks
         ? `${data.remarks} | ${serviceTypeText}`

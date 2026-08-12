@@ -9,15 +9,6 @@ export declare class ServiceReportsController {
     downloadPdf(id: string, req: any, res: Response): Promise<void>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateServiceReportDto, req: any): Promise<({
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            service_report_id: string;
-            technician_id: string;
-        })[];
         mill: {
             id: string;
             name: string;
@@ -30,25 +21,34 @@ export declare class ServiceReportsController {
             id: string;
             name: string;
         };
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            service_report_id: string;
+            technician_id: string;
+        })[];
     } & {
         id: string;
+        mill_id: string;
+        place: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        machine_model: string;
+        serial_or_frame_no: string;
         report_number: string;
         service_category_id: string;
-        mill_id: string;
-        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
-        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;
@@ -76,15 +76,6 @@ export declare class ServiceReportsController {
     update(id: string, dto: UpdateServiceReportDto, req: any): Promise<{
         before: any;
         after: {
-            technicians: ({
-                technician: {
-                    id: string;
-                    full_name: string;
-                };
-            } & {
-                service_report_id: string;
-                technician_id: string;
-            })[];
             mill: {
                 id: string;
                 name: string;
@@ -97,25 +88,34 @@ export declare class ServiceReportsController {
                 id: string;
                 name: string;
             };
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                service_report_id: string;
+                technician_id: string;
+            })[];
         } & {
             id: string;
+            mill_id: string;
+            place: string;
+            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            status: string;
+            machine_model: string;
+            serial_or_frame_no: string;
             report_number: string;
             service_category_id: string;
-            mill_id: string;
-            place: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
             visit_date: Date;
             visit_time: string;
             call_registered_date: Date;
-            machine_model: string;
             machine_mfg_date: Date | null;
             machine_installation_date: Date | null;
-            serial_or_frame_no: string;
             authorized_person: string;
             previous_visit_engineer: string | null;
             nature_of_complaint: string;
@@ -142,15 +142,6 @@ export declare class ServiceReportsController {
         };
     }>;
     remove(id: string, req: any): Promise<{
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            service_report_id: string;
-            technician_id: string;
-        })[];
         mill: {
             id: string;
             name: string;
@@ -163,25 +154,34 @@ export declare class ServiceReportsController {
             id: string;
             name: string;
         };
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            service_report_id: string;
+            technician_id: string;
+        })[];
     } & {
         id: string;
+        mill_id: string;
+        place: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        machine_model: string;
+        serial_or_frame_no: string;
         report_number: string;
         service_category_id: string;
-        mill_id: string;
-        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
-        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;

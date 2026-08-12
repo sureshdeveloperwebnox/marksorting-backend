@@ -73,7 +73,13 @@ let StoresService = class StoresService {
     }
     async create(dto) {
         const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, ...data } = dto;
-        if (service_type && !data.remarks?.includes(`Service Type:`)) {
+        if (service_type) {
+            if (data.remarks) {
+                data.remarks = data.remarks
+                    .replace(/\s*\|\s*Service Type:\s*[^\s|)]*/gi, '')
+                    .replace(/\s*Service Type:\s*[^\s|)]*/gi, '')
+                    .trim();
+            }
             const serviceTypeText = `Service Type: ${service_type}`;
             data.remarks = data.remarks
                 ? `${data.remarks} | ${serviceTypeText}`
@@ -124,7 +130,13 @@ let StoresService = class StoresService {
             throw new common_1.NotFoundException('Store record not found');
         }
         const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, ...data } = dto;
-        if (service_type && !data.remarks?.includes(`Service Type:`)) {
+        if (service_type) {
+            if (data.remarks) {
+                data.remarks = data.remarks
+                    .replace(/\s*\|\s*Service Type:\s*[^\s|)]*/gi, '')
+                    .replace(/\s*Service Type:\s*[^\s|)]*/gi, '')
+                    .trim();
+            }
             const serviceTypeText = `Service Type: ${service_type}`;
             data.remarks = data.remarks
                 ? `${data.remarks} | ${serviceTypeText}`
