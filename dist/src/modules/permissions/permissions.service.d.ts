@@ -11,6 +11,14 @@ export declare class PermissionsService {
     hasAnyPermission(userId: string, permissions: string[]): Promise<boolean>;
     hasAllPermissions(userId: string, permissions: string[]): Promise<boolean>;
     invalidateUserPermissionsCache(userId: string): Promise<void>;
-    getAllPermissions(): Promise<any>;
-    getPermissionsByModule(module: string): Promise<any>;
+    getAllPermissions(): Promise<{
+        id: string;
+        description: string | null;
+        name: string;
+    }[]>;
+    getPermissionsByModule(module: string): Promise<{
+        id: string;
+        description: string | null;
+        name: string;
+    }[]>;
 }

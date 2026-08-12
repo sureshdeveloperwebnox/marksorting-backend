@@ -15,11 +15,35 @@ export declare class ServiceCategoriesService {
         status?: string;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateServiceCategoryDto): Promise<any>;
+    create(dto: CreateServiceCategoryDto): Promise<{
+        id: string;
+        description: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        name: string;
+        status: string;
+    }>;
     update(id: string, dto: UpdateServiceCategoryDto): Promise<{
         before: any;
-        after: any;
+        after: {
+            id: string;
+            description: string | null;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            name: string;
+            status: string;
+        };
     }>;
-    remove(id: string): Promise<any>;
+    remove(id: string): Promise<{
+        id: string;
+        description: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        name: string;
+        status: string;
+    }>;
     private invalidateCache;
 }
