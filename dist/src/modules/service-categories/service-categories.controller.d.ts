@@ -6,34 +6,10 @@ export declare class ServiceCategoriesController {
     constructor(serviceCategoriesService: ServiceCategoriesService);
     findAll(skip?: string, take?: string, search?: string, status?: string): Promise<any>;
     findOne(id: string): Promise<any>;
-    create(dto: CreateServiceCategoryDto): Promise<{
-        id: string;
-        description: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-    }>;
+    create(dto: CreateServiceCategoryDto): Promise<any>;
     update(id: string, dto: UpdateServiceCategoryDto): Promise<{
         before: any;
-        after: {
-            id: string;
-            description: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-        };
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        description: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-    }>;
+    remove(id: string): Promise<any>;
 }

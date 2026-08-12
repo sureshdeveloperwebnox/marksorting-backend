@@ -17,114 +17,12 @@ export declare class StoresService {
         orderBy?: Prisma.StoreOrderByWithRelationInput;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateStoreDto): Promise<{
-        customer: {
-            id: string;
-            name: string;
-        };
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
-        materials: ({
-            material: {
-                id: string;
-                name: string;
-            };
-        } & {
-            quantity: number;
-            store_id: string;
-            material_id: string;
-        })[];
-    } & {
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
-        customer_id: string;
-        service_engineer_id: string;
-        remarks: string | null;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
-        provider_name: string | null;
-    }>;
+    create(dto: CreateStoreDto): Promise<any>;
     update(id: string, dto: UpdateStoreDto): Promise<{
-        before: {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
-        after: {
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
-            materials: ({
-                material: {
-                    id: string;
-                    name: string;
-                };
-            } & {
-                quantity: number;
-                store_id: string;
-                material_id: string;
-            })[];
-        } & {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
+        before: any;
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
-        customer_id: string;
-        service_engineer_id: string;
-        remarks: string | null;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
-        provider_name: string | null;
-    }>;
+    remove(id: string): Promise<any>;
     findByTechnician(technicianId: string, params: {
         skip?: number;
         take?: number;
@@ -133,214 +31,26 @@ export declare class StoresService {
         inflow_status?: string;
         warranty_status?: string;
     }): Promise<{
-        stores: ({
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
-            materials: ({
-                material: {
-                    id: string;
-                    name: string;
-                };
-            } & {
-                quantity: number;
-                store_id: string;
-                material_id: string;
-            })[];
-        } & {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        })[];
-        total: number;
+        stores: any;
+        total: any;
     }>;
     findPendingByTechnician(technicianId: string, params: {
         skip?: number;
         take?: number;
         search?: string;
     }): Promise<{
-        stores: ({
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
-            materials: ({
-                material: {
-                    id: string;
-                    name: string;
-                };
-            } & {
-                quantity: number;
-                store_id: string;
-                material_id: string;
-            })[];
-        } & {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        })[];
-        total: number;
+        stores: any;
+        total: any;
     }>;
     submitReturnDetails(storeId: string, technicianId: string, dto: UpdateStoreReturnDto): Promise<{
-        before: {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
-        after: {
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
-            materials: ({
-                material: {
-                    id: string;
-                    name: string;
-                };
-            } & {
-                quantity: number;
-                store_id: string;
-                material_id: string;
-            })[];
-        } & {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
+        before: any;
+        after: any;
     }>;
     findByIdAndTechnician(id: string, technicianId: string): Promise<any>;
     updateByTechnician(id: string, technicianId: string, dto: UpdateStoreDto): Promise<{
-        before: {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
-        after: {
-            customer: {
-                id: string;
-                name: string;
-            };
-            service_engineer: {
-                id: string;
-                full_name: string;
-            };
-            materials: ({
-                material: {
-                    id: string;
-                    name: string;
-                };
-            } & {
-                quantity: number;
-                store_id: string;
-                material_id: string;
-            })[];
-        } & {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            invoice_number: string | null;
-            customer_id: string;
-            service_engineer_id: string;
-            remarks: string | null;
-            quantity: number;
-            warranty_status: string;
-            frame_number: string;
-            return_status: string;
-            inflow_status: string;
-            barcode: string | null;
-            provider_name: string | null;
-        };
+        before: any;
+        after: any;
     }>;
-    removeByTechnician(id: string, technicianId: string): Promise<{
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
-        customer_id: string;
-        service_engineer_id: string;
-        remarks: string | null;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        barcode: string | null;
-        provider_name: string | null;
-    }>;
+    removeByTechnician(id: string, technicianId: string): Promise<any>;
     private invalidateCache;
 }

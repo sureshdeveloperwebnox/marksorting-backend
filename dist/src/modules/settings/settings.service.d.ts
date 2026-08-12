@@ -15,32 +15,11 @@ export declare class SettingsService {
         group?: string;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateSettingDto): Promise<{
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        value: string;
-        key: string;
-        group: string;
-    }>;
+    create(dto: CreateSettingDto): Promise<any>;
     update(id: string, dto: UpdateSettingDto): Promise<{
         before: any;
-        after: {
-            id: string;
-            created_at: Date;
-            updated_at: Date;
-            value: string;
-            key: string;
-            group: string;
-        };
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        value: string;
-        key: string;
-        group: string;
-    }>;
+    remove(id: string): Promise<any>;
     private invalidateCache;
 }

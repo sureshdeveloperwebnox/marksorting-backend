@@ -6,74 +6,10 @@ export declare class MillsController {
     constructor(millsService: MillsService);
     findAll(skip?: string, take?: string, search?: string, refNo?: string, frameNo?: string, status?: string, customerId?: string): Promise<any>;
     findOne(id: string): Promise<any>;
-    create(dto: CreateMillDto): Promise<{
-        id: string;
-        created_at: Date;
-        email: string | null;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        place: string | null;
-        phone: string | null;
-        ref_no: string | null;
-        address: string | null;
-        customer_id: string | null;
-        city: string | null;
-        phone_2: string | null;
-        phone_3: string | null;
-    }>;
+    create(dto: CreateMillDto): Promise<any>;
     update(id: string, dto: UpdateMillDto): Promise<{
-        before: {
-            id: string;
-            created_at: Date;
-            email: string | null;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            place: string | null;
-            phone: string | null;
-            ref_no: string | null;
-            address: string | null;
-            customer_id: string | null;
-            city: string | null;
-            phone_2: string | null;
-            phone_3: string | null;
-        };
-        after: {
-            id: string;
-            created_at: Date;
-            email: string | null;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            place: string | null;
-            phone: string | null;
-            ref_no: string | null;
-            address: string | null;
-            customer_id: string | null;
-            city: string | null;
-            phone_2: string | null;
-            phone_3: string | null;
-        };
+        before: any;
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        created_at: Date;
-        email: string | null;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        place: string | null;
-        phone: string | null;
-        ref_no: string | null;
-        address: string | null;
-        customer_id: string | null;
-        city: string | null;
-        phone_2: string | null;
-        phone_3: string | null;
-    }>;
+    remove(id: string): Promise<any>;
 }

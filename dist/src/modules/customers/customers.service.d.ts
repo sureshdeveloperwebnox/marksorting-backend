@@ -16,51 +16,11 @@ export declare class CustomersService {
         orderBy?: Prisma.CustomerOrderByWithRelationInput;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateCustomerDto): Promise<{
-        id: string;
-        created_at: Date;
-        email: string | null;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        phone: string | null;
-        address: string | null;
-    }>;
+    create(dto: CreateCustomerDto): Promise<any>;
     update(id: string, dto: UpdateCustomerDto): Promise<{
-        before: {
-            id: string;
-            created_at: Date;
-            email: string | null;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            phone: string | null;
-            address: string | null;
-        };
-        after: {
-            id: string;
-            created_at: Date;
-            email: string | null;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            phone: string | null;
-            address: string | null;
-        };
+        before: any;
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        created_at: Date;
-        email: string | null;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        phone: string | null;
-        address: string | null;
-    }>;
+    remove(id: string): Promise<any>;
     private invalidateCache;
 }
