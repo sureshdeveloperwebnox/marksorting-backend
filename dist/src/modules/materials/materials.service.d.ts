@@ -17,45 +17,45 @@ export declare class MaterialsService {
     }): Promise<any>;
     findById(id: string): Promise<any>;
     create(dto: CreateMaterialDto): Promise<{
-        description: string | null;
-        status: string;
         id: string;
-        name: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
         uom: string | null;
     }>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
         before: {
-            description: string | null;
-            status: string;
             id: string;
-            name: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
             uom: string | null;
         };
         after: {
-            description: string | null;
-            status: string;
             id: string;
-            name: string;
+            description: string | null;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
+            name: string;
+            status: string;
             uom: string | null;
         };
     }>;
     remove(id: string): Promise<{
-        description: string | null;
-        status: string;
         id: string;
-        name: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
         uom: string | null;
     }>;
     private invalidateCache;

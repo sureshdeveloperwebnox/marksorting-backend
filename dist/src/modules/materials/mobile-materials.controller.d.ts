@@ -5,13 +5,13 @@ export declare class MobileMaterialsController {
     constructor(materialsService: MaterialsService);
     findAll(skip?: string, take?: string, search?: string): Promise<any>;
     create(dto: CreateMaterialDto): Promise<{
-        description: string | null;
-        status: string;
         id: string;
-        name: string;
+        description: string | null;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
+        name: string;
+        status: string;
         uom: string | null;
     }>;
 }
