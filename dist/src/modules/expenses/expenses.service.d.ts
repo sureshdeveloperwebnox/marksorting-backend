@@ -42,19 +42,169 @@ export declare class ExpensesService {
         role: string;
     }): Promise<{
         before: any;
-        after: any;
+        after: ({
+            mill: {
+                id: string;
+                name: string;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
+            } | null;
+            serviceReport: {
+                id: string;
+                report_number: string;
+            } | null;
+            installationReport: {
+                id: string;
+                report_number: string;
+            } | null;
+            expenseCategory: {
+                id: string;
+                name: string;
+            } | null;
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                expense_id: string;
+                technician_id: string;
+            })[];
+            expense_items: ({
+                expenseCategory: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                id: string;
+                created_at: Date;
+                updated_at: Date;
+                expense_id: string;
+                expense_category_id: string;
+                remarks: string | null;
+                amount: import("@prisma/client-runtime-utils").Decimal;
+                admin_amount: import("@prisma/client-runtime-utils").Decimal;
+                expense_images: string[];
+                admin_remarks: string | null;
+            })[];
+        } & {
+            mill_id: string | null;
+            place: string | null;
+            status: string;
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            visit_date: Date;
+            visit_time: string;
+            service_report_id: string | null;
+            installation_report_id: string | null;
+            expense_number: string;
+            expense_type: string;
+            report_type: string;
+            expense_category_id: string | null;
+            others: string | null;
+            remarks: string | null;
+            amount: import("@prisma/client-runtime-utils").Decimal;
+            admin_amount: import("@prisma/client-runtime-utils").Decimal;
+            expense_images: string[];
+        }) | null;
     }>;
     remove(id: string, user?: {
         userId: string;
         role: string;
-    }): Promise<any>;
+    }): Promise<{
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        } | null;
+        serviceReport: {
+            id: string;
+            report_number: string;
+        } | null;
+        installationReport: {
+            id: string;
+            report_number: string;
+        } | null;
+        expenseCategory: {
+            id: string;
+            name: string;
+        } | null;
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            expense_id: string;
+            technician_id: string;
+        })[];
+        expense_items: ({
+            expenseCategory: {
+                id: string;
+                name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            expense_id: string;
+            expense_category_id: string;
+            remarks: string | null;
+            amount: import("@prisma/client-runtime-utils").Decimal;
+            admin_amount: import("@prisma/client-runtime-utils").Decimal;
+            expense_images: string[];
+            admin_remarks: string | null;
+        })[];
+    } & {
+        mill_id: string | null;
+        place: string | null;
+        status: string;
+        id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        visit_date: Date;
+        visit_time: string;
+        service_report_id: string | null;
+        installation_report_id: string | null;
+        expense_number: string;
+        expense_type: string;
+        report_type: string;
+        expense_category_id: string | null;
+        others: string | null;
+        remarks: string | null;
+        amount: import("@prisma/client-runtime-utils").Decimal;
+        admin_amount: import("@prisma/client-runtime-utils").Decimal;
+        expense_images: string[];
+    }>;
     checkEligibility(user: {
         userId: string;
         role: string;
     }, technicianId?: string, excludeExpenseId?: string): Promise<{
         eligible: boolean;
-        serviceReports: any;
-        installationReports: any;
+        serviceReports: {
+            id: string;
+            report_number: string;
+            mill_id: string;
+            place: string;
+            visit_date: Date;
+            mill_name: string;
+        }[];
+        installationReports: {
+            id: string;
+            report_number: string;
+            mill_id: string;
+            place: string;
+            visit_date: Date;
+            mill_name: string;
+        }[];
     }>;
     private invalidateCache;
 }

@@ -6,34 +6,378 @@ export declare class MobileStoreReturnsController {
     private readonly storesService;
     constructor(storesService: StoresService);
     findAll(req: any, skip?: string, take?: string, search?: string): Promise<{
-        stores: any;
-        total: any;
+        stores: ({
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        })[];
+        total: number;
     }>;
     submitReturn(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
-        before: any;
-        after: any;
+        before: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+        after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
     }>;
 }
 export declare class MobileStoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
     findAll(req: any, skip?: string, take?: string, search?: string, return_status?: string, returnStatus?: string, inflow_status?: string, inflowStatus?: string, warranty_status?: string, warrantyStatus?: string): Promise<{
-        stores: any;
-        total: any;
+        stores: ({
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        })[];
+        total: number;
     }>;
     submitReturn(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
-        before: any;
-        after: any;
+        before: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+        after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
     }>;
     submitReturnAlias(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
-        before: any;
-        after: any;
+        before: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+        after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
     }>;
-    create(dto: MobileCreateStoreDto, req: any): Promise<any>;
+    create(dto: MobileCreateStoreDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        };
+        materials: ({
+            material: {
+                id: string;
+                name: string;
+            };
+        } & {
+            quantity: number;
+            stock_type: string | null;
+            store_id: string;
+            material_id: string;
+        })[];
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
+    } & {
+        id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        customer_id: string;
+        invoice_number: string | null;
+        remarks: string | null;
+        service_engineer_id: string;
+        quantity: number;
+        warranty_status: string;
+        frame_number: string;
+        return_status: string;
+        inflow_status: string;
+        stock_type: string | null;
+        barcode: string | null;
+        provider_name: string | null;
+    }>;
     findOne(id: string, req: any): Promise<any>;
     update(id: string, dto: MobileUpdateStoreDto, req: any): Promise<{
-        before: any;
-        after: any;
+        before: {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
+        after: {
+            customer: {
+                id: string;
+                name: string;
+            };
+            materials: ({
+                material: {
+                    id: string;
+                    name: string;
+                };
+            } & {
+                quantity: number;
+                stock_type: string | null;
+                store_id: string;
+                material_id: string;
+            })[];
+            service_engineer: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            customer_id: string;
+            invoice_number: string | null;
+            remarks: string | null;
+            service_engineer_id: string;
+            quantity: number;
+            warranty_status: string;
+            frame_number: string;
+            return_status: string;
+            inflow_status: string;
+            stock_type: string | null;
+            barcode: string | null;
+            provider_name: string | null;
+        };
     }>;
-    remove(id: string, req: any): Promise<any>;
+    remove(id: string, req: any): Promise<{
+        id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        customer_id: string;
+        invoice_number: string | null;
+        remarks: string | null;
+        service_engineer_id: string;
+        quantity: number;
+        warranty_status: string;
+        frame_number: string;
+        return_status: string;
+        inflow_status: string;
+        stock_type: string | null;
+        barcode: string | null;
+        provider_name: string | null;
+    }>;
 }
