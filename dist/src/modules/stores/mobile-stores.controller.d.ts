@@ -22,6 +22,7 @@ export declare class MobileStoreReturnsController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -39,6 +40,7 @@ export declare class MobileStoreReturnsController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         })[];
@@ -59,6 +61,7 @@ export declare class MobileStoreReturnsController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -78,6 +81,7 @@ export declare class MobileStoreReturnsController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -95,6 +99,7 @@ export declare class MobileStoreReturnsController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -120,6 +125,7 @@ export declare class MobileStoresController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -137,6 +143,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         })[];
@@ -157,6 +164,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -176,6 +184,7 @@ export declare class MobileStoresController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -193,6 +202,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -212,6 +222,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -231,6 +242,7 @@ export declare class MobileStoresController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -248,6 +260,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -268,6 +281,7 @@ export declare class MobileStoresController {
             };
         } & {
             quantity: number;
+            stock_type: string | null;
             store_id: string;
             material_id: string;
         })[];
@@ -285,6 +299,7 @@ export declare class MobileStoresController {
         frame_number: string;
         return_status: string;
         inflow_status: string;
+        stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
     }>;
@@ -304,6 +319,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -323,6 +339,7 @@ export declare class MobileStoresController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -340,6 +357,7 @@ export declare class MobileStoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -358,6 +376,7 @@ export declare class MobileStoresController {
         frame_number: string;
         return_status: string;
         inflow_status: string;
+        stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
     }>;

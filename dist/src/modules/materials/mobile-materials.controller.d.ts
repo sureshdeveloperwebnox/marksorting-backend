@@ -12,5 +12,6 @@ export declare class MobileMaterialsController {
         deleted_at: Date | null;
         name: string;
         status: string;
+        uom: string | null;
     }>;
 }

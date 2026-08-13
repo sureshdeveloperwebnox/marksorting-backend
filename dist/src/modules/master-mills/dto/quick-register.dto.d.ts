@@ -11,7 +11,6 @@ export declare class QuickRegisterDto {
     state?: string;
     phone?: string;
     email?: string;
-    type?: string;
     invoice_no?: string;
     invoice_date?: string;
     installation_date?: string;

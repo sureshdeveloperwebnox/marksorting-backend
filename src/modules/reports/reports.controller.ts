@@ -214,6 +214,10 @@ export class ReportsController {
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
+  @ApiQuery({ name: 'expenseDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'expenseDateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
@@ -235,6 +239,10 @@ export class ReportsController {
     @Query('categoryId') categoryId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
+    @Query('expenseDateFrom') expenseDateFrom?: string,
+    @Query('expenseDateTo') expenseDateTo?: string,
     @Query('millId') millId?: string,
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
@@ -250,6 +258,10 @@ export class ReportsController {
       categoryId,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
+      expenseDateFrom,
+      expenseDateTo,
       millId,
       technicianId,
       millName,

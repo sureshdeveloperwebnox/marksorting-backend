@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { ExpensesService } from './expenses.service';
@@ -51,24 +52,13 @@ export class ExpensesController {
     type: String,
     description: 'Filter by status',
   })
-  @ApiQuery({
-    name: 'dateFrom',
-    required: false,
-    type: String,
-    description: 'Filter from visit date (YYYY-MM-DD)',
-  })
-  @ApiQuery({
-    name: 'dateTo',
-    required: false,
-    type: String,
-    description: 'Filter to visit date (YYYY-MM-DD)',
-  })
-  @ApiQuery({
-    name: 'technicianId',
-    required: false,
-    type: String,
-    description: 'Filter by technician/service engineer ID',
-  })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
+  @ApiQuery({ name: 'expenseDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'expenseDateTo', required: false, type: String })
+  @ApiQuery({ name: 'technicianId', required: false, type: String })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -77,16 +67,28 @@ export class ExpensesController {
     @Query('technicianId') technicianId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
+    @Query('expenseDateFrom') expenseDateFrom?: string,
+    @Query('expenseDateTo') expenseDateTo?: string,
+    @Request() req?: any,
   ) {
-    return this.expensesService.findAll({
-      skip: skip ? parseInt(skip, 10) : 0,
-      take: take ? parseInt(take, 10) : 10,
-      search,
-      status,
-      technicianId,
-      dateFrom,
-      dateTo,
-    });
+    return this.expensesService.findAll(
+      {
+        skip: skip ? parseInt(skip, 10) : 0,
+        take: take ? parseInt(take, 10) : 10,
+        search,
+        status,
+        technicianId,
+        dateFrom,
+        dateTo,
+        createdDateFrom,
+        createdDateTo,
+        expenseDateFrom,
+        expenseDateTo,
+      },
+      req?.user,
+    );
   }
 
   @Get('eligibility')

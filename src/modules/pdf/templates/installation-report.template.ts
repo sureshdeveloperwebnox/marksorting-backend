@@ -41,12 +41,9 @@ const row = (label: string, value: string, extraValueClass = '') => `
 `;
 
 const formatWarrantyDuration = (years?: number, months?: number) => {
-  const y = years ?? 0;
-  const m = months ?? 0;
-  const parts = [];
-  if (y > 0) parts.push(`${y} Year${y > 1 ? 's' : ''}`);
-  if (m > 0) parts.push(`${m} Month${m > 1 ? 's' : ''}`);
-  return parts.join(' ') || '-';
+  const totalMonths = (months ?? 0) + ((years ?? 0) * 12);
+  if (totalMonths <= 0) return '-';
+  return `${totalMonths} Month${totalMonths > 1 ? 's' : ''}`;
 };
 
 const fullRow = (label: string, value: string, minHeight = 34) => `

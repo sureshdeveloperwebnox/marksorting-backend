@@ -499,6 +499,47 @@ export class ServiceReportsService {
     return serviceReport;
   }
 
+  async bulkDeleteByDate(
+    startDate?: string,
+    endDate?: string,
+    user?: { userId: string; role: string },
+  ) {
+    const where: any = { deleted_at: null };
+
+    if (startDate || endDate) {
+      where.created_at = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setUTCHours(0, 0, 0, 0);
+        where.created_at.gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setUTCHours(23, 59, 59, 999);
+        where.created_at.lte = end;
+      }
+    }
+
+    const result = await this.prisma.serviceReport.updateMany({
+      where,
+      data: {
+        deleted_at: new Date(),
+      },
+    });
+
+    await this.invalidateCache();
+
+    let rangeStr = '';
+    if (startDate && endDate) rangeStr = `between ${startDate} and ${endDate}`;
+    else if (startDate) rangeStr = `from ${startDate} onwards`;
+    else if (endDate) rangeStr = `on or before ${endDate}`;
+
+    return {
+      count: result.count,
+      message: `Successfully deleted ${result.count} service report(s) ${rangeStr}`.trim(),
+    };
+  }
+
   async generatePdf(
     id: string,
     user?: { userId: string; role: string },

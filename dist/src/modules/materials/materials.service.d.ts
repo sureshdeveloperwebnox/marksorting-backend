@@ -24,6 +24,7 @@ export declare class MaterialsService {
         deleted_at: Date | null;
         name: string;
         status: string;
+        uom: string | null;
     }>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
         before: {
@@ -34,6 +35,7 @@ export declare class MaterialsService {
             deleted_at: Date | null;
             name: string;
             status: string;
+            uom: string | null;
         };
         after: {
             id: string;
@@ -43,6 +45,7 @@ export declare class MaterialsService {
             deleted_at: Date | null;
             name: string;
             status: string;
+            uom: string | null;
         };
     }>;
     remove(id: string): Promise<{
@@ -53,6 +56,7 @@ export declare class MaterialsService {
         deleted_at: Date | null;
         name: string;
         status: string;
+        uom: string | null;
     }>;
     private invalidateCache;
 }

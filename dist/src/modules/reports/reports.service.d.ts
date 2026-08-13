@@ -11,6 +11,10 @@ interface ReportParams {
     categoryId?: string;
     dateFrom?: string;
     dateTo?: string;
+    createdDateFrom?: string;
+    createdDateTo?: string;
+    expenseDateFrom?: string;
+    expenseDateTo?: string;
     millId?: string;
     technicianId?: string;
     millName?: string;

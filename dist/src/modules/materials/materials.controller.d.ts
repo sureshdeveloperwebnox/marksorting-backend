@@ -14,6 +14,7 @@ export declare class MaterialsController {
         deleted_at: Date | null;
         name: string;
         status: string;
+        uom: string | null;
     }>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
         before: {
@@ -24,6 +25,7 @@ export declare class MaterialsController {
             deleted_at: Date | null;
             name: string;
             status: string;
+            uom: string | null;
         };
         after: {
             id: string;
@@ -33,6 +35,7 @@ export declare class MaterialsController {
             deleted_at: Date | null;
             name: string;
             status: string;
+            uom: string | null;
         };
     }>;
     remove(id: string): Promise<{
@@ -43,5 +46,6 @@ export declare class MaterialsController {
         deleted_at: Date | null;
         name: string;
         status: string;
+        uom: string | null;
     }>;
 }

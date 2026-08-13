@@ -4,7 +4,7 @@ import { UpdateExpenseDto } from './dto/update-expense.dto';
 export declare class ExpensesController {
     private readonly expensesService;
     constructor(expensesService: ExpensesService);
-    findAll(skip?: string, take?: string, search?: string, status?: string, technicianId?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, status?: string, technicianId?: string, dateFrom?: string, dateTo?: string, createdDateFrom?: string, createdDateTo?: string, expenseDateFrom?: string, expenseDateTo?: string, req?: any): Promise<any>;
     checkEligibility(technicianId?: string, excludeExpenseId?: string): Promise<{
         eligible: boolean;
         serviceReports: {

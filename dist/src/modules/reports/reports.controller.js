@@ -76,7 +76,7 @@ let ReportsController = class ReportsController {
         const data = await this.reportsService.getInstallations(params, req.user);
         return res.json(data);
     }
-    async getExpenses(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, refNo, exportType) {
+    async getExpenses(req, res, skip, take, search, status, categoryId, dateFrom, dateTo, createdDateFrom, createdDateTo, expenseDateFrom, expenseDateTo, millId, technicianId, millName, frameNo, refNo, exportType) {
         const params = {
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -85,6 +85,10 @@ let ReportsController = class ReportsController {
             categoryId,
             dateFrom,
             dateTo,
+            createdDateFrom,
+            createdDateTo,
+            expenseDateFrom,
+            expenseDateTo,
             millId,
             technicianId,
             millName,
@@ -284,6 +288,10 @@ __decorate([
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'createdDateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'createdDateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'expenseDateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'expenseDateTo', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'technicianId', required: false, type: String }),
     (0, swagger_1.ApiQuery)({ name: 'millName', required: false, type: String }),
@@ -304,14 +312,18 @@ __decorate([
     __param(6, (0, common_1.Query)('categoryId')),
     __param(7, (0, common_1.Query)('dateFrom')),
     __param(8, (0, common_1.Query)('dateTo')),
-    __param(9, (0, common_1.Query)('millId')),
-    __param(10, (0, common_1.Query)('technicianId')),
-    __param(11, (0, common_1.Query)('millName')),
-    __param(12, (0, common_1.Query)('frameNo')),
-    __param(13, (0, common_1.Query)('refNo')),
-    __param(14, (0, common_1.Query)('export')),
+    __param(9, (0, common_1.Query)('createdDateFrom')),
+    __param(10, (0, common_1.Query)('createdDateTo')),
+    __param(11, (0, common_1.Query)('expenseDateFrom')),
+    __param(12, (0, common_1.Query)('expenseDateTo')),
+    __param(13, (0, common_1.Query)('millId')),
+    __param(14, (0, common_1.Query)('technicianId')),
+    __param(15, (0, common_1.Query)('millName')),
+    __param(16, (0, common_1.Query)('frameNo')),
+    __param(17, (0, common_1.Query)('refNo')),
+    __param(18, (0, common_1.Query)('export')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ReportsController.prototype, "getExpenses", null);
 __decorate([

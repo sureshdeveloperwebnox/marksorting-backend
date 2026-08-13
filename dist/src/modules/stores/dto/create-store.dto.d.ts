@@ -5,6 +5,7 @@ export declare class CreateStoreDto {
     material_quantities?: {
         material_id: string;
         quantity: number;
+        stock_type?: string;
     }[];
     quantity: number;
     warranty_status: string;
@@ -12,6 +13,7 @@ export declare class CreateStoreDto {
     frame_number: string;
     return_status: string;
     inflow_status: string;
+    stock_type?: string;
     barcode?: string;
     provider_name?: string;
     invoice_number?: string;

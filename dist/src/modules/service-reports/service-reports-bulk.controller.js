@@ -19,10 +19,18 @@ const platform_express_1 = require("@nestjs/platform-express");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const service_reports_bulk_service_1 = require("./service-reports-bulk.service");
 const service_report_bulk_upload_dto_1 = require("./dto/service-report-bulk-upload.dto");
+const service_reports_service_1 = require("./service-reports.service");
 let ServiceReportsBulkController = class ServiceReportsBulkController {
     bulkService;
-    constructor(bulkService) {
+    serviceReportsService;
+    constructor(bulkService, serviceReportsService) {
         this.bulkService = bulkService;
+        this.serviceReportsService = serviceReportsService;
+    }
+    bulkDeleteByDate(startDate, endDate, beforeDate, bodyStartDate, bodyEndDate, bodyBeforeDate, req) {
+        const start = startDate || bodyStartDate;
+        const end = endDate || bodyEndDate || beforeDate || bodyBeforeDate;
+        return this.serviceReportsService.bulkDeleteByDate(start, end, req?.user);
     }
     async getTemplate(res) {
         const buffer = await this.bulkService.generateTemplate();
@@ -47,6 +55,22 @@ let ServiceReportsBulkController = class ServiceReportsBulkController {
     }
 };
 exports.ServiceReportsBulkController = ServiceReportsBulkController;
+__decorate([
+    (0, common_1.Delete)('bulk-delete/by-date'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Bulk soft-delete old service reports created within a given date range',
+    }),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, common_1.Query)('beforeDate')),
+    __param(3, (0, common_1.Body)('startDate')),
+    __param(4, (0, common_1.Body)('endDate')),
+    __param(5, (0, common_1.Body)('beforeDate')),
+    __param(6, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, Object]),
+    __metadata("design:returntype", void 0)
+], ServiceReportsBulkController.prototype, "bulkDeleteByDate", null);
 __decorate([
     (0, common_1.Get)('bulk-upload/template'),
     (0, swagger_1.ApiOperation)({
@@ -101,6 +125,7 @@ exports.ServiceReportsBulkController = ServiceReportsBulkController = __decorate
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('service-reports'),
-    __metadata("design:paramtypes", [service_reports_bulk_service_1.ServiceReportsBulkService])
+    __metadata("design:paramtypes", [service_reports_bulk_service_1.ServiceReportsBulkService,
+        service_reports_service_1.ServiceReportsService])
 ], ServiceReportsBulkController);
 //# sourceMappingURL=service-reports-bulk.controller.js.map

@@ -105,6 +105,7 @@ let StoresService = class StoresService {
                         return {
                             material: { connect: { id } },
                             quantity: qtyObj ? qtyObj.quantity : 1,
+                            stock_type: qtyObj?.stock_type || 'Inflow',
                         };
                     }),
                 },
@@ -172,6 +173,7 @@ let StoresService = class StoresService {
                             return {
                                 material: { connect: { id: matId } },
                                 quantity: qtyObj ? qtyObj.quantity : 1,
+                                stock_type: qtyObj?.stock_type || 'Inflow',
                             };
                         }),
                     }

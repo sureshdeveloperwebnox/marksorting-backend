@@ -27,7 +27,7 @@ let StoresController = class StoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, dateFrom, dateTo) {
+    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, stockType, stockTypeCamel, dateFrom, dateTo) {
         const where = {};
         const engId = serviceEngineerId || serviceEngineerIdCamel;
         const custId = customerId || customerIdCamel;
@@ -35,6 +35,7 @@ let StoresController = class StoresController {
         const warStatus = warrantyStatus || warrantyStatusCamel;
         const retStatus = returnStatus || returnStatusCamel;
         const infStatus = inflowStatus || inflowStatusCamel;
+        const stkType = stockType || stockTypeCamel;
         if (search) {
             where.OR = [
                 { frame_number: { contains: search, mode: 'insensitive' } },
@@ -77,6 +78,9 @@ let StoresController = class StoresController {
         }
         if (infStatus) {
             where.inflow_status = { equals: infStatus, mode: 'insensitive' };
+        }
+        if (stkType) {
+            where.stock_type = { equals: stkType, mode: 'insensitive' };
         }
         if (materialId) {
             where.materials = {
@@ -181,6 +185,12 @@ __decorate([
         description: 'Filter by inflow/stock status',
     }),
     (0, swagger_1.ApiQuery)({
+        name: 'stock_type',
+        required: false,
+        type: String,
+        description: 'Filter by stock type (Inflow / From Store)',
+    }),
+    (0, swagger_1.ApiQuery)({
         name: 'dateFrom',
         required: false,
         type: String,
@@ -207,10 +217,12 @@ __decorate([
     __param(12, (0, common_1.Query)('returnStatus')),
     __param(13, (0, common_1.Query)('inflow_status')),
     __param(14, (0, common_1.Query)('inflowStatus')),
-    __param(15, (0, common_1.Query)('dateFrom')),
-    __param(16, (0, common_1.Query)('dateTo')),
+    __param(15, (0, common_1.Query)('stock_type')),
+    __param(16, (0, common_1.Query)('stockType')),
+    __param(17, (0, common_1.Query)('dateFrom')),
+    __param(18, (0, common_1.Query)('dateTo')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "findAll", null);
 __decorate([

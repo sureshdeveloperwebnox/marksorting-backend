@@ -2,6 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
+  Query,
+  Request,
   Body,
   Param,
   Res,
@@ -25,6 +28,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InstallationReportsBulkService } from './installation-reports-bulk.service';
 import { InstallationReportBulkImportDto } from './dto/installation-report-bulk-upload.dto';
 
+import { InstallationReportsService } from './installation-reports.service';
+
 interface MulterFile {
   fieldname: string;
   originalname: string;
@@ -39,7 +44,32 @@ interface MulterFile {
 @UseGuards(JwtAuthGuard)
 @Controller('installation-reports')
 export class InstallationReportsBulkController {
-  constructor(private readonly bulkService: InstallationReportsBulkService) {}
+  constructor(
+    private readonly bulkService: InstallationReportsBulkService,
+    private readonly installationReportsService: InstallationReportsService,
+  ) {}
+
+  /**
+   * DELETE /installation-reports/bulk-delete/by-date
+   * Bulk soft-delete old installation reports created on or before a given date.
+   */
+  @Delete('bulk-delete/by-date')
+  @ApiOperation({
+    summary: 'Bulk soft-delete old installation reports created within a given date range',
+  })
+  bulkDeleteByDate(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('beforeDate') beforeDate?: string,
+    @Body('startDate') bodyStartDate?: string,
+    @Body('endDate') bodyEndDate?: string,
+    @Body('beforeDate') bodyBeforeDate?: string,
+    @Request() req?: any,
+  ) {
+    const start = startDate || bodyStartDate;
+    const end = endDate || bodyEndDate || beforeDate || bodyBeforeDate;
+    return this.installationReportsService.bulkDeleteByDate(start, end, req?.user);
+  }
 
   /**
    * GET /installation-reports/bulk-upload/template

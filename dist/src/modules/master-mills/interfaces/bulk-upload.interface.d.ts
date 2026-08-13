@@ -1,6 +1,5 @@
 export interface PreviewRow {
     invoice_no: string;
-    type: string;
     invoice_date: string;
     ref_no: string;
     frame_no: string;

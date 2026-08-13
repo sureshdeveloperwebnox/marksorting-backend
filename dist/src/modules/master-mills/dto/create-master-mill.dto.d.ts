@@ -1,6 +1,5 @@
 export declare class CreateMasterMillDto {
     invoice_no: string;
-    type?: string;
     invoice_date?: string;
     ref_no?: string;
     mill_id?: string;

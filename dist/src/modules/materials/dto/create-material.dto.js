@@ -15,6 +15,7 @@ const swagger_1 = require("@nestjs/swagger");
 class CreateMaterialDto {
     name;
     description;
+    uom;
     status;
 }
 exports.CreateMaterialDto = CreateMaterialDto;
@@ -30,6 +31,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMaterialDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'PCS', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMaterialDto.prototype, "uom", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'ACTIVE', required: false }),
     (0, class_validator_1.IsString)(),

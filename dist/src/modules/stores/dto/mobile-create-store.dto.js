@@ -22,6 +22,7 @@ class MobileCreateStoreDto {
     frame_number;
     return_status;
     inflow_status;
+    stock_type;
     barcode;
     provider_name;
     invoice_number;
@@ -43,7 +44,7 @@ __decorate([
 ], MobileCreateStoreDto.prototype, "material_ids", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: [{ material_id: 'uuid-of-material-1', quantity: 2 }],
+        example: [{ material_id: 'uuid-of-material-1', quantity: 2, stock_type: 'Inflow' }],
         required: false,
     }),
     (0, class_validator_1.IsArray)(),
@@ -63,7 +64,7 @@ __decorate([
     __metadata("design:type", String)
 ], MobileCreateStoreDto.prototype, "warranty_status", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Payment', required: false }),
+    (0, swagger_1.ApiProperty)({ example: 'Acknowledgement', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -86,6 +87,12 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], MobileCreateStoreDto.prototype, "inflow_status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Inflow', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], MobileCreateStoreDto.prototype, "stock_type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'BAR1234567', required: false }),
     (0, class_validator_1.IsString)(),

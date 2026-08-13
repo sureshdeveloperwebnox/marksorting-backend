@@ -215,7 +215,6 @@ model MasterMill {
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
   deleted_at            DateTime?
-  type                  String    @default("Installation")
   mill                  Mill?     @relation(fields: [mill_id], references: [id])
 
   @@index([mill_id])
@@ -585,6 +584,7 @@ model Material {
   id          String          @id @default(uuid())
   name        String          @unique
   description String?
+  uom         String?
   status      String          @default("ACTIVE")
   created_at  DateTime        @default(now())
   updated_at  DateTime        @updatedAt
@@ -603,6 +603,7 @@ model Store {
   frame_number        String          @unique
   return_status       String
   inflow_status       String
+  stock_type          String?         @default("Inflow")
   barcode             String?
   provider_name       String?
   invoice_number      String?
@@ -621,6 +622,7 @@ model StoreMaterial {
   store_id    String
   material_id String
   quantity    Int      @default(1)
+  stock_type  String?  @default("Inflow")
   material    Material @relation(fields: [material_id], references: [id])
   store       Store    @relation(fields: [store_id], references: [id], onDelete: Cascade)
 

@@ -237,10 +237,10 @@ let InstallationReportsService = class InstallationReportsService {
             let wEndDate = reportData.warranty_end_date && reportData.warranty_end_date.trim()
                 ? new Date(reportData.warranty_end_date)
                 : undefined;
-            if (!wEndDate && wStartDate && (wYears > 0 || wMonths > 0)) {
+            const totalMonths = wMonths + wYears * 12;
+            if (!wEndDate && wStartDate && totalMonths > 0) {
                 const calcDate = new Date(wStartDate);
-                calcDate.setFullYear(calcDate.getFullYear() + wYears);
-                calcDate.setMonth(calcDate.getMonth() + wMonths);
+                calcDate.setMonth(calcDate.getMonth() + totalMonths);
                 calcDate.setDate(calcDate.getDate() - 1);
                 wEndDate = calcDate;
             }
@@ -383,10 +383,10 @@ let InstallationReportsService = class InstallationReportsService {
             const months = updateData.warranty_months !== undefined
                 ? updateData.warranty_months
                 : (existingReport.warranty_months ?? 0);
-            if (startDate && (years > 0 || months > 0)) {
+            const totalMonths = (months ?? 0) + (years ?? 0) * 12;
+            if (startDate && totalMonths > 0) {
                 const calcDate = new Date(startDate);
-                calcDate.setFullYear(calcDate.getFullYear() + years);
-                calcDate.setMonth(calcDate.getMonth() + months);
+                calcDate.setMonth(calcDate.getMonth() + totalMonths);
                 calcDate.setDate(calcDate.getDate() - 1);
                 updateData.warranty_end_date = calcDate;
             }
@@ -419,6 +419,40 @@ let InstallationReportsService = class InstallationReportsService {
         });
         await this.invalidateCache(id);
         return installationReport;
+    }
+    async bulkDeleteByDate(startDate, endDate, user) {
+        const where = { deleted_at: null };
+        if (startDate || endDate) {
+            where.created_at = {};
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setUTCHours(0, 0, 0, 0);
+                where.created_at.gte = start;
+            }
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setUTCHours(23, 59, 59, 999);
+                where.created_at.lte = end;
+            }
+        }
+        const result = await this.prisma.installationReport.updateMany({
+            where,
+            data: {
+                deleted_at: new Date(),
+            },
+        });
+        await this.invalidateCache();
+        let rangeStr = '';
+        if (startDate && endDate)
+            rangeStr = `between ${startDate} and ${endDate}`;
+        else if (startDate)
+            rangeStr = `from ${startDate} onwards`;
+        else if (endDate)
+            rangeStr = `on or before ${endDate}`;
+        return {
+            count: result.count,
+            message: `Successfully deleted ${result.count} installation report(s) ${rangeStr}`.trim(),
+        };
     }
     async invalidateCache(id) {
         const promises = [

@@ -4,7 +4,7 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 export declare class StoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
-    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, serviceEngineerIdCamel?: string, customerId?: string, customerIdCamel?: string, materialId?: string, materialIdCamel?: string, warrantyStatus?: string, warrantyStatusCamel?: string, returnStatus?: string, returnStatusCamel?: string, inflowStatus?: string, inflowStatusCamel?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, serviceEngineerIdCamel?: string, customerId?: string, customerIdCamel?: string, materialId?: string, materialIdCamel?: string, warrantyStatus?: string, warrantyStatusCamel?: string, returnStatus?: string, returnStatusCamel?: string, inflowStatus?: string, inflowStatusCamel?: string, stockType?: string, stockTypeCamel?: string, dateFrom?: string, dateTo?: string): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateStoreDto): Promise<{
         customer: {
@@ -22,6 +22,7 @@ export declare class StoresController {
             };
         } & {
             quantity: number;
+            stock_type: string | null;
             store_id: string;
             material_id: string;
         })[];
@@ -39,6 +40,7 @@ export declare class StoresController {
         frame_number: string;
         return_status: string;
         inflow_status: string;
+        stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
     }>;
@@ -57,6 +59,7 @@ export declare class StoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -76,6 +79,7 @@ export declare class StoresController {
                 };
             } & {
                 quantity: number;
+                stock_type: string | null;
                 store_id: string;
                 material_id: string;
             })[];
@@ -93,6 +97,7 @@ export declare class StoresController {
             frame_number: string;
             return_status: string;
             inflow_status: string;
+            stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
         };
@@ -111,6 +116,7 @@ export declare class StoresController {
         frame_number: string;
         return_status: string;
         inflow_status: string;
+        stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
     }>;

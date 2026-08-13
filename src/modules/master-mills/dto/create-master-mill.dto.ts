@@ -23,11 +23,6 @@ export class CreateMasterMillDto {
   @IsNotEmpty()
   invoice_no: string;
 
-  @ApiProperty({ example: 'Installation', required: false })
-  @IsString()
-  @IsOptional()
-  @emptyStringToUndefined
-  type?: string;
 
   @ApiProperty({ example: '2024-01-15', required: false })
   @IsDateString()

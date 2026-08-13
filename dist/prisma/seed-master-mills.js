@@ -178,7 +178,6 @@ async function seedMasterMills(prisma) {
                     mc_model: item.mc_model,
                     frame_no: item.frame_no,
                     mfg_date: new Date('2026-01-01'),
-                    type: item.ref_no.startsWith('S') ? 'Service' : 'Installation',
                 },
             });
             console.log(`Updated MasterMill for mill: ${mill.name}`);
@@ -203,7 +202,6 @@ async function seedMasterMills(prisma) {
                     warranty_closing_date: new Date('2027-06-13'),
                     all_warranty: 'Under Warranty',
                     status: 'ACTIVE',
-                    type: item.ref_no.startsWith('S') ? 'Service' : 'Installation',
                 },
             });
             console.log(`Created MasterMill for mill: ${mill.name}`);

@@ -12,6 +12,11 @@ export class CreateMaterialDto {
   @IsOptional()
   description?: string;
 
+  @ApiProperty({ example: 'PCS', required: false })
+  @IsString()
+  @IsOptional()
+  uom?: string;
+
   @ApiProperty({ example: 'ACTIVE', required: false })
   @IsString()
   @IsOptional()

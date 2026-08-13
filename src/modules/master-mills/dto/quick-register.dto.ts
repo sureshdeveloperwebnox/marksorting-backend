@@ -76,10 +76,6 @@ export class QuickRegisterDto {
   @IsOptional()
   email?: string;
 
-  @ApiProperty({ example: 'Installation', required: false })
-  @IsString()
-  @IsOptional()
-  type?: string;
 
   @ApiProperty({ example: 'INV-001', required: false })
   @IsString()

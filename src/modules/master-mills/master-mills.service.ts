@@ -114,8 +114,8 @@ export class MasterMillsService {
       if (baseDate) {
         const years = data.warranty_years ?? 0;
         const months = data.warranty_months ?? 0;
-        baseDate.setFullYear(baseDate.getFullYear() + years);
-        baseDate.setMonth(baseDate.getMonth() + months);
+        const totalMonths = months + years * 12;
+        baseDate.setMonth(baseDate.getMonth() + (totalMonths > 0 ? totalMonths : 12));
         baseDate.setDate(baseDate.getDate() - 1);
         data.warranty_closing_date = baseDate.toISOString();
       }
@@ -125,6 +125,7 @@ export class MasterMillsService {
     if (!data.amc_closing_date && data.amc_starting_date && data.amc_period) {
       const amcStart = new Date(data.amc_starting_date);
       amcStart.setMonth(amcStart.getMonth() + data.amc_period);
+      amcStart.setDate(amcStart.getDate() - 1);
       data.amc_closing_date = amcStart.toISOString();
     }
 
@@ -213,9 +214,9 @@ export class MasterMillsService {
     if (baseDate && !data.warranty_closing_date) {
       const years = data.warranty_years ?? existing.warranty_years ?? 0;
       const months = data.warranty_months ?? existing.warranty_months ?? 0;
+      const totalMonths = months + years * 12;
       const closing = new Date(baseDate);
-      closing.setFullYear(closing.getFullYear() + years);
-      closing.setMonth(closing.getMonth() + months);
+      closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
       closing.setDate(closing.getDate() - 1);
       data.warranty_closing_date = closing.toISOString();
     }
@@ -231,6 +232,7 @@ export class MasterMillsService {
     if (amcStart && amcPeriod && !data.amc_closing_date) {
       const amcClose = new Date(amcStart);
       amcClose.setMonth(amcClose.getMonth() + amcPeriod);
+      amcClose.setDate(amcClose.getDate() - 1);
       data.amc_closing_date = amcClose.toISOString();
     }
 
@@ -299,8 +301,6 @@ export class MasterMillsService {
       underWarranty,
       underAmc,
       nonWarranty,
-      installationCount,
-      serviceCount,
     ] = await Promise.all([
       this.prisma.masterMill.count({ where: { deleted_at: null } }),
       this.prisma.masterMill.count({
@@ -318,12 +318,6 @@ export class MasterMillsService {
       this.prisma.masterMill.count({
         where: { deleted_at: null, all_warranty: 'Non Warranty' },
       }),
-      this.prisma.masterMill.count({
-        where: { deleted_at: null, type: 'Installation' },
-      }),
-      this.prisma.masterMill.count({
-        where: { deleted_at: null, type: 'Service' },
-      }),
     ]);
 
     const result = {
@@ -331,8 +325,6 @@ export class MasterMillsService {
       underWarranty,
       underAmc,
       nonWarranty,
-      installationCount,
-      serviceCount,
     };
     await this.redis.setJson(cacheKey, result, 120);
     return result;
@@ -352,19 +344,13 @@ export class MasterMillsService {
     const cleanRefNo = refNo ? refNo.trim() : '';
     const cleanFrameNo = frameNo ? frameNo.trim() : '';
 
-    // 1. Fetch from MasterMill
+    // 1. Fetch from MasterMill (no type filter — all records are visible to both workflows)
     let masterMills: any[] = [];
-    if (!context || context === 'service_report' || context === 'installation_report') {
+    {
       const mmWhere: Prisma.MasterMillWhereInput = {
         deleted_at: null,
         status: 'ACTIVE',
       };
-      
-      if (context === 'service_report') {
-        mmWhere.type = 'Service';
-      } else if (context === 'installation_report') {
-        mmWhere.type = 'Installation';
-      }
 
       if (cleanSearch) {
         mmWhere.OR = [
@@ -537,7 +523,6 @@ export class MasterMillsService {
       amc_closing_date: record.amc_closing_date,
       amc_amount: record.amc_amount,
       status: record.status,
-      type: record.type,
       mfg_date: record.mfg_date,
       mill: record.mill ? {
         id: record.mill.id,
@@ -579,7 +564,6 @@ export class MasterMillsService {
       amc_closing_date: null,
       amc_amount: 0,
       status: 'ACTIVE',
-      type: 'Service',
       mfg_date: record.machine_mfg_date || null,
       mill: record.mill ? {
         id: record.mill.id,
@@ -621,7 +605,6 @@ export class MasterMillsService {
       amc_closing_date: null,
       amc_amount: 0,
       status: 'ACTIVE',
-      type: 'Installation',
       mfg_date: record.machine_mfg_date || null,
       mill: record.mill ? {
         id: record.mill.id,
@@ -779,7 +762,7 @@ export class MasterMillsService {
           });
         }
       } else {
-        const cleanCustName = customerNameInput!;
+        const cleanCustName = customerNameInput || cleanMillName;
         // Find existing by name (case-insensitive)
         customer = await tx.customer.findFirst({
           where: {
@@ -887,7 +870,6 @@ export class MasterMillsService {
           where: {
             deleted_at: null,
             mill_id: resolvedMillId,
-            type: dto.type || 'Installation',
             OR: orConditions.length > 0 ? orConditions : undefined,
           },
         });
@@ -911,8 +893,6 @@ export class MasterMillsService {
           masterMillUpdates.state = cleanState;
         if (cleanPhone && masterMill.phone_no !== cleanPhone)
           masterMillUpdates.phone_no = cleanPhone;
-        if (dto.type && masterMill.type !== dto.type)
-          masterMillUpdates.type = dto.type;
 
         // Bulk upload extra fields:
         if (cleanInvoiceNo && masterMill.invoice_no !== cleanInvoiceNo)
@@ -972,7 +952,6 @@ export class MasterMillsService {
             phone_no: cleanPhone,
             mill_id: resolvedMillId,
             status: 'ACTIVE',
-            type: dto.type || 'Installation',
             installation_date: installationDate,
             warranty_start_date: warrantyStartDate,
             warranty_years: warrantyYears,
@@ -1062,7 +1041,6 @@ export class MasterMillsService {
       const existing = await this.prisma.masterMill.findFirst({
         where: {
           deleted_at: null,
-          type: 'Service',
           mill_id: millId,
         },
       });
@@ -1079,8 +1057,6 @@ export class MasterMillsService {
         if (place && place.trim() && existing.place !== place.trim())
           updates.place = place.trim();
         if (existing.mill_id !== millId) updates.mill_id = millId;
-        // Only flip type to 'Service' if it hasn't already been set to 'Installation'
-        if (existing.type !== 'Installation') updates.type = 'Service';
 
         if (Object.keys(updates).length > 0) {
           await this.prisma.masterMill.update({
@@ -1103,7 +1079,6 @@ export class MasterMillsService {
             phone_no: mill.phone || undefined,
             mill_id: millId,
             status: 'ACTIVE',
-            type: 'Service',
           },
         });
       }

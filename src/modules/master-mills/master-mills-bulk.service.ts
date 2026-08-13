@@ -113,7 +113,6 @@ export class MasterMillsBulkService {
       select: {
         ref_no: true,
         frame_no: true,
-        type: true,
         mill: {
           select: {
             name: true,
@@ -137,19 +136,18 @@ export class MasterMillsBulkService {
       const cleanFrame = row.frame_no?.trim().toLowerCase();
       const cleanMillName = row.mill_name?.trim().toLowerCase();
       const cleanCustomerName = row.customer_name?.trim().toLowerCase();
-      const rowType = (row.type || 'Installation').trim().toLowerCase();
 
       // 1. Check for duplicates in the spreadsheet itself
       if (cleanRef) {
-        const key = `${cleanRef}:${rowType}`;
+        const key = `${cleanRef}`;
         if (sheetRefKeys.has(key)) {
-          row.errors.ref_no = `Duplicate ${row.type || 'Installation'} Ref No in Excel sheet`;
+          row.errors.ref_no = `Duplicate Ref No in Excel sheet`;
         }
       }
       if (cleanFrame) {
-        const key = `${cleanFrame}:${rowType}`;
+        const key = `${cleanFrame}`;
         if (sheetFrameKeys.has(key)) {
-          row.errors.frame_no = `Duplicate ${row.type || 'Installation'} Frame No in Excel sheet`;
+          row.errors.frame_no = `Duplicate Frame No in Excel sheet`;
         }
       }
 
@@ -157,13 +155,12 @@ export class MasterMillsBulkService {
       if (cleanRef && !row.errors.ref_no) {
         const matchingMM = dbMasterMills.find(
           (m) =>
-            m.ref_no?.trim().toLowerCase() === cleanRef &&
-            (m.type || 'Installation').trim().toLowerCase() === rowType,
+            m.ref_no?.trim().toLowerCase() === cleanRef,
         );
         if (matchingMM) {
           const isSameMill =
             matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
-            matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName;
+            (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
           if (!isSameMill) {
             row.errors.ref_no = 'Ref No already exists under a different customer or mill';
           }
@@ -172,13 +169,12 @@ export class MasterMillsBulkService {
       if (cleanFrame && !row.errors.frame_no) {
         const matchingMM = dbMasterMills.find(
           (m) =>
-            m.frame_no?.trim().toLowerCase() === cleanFrame &&
-            (m.type || 'Installation').trim().toLowerCase() === rowType,
+            m.frame_no?.trim().toLowerCase() === cleanFrame,
         );
         if (matchingMM) {
           const isSameMill =
             matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
-            matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName;
+            (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
           if (!isSameMill) {
             row.errors.frame_no = 'Frame No already exists under a different customer or mill';
           }
@@ -192,10 +188,10 @@ export class MasterMillsBulkService {
 
       // 4. If unique in sheet so far, add to sheet tracking
       if (cleanRef && !row.errors.ref_no) {
-        sheetRefKeys.add(`${cleanRef}:${rowType}`);
+        sheetRefKeys.add(`${cleanRef}`);
       }
       if (cleanFrame && !row.errors.frame_no) {
-        sheetFrameKeys.add(`${cleanFrame}:${rowType}`);
+        sheetFrameKeys.add(`${cleanFrame}`);
       }
     }
 
@@ -291,7 +287,6 @@ export class MasterMillsBulkService {
               place: row.place,
               state: row.state || undefined,
               phone: row.phone_no || undefined,
-              type: row.type || undefined,
               mfg_date: this.parseExcelDate(row.mfg_date) || undefined,
               invoice_no: row.invoice_no || undefined,
               invoice_date: this.parseExcelDate(row.invoice_date),

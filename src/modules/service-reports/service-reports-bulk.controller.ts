@@ -2,6 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
+  Query,
+  Request,
   Body,
   Param,
   Res,
@@ -24,6 +27,7 @@ import type { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServiceReportsBulkService } from './service-reports-bulk.service';
 import { ServiceReportBulkImportDto } from './dto/service-report-bulk-upload.dto';
+import { ServiceReportsService } from './service-reports.service';
 
 interface MulterFile {
   fieldname: string;
@@ -39,7 +43,32 @@ interface MulterFile {
 @UseGuards(JwtAuthGuard)
 @Controller('service-reports')
 export class ServiceReportsBulkController {
-  constructor(private readonly bulkService: ServiceReportsBulkService) {}
+  constructor(
+    private readonly bulkService: ServiceReportsBulkService,
+    private readonly serviceReportsService: ServiceReportsService,
+  ) {}
+
+  /**
+   * DELETE /service-reports/bulk-delete/by-date
+   * Bulk soft-delete old service reports created on or before a given date.
+   */
+  @Delete('bulk-delete/by-date')
+  @ApiOperation({
+    summary: 'Bulk soft-delete old service reports created within a given date range',
+  })
+  bulkDeleteByDate(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('beforeDate') beforeDate?: string,
+    @Body('startDate') bodyStartDate?: string,
+    @Body('endDate') bodyEndDate?: string,
+    @Body('beforeDate') bodyBeforeDate?: string,
+    @Request() req?: any,
+  ) {
+    const start = startDate || bodyStartDate;
+    const end = endDate || bodyEndDate || beforeDate || bodyBeforeDate;
+    return this.serviceReportsService.bulkDeleteByDate(start, end, req?.user);
+  }
 
   /**
    * GET /service-reports/bulk-upload/template

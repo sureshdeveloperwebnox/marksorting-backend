@@ -99,6 +99,12 @@ export class StoresController {
     description: 'Filter by inflow/stock status',
   })
   @ApiQuery({
+    name: 'stock_type',
+    required: false,
+    type: String,
+    description: 'Filter by stock type (Inflow / From Store)',
+  })
+  @ApiQuery({
     name: 'dateFrom',
     required: false,
     type: String,
@@ -126,6 +132,8 @@ export class StoresController {
     @Query('returnStatus') returnStatusCamel?: string,
     @Query('inflow_status') inflowStatus?: string,
     @Query('inflowStatus') inflowStatusCamel?: string,
+    @Query('stock_type') stockType?: string,
+    @Query('stockType') stockTypeCamel?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -137,6 +145,7 @@ export class StoresController {
     const warStatus = warrantyStatus || warrantyStatusCamel;
     const retStatus = returnStatus || returnStatusCamel;
     const infStatus = inflowStatus || inflowStatusCamel;
+    const stkType = stockType || stockTypeCamel;
 
     if (search) {
       where.OR = [
@@ -182,6 +191,10 @@ export class StoresController {
 
     if (infStatus) {
       where.inflow_status = { equals: infStatus, mode: 'insensitive' };
+    }
+
+    if (stkType) {
+      where.stock_type = { equals: stkType, mode: 'insensitive' };
     }
 
     if (materialId) {

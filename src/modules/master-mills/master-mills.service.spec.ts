@@ -239,7 +239,8 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(prisma.masterMill.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            type: 'Service',
+            deleted_at: null,
+            mill_id: 'mill-456',
           }),
         }),
       );

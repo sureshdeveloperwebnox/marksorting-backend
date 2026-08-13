@@ -47,7 +47,6 @@ export class MasterMillsController {
   @ApiQuery({ name: 'state', required: false, type: String })
   @ApiQuery({ name: 'all_warranty', required: false, type: String })
   @ApiQuery({ name: 'mill_id', required: false, type: String })
-  @ApiQuery({ name: 'type', required: false, type: String })
   @ApiQuery({
     name: 'dateFrom',
     required: false,
@@ -68,7 +67,6 @@ export class MasterMillsController {
     @Query('state') state?: string,
     @Query('all_warranty') allWarranty?: string,
     @Query('mill_id') millId?: string,
-    @Query('type') type?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
@@ -111,8 +109,6 @@ export class MasterMillsController {
     }
 
     if (millId) where.mill_id = millId;
-    if (type) where.type = type;
-
     if (dateFrom || dateTo) {
       where.installation_date = {};
       if (dateFrom) {

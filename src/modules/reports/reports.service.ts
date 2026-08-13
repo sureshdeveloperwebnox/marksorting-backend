@@ -20,6 +20,10 @@ interface ReportParams {
   categoryId?: string;
   dateFrom?: string;
   dateTo?: string;
+  createdDateFrom?: string;
+  createdDateTo?: string;
+  expenseDateFrom?: string;
+  expenseDateTo?: string;
   millId?: string;
   technicianId?: string;
   millName?: string;
@@ -643,6 +647,10 @@ export class ReportsService {
       categoryId,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
+      expenseDateFrom,
+      expenseDateTo,
       millId,
       technicianId,
       millName,
@@ -724,17 +732,35 @@ export class ReportsService {
       }
     }
 
-    if (dateFrom || dateTo) {
+    // Expense Date (visit_date) filtering
+    const effExpenseFrom = expenseDateFrom || dateFrom;
+    const effExpenseTo = expenseDateTo || dateTo;
+    if (effExpenseFrom || effExpenseTo) {
       where.visit_date = {};
-      if (dateFrom) {
-        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+      if (effExpenseFrom) {
+        const [fy, fm, fd] = effExpenseFrom.split('-').map(Number);
         const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
         where.visit_date.gte = fromDate;
       }
-      if (dateTo) {
-        const [ty, tm, td] = dateTo.split('-').map(Number);
+      if (effExpenseTo) {
+        const [ty, tm, td] = effExpenseTo.split('-').map(Number);
         const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
         where.visit_date.lte = toDate;
+      }
+    }
+
+    // Created Date (created_at) filtering
+    if (createdDateFrom || createdDateTo) {
+      where.created_at = {};
+      if (createdDateFrom) {
+        const [cy, cm, cd] = createdDateFrom.split('-').map(Number);
+        const cFromDate = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
+        where.created_at.gte = cFromDate;
+      }
+      if (createdDateTo) {
+        const [cy, cm, cd] = createdDateTo.split('-').map(Number);
+        const cToDate = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
+        where.created_at.lte = cToDate;
       }
     }
 

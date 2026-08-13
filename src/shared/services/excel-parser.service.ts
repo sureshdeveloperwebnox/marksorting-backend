@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { PreviewRow } from '../../modules/master-mills/interfaces/bulk-upload.interface';
 
-// Column order for template (22 headers)
+// Column order for template (21 headers)
 const TEMPLATE_HEADERS = [
   'Invoice No',
-  'Record Type',
   'Invoice Date',
   'Ref No',
   'Frame No',
@@ -19,8 +18,7 @@ const TEMPLATE_HEADERS = [
   'Address',
   'Installation Date',
   'Warranty Start Date',
-  'Warranty Years',
-  'Warranty Months',
+  'Warranty Period (Months)',
   'AMC Starting Date',
   'AMC Closing Date',
   'AMC Period (Months)',
@@ -31,7 +29,6 @@ const TEMPLATE_HEADERS = [
 // Example data row for the template
 const EXAMPLE_ROW = [
   'INV-001',
-  'Installation',
   '01/01/2024',
   'REF-001',
   'FRM-001',
@@ -45,8 +42,7 @@ const EXAMPLE_ROW = [
   '123, Main Street, Chennai - 600001',
   '15/01/2024',
   '15/01/2024',
-  '2',
-  '0',
+  '12',
   '01/02/2024',
   '01/02/2025',
   '12',
@@ -60,7 +56,6 @@ const HEADER_TO_FIELD_MAP: Record<
   keyof Omit<PreviewRow, 'errors' | 'isValid' | 'rowIndex'>
 > = {
   'invoice no': 'invoice_no',
-  'record type': 'type',
   'invoice date': 'invoice_date',
   'ref no': 'ref_no',
   'frame no': 'frame_no',
@@ -75,6 +70,7 @@ const HEADER_TO_FIELD_MAP: Record<
   address: 'address',
   'installation date': 'installation_date',
   'warranty start date': 'warranty_start_date',
+  'warranty period (months)': 'warranty_months',
   'warranty years': 'warranty_years',
   'warranty months': 'warranty_months',
   'amc starting date': 'amc_starting_date',
@@ -88,7 +84,6 @@ const HEADER_TO_FIELD_MAP: Record<
 const REQUIRED_FIELDS: Array<keyof PreviewRow> = [
   'invoice_no',
   'mill_name',
-  'customer_name',
   'place',
 ];
 
@@ -221,24 +216,9 @@ export class ExcelParserService {
         return; // skip this empty or stray row
       }
 
-      // Normalize type
-      const rawType = (rawData.type ?? '').trim();
-      let normalizedType = 'Installation';
-      if (rawType) {
-        const lowerType = rawType.toLowerCase();
-        if (lowerType === 'service') {
-          normalizedType = 'Service';
-        } else if (lowerType === 'installation') {
-          normalizedType = 'Installation';
-        } else {
-          normalizedType = rawType; // Let validator catch invalid values
-        }
-      }
-
       // Build a complete PreviewRow with empty strings for missing fields
       const previewRow: PreviewRow = {
         invoice_no: rawData.invoice_no ?? '',
-        type: normalizedType,
         invoice_date: rawData.invoice_date ?? '',
         ref_no: rawData.ref_no ?? '',
         frame_no: rawData.frame_no ?? '',
@@ -294,11 +274,6 @@ export class ExcelParserService {
         }
       }
 
-      // Validate record type — must be 'Installation' or 'Service'
-      if (previewRow.type !== 'Installation' && previewRow.type !== 'Service') {
-        previewRow.errors['type'] =
-          "Record Type must be 'Installation' or 'Service'";
-      }
 
       // Set isValid based on whether there are any errors
       previewRow.isValid = Object.keys(previewRow.errors).length === 0;

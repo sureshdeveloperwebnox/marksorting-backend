@@ -19,10 +19,18 @@ const platform_express_1 = require("@nestjs/platform-express");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const installation_reports_bulk_service_1 = require("./installation-reports-bulk.service");
 const installation_report_bulk_upload_dto_1 = require("./dto/installation-report-bulk-upload.dto");
+const installation_reports_service_1 = require("./installation-reports.service");
 let InstallationReportsBulkController = class InstallationReportsBulkController {
     bulkService;
-    constructor(bulkService) {
+    installationReportsService;
+    constructor(bulkService, installationReportsService) {
         this.bulkService = bulkService;
+        this.installationReportsService = installationReportsService;
+    }
+    bulkDeleteByDate(startDate, endDate, beforeDate, bodyStartDate, bodyEndDate, bodyBeforeDate, req) {
+        const start = startDate || bodyStartDate;
+        const end = endDate || bodyEndDate || beforeDate || bodyBeforeDate;
+        return this.installationReportsService.bulkDeleteByDate(start, end, req?.user);
     }
     async getTemplate(res) {
         const buffer = await this.bulkService.generateTemplate();
@@ -47,6 +55,22 @@ let InstallationReportsBulkController = class InstallationReportsBulkController 
     }
 };
 exports.InstallationReportsBulkController = InstallationReportsBulkController;
+__decorate([
+    (0, common_1.Delete)('bulk-delete/by-date'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Bulk soft-delete old installation reports created within a given date range',
+    }),
+    __param(0, (0, common_1.Query)('startDate')),
+    __param(1, (0, common_1.Query)('endDate')),
+    __param(2, (0, common_1.Query)('beforeDate')),
+    __param(3, (0, common_1.Body)('startDate')),
+    __param(4, (0, common_1.Body)('endDate')),
+    __param(5, (0, common_1.Body)('beforeDate')),
+    __param(6, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, Object]),
+    __metadata("design:returntype", void 0)
+], InstallationReportsBulkController.prototype, "bulkDeleteByDate", null);
 __decorate([
     (0, common_1.Get)('bulk-upload/template'),
     (0, swagger_1.ApiOperation)({
@@ -103,6 +127,7 @@ exports.InstallationReportsBulkController = InstallationReportsBulkController = 
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('installation-reports'),
-    __metadata("design:paramtypes", [installation_reports_bulk_service_1.InstallationReportsBulkService])
+    __metadata("design:paramtypes", [installation_reports_bulk_service_1.InstallationReportsBulkService,
+        installation_reports_service_1.InstallationReportsService])
 ], InstallationReportsBulkController);
 //# sourceMappingURL=installation-reports-bulk.controller.js.map

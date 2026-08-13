@@ -28,12 +28,12 @@ export class CreateStoreDto {
   material_ids: string[];
 
   @ApiProperty({
-    example: [{ material_id: 'uuid-of-material-1', quantity: 2 }],
+    example: [{ material_id: 'uuid-of-material-1', quantity: 2, stock_type: 'Inflow' }],
     required: false,
   })
   @IsArray()
   @IsOptional()
-  material_quantities?: { material_id: string; quantity: number }[];
+  material_quantities?: { material_id: string; quantity: number; stock_type?: string }[];
 
   @ApiProperty({ example: 5 })
   @IsInt()
@@ -45,7 +45,7 @@ export class CreateStoreDto {
   @IsNotEmpty()
   warranty_status: string;
 
-  @ApiProperty({ example: 'Payment', required: false })
+  @ApiProperty({ example: 'Acknowledgement', required: false })
   @IsString()
   @IsOptional()
   service_type?: string;
@@ -64,6 +64,11 @@ export class CreateStoreDto {
   @IsString()
   @IsNotEmpty()
   inflow_status: string;
+
+  @ApiProperty({ example: 'Inflow', required: false })
+  @IsString()
+  @IsOptional()
+  stock_type?: string;
 
   @ApiProperty({ example: 'BAR1234567', required: false })
   @IsString()

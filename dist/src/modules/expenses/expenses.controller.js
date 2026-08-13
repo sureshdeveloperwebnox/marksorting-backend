@@ -26,7 +26,7 @@ let ExpensesController = class ExpensesController {
     constructor(expensesService) {
         this.expensesService = expensesService;
     }
-    findAll(skip, take, search, status, technicianId, dateFrom, dateTo) {
+    findAll(skip, take, search, status, technicianId, dateFrom, dateTo, createdDateFrom, createdDateTo, expenseDateFrom, expenseDateTo, req) {
         return this.expensesService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
@@ -35,7 +35,11 @@ let ExpensesController = class ExpensesController {
             technicianId,
             dateFrom,
             dateTo,
-        });
+            createdDateFrom,
+            createdDateTo,
+            expenseDateFrom,
+            expenseDateTo,
+        }, req?.user);
     }
     checkEligibility(technicianId, excludeExpenseId) {
         return this.expensesService.checkEligibility({ userId: '', role: 'Admin' }, technicianId, excludeExpenseId);
@@ -81,24 +85,13 @@ __decorate([
         type: String,
         description: 'Filter by status',
     }),
-    (0, swagger_1.ApiQuery)({
-        name: 'dateFrom',
-        required: false,
-        type: String,
-        description: 'Filter from visit date (YYYY-MM-DD)',
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'dateTo',
-        required: false,
-        type: String,
-        description: 'Filter to visit date (YYYY-MM-DD)',
-    }),
-    (0, swagger_1.ApiQuery)({
-        name: 'technicianId',
-        required: false,
-        type: String,
-        description: 'Filter by technician/service engineer ID',
-    }),
+    (0, swagger_1.ApiQuery)({ name: 'dateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'dateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'createdDateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'createdDateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'expenseDateFrom', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'expenseDateTo', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'technicianId', required: false, type: String }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
@@ -106,8 +99,13 @@ __decorate([
     __param(4, (0, common_1.Query)('technicianId')),
     __param(5, (0, common_1.Query)('dateFrom')),
     __param(6, (0, common_1.Query)('dateTo')),
+    __param(7, (0, common_1.Query)('createdDateFrom')),
+    __param(8, (0, common_1.Query)('createdDateTo')),
+    __param(9, (0, common_1.Query)('expenseDateFrom')),
+    __param(10, (0, common_1.Query)('expenseDateTo')),
+    __param(11, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, Object]),
     __metadata("design:returntype", void 0)
 ], ExpensesController.prototype, "findAll", null);
 __decorate([

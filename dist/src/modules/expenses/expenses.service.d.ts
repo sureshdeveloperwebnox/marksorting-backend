@@ -25,6 +25,10 @@ export declare class ExpensesService {
         technicianId?: string;
         dateFrom?: string;
         dateTo?: string;
+        createdDateFrom?: string;
+        createdDateTo?: string;
+        expenseDateFrom?: string;
+        expenseDateTo?: string;
     }, user?: {
         userId: string;
         role: string;
