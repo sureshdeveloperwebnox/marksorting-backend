@@ -87,11 +87,18 @@ const documentHeader = (
   reportNumber: unknown,
 ): string => {
   const logoSrc = template.imageSrc(company.logoUrl);
-  const companyLines = [
-    company.addressLine1,
-    company.addressLine2,
-    company.region,
-  ].filter(Boolean);
+  const regionAndEmail = [
+    company.region ? template.escape(company.region) : '',
+    company.email ? `E-mail : ${template.escape(company.email)}` : '',
+  ].filter(Boolean).join(', ');
+
+  const phoneLine = [
+    company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : '',
+    company.cellNumbers ? `Cell : ${template.escape(company.cellNumbers)}` : '',
+  ].filter(Boolean).join(' / ');
+
+  const partnerText = template.text(company.partnerDescription, '');
+  const partnerFormatted = partnerText.replace(/(\bpartner)\s+(of\b)/gi, '$1<br />$2');
 
   return `
     <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 4mm; background: #fff;">
@@ -101,11 +108,12 @@ const documentHeader = (
         </td>
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
-          <div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${template.text(company.partnerDescription, '')})</div>
+          ${partnerText ? `<div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${partnerFormatted})</div>` : ''}
           <div style="font-size: 13px; color: #111827; line-height: 1.35; font-weight: 800;">
-            ${companyLines.map((line) => template.escape(line)).join('<br />')}
-            ${company.email ? `<br />E-mail : ${template.escape(company.email)}` : ''}
-            ${company.tollFree || company.cellNumbers ? `<br />${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}` : ''}
+            ${company.addressLine1 ? `<div>${template.escape(company.addressLine1)}</div>` : ''}
+            ${company.addressLine2 ? `<div>${template.escape(company.addressLine2)}</div>` : ''}
+            ${regionAndEmail ? `<div>${regionAndEmail}</div>` : ''}
+            ${phoneLine ? `<div>${phoneLine}</div>` : ''}
           </div>
         </td>
       </tr>
@@ -308,6 +316,18 @@ export function renderServiceReportTemplate(
     .value {
       font-weight: 400;
     }
+    .first-page-table th {
+      padding: 7px 8px;
+    }
+    .first-page-table td {
+      padding: 9px 8px;
+    }
+    .first-page-table .company-details-cell {
+      height: 54mm;
+    }
+    .first-page-table .company-field-values {
+      padding-top: 11mm;
+    }
     .company-details-cell {
       height: 31mm;
       position: relative;
@@ -355,19 +375,21 @@ export function renderServiceReportTemplate(
       text-transform: uppercase;
     }
     .maintenance-title {
-      color: #d97706;
+      color: #f05a00;
       text-decoration: underline;
       font-weight: 800;
       text-align: center;
     }
-    .maintenance td {
+    .maintenance-item {
       color: #f05a00;
+    }
+    .maintenance td {
       font-size: 11px;
-      height: 8.5mm;
+      height: 10.5mm;
       vertical-align: middle;
     }
     .signature-cell {
-      height: 28mm;
+      height: 128mm;
       position: relative;
     }
     .signature-top-spacer td,
@@ -377,14 +399,16 @@ export function renderServiceReportTemplate(
       padding: 0;
     }
     .signature-image {
-      max-width: 52mm;
-      max-height: 22mm;
+      max-width: 65mm;
+      max-height: 50mm;
       object-fit: contain;
-      margin-top: 4mm;
-      opacity: 0.75;
+      margin-top: 6mm;
+      opacity: 0.85;
     }
     .second-section {
       margin-top: 0;
+      page-break-before: always;
+      break-before: page;
     }
     .avoid-break { break-inside: avoid; page-break-inside: avoid; }
   </style>
@@ -398,7 +422,7 @@ export function renderServiceReportTemplate(
       <tr>
         <td>
   <main class="document">
-      <table class="report">
+      <table class="report first-page-table">
         <colgroup>
           <col style="width: 28%;" />
           <col style="width: 22%;" />
@@ -425,11 +449,11 @@ export function renderServiceReportTemplate(
         <tr>${labelCell('Mfg Date :')}${valueCell(template.date(report.machine_mfg_date), 'nowrap')}</tr>
         <tr>${labelCell('Installation Date :')}${valueCell(template.date(report.machine_installation_date), 'nowrap')}</tr>
         <tr>${labelCell('Sl.No/Frame No :')}${valueCell(template.text(report.serial_or_frame_no))}</tr>
-        ${fullRow('Authorized Person :', template.text(report.authorized_person) + (report.authorized_person_phone ? ` (Contact: ${report.authorized_person_phone})` : ''), 20)}
-        ${fullRow('Previous Visited Engineer Name :', template.text(report.previous_visit_engineer), 20)}
-        ${fullRow('Nature Of Complaint :', template.text(report.nature_of_complaint), 28)}
-        ${fullRow('Problem Observed :', template.text(report.problem_observed), 28)}
-        ${fullRow('Action taken to rectify the problem :', template.text(report.action_taken), 28)}
+        ${fullRow('Authorized Person :', template.text(report.authorized_person) + (report.authorized_person_phone ? ` (Contact: ${report.authorized_person_phone})` : ''), 32)}
+        ${fullRow('Previous Visited Engineer Name :', template.text(report.previous_visit_engineer), 32)}
+        ${fullRow('Nature Of Complaint :', template.text(report.nature_of_complaint), 72)}
+        ${fullRow('Problem Observed :', template.text(report.problem_observed), 72)}
+        ${fullRow('Action taken to rectify the problem :', template.text(report.action_taken), 72)}
         <tr><td colspan="4" class="section-title">Machine Performance</td></tr>
         ${twoColumnRow('Commodity', template.text(report.commodity))}
         ${twoColumnRow('Contamination', template.text(report.contamination))}
@@ -461,16 +485,13 @@ export function renderServiceReportTemplate(
         We are not responsible for any damage to the mark color sorter machine ejector valves and pneumatic parts due to oil or water particles that comes from the compressor and air drier
       </div>
       <table class="report maintenance">
-        <tr><td colspan="2" class="maintenance-title">Routine Maintenance</td></tr>
-        <tr><td>1. ${template.escape(maintenanceItems[0])}</td><td>2. ${template.escape(maintenanceItems[1])}</td></tr>
-        <tr><td>3. ${template.escape(maintenanceItems[2])}</td><td>4. ${template.escape(maintenanceItems[3])}</td></tr>
-        <tr><td colspan="2">5. ${template.escape(maintenanceItems[4])}</td></tr>
-        <tr><td colspan="2">6. ${template.escape(maintenanceItems[5])}</td></tr>
-      </table>
-      <table class="report">
-        <tr class="signature-top-spacer"><td colspan="4"></td></tr>
-        ${fullRow('Work Status Remarks :', template.text(report.customer_remarks), 26)}
-        <tr class="signature-spacer"><td colspan="4"></td></tr>
+        <tr><td colspan="4" class="maintenance-title">Routine Maintenance</td></tr>
+        <tr><td colspan="2" class="maintenance-item">1. ${template.escape(maintenanceItems[0])}</td><td colspan="2" class="maintenance-item">2. ${template.escape(maintenanceItems[1])}</td></tr>
+        <tr><td colspan="2" class="maintenance-item">3. ${template.escape(maintenanceItems[2])}</td><td colspan="2" class="maintenance-item">4. ${template.escape(maintenanceItems[3])}</td></tr>
+        <tr><td colspan="4" class="maintenance-item">5. ${template.escape(maintenanceItems[4])}</td></tr>
+        <tr><td colspan="4" class="maintenance-item">6. ${template.escape(maintenanceItems[5])}</td></tr>
+        ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 32)}
+        ${fullRow('Work Status Remarks :', template.text(report.work_status_remarks || report.work_status || (report.status ? template.status(report.status) : '')), 32)}
         <tr>
           <td colspan="2" class="signature-cell">
             <span class="label">Customer Signature:</span><br />

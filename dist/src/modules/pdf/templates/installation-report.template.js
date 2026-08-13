@@ -36,11 +36,16 @@ const fullRow = (label, value, minHeight = 34) => `
 `;
 const documentHeader = (company, template, reportNumber) => {
     const logoSrc = template.imageSrc(company.logoUrl);
-    const companyLines = [
-        company.addressLine1,
-        company.addressLine2,
-        company.region,
-    ].filter(Boolean);
+    const regionAndEmail = [
+        company.region ? template.escape(company.region) : '',
+        company.email ? `E-mail : ${template.escape(company.email)}` : '',
+    ].filter(Boolean).join(', ');
+    const phoneLine = [
+        company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : '',
+        company.cellNumbers ? `Cell : ${template.escape(company.cellNumbers)}` : '',
+    ].filter(Boolean).join(' / ');
+    const partnerText = template.text(company.partnerDescription, '');
+    const partnerFormatted = partnerText.replace(/(\bpartner)\s+(of\b)/gi, '$1<br />$2');
     return `
     <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 4mm; background: #fff;">
       <tr>
@@ -49,11 +54,12 @@ const documentHeader = (company, template, reportNumber) => {
         </td>
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
-          <div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${template.text(company.partnerDescription, '')})</div>
+          ${partnerText ? `<div style="color: #f05a00; font-size: 11px; font-weight: 700; line-height: 1.2; margin-bottom: 3px;">(${partnerFormatted})</div>` : ''}
           <div style="font-size: 13px; color: #111827; line-height: 1.35; font-weight: 800;">
-            ${companyLines.map((line) => template.escape(line)).join('<br />')}
-            ${company.email ? `<br />E-mail : ${template.escape(company.email)}` : ''}
-            ${company.tollFree || company.cellNumbers ? `<br />${company.tollFree ? `Toll Free : ${template.escape(company.tollFree)}` : ''}${company.cellNumbers ? ` / Cell : ${template.escape(company.cellNumbers)}` : ''}` : ''}
+            ${company.addressLine1 ? `<div>${template.escape(company.addressLine1)}</div>` : ''}
+            ${company.addressLine2 ? `<div>${template.escape(company.addressLine2)}</div>` : ''}
+            ${regionAndEmail ? `<div>${regionAndEmail}</div>` : ''}
+            ${phoneLine ? `<div>${phoneLine}</div>` : ''}
           </div>
         </td>
       </tr>
@@ -281,21 +287,23 @@ function renderInstallationReportTemplate(data, template) {
       line-height: 1.35;
     }
     .maintenance-title {
-      color: #d97706;
+      color: #f05a00;
       text-decoration: underline;
       font-weight: 800;
       text-align: center;
       font-size: 15px;
       padding: 6px 0 !important;
     }
-    .maintenance td {
+    .maintenance-item {
       color: #f05a00;
+    }
+    .maintenance td {
       font-size: 11px;
-      height: 8.5mm;
+      height: 10.5mm;
       vertical-align: middle;
     }
     .signature-cell {
-      height: 28mm;
+      height: 115mm;
       position: relative;
     }
     .signature-top-spacer td,
@@ -305,10 +313,10 @@ function renderInstallationReportTemplate(data, template) {
       padding: 0;
     }
     .signature-image {
-      max-width: 52mm;
-      max-height: 20mm;
+      max-width: 65mm;
+      max-height: 50mm;
       object-fit: contain;
-      margin-top: 2.5mm;
+      margin-top: 6mm;
       opacity: 0.85;
     }
     .second-section {
@@ -387,25 +395,21 @@ function renderInstallationReportTemplate(data, template) {
                 </colgroup>
                 <tr><td colspan="2" class="maintenance-title">Routine Maintenance</td></tr>
                 <tr>
-                  <td>1. ${template.escape(maintenanceItems[0])}</td>
-                  <td>2. ${template.escape(maintenanceItems[1])}</td>
+                  <td class="maintenance-item">1. ${template.escape(maintenanceItems[0])}</td>
+                  <td class="maintenance-item">2. ${template.escape(maintenanceItems[1])}</td>
                 </tr>
                 <tr>
-                  <td>3. ${template.escape(maintenanceItems[2])}</td>
-                  <td>4. ${template.escape(maintenanceItems[3])}</td>
+                  <td class="maintenance-item">3. ${template.escape(maintenanceItems[2])}</td>
+                  <td class="maintenance-item">4. ${template.escape(maintenanceItems[3])}</td>
                 </tr>
                 <tr>
-                  <td colspan="2">5. ${template.escape(maintenanceItems[4])}</td>
+                  <td colspan="2" class="maintenance-item">5. ${template.escape(maintenanceItems[4])}</td>
                 </tr>
                 <tr>
-                  <td colspan="2">6. ${template.escape(maintenanceItems[5])}</td>
+                  <td colspan="2" class="maintenance-item">6. ${template.escape(maintenanceItems[5])}</td>
                 </tr>
-              </table>
-              <table class="report">
-                <tr class="signature-top-spacer"><td colspan="2"></td></tr>
-                ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 26)}
-                ${fullRow('Work Status :', template.status(report.status), 24)}
-                <tr class="signature-spacer"><td colspan="2"></td></tr>
+                ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 28)}
+                ${fullRow('Work Status :', template.status(report.status), 28)}
                 <tr>
                   <td class="signature-cell" style="width: 50%;">
                     <span class="label">Customer Signature:</span><br />

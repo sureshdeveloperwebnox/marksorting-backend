@@ -51,11 +51,15 @@ export function renderTabularReportTemplate(
 ): string {
   const { title, filters, metrics, headers, rows, company } = data;
   const logoSrc = template.imageSrc(company.logoUrl);
-  const companyLines = [
-    company.addressLine1,
-    company.addressLine2,
-    company.region,
-  ].filter(Boolean);
+  const regionAndEmail = [
+    company.region ? template.escape(company.region) : '',
+    company.email ? `E-mail : ${template.escape(company.email)}` : '',
+  ].filter(Boolean).join(', ');
+
+  const phoneLine = [
+    company.tollFree ? `Toll Free: ${template.escape(company.tollFree)}` : '',
+    company.cellNumbers ? `Cell: ${template.escape(company.cellNumbers)}` : '',
+  ].filter(Boolean).join(' / ');
 
   const formattedFilters = filters
     .map(
@@ -333,13 +337,11 @@ export function renderTabularReportTemplate(
             </div>
             <div class="company-details">
               <div class="company-name">${template.text(company.name, 'MENDO CONTROLS')}</div>
-              ${company.partnerDescription ? `<div class="partner-tag">(${template.text(company.partnerDescription)})</div>` : ''}
-              <div>${companyLines.map((line) => template.escape(line)).join('<br />')}</div>
-              <div>${company.email ? `Email: ${template.escape(company.email)}` : ''}</div>
-              <div>
-                ${company.tollFree ? `Toll Free: ${template.escape(company.tollFree)}` : ''}
-                ${company.cellNumbers ? ` | Cell: ${template.escape(company.cellNumbers)}` : ''}
-              </div>
+              ${company.partnerDescription ? `<div class="partner-tag">(${template.text(company.partnerDescription).replace(/(\bpartner)\s+(of\b)/gi, '$1<br />$2')})</div>` : ''}
+              ${company.addressLine1 ? `<div>${template.escape(company.addressLine1)}</div>` : ''}
+              ${company.addressLine2 ? `<div>${template.escape(company.addressLine2)}</div>` : ''}
+              ${regionAndEmail ? `<div>${regionAndEmail}</div>` : ''}
+              ${phoneLine ? `<div>${phoneLine}</div>` : ''}
             </div>
           </header>
 
