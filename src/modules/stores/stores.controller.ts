@@ -182,6 +182,8 @@ export class StoresController {
         where.return_status = { in: ['Returned', 'Completed'] };
       } else if (lower === 'pending') {
         where.return_status = 'Pending';
+      } else if (lower === 'in progress' || lower === 'in_progress') {
+        where.return_status = 'In Progress';
       } else if (lower === 'not returned' || lower === 'not_returned') {
         where.return_status = 'Not Returned';
       } else {
