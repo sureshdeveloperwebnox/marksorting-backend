@@ -677,12 +677,6 @@ export class MasterMillsService {
     const customerIdInput = dto.customer_id?.trim();
     const customerNameInput = dto.customer_name?.trim();
 
-    if (!customerIdInput && !customerNameInput) {
-      throw new BadRequestException(
-        'Either customer_id or customer_name must be provided',
-      );
-    }
-
     const cleanMillName = dto.mill_name.trim();
     const cleanRefNo = dto.ref_no.trim();
     const cleanFrameNo = dto.frame_no?.trim();

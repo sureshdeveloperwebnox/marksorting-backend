@@ -307,7 +307,8 @@ export class MasterMillsBulkService {
             } else {
               status.createdCount++;
             }
-          } catch {
+          } catch (err: any) {
+            console.error('Master mill row import error:', err?.message || err);
             status.errorCount++;
           }
         }

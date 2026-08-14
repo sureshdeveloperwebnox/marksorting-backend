@@ -224,7 +224,8 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             status.createdCount++;
                         }
                     }
-                    catch {
+                    catch (err) {
+                        console.error('Master mill row import error:', err?.message || err);
                         status.errorCount++;
                     }
                 }
