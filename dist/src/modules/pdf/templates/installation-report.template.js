@@ -26,7 +26,7 @@ const formatWarrantyDuration = (years, months) => {
 };
 const fullRow = (label, value, minHeight = 34) => `
   <tr>
-    <td colspan="2" class="full-row" style="height: ${minHeight}px;">
+    <td colspan="2" class="full-row" style="height: ${minHeight}px; min-height: ${minHeight}px; vertical-align: top; padding: 6px 8px;">
       <div class="full-row-content">
         <span class="label">${label}</span>
         <span class="block-value">${value}</span>
@@ -47,10 +47,13 @@ const documentHeader = (company, template, reportNumber) => {
     const partnerText = template.text(company.partnerDescription, '');
     const partnerFormatted = partnerText.replace(/(\bpartner)\s+(of\b)/gi, '$1<br />$2');
     return `
-    <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 4mm; background: #fff;">
+    <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 6.5mm; background: #fff;">
       <tr>
         <td style="width: 50mm; vertical-align: top; border: 0; padding: 0;">
           ${logoSrc ? `<img src="${logoSrc}" alt="Company logo" style="display: block; width: 45mm; height: 18mm; object-fit: contain;" />` : ''}
+          <div style="font-weight: 700; font-size: 13px; text-align: left; margin-top: 5mm; color: #111827;">
+            Sl.NO: ${template.text(reportNumber)}
+          </div>
         </td>
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
@@ -61,11 +64,6 @@ const documentHeader = (company, template, reportNumber) => {
             ${regionAndEmail ? `<div>${regionAndEmail}</div>` : ''}
             ${phoneLine ? `<div>${phoneLine}</div>` : ''}
           </div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" style="border: 0; padding: 4px 0 0; font-weight: 700; font-size: 13px; text-align: left;">
-          SI.NO: ${template.text(reportNumber)}
         </td>
       </tr>
     </table>
@@ -222,6 +220,21 @@ function renderInstallationReportTemplate(data, template) {
       word-break: break-word;
       overflow-wrap: anywhere;
     }
+    .first-page-table th {
+      padding: 5px 6px;
+      font-size: 14px;
+      height: 7.8mm;
+    }
+    .first-page-table td {
+      padding: 4px 6px;
+      font-size: 11.5px;
+      height: 6.8mm;
+      line-height: 1.22;
+    }
+    .first-page-table .company-details-value {
+      padding: 6px 8px !important;
+      height: 18mm;
+    }
     .report th {
       text-align: center;
       font-weight: 800;
@@ -292,18 +305,22 @@ function renderInstallationReportTemplate(data, template) {
       font-weight: 800;
       text-align: center;
       font-size: 15px;
-      padding: 6px 0 !important;
+      padding: 7px 0 !important;
     }
     .maintenance-item {
       color: #f05a00;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.45;
+      padding: 8px 10px !important;
     }
     .maintenance td {
-      font-size: 11px;
-      height: 10.5mm;
+      font-size: 12px;
+      min-height: 15mm;
       vertical-align: middle;
     }
     .signature-cell {
-      height: 115mm;
+      height: 55mm;
       position: relative;
     }
     .signature-top-spacer td,
@@ -336,7 +353,7 @@ function renderInstallationReportTemplate(data, template) {
         <td>
           <main class="document">
             <!-- PAGE 1: Installation Specs -->
-            <table class="report">
+            <table class="report first-page-table">
               <colgroup>
                 <col style="width: 40%;" />
                 <col style="width: 60%;" />
@@ -383,7 +400,7 @@ function renderInstallationReportTemplate(data, template) {
             <!-- PAGE 2: Remarks & Routine Maintenance -->
             <div class="second-section">
               <table class="report">
-                ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 28)}
+                ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 105)}
               </table>
               <div class="notice">
                 We are not responsible for any damage to the mark color sorter machine ejector valves and pneumatic parts due to oil or water particles that comes from the compressor and air drier
@@ -408,8 +425,8 @@ function renderInstallationReportTemplate(data, template) {
                 <tr>
                   <td colspan="2" class="maintenance-item">6. ${template.escape(maintenanceItems[5])}</td>
                 </tr>
-                ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 28)}
-                ${fullRow('Work Status :', template.status(report.status), 28)}
+                ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 105)}
+                ${fullRow('Work Status :', template.status(report.status), 105)}
                 <tr>
                   <td class="signature-cell" style="width: 50%;">
                     <span class="label">Customer Signature:</span><br />

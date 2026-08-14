@@ -37,7 +37,7 @@ const twoColumnRow = (label, value) => `
 `;
 const fullRow = (label, value, minHeight = 34) => `
   <tr>
-    <td colspan="4" class="full-row" style="height: ${minHeight}px;">
+    <td colspan="4" class="full-row" style="height: ${minHeight}px; min-height: ${minHeight}px; vertical-align: top; padding: 6px 8px;">
       <div class="full-row-content">
         <span class="label">${label}</span>
         <span class="block-value">${value}</span>
@@ -58,10 +58,13 @@ const documentHeader = (company, template, reportNumber) => {
     const partnerText = template.text(company.partnerDescription, '');
     const partnerFormatted = partnerText.replace(/(\bpartner)\s+(of\b)/gi, '$1<br />$2');
     return `
-    <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 4mm; background: #fff;">
+    <table style="width: 100%; border-collapse: collapse; border: 0; margin-bottom: 6.5mm; background: #fff;">
       <tr>
         <td style="width: 50mm; vertical-align: top; border: 0; padding: 0;">
           ${logoSrc ? `<img src="${logoSrc}" alt="Company logo" style="display: block; width: 45mm; height: 18mm; object-fit: contain;" />` : ''}
+          <div style="font-weight: 700; font-size: 13px; text-align: left; margin-top: 5mm; color: #111827;">
+            Sl.NO: ${template.text(reportNumber)}
+          </div>
         </td>
         <td style="vertical-align: top; text-align: right; border: 0; padding: 0; font-family: Arial, sans-serif;">
           <div style="color: #00664d; font-size: 22px; font-weight: 800; line-height: 1.1; margin-bottom: 2px;">${template.text(company.name, 'Company')}</div>
@@ -72,11 +75,6 @@ const documentHeader = (company, template, reportNumber) => {
             ${regionAndEmail ? `<div>${regionAndEmail}</div>` : ''}
             ${phoneLine ? `<div>${phoneLine}</div>` : ''}
           </div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" style="border: 0; padding: 4px 0 0; font-weight: 700; font-size: 13px; text-align: left;">
-          SI.NO: ${template.text(reportNumber)}
         </td>
       </tr>
     </table>
@@ -246,7 +244,7 @@ function renderServiceReportTemplate(data, template) {
       white-space: nowrap;
     }
     .label-cell-regular {
-      font-weight: 400;
+      font-weight: 800;
       white-space: nowrap;
     }
     .value-cell {
@@ -323,30 +321,36 @@ function renderServiceReportTemplate(data, template) {
       text-decoration: underline;
       font-weight: 800;
       text-align: center;
+      font-size: 15px;
+      padding: 7px 0 !important;
     }
     .maintenance-item {
       color: #f05a00;
+      font-weight: 600;
+      font-size: 12px;
+      line-height: 1.45;
+      padding: 8px 10px !important;
     }
     .maintenance td {
-      font-size: 11px;
-      height: 10.5mm;
+      font-size: 11.5px;
+      height: 11mm;
       vertical-align: middle;
     }
     .signature-cell {
-      height: 128mm;
+      height: 48mm;
       position: relative;
     }
     .signature-top-spacer td,
     .signature-spacer td {
-      height: 8mm;
+      height: 6mm;
       border: 0;
       padding: 0;
     }
     .signature-image {
       max-width: 65mm;
-      max-height: 50mm;
+      max-height: 38mm;
       object-fit: contain;
-      margin-top: 6mm;
+      margin-top: 4mm;
       opacity: 0.85;
     }
     .second-section {
@@ -423,7 +427,7 @@ function renderServiceReportTemplate(data, template) {
           ${labelCellRegular('Auto Drain Valve Working')}
           ${valueCell(template.yesNo(report.auto_drain_valve_working), 'nowrap')}
         </tr>
-        ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 28)}
+        ${fullRow('Service Engineer Remarks :', template.text(report.engineer_remarks), 92)}
       </table>
       <div class="notice">
         We are not responsible for any damage to the mark color sorter machine ejector valves and pneumatic parts due to oil or water particles that comes from the compressor and air drier
@@ -434,8 +438,8 @@ function renderServiceReportTemplate(data, template) {
         <tr><td colspan="2" class="maintenance-item">3. ${template.escape(maintenanceItems[2])}</td><td colspan="2" class="maintenance-item">4. ${template.escape(maintenanceItems[3])}</td></tr>
         <tr><td colspan="4" class="maintenance-item">5. ${template.escape(maintenanceItems[4])}</td></tr>
         <tr><td colspan="4" class="maintenance-item">6. ${template.escape(maintenanceItems[5])}</td></tr>
-        ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 32)}
-        ${fullRow('Work Status Remarks :', template.text(report.work_status_remarks || report.work_status || (report.status ? template.status(report.status) : '')), 32)}
+        ${fullRow('Customer Remarks :', template.text(report.customer_remarks), 80)}
+        ${fullRow('Work Status Remarks :', template.text(report.work_status_remarks || report.work_status || (report.status ? template.status(report.status) : '')), 80)}
         <tr>
           <td colspan="2" class="signature-cell">
             <span class="label">Customer Signature:</span><br />
