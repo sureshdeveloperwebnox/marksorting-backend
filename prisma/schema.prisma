@@ -597,7 +597,7 @@ model Material {
 model Store {
   id                  String          @id @default(uuid())
   service_engineer_id String
-  customer_id         String
+  customer_id         String?
   quantity            Int
   warranty_status     String
   frame_number        String          @unique
@@ -612,7 +612,7 @@ model Store {
   updated_at          DateTime        @updatedAt
   deleted_at          DateTime?
   materials           StoreMaterial[]
-  customer            Customer        @relation(fields: [customer_id], references: [id])
+  customer            Customer?       @relation(fields: [customer_id], references: [id])
   service_engineer    Technician      @relation(fields: [service_engineer_id], references: [id])
 
   @@map("stores")

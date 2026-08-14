@@ -98,7 +98,7 @@ let StoresService = class StoresService {
             data: {
                 ...data,
                 service_engineer: { connect: { id: service_engineer_id } },
-                customer: { connect: { id: customer_id } },
+                ...(customer_id ? { customer: { connect: { id: customer_id } } } : {}),
                 materials: {
                     create: material_ids.map((id) => {
                         const qtyObj = material_quantities?.find((q) => q.material_id === id);

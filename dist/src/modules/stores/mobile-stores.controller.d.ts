@@ -10,7 +10,7 @@ export declare class MobileStoreReturnsController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -32,7 +32,7 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -53,7 +53,7 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -69,7 +69,7 @@ export declare class MobileStoreReturnsController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -91,7 +91,7 @@ export declare class MobileStoreReturnsController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -113,7 +113,7 @@ export declare class MobileStoresController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -135,7 +135,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -156,7 +156,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -172,7 +172,7 @@ export declare class MobileStoresController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -194,7 +194,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -214,7 +214,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -230,7 +230,7 @@ export declare class MobileStoresController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -252,7 +252,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -269,7 +269,7 @@ export declare class MobileStoresController {
         customer: {
             id: string;
             name: string;
-        };
+        } | null;
         service_engineer: {
             id: string;
             full_name: string;
@@ -291,7 +291,7 @@ export declare class MobileStoresController {
         updated_at: Date;
         deleted_at: Date | null;
         invoice_number: string | null;
-        customer_id: string;
+        customer_id: string | null;
         service_engineer_id: string;
         remarks: string | null;
         quantity: number;
@@ -311,7 +311,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -327,7 +327,7 @@ export declare class MobileStoresController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -349,7 +349,7 @@ export declare class MobileStoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -368,7 +368,7 @@ export declare class MobileStoresController {
         updated_at: Date;
         deleted_at: Date | null;
         invoice_number: string | null;
-        customer_id: string;
+        customer_id: string | null;
         service_engineer_id: string;
         remarks: string | null;
         quantity: number;

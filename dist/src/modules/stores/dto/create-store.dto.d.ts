@@ -1,6 +1,6 @@
 export declare class CreateStoreDto {
     service_engineer_id: string;
-    customer_id: string;
+    customer_id?: string;
     material_ids: string[];
     material_quantities?: {
         material_id: string;

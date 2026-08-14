@@ -9,6 +9,7 @@ import {
   ArrayMinSize,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateStoreDto {
   @ApiProperty({ example: 'uuid-of-service-engineer' })
@@ -16,10 +17,11 @@ export class CreateStoreDto {
   @IsNotEmpty()
   service_engineer_id: string;
 
-  @ApiProperty({ example: 'uuid-of-customer' })
+  @ApiProperty({ example: 'uuid-of-customer', required: false })
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === null ? undefined : value))
   @IsUUID()
-  @IsNotEmpty()
-  customer_id: string;
+  customer_id?: string;
 
   @ApiProperty({ example: ['uuid-of-material-1', 'uuid-of-material-2'] })
   @IsArray()

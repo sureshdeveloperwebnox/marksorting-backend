@@ -124,7 +124,7 @@ export class StoresService {
       data: {
         ...data,
         service_engineer: { connect: { id: service_engineer_id } },
-        customer: { connect: { id: customer_id } },
+        ...(customer_id ? { customer: { connect: { id: customer_id } } } : {}),
         materials: {
           create: material_ids.map((id) => {
             const qtyObj = material_quantities?.find(
@@ -137,7 +137,7 @@ export class StoresService {
             };
           }),
         },
-      },
+      } as any,
       include: {
         service_engineer: { select: { id: true, full_name: true } },
         customer: { select: { id: true, name: true } },

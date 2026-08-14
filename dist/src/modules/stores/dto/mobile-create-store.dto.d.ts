@@ -1,5 +1,5 @@
 export declare class MobileCreateStoreDto {
-    customer_id: string;
+    customer_id?: string;
     material_ids: string[];
     material_quantities?: {
         material_id: string;

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateStoreDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
 class CreateStoreDto {
     service_engineer_id;
     customer_id;
@@ -37,9 +38,10 @@ __decorate([
     __metadata("design:type", String)
 ], CreateStoreDto.prototype, "service_engineer_id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer' }),
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => (value === '' || value === null ? undefined : value)),
     (0, class_validator_1.IsUUID)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateStoreDto.prototype, "customer_id", void 0);
 __decorate([

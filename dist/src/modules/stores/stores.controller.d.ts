@@ -10,7 +10,7 @@ export declare class StoresController {
         customer: {
             id: string;
             name: string;
-        };
+        } | null;
         service_engineer: {
             id: string;
             full_name: string;
@@ -32,7 +32,7 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         invoice_number: string | null;
-        customer_id: string;
+        customer_id: string | null;
         service_engineer_id: string;
         remarks: string | null;
         quantity: number;
@@ -51,7 +51,7 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -67,7 +67,7 @@ export declare class StoresController {
             customer: {
                 id: string;
                 name: string;
-            };
+            } | null;
             service_engineer: {
                 id: string;
                 full_name: string;
@@ -89,7 +89,7 @@ export declare class StoresController {
             updated_at: Date;
             deleted_at: Date | null;
             invoice_number: string | null;
-            customer_id: string;
+            customer_id: string | null;
             service_engineer_id: string;
             remarks: string | null;
             quantity: number;
@@ -108,7 +108,7 @@ export declare class StoresController {
         updated_at: Date;
         deleted_at: Date | null;
         invoice_number: string | null;
-        customer_id: string;
+        customer_id: string | null;
         service_engineer_id: string;
         remarks: string | null;
         quantity: number;
