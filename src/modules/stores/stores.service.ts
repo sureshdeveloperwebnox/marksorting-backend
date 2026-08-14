@@ -398,18 +398,13 @@ export class StoresService {
       );
     }
 
-    if (existing.return_status !== 'Pending') {
-      throw new ConflictException(
-        `Store return status is already ${existing.return_status}`,
-      );
-    }
-
     const store = await this.prisma.store.update({
       where: { id: storeId },
       data: {
-        provider_name: dto.provider_name,
-        invoice_number: dto.invoice_number,
-        return_status: 'Completed',
+        ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
+        ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
+        ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
+        return_status: dto.return_status || 'Returned',
       },
       include: {
         service_engineer: { select: { id: true, full_name: true } },

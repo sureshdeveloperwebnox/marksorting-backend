@@ -1,20 +1,36 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateStoreReturnDto {
-  @ApiProperty({
-    example: 'Express Logistics',
+  @ApiPropertyOptional({
+    example: 'DHL Express',
     description: 'Name of the provider/courier',
   })
   @IsString()
-  @IsNotEmpty()
-  provider_name: string;
+  @IsOptional()
+  provider_name?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'INV-987654',
-    description: 'Return shipment invoice number',
+    description: 'Return shipment invoice / tracking number',
   })
   @IsString()
-  @IsNotEmpty()
-  invoice_number: string;
+  @IsOptional()
+  invoice_number?: string;
+
+  @ApiPropertyOptional({
+    example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED)])',
+    description: 'Remarks and serial number breakdown',
+  })
+  @IsString()
+  @IsOptional()
+  remarks?: string;
+
+  @ApiPropertyOptional({
+    example: 'Returned',
+    description: 'Return status (e.g. Returned, Completed, In Progress)',
+  })
+  @IsString()
+  @IsOptional()
+  return_status?: string;
 }

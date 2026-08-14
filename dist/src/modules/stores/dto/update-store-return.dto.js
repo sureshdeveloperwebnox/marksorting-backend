@@ -15,24 +15,44 @@ const swagger_1 = require("@nestjs/swagger");
 class UpdateStoreReturnDto {
     provider_name;
     invoice_number;
+    remarks;
+    return_status;
 }
 exports.UpdateStoreReturnDto = UpdateStoreReturnDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        example: 'Express Logistics',
+    (0, swagger_1.ApiPropertyOptional)({
+        example: 'DHL Express',
         description: 'Name of the provider/courier',
     }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateStoreReturnDto.prototype, "provider_name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
+    (0, swagger_1.ApiPropertyOptional)({
         example: 'INV-987654',
-        description: 'Return shipment invoice number',
+        description: 'Return shipment invoice / tracking number',
     }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateStoreReturnDto.prototype, "invoice_number", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED)])',
+        description: 'Remarks and serial number breakdown',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateStoreReturnDto.prototype, "remarks", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        example: 'Returned',
+        description: 'Return status (e.g. Returned, Completed, In Progress)',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateStoreReturnDto.prototype, "return_status", void 0);
 //# sourceMappingURL=update-store-return.dto.js.map
