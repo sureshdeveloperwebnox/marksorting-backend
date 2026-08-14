@@ -315,13 +315,25 @@ let StoresService = class StoresService {
         if (existing.service_engineer_id !== technicianId) {
             throw new common_1.ForbiddenException('You are not authorized to update this store record');
         }
+        if (existing.return_status === 'In Progress' ||
+            existing.return_status === 'Returned' ||
+            existing.return_status === 'Completed') {
+            throw new common_1.BadRequestException('Store return is already completed and locked. It cannot be edited in the app.');
+        }
+        const hasCourier = Boolean(dto.provider_name &&
+            dto.provider_name.trim() !== '' &&
+            dto.invoice_number &&
+            dto.invoice_number.trim() !== '');
+        const targetStatus = hasCourier
+            ? 'In Progress'
+            : dto.return_status || existing.return_status || 'Pending';
         const store = await this.prisma.store.update({
             where: { id: storeId },
             data: {
                 ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
                 ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
                 ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
-                return_status: dto.return_status || 'Returned',
+                return_status: targetStatus,
             },
             include: {
                 service_engineer: { select: { id: true, full_name: true } },

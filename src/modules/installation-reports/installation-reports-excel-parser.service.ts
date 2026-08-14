@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { InstallationReportPreviewRow } from './interfaces/bulk-upload.interface';
 
@@ -236,6 +236,17 @@ export class InstallationReportsExcelParserService {
 
     const worksheet = workbook.worksheets[0];
     if (!worksheet) return [];
+
+    let dataRowCount = 0;
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber > 1) dataRowCount++;
+    });
+
+    if (dataRowCount > 5000) {
+      throw new BadRequestException(
+        'We cannot handle more than 5000 rows, so kindly separate and upload.',
+      );
+    }
 
     const headerRow = worksheet.getRow(1);
     const headerMap: Record<number, RowField> = {};

@@ -121,8 +121,10 @@ export class MasterMillsService {
       }
     }
 
-    // Auto-calculate amc_closing_date if not supplied
-    if (!data.amc_closing_date && data.amc_starting_date && data.amc_period) {
+    // Auto-calculate or clear amc_closing_date based on amc_starting_date
+    if (!data.amc_starting_date) {
+      data.amc_closing_date = null as any;
+    } else if (data.amc_starting_date && data.amc_period) {
       const amcStart = new Date(data.amc_starting_date);
       amcStart.setMonth(amcStart.getMonth() + data.amc_period);
       amcStart.setDate(amcStart.getDate() - 1);
@@ -221,15 +223,15 @@ export class MasterMillsService {
       data.warranty_closing_date = closing.toISOString();
     }
 
-    // Re-calculate amc_closing_date if relevant fields change
-    const amcStart = data.amc_starting_date
-      ? new Date(data.amc_starting_date)
-      : existing.amc_starting_date
-        ? new Date(existing.amc_starting_date)
-        : null;
+    // Re-calculate or clear amc_closing_date if relevant fields change
+    const amcStart = data.amc_starting_date !== undefined
+      ? (data.amc_starting_date ? new Date(data.amc_starting_date) : null)
+      : (existing.amc_starting_date ? new Date(existing.amc_starting_date) : null);
     const amcPeriod = data.amc_period ?? existing.amc_period;
 
-    if (amcStart && amcPeriod && !data.amc_closing_date) {
+    if (!amcStart) {
+      data.amc_closing_date = null as any;
+    } else if (amcStart && amcPeriod) {
       const amcClose = new Date(amcStart);
       amcClose.setMonth(amcClose.getMonth() + amcPeriod);
       amcClose.setDate(amcClose.getDate() - 1);
@@ -515,12 +517,12 @@ export class MasterMillsService {
       warranty_months: record.warranty_months,
       installation_date: record.installation_date,
       warranty_start_date: record.warranty_start_date || record.installation_date,
-      warranty_closing_date: record.warranty_closing_date,
+      warranty_closing_date: (record.warranty_start_date || record.installation_date) ? record.warranty_closing_date : null,
       all_warranty: record.all_warranty,
       amc_starting_date: record.amc_starting_date,
       amc_period: record.amc_period,
       amc_particular: record.amc_particular,
-      amc_closing_date: record.amc_closing_date,
+      amc_closing_date: record.amc_starting_date ? record.amc_closing_date : null,
       amc_amount: record.amc_amount,
       status: record.status,
       mfg_date: record.mfg_date,
@@ -755,12 +757,11 @@ export class MasterMillsService {
             data: customerUpdates,
           });
         }
-      } else {
-        const cleanCustName = customerNameInput || cleanMillName;
+      } else if (customerNameInput) {
         // Find existing by name (case-insensitive)
         customer = await tx.customer.findFirst({
           where: {
-            name: { equals: cleanCustName, mode: 'insensitive' },
+            name: { equals: customerNameInput, mode: 'insensitive' },
             deleted_at: null,
           },
         });
@@ -785,7 +786,7 @@ export class MasterMillsService {
           // Create customer
           customer = await tx.customer.create({
             data: {
-              name: cleanCustName,
+              name: customerNameInput,
               address: cleanAddress,
               phone: cleanPhone,
               email: cleanEmail,
@@ -795,13 +796,13 @@ export class MasterMillsService {
         }
       }
 
-      const resolvedCustomerId = customer.id;
+      const resolvedCustomerId = customer ? customer.id : null;
 
       // 2. Resolve & Update Mill
       let mill = await tx.mill.findFirst({
         where: {
           name: { equals: cleanMillName, mode: 'insensitive' },
-          customer_id: resolvedCustomerId,
+          ...(resolvedCustomerId ? { customer_id: resolvedCustomerId } : {}),
           deleted_at: null,
         },
       });

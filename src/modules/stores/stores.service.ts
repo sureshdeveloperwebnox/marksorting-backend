@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -400,13 +401,36 @@ export class StoresService {
       );
     }
 
+    // Once status in app becomes completed (return_status in DB is 'In Progress', 'Returned', or 'Completed'), editing is locked
+    if (
+      existing.return_status === 'In Progress' ||
+      existing.return_status === 'Returned' ||
+      existing.return_status === 'Completed'
+    ) {
+      throw new BadRequestException(
+        'Store return is already completed and locked. It cannot be edited in the app.',
+      );
+    }
+
+    // Automatically set status to 'In Progress' for Admin Panel once Courier Service Name and Tracking ID are entered
+    const hasCourier = Boolean(
+      dto.provider_name &&
+        dto.provider_name.trim() !== '' &&
+        dto.invoice_number &&
+        dto.invoice_number.trim() !== '',
+    );
+
+    const targetStatus = hasCourier
+      ? 'In Progress'
+      : dto.return_status || existing.return_status || 'Pending';
+
     const store = await this.prisma.store.update({
       where: { id: storeId },
       data: {
         ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
         ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
         ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
-        return_status: dto.return_status || 'Returned',
+        return_status: targetStatus,
       },
       include: {
         service_engineer: { select: { id: true, full_name: true } },

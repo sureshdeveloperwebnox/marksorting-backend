@@ -25,6 +25,9 @@ const INCLUDE_SHAPE = {
         select: {
             id: true,
             name: true,
+            phone: true,
+            place: true,
+            address: true,
             customer: { select: { id: true, name: true } },
         },
     },

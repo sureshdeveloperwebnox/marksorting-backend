@@ -46,15 +46,15 @@ const TEMPLATE_HEADERS = [
     'Invoice No',
     'Invoice Date',
     'Ref No',
-    'Frame No',
-    'MC Model',
-    'MFG Date',
     'Mill Name',
     'Customer Name',
     'Place',
     'State',
     'Phone No',
     'Address',
+    'Frame No',
+    'MC Model',
+    'MFG Date',
     'Installation Date',
     'Warranty Start Date',
     'Warranty Period (Months)',
@@ -68,15 +68,15 @@ const EXAMPLE_ROW = [
     'INV-001',
     '01/01/2024',
     'REF-001',
-    'FRM-001',
-    'Model XYZ',
-    '01/01/2024',
     'ABC Mills',
     'John Doe',
     'Chennai',
     'Tamil Nadu',
     '9876543210',
     '123, Main Street, Chennai - 600001',
+    'FRM-001',
+    'Model XYZ',
+    '01/01/2024',
     '15/01/2024',
     '15/01/2024',
     '12',
@@ -164,6 +164,14 @@ let ExcelParserService = class ExcelParserService {
         const worksheet = workbook.worksheets[0];
         if (!worksheet) {
             return [];
+        }
+        let dataRowCount = 0;
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+            if (rowNumber > 1)
+                dataRowCount++;
+        });
+        if (dataRowCount > 5000) {
+            throw new common_1.BadRequestException('We cannot handle more than 5000 rows, so kindly separate and upload.');
         }
         const headerRow = worksheet.getRow(1);
         const headerMap = {};

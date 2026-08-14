@@ -250,6 +250,14 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
         const worksheet = workbook.worksheets[0];
         if (!worksheet)
             return [];
+        let dataRowCount = 0;
+        worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+            if (rowNumber > 1)
+                dataRowCount++;
+        });
+        if (dataRowCount > 5000) {
+            throw new common_1.BadRequestException('We cannot handle more than 5000 rows, so kindly separate and upload.');
+        }
         const headerRow = worksheet.getRow(1);
         const headerMap = {};
         headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {

@@ -1,21 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import * as ExcelJS from 'exceljs';
 import { PreviewRow } from '../../modules/master-mills/interfaces/bulk-upload.interface';
 
-// Column order for template (21 headers)
+// Column order for template (20 headers)
 const TEMPLATE_HEADERS = [
   'Invoice No',
   'Invoice Date',
   'Ref No',
-  'Frame No',
-  'MC Model',
-  'MFG Date',
   'Mill Name',
   'Customer Name',
   'Place',
   'State',
   'Phone No',
   'Address',
+  'Frame No',
+  'MC Model',
+  'MFG Date',
   'Installation Date',
   'Warranty Start Date',
   'Warranty Period (Months)',
@@ -31,15 +31,15 @@ const EXAMPLE_ROW = [
   'INV-001',
   '01/01/2024',
   'REF-001',
-  'FRM-001',
-  'Model XYZ',
-  '01/01/2024',
   'ABC Mills',
   'John Doe',
   'Chennai',
   'Tamil Nadu',
   '9876543210',
   '123, Main Street, Chennai - 600001',
+  'FRM-001',
+  'Model XYZ',
+  '01/01/2024',
   '15/01/2024',
   '15/01/2024',
   '12',
@@ -159,6 +159,17 @@ export class ExcelParserService {
     const worksheet = workbook.worksheets[0];
     if (!worksheet) {
       return [];
+    }
+
+    let dataRowCount = 0;
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber > 1) dataRowCount++;
+    });
+
+    if (dataRowCount > 5000) {
+      throw new BadRequestException(
+        'We cannot handle more than 5000 rows, so kindly separate and upload.',
+      );
     }
 
     // Read header row (row 1) — normalize headers and build colNumber → fieldKey map

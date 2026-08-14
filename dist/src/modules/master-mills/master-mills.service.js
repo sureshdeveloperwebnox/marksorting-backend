@@ -110,7 +110,10 @@ let MasterMillsService = class MasterMillsService {
                 data.warranty_closing_date = baseDate.toISOString();
             }
         }
-        if (!data.amc_closing_date && data.amc_starting_date && data.amc_period) {
+        if (!data.amc_starting_date) {
+            data.amc_closing_date = null;
+        }
+        else if (data.amc_starting_date && data.amc_period) {
             const amcStart = new Date(data.amc_starting_date);
             amcStart.setMonth(amcStart.getMonth() + data.amc_period);
             amcStart.setDate(amcStart.getDate() - 1);
@@ -199,13 +202,14 @@ let MasterMillsService = class MasterMillsService {
             closing.setDate(closing.getDate() - 1);
             data.warranty_closing_date = closing.toISOString();
         }
-        const amcStart = data.amc_starting_date
-            ? new Date(data.amc_starting_date)
-            : existing.amc_starting_date
-                ? new Date(existing.amc_starting_date)
-                : null;
+        const amcStart = data.amc_starting_date !== undefined
+            ? (data.amc_starting_date ? new Date(data.amc_starting_date) : null)
+            : (existing.amc_starting_date ? new Date(existing.amc_starting_date) : null);
         const amcPeriod = data.amc_period ?? existing.amc_period;
-        if (amcStart && amcPeriod && !data.amc_closing_date) {
+        if (!amcStart) {
+            data.amc_closing_date = null;
+        }
+        else if (amcStart && amcPeriod) {
             const amcClose = new Date(amcStart);
             amcClose.setMonth(amcClose.getMonth() + amcPeriod);
             amcClose.setDate(amcClose.getDate() - 1);
@@ -462,12 +466,12 @@ let MasterMillsService = class MasterMillsService {
             warranty_months: record.warranty_months,
             installation_date: record.installation_date,
             warranty_start_date: record.warranty_start_date || record.installation_date,
-            warranty_closing_date: record.warranty_closing_date,
+            warranty_closing_date: (record.warranty_start_date || record.installation_date) ? record.warranty_closing_date : null,
             all_warranty: record.all_warranty,
             amc_starting_date: record.amc_starting_date,
             amc_period: record.amc_period,
             amc_particular: record.amc_particular,
-            amc_closing_date: record.amc_closing_date,
+            amc_closing_date: record.amc_starting_date ? record.amc_closing_date : null,
             amc_amount: record.amc_amount,
             status: record.status,
             mfg_date: record.mfg_date,
@@ -676,11 +680,10 @@ let MasterMillsService = class MasterMillsService {
                     });
                 }
             }
-            else {
-                const cleanCustName = customerNameInput || cleanMillName;
+            else if (customerNameInput) {
                 customer = await tx.customer.findFirst({
                     where: {
-                        name: { equals: cleanCustName, mode: 'insensitive' },
+                        name: { equals: customerNameInput, mode: 'insensitive' },
                         deleted_at: null,
                     },
                 });
@@ -702,7 +705,7 @@ let MasterMillsService = class MasterMillsService {
                 else {
                     customer = await tx.customer.create({
                         data: {
-                            name: cleanCustName,
+                            name: customerNameInput,
                             address: cleanAddress,
                             phone: cleanPhone,
                             email: cleanEmail,
@@ -711,11 +714,11 @@ let MasterMillsService = class MasterMillsService {
                     });
                 }
             }
-            const resolvedCustomerId = customer.id;
+            const resolvedCustomerId = customer ? customer.id : null;
             let mill = await tx.mill.findFirst({
                 where: {
                     name: { equals: cleanMillName, mode: 'insensitive' },
-                    customer_id: resolvedCustomerId,
+                    ...(resolvedCustomerId ? { customer_id: resolvedCustomerId } : {}),
                     deleted_at: null,
                 },
             });

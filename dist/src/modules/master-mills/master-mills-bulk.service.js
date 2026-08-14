@@ -211,7 +211,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             warranty_years: row.warranty_years ? Number(row.warranty_years) : undefined,
                             warranty_months: row.warranty_months ? Number(row.warranty_months) : undefined,
                             amc_starting_date: this.parseExcelDate(row.amc_starting_date),
-                            amc_closing_date: this.parseExcelDate(row.amc_closing_date),
+                            amc_closing_date: row.amc_starting_date ? this.parseExcelDate(row.amc_closing_date) : undefined,
                             amc_period: row.amc_period ? Number(row.amc_period) : undefined,
                             amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
                             amc_particulars: row.amc_particulars || undefined,
