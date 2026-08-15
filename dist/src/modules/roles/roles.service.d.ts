@@ -18,23 +18,13 @@ export declare class RolesService {
     findById(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
     update(id: string, dto: UpdateRoleDto): Promise<{
-        before: {
-            id: string;
-            description: string | null;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-        };
+        before: any;
         after: any;
     }>;
     remove(id: string): Promise<{
         message: string;
     }>;
     private invalidateCache;
-    getAllPermissions(): Promise<{
-        id: string;
-        description: string | null;
-        name: string;
-    }[]>;
+    getAllPermissions(): Promise<any>;
     private formatRole;
 }

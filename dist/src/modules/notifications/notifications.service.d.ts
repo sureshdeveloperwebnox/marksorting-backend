@@ -9,53 +9,19 @@ export declare class NotificationsService {
     private gateway;
     private readonly logger;
     constructor(prisma: PrismaService, notificationsQueue: Queue, gateway: NotificationsGateway);
-    createNotification(userId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
-        id: string;
-        user_id: string | null;
-        created_at: Date;
-        status: string;
-        message: string;
-        title: string;
-        type: string;
-        meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-    }>;
+    createNotification(userId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<any>;
     sendToUsers(userIds: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcast(title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcastToRole(roleName: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcastToRoles(roleNames: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     getAdminUserIds(): Promise<string[]>;
     getUserNotifications(userId: string, skip?: number, take?: number): Promise<{
-        notifications: {
-            id: string;
-            user_id: string | null;
-            created_at: Date;
-            status: string;
-            message: string;
-            title: string;
-            type: string;
-            meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-        }[];
-        total: number;
-        unreadCount: number;
+        notifications: any;
+        total: any;
+        unreadCount: any;
     }>;
-    markAsRead(userId: string, notificationId: string): Promise<{
-        id: string;
-        user_id: string | null;
-        created_at: Date;
-        status: string;
-        message: string;
-        title: string;
-        type: string;
-        meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-    }>;
-    markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
+    markAsRead(userId: string, notificationId: string): Promise<any>;
+    markAllAsRead(userId: string): Promise<any>;
     notifyStakeholders(technicianUserIds: string[], creatorUserId: string | undefined, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
-    registerPushToken(userId: string, token: string, deviceType: DeviceType): Promise<{
-        id: string;
-        user_id: string;
-        created_at: Date;
-        updated_at: Date;
-        token: string;
-        device_type: string;
-    }>;
+    registerPushToken(userId: string, token: string, deviceType: DeviceType): Promise<any>;
 }

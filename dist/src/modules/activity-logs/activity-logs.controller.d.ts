@@ -5,105 +5,25 @@ export declare class ActivityLogsController {
     private readonly activityLogsService;
     constructor(activityLogsService: ActivityLogsService);
     findAll(dto: QueryActivityLogsDto): Promise<{
-        data: ({
-            user: {
-                id: string;
-                full_name: string;
-                email: string;
-            };
-        } & {
-            id: string;
-            user_id: string;
-            action: string;
-            entity_type: string | null;
-            entity_id: string | null;
-            description: string;
-            metadata: import("@prisma/client/runtime/client").JsonValue | null;
-            ip_address: string | null;
-            user_agent: string | null;
-            device_name: string | null;
-            browser: string | null;
-            os: string | null;
-            correlation_id: string | null;
-            request_id: string | null;
-            session_id: string | null;
-            execution_time_ms: number | null;
-            archived: boolean;
-            created_at: Date;
-        })[];
+        data: any;
         meta: {
-            total: number;
+            total: any;
             skip: number;
             take: number;
             has_more: boolean;
         };
     }>;
     getStats(startDate?: string, endDate?: string): Promise<{
-        total_activities: number;
-        most_active_user: {
-            activity_count: number;
-            id: string;
-            full_name: string;
-            email: string;
-        } | null;
+        total_activities: any;
+        most_active_user: any;
         most_common_action: {
-            action: string;
-            count: number;
+            action: any;
+            count: any;
         } | null;
-        login_count: number;
-        logout_count: number;
+        login_count: any;
+        logout_count: any;
     }>;
-    getUserActivity(userId: string, limit?: string): Promise<({
-        user: {
-            id: string;
-            full_name: string;
-            email: string;
-        };
-    } & {
-        id: string;
-        user_id: string;
-        action: string;
-        entity_type: string | null;
-        entity_id: string | null;
-        description: string;
-        metadata: import("@prisma/client/runtime/client").JsonValue | null;
-        ip_address: string | null;
-        user_agent: string | null;
-        device_name: string | null;
-        browser: string | null;
-        os: string | null;
-        correlation_id: string | null;
-        request_id: string | null;
-        session_id: string | null;
-        execution_time_ms: number | null;
-        archived: boolean;
-        created_at: Date;
-    })[]>;
-    getEntityActivity(entityType: string, entityId: string, limit?: string): Promise<({
-        user: {
-            id: string;
-            full_name: string;
-            email: string;
-        };
-    } & {
-        id: string;
-        user_id: string;
-        action: string;
-        entity_type: string | null;
-        entity_id: string | null;
-        description: string;
-        metadata: import("@prisma/client/runtime/client").JsonValue | null;
-        ip_address: string | null;
-        user_agent: string | null;
-        device_name: string | null;
-        browser: string | null;
-        os: string | null;
-        correlation_id: string | null;
-        request_id: string | null;
-        session_id: string | null;
-        execution_time_ms: number | null;
-        archived: boolean;
-        created_at: Date;
-    })[]>;
+    getUserActivity(userId: string, limit?: string): Promise<any>;
+    getEntityActivity(entityType: string, entityId: string, limit?: string): Promise<any>;
     exportToExcel(dto: QueryActivityLogsDto, res: Response): Promise<void>;
 }

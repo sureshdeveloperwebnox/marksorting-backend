@@ -208,6 +208,13 @@ let InstallationReportsService = class InstallationReportsService {
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
         delete reportData.technician_id;
+        delete reportData.amc_period;
+        delete reportData.amc_start_date;
+        delete reportData.amc_starting_date;
+        delete reportData.amc_closing_date;
+        delete reportData.amc_amount;
+        delete reportData.amc_particular;
+        delete reportData.amc_particulars;
         const finalTechnicianIds = [...(technician_ids || [])];
         if (rawDto.technician_id &&
             !finalTechnicianIds.includes(rawDto.technician_id)) {
@@ -318,6 +325,13 @@ let InstallationReportsService = class InstallationReportsService {
         const { technician_ids, ...reportData } = rawDto;
         delete reportData.customer_id;
         delete reportData.technician_id;
+        delete reportData.amc_period;
+        delete reportData.amc_start_date;
+        delete reportData.amc_starting_date;
+        delete reportData.amc_closing_date;
+        delete reportData.amc_amount;
+        delete reportData.amc_particular;
+        delete reportData.amc_particulars;
         let finalTechnicianIds = technician_ids !== undefined ? [...technician_ids] : undefined;
         if (rawDto.technician_id !== undefined) {
             if (finalTechnicianIds !== undefined) {

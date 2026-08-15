@@ -16,7 +16,7 @@ export declare class ServiceReportsBulkController {
     private readonly serviceReportsService;
     constructor(bulkService: ServiceReportsBulkService, serviceReportsService: ServiceReportsService);
     bulkDeleteByDate(startDate?: string, endDate?: string, beforeDate?: string, bodyStartDate?: string, bodyEndDate?: string, bodyBeforeDate?: string, req?: any): Promise<{
-        count: number;
+        count: any;
         message: string;
     }>;
     getTemplate(res: Response): Promise<StreamableFile>;

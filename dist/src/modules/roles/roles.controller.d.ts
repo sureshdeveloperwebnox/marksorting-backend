@@ -5,21 +5,11 @@ export declare class RolesController {
     private readonly rolesService;
     constructor(rolesService: RolesService);
     findAll(skip?: string, take?: string, search?: string): Promise<any>;
-    getAllPermissions(): Promise<{
-        id: string;
-        description: string | null;
-        name: string;
-    }[]>;
+    getAllPermissions(): Promise<any>;
     findOne(id: string): Promise<any>;
     create(dto: CreateRoleDto): Promise<any>;
     update(id: string, dto: UpdateRoleDto): Promise<{
-        before: {
-            id: string;
-            description: string | null;
-            created_at: Date;
-            updated_at: Date;
-            name: string;
-        };
+        before: any;
         after: any;
     }>;
     remove(id: string): Promise<{

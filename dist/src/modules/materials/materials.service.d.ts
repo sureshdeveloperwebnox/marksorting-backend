@@ -16,47 +16,11 @@ export declare class MaterialsService {
         orderBy?: Prisma.MaterialOrderByWithRelationInput;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    create(dto: CreateMaterialDto): Promise<{
-        id: string;
-        description: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        uom: string | null;
-    }>;
+    create(dto: CreateMaterialDto): Promise<any>;
     update(id: string, dto: UpdateMaterialDto): Promise<{
-        before: {
-            id: string;
-            description: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            uom: string | null;
-        };
-        after: {
-            id: string;
-            description: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
-            name: string;
-            status: string;
-            uom: string | null;
-        };
+        before: any;
+        after: any;
     }>;
-    remove(id: string): Promise<{
-        id: string;
-        description: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        name: string;
-        status: string;
-        uom: string | null;
-    }>;
+    remove(id: string): Promise<any>;
     private invalidateCache;
 }

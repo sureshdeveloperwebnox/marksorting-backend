@@ -279,6 +279,13 @@ export class InstallationReportsService {
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
+    delete reportData.amc_period;
+    delete reportData.amc_start_date;
+    delete reportData.amc_starting_date;
+    delete reportData.amc_closing_date;
+    delete reportData.amc_amount;
+    delete reportData.amc_particular;
+    delete reportData.amc_particulars;
 
     const finalTechnicianIds = [...(technician_ids || [])];
     if (
@@ -429,6 +436,13 @@ export class InstallationReportsService {
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
+    delete reportData.amc_period;
+    delete reportData.amc_start_date;
+    delete reportData.amc_starting_date;
+    delete reportData.amc_closing_date;
+    delete reportData.amc_amount;
+    delete reportData.amc_particular;
+    delete reportData.amc_particulars;
 
     let finalTechnicianIds =
       technician_ids !== undefined ? [...technician_ids] : undefined;
