@@ -81,6 +81,23 @@ export class MobileStoreReturnsController {
     });
   }
 
+  @Get(':id')
+  @ApiOperation({
+    summary: '[Mobile] Get single pending store return details by ID',
+    description:
+      'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+  })
+  @ApiResponse({ status: 200, description: 'Store return details found' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden from accessing other engineers records',
+  })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.storesService.findByIdAndTechnician(id, req.user.userId);
+  }
+
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',
@@ -119,12 +136,18 @@ export class MobileStoreReturnsController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturn(
+  async submitReturn(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 }
 
@@ -241,12 +264,18 @@ export class MobileStoresController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturn(
+  async submitReturn(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Put(':id/return')
@@ -287,12 +316,18 @@ export class MobileStoresController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturnAlias(
+  async submitReturnAlias(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Post()
@@ -389,12 +424,18 @@ export class MobileStoresController {
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
     },
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() dto: MobileUpdateStoreDto,
     @Request() req: any,
   ) {
-    return this.storesService.updateByTechnician(id, req.user.userId, dto);
+    const result = await this.storesService.updateByTechnician(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Delete(':id')

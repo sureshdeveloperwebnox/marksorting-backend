@@ -112,14 +112,20 @@ let StoresController = class StoresController {
             orderBy: { created_at: 'desc' },
         });
     }
-    findOne(id) {
-        return this.storesService.findById(id);
+    async findOne(id) {
+        const store = await this.storesService.findById(id);
+        if (!store) {
+            throw new common_1.NotFoundException('Store record not found');
+        }
+        return store;
     }
     create(dto) {
         return this.storesService.create(dto);
     }
-    update(id, dto) {
-        return this.storesService.update(id, dto);
+    async update(id, dto, req) {
+        const result = await this.storesService.update(id, dto);
+        req.logData = result;
+        return result.after;
     }
     remove(id) {
         return this.storesService.remove(id);
@@ -237,7 +243,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], StoresController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Post)(),
@@ -303,9 +309,10 @@ __decorate([
     }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_store_dto_1.UpdateStoreDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, update_store_dto_1.UpdateStoreDto, Object]),
+    __metadata("design:returntype", Promise)
 ], StoresController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),

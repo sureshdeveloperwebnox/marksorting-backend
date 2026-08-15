@@ -17,6 +17,15 @@ export declare class TechniciansService implements OnApplicationBootstrap {
         orderBy?: Prisma.TechnicianOrderByWithRelationInput;
     }): Promise<any>;
     findById(id: string): Promise<any>;
-    updateStatus(id: string, status: string): Promise<any>;
+    updateStatus(id: string, status: string): Promise<{
+        id: string;
+        created_at: Date;
+        full_name: string;
+        email: string | null;
+        updated_at: Date;
+        deleted_at: Date | null;
+        status: string;
+        phone: string | null;
+    }>;
     private invalidateCache;
 }

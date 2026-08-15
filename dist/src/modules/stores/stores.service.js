@@ -271,7 +271,7 @@ let StoresService = class StoresService {
         const { skip, take, search } = params;
         const where = {
             service_engineer_id: technicianId,
-            return_status: 'Pending',
+            return_status: { equals: 'Pending', mode: 'insensitive' },
             deleted_at: null,
         };
         if (search) {

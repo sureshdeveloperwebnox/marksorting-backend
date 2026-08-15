@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  Request,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -237,8 +239,12 @@ export class StoresController {
   @ApiResponse({ status: 200, description: 'Store record details' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @ApiResponse({ status: 404, description: 'Store record not found' })
-  findOne(@Param('id') id: string) {
-    return this.storesService.findById(id);
+  async findOne(@Param('id') id: string) {
+    const store = await this.storesService.findById(id);
+    if (!store) {
+      throw new NotFoundException('Store record not found');
+    }
+    return store;
   }
 
   @Post()
@@ -307,8 +313,14 @@ export class StoresController {
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
     },
   })
-  update(@Param('id') id: string, @Body() dto: UpdateStoreDto) {
-    return this.storesService.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreDto,
+    @Request() req: any,
+  ) {
+    const result = await this.storesService.update(id, dto);
+    req.logData = result;
+    return result.after;
   }
 
   @Delete(':id')

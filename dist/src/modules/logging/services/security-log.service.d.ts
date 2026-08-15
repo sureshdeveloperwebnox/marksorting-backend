@@ -54,11 +54,44 @@ export declare class SecurityLogService {
     private calculateDistance;
     private deg2rad;
     getFailedLoginAttempts(email: string, minutes?: number): Promise<number>;
-    getSuspiciousActivities(limit?: number): Promise<any>;
+    getSuspiciousActivities(limit?: number): Promise<({
+        user: {
+            id: string;
+            full_name: string;
+            email: string;
+        } | null;
+    } & {
+        id: string;
+        user_id: string | null;
+        description: string;
+        ip_address: string;
+        user_agent: string | null;
+        correlation_id: string | null;
+        session_id: string | null;
+        created_at: Date;
+        severity: string;
+        event_type: string;
+        email_attempted: string | null;
+        auth_method: string | null;
+        mfa_used: boolean;
+        failure_reason: string | null;
+        device_fingerprint: string | null;
+        geolocation: import("@prisma/client/runtime/client").JsonValue | null;
+        risk_score: number | null;
+        is_suspicious: boolean;
+    })[]>;
     getSecurityStats(startDate?: Date, endDate?: Date): Promise<{
-        total_events: any;
-        by_severity: any;
-        by_type: any;
-        suspicious_count: any;
+        total_events: number;
+        by_severity: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.SecurityLogGroupByOutputType, "severity"[]> & {
+            _count: {
+                id: number;
+            };
+        })[];
+        by_type: (import("@prisma/client").Prisma.PickEnumerable<import("@prisma/client").Prisma.SecurityLogGroupByOutputType, "event_type"[]> & {
+            _count: {
+                id: number;
+            };
+        })[];
+        suspicious_count: number;
     }>;
 }
