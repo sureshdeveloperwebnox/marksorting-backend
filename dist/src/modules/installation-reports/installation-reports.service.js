@@ -294,6 +294,7 @@ let InstallationReportsService = class InstallationReportsService {
                         invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
                             ? new Date(reportData.invoice_date)
                             : undefined,
+                        customer_signature: reportData.customer_signature || '',
                         warranty_start_date: wStartDate,
                         warranty_end_date: wEndDate,
                         warranty_years: wYears,
