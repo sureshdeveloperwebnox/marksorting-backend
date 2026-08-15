@@ -234,6 +234,40 @@ export class StoresController {
     });
   }
 
+  @Get('return')
+  @ApiOperation({ summary: 'Get store returns' })
+  @ApiResponse({ status: 200, description: 'List of store returns' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  findReturns(
+    @Request() req: any,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('return_status') returnStatus?: string,
+  ) {
+    const effectiveTake = limit
+      ? parseInt(limit, 10)
+      : take
+        ? parseInt(take, 10)
+        : 10;
+    const effectiveSkip = page
+      ? (parseInt(page, 10) - 1) * effectiveTake
+      : skip
+        ? parseInt(skip, 10)
+        : 0;
+    const targetStatus = status || returnStatus || 'Pending';
+    const userId = req.user?.userId || req.user?.id;
+    return this.storesService.findPendingByTechnician(userId, {
+      skip: effectiveSkip,
+      take: effectiveTake,
+      search,
+      status: targetStatus,
+    });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get store record by ID' })
   @ApiResponse({ status: 200, description: 'Store record details' })

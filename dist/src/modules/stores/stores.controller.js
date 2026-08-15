@@ -112,6 +112,26 @@ let StoresController = class StoresController {
             orderBy: { created_at: 'desc' },
         });
     }
+    findReturns(req, skip, take, page, limit, search, status, returnStatus) {
+        const effectiveTake = limit
+            ? parseInt(limit, 10)
+            : take
+                ? parseInt(take, 10)
+                : 10;
+        const effectiveSkip = page
+            ? (parseInt(page, 10) - 1) * effectiveTake
+            : skip
+                ? parseInt(skip, 10)
+                : 0;
+        const targetStatus = status || returnStatus || 'Pending';
+        const userId = req.user?.userId || req.user?.id;
+        return this.storesService.findPendingByTechnician(userId, {
+            skip: effectiveSkip,
+            take: effectiveTake,
+            search,
+            status: targetStatus,
+        });
+    }
     async findOne(id) {
         const store = await this.storesService.findById(id);
         if (!store) {
@@ -234,6 +254,23 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('return'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get store returns' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of store returns' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('skip')),
+    __param(2, (0, common_1.Query)('take')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('limit')),
+    __param(5, (0, common_1.Query)('search')),
+    __param(6, (0, common_1.Query)('status')),
+    __param(7, (0, common_1.Query)('return_status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], StoresController.prototype, "findReturns", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get store record by ID' }),

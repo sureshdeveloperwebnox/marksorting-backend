@@ -166,6 +166,24 @@ let MobileStoresController = class MobileStoresController {
             warranty_status: warranty_status || warrantyStatus,
         });
     }
+    findReturns(req, skip, take, page, limit, search, status) {
+        const effectiveTake = limit
+            ? parseInt(limit, 10)
+            : take
+                ? parseInt(take, 10)
+                : 10;
+        const effectiveSkip = page
+            ? (parseInt(page, 10) - 1) * effectiveTake
+            : skip
+                ? parseInt(skip, 10)
+                : 0;
+        return this.storesService.findPendingByTechnician(req.user.userId, {
+            skip: effectiveSkip,
+            take: effectiveTake,
+            search,
+            status: status || 'Pending',
+        });
+    }
     async submitReturn(id, dto, req) {
         const result = await this.storesService.submitReturnDetails(id, req.user.userId, dto);
         req.logData = result;
@@ -253,6 +271,24 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MobileStoresController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('return'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] List store returns assigned to the logged-in engineer',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of store returns' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('skip')),
+    __param(2, (0, common_1.Query)('take')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('limit')),
+    __param(5, (0, common_1.Query)('search')),
+    __param(6, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "findReturns", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({

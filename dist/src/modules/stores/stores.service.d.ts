@@ -179,10 +179,11 @@ export declare class StoresService {
         })[];
         total: number;
     }>;
-    findPendingByTechnician(technicianId: string, params: {
+    findPendingByTechnician(technicianId?: string, params?: {
         skip?: number;
         take?: number;
         search?: string;
+        status?: string;
     }): Promise<{
         stores: ({
             customer: {

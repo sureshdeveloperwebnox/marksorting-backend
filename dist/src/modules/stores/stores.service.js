@@ -268,12 +268,17 @@ let StoresService = class StoresService {
         return { stores, total };
     }
     async findPendingByTechnician(technicianId, params) {
-        const { skip, take, search } = params;
+        const { skip, take, search, status } = params || {};
+        const returnStatus = status || 'Pending';
         const where = {
-            service_engineer_id: technicianId,
-            return_status: { equals: 'Pending', mode: 'insensitive' },
             deleted_at: null,
         };
+        if (technicianId) {
+            where.service_engineer_id = technicianId;
+        }
+        if (returnStatus.toLowerCase() !== 'all') {
+            where.return_status = { equals: returnStatus, mode: 'insensitive' };
+        }
         if (search) {
             where.OR = [
                 { frame_number: { contains: search, mode: 'insensitive' } },

@@ -226,6 +226,39 @@ export class MobileStoresController {
     });
   }
 
+  @Get('return')
+  @ApiOperation({
+    summary: '[Mobile] List store returns assigned to the logged-in engineer',
+  })
+  @ApiResponse({ status: 200, description: 'Paginated list of store returns' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  findReturns(
+    @Request() req: any,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+  ) {
+    const effectiveTake = limit
+      ? parseInt(limit, 10)
+      : take
+        ? parseInt(take, 10)
+        : 10;
+    const effectiveSkip = page
+      ? (parseInt(page, 10) - 1) * effectiveTake
+      : skip
+        ? parseInt(skip, 10)
+        : 0;
+    return this.storesService.findPendingByTechnician(req.user.userId, {
+      skip: effectiveSkip,
+      take: effectiveTake,
+      search,
+      status: status || 'Pending',
+    });
+  }
+
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',

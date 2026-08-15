@@ -338,15 +338,22 @@ export class StoresService {
   }
 
   async findPendingByTechnician(
-    technicianId: string,
-    params: { skip?: number; take?: number; search?: string },
+    technicianId?: string,
+    params?: { skip?: number; take?: number; search?: string; status?: string },
   ) {
-    const { skip, take, search } = params;
+    const { skip, take, search, status } = params || {};
+    const returnStatus = status || 'Pending';
     const where: Prisma.StoreWhereInput = {
-      service_engineer_id: technicianId,
-      return_status: { equals: 'Pending', mode: 'insensitive' },
       deleted_at: null,
     };
+
+    if (technicianId) {
+      where.service_engineer_id = technicianId;
+    }
+
+    if (returnStatus.toLowerCase() !== 'all') {
+      where.return_status = { equals: returnStatus, mode: 'insensitive' };
+    }
 
     if (search) {
       where.OR = [
