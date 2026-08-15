@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstallationReportsService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
@@ -199,7 +200,7 @@ let InstallationReportsService = class InstallationReportsService {
                 select: { id: true, phone: true, email: true },
             });
             if (!mill) {
-                throw new BadRequestException(`Mill with ID "${rawDto.mill_id}" not found. Please provide a valid mill_id.`);
+                throw new common_1.BadRequestException(`Mill with ID "${rawDto.mill_id}" not found. Please provide a valid mill_id.`);
             }
             if (!rawDto.mill_whatsapp_number) {
                 rawDto.mill_whatsapp_number = mill.phone || '';
@@ -315,9 +316,9 @@ let InstallationReportsService = class InstallationReportsService {
             });
         }
         catch (error) {
-            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error instanceof client_1.Prisma.PrismaClientKnownRequestError) {
                 if (error.code === 'P2003') {
-                    throw new BadRequestException('Invalid reference: mill_id or technician_id does not exist in the database.');
+                    throw new common_1.BadRequestException('Invalid reference: mill_id or technician_id does not exist in the database.');
                 }
             }
             throw error;
