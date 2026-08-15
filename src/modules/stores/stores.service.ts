@@ -391,8 +391,9 @@ export class StoresService {
 
   async submitReturnDetails(
     storeId: string,
-    technicianId: string,
-    dto: UpdateStoreReturnDto,
+    technicianId?: string,
+    dto: UpdateStoreReturnDto = {},
+    isUserAdmin: boolean = false,
   ) {
     const existing = await this.prisma.store.findFirst({
       where: { id: storeId, deleted_at: null },
@@ -402,17 +403,18 @@ export class StoresService {
       throw new NotFoundException('Store record not found');
     }
 
-    if (existing.service_engineer_id !== technicianId) {
+    if (!isUserAdmin && technicianId && existing.service_engineer_id !== technicianId) {
       throw new ForbiddenException(
         'You are not authorized to update this store record',
       );
     }
 
-    // Once status in app becomes completed (return_status in DB is 'In Progress', 'Returned', or 'Completed'), editing is locked
+    // Once status in app becomes completed (return_status in DB is 'In Progress', 'Returned', or 'Completed'), editing is locked for non-admins
     if (
-      existing.return_status === 'In Progress' ||
-      existing.return_status === 'Returned' ||
-      existing.return_status === 'Completed'
+      !isUserAdmin &&
+      (existing.return_status === 'In Progress' ||
+        existing.return_status === 'Returned' ||
+        existing.return_status === 'Completed')
     ) {
       throw new BadRequestException(
         'Store return is already completed and locked. It cannot be edited in the app.',
@@ -431,12 +433,36 @@ export class StoresService {
       ? 'In Progress'
       : dto.return_status || existing.return_status || 'Pending';
 
+    let finalRemarks = dto.remarks;
+    if (
+      (!finalRemarks || finalRemarks.trim() === '') &&
+      dto.products &&
+      Array.isArray(dto.products)
+    ) {
+      const extractedRemarks = dto.products
+        .map((p) => {
+          if (typeof p === 'string') return p;
+          const r = p?.barcode_remarks?.remarks || p?.remarks;
+          const isUsed =
+            p?.is_used !== undefined ? p.is_used : p?.barcode_remarks?.is_used;
+          if (r && r.trim() !== '') {
+            return isUsed !== undefined ? `${isUsed ? '[USED]' : '[NEW]'} ${r}` : r;
+          }
+          return null;
+        })
+        .filter(Boolean)
+        .join(' | ');
+      if (extractedRemarks) {
+        finalRemarks = extractedRemarks;
+      }
+    }
+
     const store = await this.prisma.store.update({
       where: { id: storeId },
       data: {
         ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
         ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
-        ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
+        ...(finalRemarks !== undefined ? { remarks: finalRemarks } : {}),
         return_status: targetStatus,
       },
       include: {

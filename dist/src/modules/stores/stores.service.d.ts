@@ -225,7 +225,7 @@ export declare class StoresService {
         })[];
         total: number;
     }>;
-    submitReturnDetails(storeId: string, technicianId: string, dto: UpdateStoreReturnDto): Promise<{
+    submitReturnDetails(storeId: string, technicianId?: string, dto?: UpdateStoreReturnDto, isUserAdmin?: boolean): Promise<{
         before: {
             id: string;
             created_at: Date;

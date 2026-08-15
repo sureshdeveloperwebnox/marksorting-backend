@@ -17,6 +17,8 @@ class UpdateStoreReturnDto {
     invoice_number;
     remarks;
     return_status;
+    courier_photos;
+    products;
 }
 exports.UpdateStoreReturnDto = UpdateStoreReturnDto;
 __decorate([
@@ -55,4 +57,20 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateStoreReturnDto.prototype, "return_status", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Courier photos list',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateStoreReturnDto.prototype, "courier_photos", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Products / barcode remarks details list',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], UpdateStoreReturnDto.prototype, "products", void 0);
 //# sourceMappingURL=update-store-return.dto.js.map

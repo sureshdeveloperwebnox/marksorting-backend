@@ -23,6 +23,7 @@ import { StoresService } from './stores.service';
 import { Prisma } from '@prisma/client';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
@@ -316,6 +317,119 @@ export class StoresController {
   })
   create(@Body() dto: CreateStoreDto) {
     return this.storesService.create(dto);
+  }
+
+  @Put('return/:id/details')
+  @ApiOperation({ summary: 'Submit store return details (return/:id/details)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'stores',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} completed return`
+        : 'Completed return';
+      return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
+    },
+  })
+  async submitReturnDetailsPath1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  @ApiOperation({ summary: 'Submit store return details (return/:id)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  @ApiOperation({ summary: 'Submit store return details (:id/details)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/return')
+  @ApiOperation({ summary: 'Submit store return details (:id/return)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath4(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Put(':id')

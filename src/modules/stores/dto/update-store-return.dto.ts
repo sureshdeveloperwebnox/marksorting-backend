@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsArray } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateStoreReturnDto {
@@ -33,4 +33,19 @@ export class UpdateStoreReturnDto {
   @IsString()
   @IsOptional()
   return_status?: string;
+
+  @ApiPropertyOptional({
+    description: 'Courier photos list',
+  })
+  @IsArray()
+  @IsOptional()
+  courier_photos?: any[];
+
+  @ApiPropertyOptional({
+    description: 'Products / barcode remarks details list',
+  })
+  @IsArray()
+  @IsOptional()
+  products?: any[];
 }
+

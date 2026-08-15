@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const stores_service_1 = require("./stores.service");
 const create_store_dto_1 = require("./dto/create-store.dto");
 const update_store_dto_1 = require("./dto/update-store.dto");
+const update_store_return_dto_1 = require("./dto/update-store-return.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const log_activity_decorator_1 = require("../activity-logs/decorators/log-activity.decorator");
 const activity_action_enum_1 = require("../activity-logs/enums/activity-action.enum");
@@ -141,6 +142,34 @@ let StoresController = class StoresController {
     }
     create(dto) {
         return this.storesService.create(dto);
+    }
+    async submitReturnDetailsPath1(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsPath2(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsPath3(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsPath4(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
     }
     async update(id, dto, req) {
         const result = await this.storesService.update(id, dto);
@@ -316,6 +345,81 @@ __decorate([
     __metadata("design:paramtypes", [create_store_dto_1.CreateStoreDto]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "create", null);
+__decorate([
+    (0, common_1.Put)('return/:id/details'),
+    (0, swagger_1.ApiOperation)({ summary: 'Submit store return details (return/:id/details)' }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return details completed successfully',
+    }),
+    (0, log_activity_decorator_1.LogActivity)({
+        action: activity_action_enum_1.ActivityAction.UPDATE,
+        entityType: 'stores',
+        entityIdParam: 'id',
+        description: (ctx) => {
+            const before = ctx.result?.before;
+            const after = ctx.result?.after;
+            const frame = after?.frame_number || before?.frame_number || ctx.params.id;
+            const diff = before && after ? (0, description_helper_1.buildDiffSummary)(before, after, ctx.body) : '';
+            const who = ctx.user.full_name
+                ? `${ctx.user.full_name} completed return`
+                : 'Completed return';
+            return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
+        },
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], StoresController.prototype, "submitReturnDetailsPath1", null);
+__decorate([
+    (0, common_1.Put)('return/:id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Submit store return details (return/:id)' }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return details completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], StoresController.prototype, "submitReturnDetailsPath2", null);
+__decorate([
+    (0, common_1.Put)(':id/details'),
+    (0, swagger_1.ApiOperation)({ summary: 'Submit store return details (:id/details)' }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return details completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], StoresController.prototype, "submitReturnDetailsPath3", null);
+__decorate([
+    (0, common_1.Put)(':id/return'),
+    (0, swagger_1.ApiOperation)({ summary: 'Submit store return details (:id/return)' }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return details completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], StoresController.prototype, "submitReturnDetailsPath4", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update existing store record' }),

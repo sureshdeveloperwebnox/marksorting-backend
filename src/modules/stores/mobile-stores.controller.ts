@@ -141,10 +141,67 @@ export class MobileStoreReturnsController {
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
     const result = await this.storesService.submitReturnDetails(
       id,
-      req.user.userId,
+      userId,
       dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  async submitReturnDetailsAlias1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id/details')
+  async submitReturnDetailsAlias2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  async submitReturnDetailsAlias3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
     );
     req.logData = result;
     return result.after;
@@ -257,6 +314,90 @@ export class MobileStoresController {
       search,
       status: status || 'Pending',
     });
+  }
+
+  @Put('return/:id/details')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (return/:id/details)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (return/:id)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (:id/details)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Put(':id')
