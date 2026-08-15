@@ -192,17 +192,20 @@ let InstallationReportsService = class InstallationReportsService {
     }
     async create(dto, user) {
         const rawDto = dto;
-        if ((!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
-            rawDto.mill_id) {
-            const mill = await this.prisma.mill.findUnique({
+        let mill = null;
+        if (rawDto.mill_id) {
+            mill = await this.prisma.mill.findUnique({
                 where: { id: rawDto.mill_id },
-                select: { phone: true, email: true },
+                select: { id: true, phone: true, email: true },
             });
+            if (!mill) {
+                throw new BadRequestException(`Mill with ID "${rawDto.mill_id}" not found. Please provide a valid mill_id.`);
+            }
             if (!rawDto.mill_whatsapp_number) {
-                rawDto.mill_whatsapp_number = mill?.phone || '';
+                rawDto.mill_whatsapp_number = mill.phone || '';
             }
             if (!rawDto.mill_email) {
-                rawDto.mill_email = mill?.email || '';
+                rawDto.mill_email = mill.email || '';
             }
         }
         const { technician_ids, ...reportData } = rawDto;
@@ -215,77 +218,110 @@ let InstallationReportsService = class InstallationReportsService {
         delete reportData.amc_amount;
         delete reportData.amc_particular;
         delete reportData.amc_particulars;
-        const finalTechnicianIds = [...(technician_ids || [])];
+        const candidateTechnicianIds = [...(technician_ids || [])];
         if (rawDto.technician_id &&
-            !finalTechnicianIds.includes(rawDto.technician_id)) {
-            finalTechnicianIds.push(rawDto.technician_id);
+            !candidateTechnicianIds.includes(rawDto.technician_id)) {
+            candidateTechnicianIds.push(rawDto.technician_id);
         }
         if (user &&
             user.role === 'Service Engineer' &&
-            !finalTechnicianIds.includes(user.userId)) {
-            finalTechnicianIds.push(user.userId);
+            !candidateTechnicianIds.includes(user.userId)) {
+            candidateTechnicianIds.push(user.userId);
         }
-        const installationReport = await this.prisma.$transaction(async (tx) => {
-            const todayStart = new Date();
-            todayStart.setUTCHours(0, 0, 0, 0);
-            const todayEnd = new Date();
-            todayEnd.setUTCHours(23, 59, 59, 999);
-            const count = await tx.installationReport.count({
-                where: { created_at: { gte: todayStart, lte: todayEnd } },
+        let finalTechnicianIds = [];
+        if (candidateTechnicianIds.length > 0) {
+            const validTechs = await this.prisma.technician.findMany({
+                where: { id: { in: candidateTechnicianIds } },
+                select: { id: true },
             });
-            const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
-            const seq = String(count + 1);
-            const report_number = `IR-${dateStr}-${seq}`;
-            const wYears = reportData.warranty_years ?? 0;
-            const wMonths = reportData.warranty_months ?? 0;
-            const wStartDate = reportData.warranty_start_date && reportData.warranty_start_date.trim()
-                ? new Date(reportData.warranty_start_date)
-                : undefined;
-            let wEndDate = reportData.warranty_end_date && reportData.warranty_end_date.trim()
-                ? new Date(reportData.warranty_end_date)
-                : undefined;
-            const totalMonths = wMonths + wYears * 12;
-            if (!wEndDate && wStartDate && totalMonths > 0) {
-                const calcDate = new Date(wStartDate);
-                calcDate.setMonth(calcDate.getMonth() + totalMonths);
-                calcDate.setDate(calcDate.getDate() - 1);
-                wEndDate = calcDate;
+            const validTechSet = new Set(validTechs.map((t) => t.id));
+            finalTechnicianIds = candidateTechnicianIds.filter((id) => validTechSet.has(id));
+        }
+        if (user &&
+            user.userId &&
+            !finalTechnicianIds.includes(user.userId)) {
+            const userIsTech = await this.prisma.technician.findUnique({
+                where: { id: user.userId },
+                select: { id: true },
+            });
+            if (userIsTech) {
+                finalTechnicianIds.push(user.userId);
             }
-            const created = await tx.installationReport.create({
-                data: {
-                    ...reportData,
-                    report_number,
-                    visit_time: reportData.visit_time && reportData.visit_time.trim()
-                        ? reportData.visit_time
-                        : (0, date_time_1.getAutoVisitTime)(),
-                    visit_date: reportData.visit_date
-                        ? new Date(reportData.visit_date)
-                        : new Date(),
-                    call_registered_date: new Date(reportData.call_registered_date),
-                    machine_mfg_date: reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
-                        ? new Date(reportData.machine_mfg_date)
-                        : undefined,
-                    invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
-                        ? new Date(reportData.invoice_date)
-                        : undefined,
-                    warranty_start_date: wStartDate,
-                    warranty_end_date: wEndDate,
-                    warranty_years: wYears,
-                    warranty_months: wMonths,
-                },
-                include: INCLUDE_SHAPE,
+        }
+        let installationReport;
+        try {
+            installationReport = await this.prisma.$transaction(async (tx) => {
+                const todayStart = new Date();
+                todayStart.setUTCHours(0, 0, 0, 0);
+                const todayEnd = new Date();
+                todayEnd.setUTCHours(23, 59, 59, 999);
+                const count = await tx.installationReport.count({
+                    where: { created_at: { gte: todayStart, lte: todayEnd } },
+                });
+                const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
+                const seq = String(count + 1);
+                const report_number = `IR-${dateStr}-${seq}`;
+                const wYears = reportData.warranty_years ?? 0;
+                const wMonths = reportData.warranty_months ?? 0;
+                const wStartDate = reportData.warranty_start_date && reportData.warranty_start_date.trim()
+                    ? new Date(reportData.warranty_start_date)
+                    : undefined;
+                let wEndDate = reportData.warranty_end_date && reportData.warranty_end_date.trim()
+                    ? new Date(reportData.warranty_end_date)
+                    : undefined;
+                const totalMonths = wMonths + wYears * 12;
+                if (!wEndDate && wStartDate && totalMonths > 0) {
+                    const calcDate = new Date(wStartDate);
+                    calcDate.setMonth(calcDate.getMonth() + totalMonths);
+                    calcDate.setDate(calcDate.getDate() - 1);
+                    wEndDate = calcDate;
+                }
+                const created = await tx.installationReport.create({
+                    data: {
+                        ...reportData,
+                        report_number,
+                        visit_time: reportData.visit_time && reportData.visit_time.trim()
+                            ? reportData.visit_time
+                            : (0, date_time_1.getAutoVisitTime)(),
+                        visit_date: reportData.visit_date
+                            ? new Date(reportData.visit_date)
+                            : new Date(),
+                        call_registered_date: new Date(reportData.call_registered_date),
+                        machine_mfg_date: reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
+                            ? new Date(reportData.machine_mfg_date)
+                            : undefined,
+                        invoice_date: reportData.invoice_date && reportData.invoice_date.trim()
+                            ? new Date(reportData.invoice_date)
+                            : undefined,
+                        warranty_start_date: wStartDate,
+                        warranty_end_date: wEndDate,
+                        warranty_years: wYears,
+                        warranty_months: wMonths,
+                    },
+                    include: INCLUDE_SHAPE,
+                });
+                if (finalTechnicianIds.length > 0) {
+                    await tx.installationReportTechnician.createMany({
+                        data: finalTechnicianIds.map((tid) => ({
+                            installation_report_id: created.id,
+                            technician_id: tid,
+                        })),
+                    });
+                }
+                return tx.installationReport.findFirst({
+                    where: { id: created.id },
+                    include: INCLUDE_SHAPE,
+                });
             });
-            await tx.installationReportTechnician.createMany({
-                data: finalTechnicianIds.map((tid) => ({
-                    installation_report_id: created.id,
-                    technician_id: tid,
-                })),
-            });
-            return tx.installationReport.findFirst({
-                where: { id: created.id },
-                include: INCLUDE_SHAPE,
-            });
-        });
+        }
+        catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError) {
+                if (error.code === 'P2003') {
+                    throw new BadRequestException('Invalid reference: mill_id or technician_id does not exist in the database.');
+                }
+            }
+            throw error;
+        }
         await this.invalidateCache();
         if (installationReport) {
             this.eventEmitter.emit('installation-report.created', {
