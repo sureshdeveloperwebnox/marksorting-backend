@@ -1092,14 +1092,14 @@ export class MasterMillsService {
    */
   async syncFromInstallationReport(params: {
     millId: string;
-    frameNo?: string;
-    mcModel?: string;
+    frameNo?: string | null;
+    mcModel?: string | null;
     mfgDate?: Date | null;
     installationDate?: Date | null;
-    invoiceNo?: string;
+    invoiceNo?: string | null;
     invoiceDate?: Date | null;
-    warrantyYears?: number;
-    warrantyMonths?: number;
+    warrantyYears?: number | null;
+    warrantyMonths?: number | null;
     warrantyStartDate?: Date | null;
     warrantyClosingDate?: Date | null;
     amcStartingDate?: Date | null;
@@ -1107,7 +1107,7 @@ export class MasterMillsService {
     amcPeriod?: number | null;
     amcParticular?: string | null;
     amcAmount?: number | any | null;
-    place?: string;
+    place?: string | null;
   }): Promise<void> {
     try {
       const {
