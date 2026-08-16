@@ -600,7 +600,7 @@ model Store {
   customer_id         String?
   quantity            Int
   warranty_status     String
-  frame_number        String          @unique
+  frame_number        String
   return_status       String
   inflow_status       String
   stock_type          String?         @default("Inflow")
@@ -615,6 +615,7 @@ model Store {
   customer            Customer?       @relation(fields: [customer_id], references: [id])
   service_engineer    Technician      @relation(fields: [service_engineer_id], references: [id])
 
+  @@index([frame_number])
   @@map("stores")
 }
 
