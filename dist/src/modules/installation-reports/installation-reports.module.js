@@ -18,12 +18,19 @@ const mobile_installation_reports_controller_1 = require("./mobile-installation-
 const installation_reports_bulk_service_1 = require("./installation-reports-bulk.service");
 const installation_reports_bulk_controller_1 = require("./installation-reports-bulk.controller");
 const installation_reports_excel_parser_service_1 = require("./installation-reports-excel-parser.service");
+const master_mills_module_1 = require("../master-mills/master-mills.module");
 let InstallationReportsModule = class InstallationReportsModule {
 };
 exports.InstallationReportsModule = InstallationReportsModule;
 exports.InstallationReportsModule = InstallationReportsModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, redis_module_1.RedisModule, pdf_module_1.PdfModule, settings_module_1.SettingsModule],
+        imports: [
+            prisma_module_1.PrismaModule,
+            redis_module_1.RedisModule,
+            pdf_module_1.PdfModule,
+            settings_module_1.SettingsModule,
+            master_mills_module_1.MasterMillsModule,
+        ],
         controllers: [
             installation_reports_controller_1.InstallationReportsController,
             mobile_installation_reports_controller_1.MobileInstallationReportsController,

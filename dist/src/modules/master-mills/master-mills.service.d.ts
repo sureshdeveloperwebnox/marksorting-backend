@@ -222,6 +222,25 @@ export declare class MasterMillsService {
         installationDate?: Date | null;
         place?: string;
     }): Promise<void>;
+    syncFromInstallationReport(params: {
+        millId: string;
+        frameNo?: string;
+        mcModel?: string;
+        mfgDate?: Date | null;
+        installationDate?: Date | null;
+        invoiceNo?: string;
+        invoiceDate?: Date | null;
+        warrantyYears?: number;
+        warrantyMonths?: number;
+        warrantyStartDate?: Date | null;
+        warrantyClosingDate?: Date | null;
+        amcStartingDate?: Date | null;
+        amcClosingDate?: Date | null;
+        amcPeriod?: number | null;
+        amcParticular?: string | null;
+        amcAmount?: number | any | null;
+        place?: string;
+    }): Promise<void>;
     private invalidateCache;
     private formatPhoneNumber;
 }

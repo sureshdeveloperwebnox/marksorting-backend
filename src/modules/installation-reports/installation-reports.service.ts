@@ -22,6 +22,7 @@ import {
   renderInstallationReportPdfOptions,
   renderInstallationReportTemplate,
 } from '../pdf/templates/installation-report.template';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 
 const INCLUDE_SHAPE = {
   mill: {
@@ -85,7 +86,64 @@ export class InstallationReportsService {
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
     private eventEmitter: EventEmitter2,
+    private masterMillsService: MasterMillsService,
   ) {}
+
+  private enrichReportWithAmc(report: any, masterMill?: any) {
+    if (!report) return report;
+    return {
+      ...report,
+      amc_period: masterMill?.amc_period ?? null,
+      amc_start_date: masterMill?.amc_starting_date
+        ? masterMill.amc_starting_date instanceof Date
+          ? masterMill.amc_starting_date.toISOString()
+          : masterMill.amc_starting_date
+        : null,
+      amc_starting_date: masterMill?.amc_starting_date
+        ? masterMill.amc_starting_date instanceof Date
+          ? masterMill.amc_starting_date.toISOString()
+          : masterMill.amc_starting_date
+        : null,
+      amc_closing_date: masterMill?.amc_closing_date
+        ? masterMill.amc_closing_date instanceof Date
+          ? masterMill.amc_closing_date.toISOString()
+          : masterMill.amc_closing_date
+        : null,
+      amc_amount: masterMill?.amc_amount ? Number(masterMill.amc_amount) : null,
+      amc_particular: masterMill?.amc_particular ?? null,
+      amc_particulars: masterMill?.amc_particular ?? null,
+    };
+  }
+
+  private async fetchMasterMillForReport(report: any) {
+    if (!report) return null;
+    let masterMill = null;
+    if (report.serial_or_frame_no) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          frame_no: report.serial_or_frame_no,
+        },
+      });
+    }
+    if (!masterMill && report.invoice_number) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          invoice_no: report.invoice_number,
+        },
+      });
+    }
+    if (!masterMill && report.mill_id) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          mill_id: report.mill_id,
+        },
+      });
+    }
+    return masterMill;
+  }
 
   async findAll(
     params: {
@@ -220,7 +278,45 @@ export class InstallationReportsService {
       this.prisma.installationReport.count({ where }),
     ]);
 
-    const result = { installationReports, total };
+    const frameNos = installationReports
+      .map((r) => r.serial_or_frame_no)
+      .filter((f): f is string => Boolean(f));
+    const invoiceNos = installationReports
+      .map((r) => r.invoice_number)
+      .filter((n): n is string => Boolean(n));
+    const millIds = installationReports
+      .map((r) => r.mill_id)
+      .filter((m): m is string => Boolean(m));
+
+    const masterMills = await this.prisma.masterMill.findMany({
+      where: {
+        deleted_at: null,
+        OR: [
+          ...(frameNos.length > 0 ? [{ frame_no: { in: frameNos } }] : []),
+          ...(invoiceNos.length > 0 ? [{ invoice_no: { in: invoiceNos } }] : []),
+          ...(millIds.length > 0 ? [{ mill_id: { in: millIds } }] : []),
+        ],
+      },
+    });
+
+    const mmByFrame = new Map<string, any>();
+    const mmByInvoice = new Map<string, any>();
+    const mmByMill = new Map<string, any>();
+    for (const mm of masterMills) {
+      if (mm.frame_no) mmByFrame.set(mm.frame_no, mm);
+      if (mm.invoice_no) mmByInvoice.set(mm.invoice_no, mm);
+      if (mm.mill_id && !mmByMill.has(mm.mill_id)) mmByMill.set(mm.mill_id, mm);
+    }
+
+    const enrichedReports = installationReports.map((r) => {
+      const mm =
+        (r.serial_or_frame_no ? mmByFrame.get(r.serial_or_frame_no) : null) ||
+        (r.invoice_number ? mmByInvoice.get(r.invoice_number) : null) ||
+        (r.mill_id ? mmByMill.get(r.mill_id) : null);
+      return this.enrichReportWithAmc(r, mm);
+    });
+
+    const result = { installationReports: enrichedReports, total };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
   }
@@ -252,8 +348,11 @@ export class InstallationReportsService {
       }
     }
 
-    await this.redis.setJson(cacheKey, installationReport, 3600); // Cache for 1 hour
-    return installationReport;
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    const enriched = this.enrichReportWithAmc(installationReport, masterMill);
+
+    await this.redis.setJson(cacheKey, enriched, 3600); // Cache for 1 hour
+    return enriched;
   }
 
   async create(
@@ -280,6 +379,20 @@ export class InstallationReportsService {
         rawDto.mill_email = mill.email || '';
       }
     }
+
+    const amcData = {
+      amc_period:
+        rawDto.amc_period !== undefined && rawDto.amc_period !== null
+          ? Number(rawDto.amc_period)
+          : undefined,
+      amc_start_date: rawDto.amc_start_date || rawDto.amc_starting_date,
+      amc_closing_date: rawDto.amc_closing_date,
+      amc_amount:
+        rawDto.amc_amount !== undefined && rawDto.amc_amount !== null
+          ? Number(rawDto.amc_amount)
+          : undefined,
+      amc_particular: rawDto.amc_particular || rawDto.amc_particulars,
+    };
 
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
@@ -432,6 +545,30 @@ export class InstallationReportsService {
     await this.invalidateCache();
 
     if (installationReport) {
+      void this.masterMillsService.syncFromInstallationReport({
+        millId: installationReport.mill_id,
+        frameNo: installationReport.serial_or_frame_no,
+        mcModel: installationReport.machine_model,
+        mfgDate: installationReport.machine_mfg_date,
+        installationDate: installationReport.visit_date,
+        invoiceNo: installationReport.invoice_number,
+        invoiceDate: installationReport.invoice_date,
+        warrantyYears: installationReport.warranty_years,
+        warrantyMonths: installationReport.warranty_months,
+        warrantyStartDate: installationReport.warranty_start_date,
+        warrantyClosingDate: installationReport.warranty_end_date,
+        amcStartingDate: amcData.amc_start_date
+          ? new Date(amcData.amc_start_date)
+          : undefined,
+        amcClosingDate: amcData.amc_closing_date
+          ? new Date(amcData.amc_closing_date)
+          : undefined,
+        amcPeriod: amcData.amc_period,
+        amcParticular: amcData.amc_particular,
+        amcAmount: amcData.amc_amount,
+        place: installationReport.place,
+      });
+
       this.eventEmitter.emit('installation-report.created', {
         reportNumber: installationReport.report_number,
         millName: installationReport.mill?.name || '',
@@ -451,7 +588,8 @@ export class InstallationReportsService {
       });
     }
 
-    return installationReport;
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    return this.enrichReportWithAmc(installationReport, masterMill);
   }
 
   async update(
@@ -478,6 +616,20 @@ export class InstallationReportsService {
         rawDto.mill_email = mill?.email || '';
       }
     }
+
+    const amcData = {
+      amc_period:
+        rawDto.amc_period !== undefined && rawDto.amc_period !== null
+          ? Number(rawDto.amc_period)
+          : undefined,
+      amc_start_date: rawDto.amc_start_date || rawDto.amc_starting_date,
+      amc_closing_date: rawDto.amc_closing_date,
+      amc_amount:
+        rawDto.amc_amount !== undefined && rawDto.amc_amount !== null
+          ? Number(rawDto.amc_amount)
+          : undefined,
+      amc_particular: rawDto.amc_particular || rawDto.amc_particulars,
+    };
 
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
@@ -597,8 +749,36 @@ export class InstallationReportsService {
       });
     }
 
+    void this.masterMillsService.syncFromInstallationReport({
+      millId: installationReport.mill_id,
+      frameNo: installationReport.serial_or_frame_no,
+      mcModel: installationReport.machine_model,
+      mfgDate: installationReport.machine_mfg_date,
+      installationDate: installationReport.visit_date,
+      invoiceNo: installationReport.invoice_number,
+      invoiceDate: installationReport.invoice_date,
+      warrantyYears: installationReport.warranty_years,
+      warrantyMonths: installationReport.warranty_months,
+      warrantyStartDate: installationReport.warranty_start_date,
+      warrantyClosingDate: installationReport.warranty_end_date,
+      amcStartingDate: amcData.amc_start_date
+        ? new Date(amcData.amc_start_date)
+        : undefined,
+      amcClosingDate: amcData.amc_closing_date
+        ? new Date(amcData.amc_closing_date)
+        : undefined,
+      amcPeriod: amcData.amc_period,
+      amcParticular: amcData.amc_particular,
+      amcAmount: amcData.amc_amount,
+      place: installationReport.place,
+    });
+
     await this.invalidateCache(id);
-    return { before: existingReport, after: installationReport };
+
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    const enrichedAfter = this.enrichReportWithAmc(installationReport, masterMill);
+
+    return { before: existingReport, after: enrichedAfter };
   }
 
   async remove(id: string, user?: { userId: string; role: string }) {

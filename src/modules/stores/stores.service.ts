@@ -55,9 +55,47 @@ export class StoresService {
       this.prisma.store.count({ where: { ...where, deleted_at: null } }),
     ]);
 
-    const result = { stores, total };
+    const enrichedStores = await this.enrichStoresWithCustomer(stores);
+    const result = { stores: enrichedStores, total };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
+  }
+
+  private async enrichStoresWithCustomer(stores: any[]) {
+    const unassigned = stores.filter((s) => !s.customer && s.frame_number);
+    if (unassigned.length === 0) return stores;
+
+    const frameNumbers = unassigned.map((s) => s.frame_number);
+    const masterMills = await this.prisma.masterMill.findMany({
+      where: {
+        frame_no: { in: frameNumbers },
+        deleted_at: null,
+      },
+      include: {
+        mill: {
+          include: {
+            customer: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+
+    const customerByFrame = new Map<string, { id: string; name: string }>();
+    for (const mm of masterMills) {
+      if (mm.frame_no && mm.mill?.customer) {
+        customerByFrame.set(mm.frame_no, mm.mill.customer);
+      }
+    }
+
+    return stores.map((s) => {
+      if (!s.customer && s.frame_number && customerByFrame.has(s.frame_number)) {
+        return {
+          ...s,
+          customer: customerByFrame.get(s.frame_number),
+        };
+      }
+      return s;
+    });
   }
 
   async findById(id: string) {
@@ -78,7 +116,15 @@ export class StoresService {
       },
     });
 
-    if (store) await this.redis.setJson(cacheKey, store, 3600);
+    if (store) {
+      let enrichedStore = store;
+      if (!store.customer && store.frame_number) {
+        const [enriched] = await this.enrichStoresWithCustomer([store]);
+        enrichedStore = enriched;
+      }
+      await this.redis.setJson(cacheKey, enrichedStore, 3600);
+      return enrichedStore;
+    }
     return store;
   }
 
@@ -112,6 +158,18 @@ export class StoresService {
       throw new ConflictException('Frame number already exists');
     }
 
+    // Auto-resolve customer_id from master_mills by frame_number if not provided
+    let resolvedCustomerId = customer_id;
+    if (!resolvedCustomerId && data.frame_number) {
+      const masterMill = await this.prisma.masterMill.findFirst({
+        where: { frame_no: data.frame_number, deleted_at: null },
+        include: { mill: { select: { customer_id: true } } },
+      });
+      if (masterMill?.mill?.customer_id) {
+        resolvedCustomerId = masterMill.mill.customer_id;
+      }
+    }
+
     // Set root quantity as sum of material quantities if provided
     if (material_quantities && material_quantities.length > 0) {
       data.quantity = material_quantities.reduce(
@@ -124,7 +182,7 @@ export class StoresService {
       data: {
         ...data,
         service_engineer: { connect: { id: service_engineer_id } },
-        ...(customer_id ? { customer: { connect: { id: customer_id } } } : {}),
+        ...(resolvedCustomerId ? { customer: { connect: { id: resolvedCustomerId } } } : {}),
         materials: {
           create: material_ids.map((id) => {
             const qtyObj = material_quantities?.find(
@@ -334,7 +392,8 @@ export class StoresService {
       this.prisma.store.count({ where }),
     ]);
 
-    return { stores, total };
+    const enrichedStores = await this.enrichStoresWithCustomer(stores);
+    return { stores: enrichedStores, total };
   }
 
   async findPendingByTechnician(
@@ -386,7 +445,8 @@ export class StoresService {
       this.prisma.store.count({ where }),
     ]);
 
-    return { stores, total };
+    const enrichedStores = await this.enrichStoresWithCustomer(stores);
+    return { stores: enrichedStores, total };
   }
 
   async submitReturnDetails(

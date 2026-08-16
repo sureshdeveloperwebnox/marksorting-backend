@@ -9,9 +9,16 @@ import { MobileInstallationReportsController } from './mobile-installation-repor
 import { InstallationReportsBulkService } from './installation-reports-bulk.service';
 import { InstallationReportsBulkController } from './installation-reports-bulk.controller';
 import { InstallationReportsExcelParserService } from './installation-reports-excel-parser.service';
+import { MasterMillsModule } from '../master-mills/master-mills.module';
 
 @Module({
-  imports: [PrismaModule, RedisModule, PdfModule, SettingsModule],
+  imports: [
+    PrismaModule,
+    RedisModule,
+    PdfModule,
+    SettingsModule,
+    MasterMillsModule,
+  ],
   controllers: [
     InstallationReportsController,
     MobileInstallationReportsController,
