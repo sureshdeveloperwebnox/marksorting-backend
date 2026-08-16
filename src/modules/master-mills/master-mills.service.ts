@@ -1177,10 +1177,27 @@ export class MasterMillsService {
         }
       }
 
-      // Compute AMC closing date if not provided
+      // Compute AMC starting and closing dates if not provided
+      let finalAmcStartingDate = amcStartingDate;
+      const wEndForAmc =
+        finalWarrantyClosingDate ||
+        (existing?.warranty_closing_date
+          ? new Date(existing.warranty_closing_date)
+          : null);
+      if (!finalAmcStartingDate && amcPeriod && amcPeriod > 0 && wEndForAmc) {
+        const autoStart = new Date(wEndForAmc);
+        autoStart.setDate(autoStart.getDate() + 1);
+        finalAmcStartingDate = autoStart;
+      }
+
       let finalAmcClosingDate = amcClosingDate;
-      if (!finalAmcClosingDate && amcStartingDate && amcPeriod && amcPeriod > 0) {
-        const calcDate = new Date(amcStartingDate);
+      if (
+        !finalAmcClosingDate &&
+        finalAmcStartingDate &&
+        amcPeriod &&
+        amcPeriod > 0
+      ) {
+        const calcDate = new Date(finalAmcStartingDate);
         calcDate.setMonth(calcDate.getMonth() + amcPeriod);
         calcDate.setDate(calcDate.getDate() - 1);
         finalAmcClosingDate = calcDate;
@@ -1217,7 +1234,7 @@ export class MasterMillsService {
         if (warrantyStartDate) updates.warranty_start_date = warrantyStartDate;
         if (finalWarrantyClosingDate)
           updates.warranty_closing_date = finalWarrantyClosingDate;
-        if (amcStartingDate) updates.amc_starting_date = amcStartingDate;
+        if (finalAmcStartingDate) updates.amc_starting_date = finalAmcStartingDate;
         if (finalAmcClosingDate) updates.amc_closing_date = finalAmcClosingDate;
         if (amcPeriod !== undefined && amcPeriod !== null)
           updates.amc_period = amcPeriod;
@@ -1250,7 +1267,7 @@ export class MasterMillsService {
             warranty_start_date: warrantyStartDate || undefined,
             warranty_closing_date: finalWarrantyClosingDate || undefined,
             all_warranty: allWarranty,
-            amc_starting_date: amcStartingDate || undefined,
+            amc_starting_date: finalAmcStartingDate || undefined,
             amc_period: amcPeriod ?? undefined,
             amc_particular: amcParticular?.trim() || undefined,
             amc_closing_date: finalAmcClosingDate || undefined,

@@ -76,24 +76,40 @@ let InstallationReportsService = class InstallationReportsService {
     enrichReportWithAmc(report, masterMill) {
         if (!report)
             return report;
+        let amcStartDate = masterMill?.amc_starting_date
+            ? masterMill.amc_starting_date instanceof Date
+                ? masterMill.amc_starting_date.toISOString()
+                : masterMill.amc_starting_date
+            : null;
+        let amcClosingDate = masterMill?.amc_closing_date
+            ? masterMill.amc_closing_date instanceof Date
+                ? masterMill.amc_closing_date.toISOString()
+                : masterMill.amc_closing_date
+            : null;
+        const amcPeriod = masterMill?.amc_period !== undefined && masterMill?.amc_period !== null
+            ? Number(masterMill.amc_period)
+            : null;
+        if (!amcStartDate && amcPeriod && amcPeriod > 0) {
+            const wEnd = report.warranty_end_date ||
+                masterMill?.warranty_closing_date;
+            if (wEnd) {
+                const autoStart = new Date(wEnd);
+                autoStart.setDate(autoStart.getDate() + 1);
+                amcStartDate = autoStart.toISOString();
+                if (!amcClosingDate) {
+                    const autoClose = new Date(autoStart);
+                    autoClose.setMonth(autoClose.getMonth() + amcPeriod);
+                    autoClose.setDate(autoClose.getDate() - 1);
+                    amcClosingDate = autoClose.toISOString();
+                }
+            }
+        }
         return {
             ...report,
-            amc_period: masterMill?.amc_period ?? null,
-            amc_start_date: masterMill?.amc_starting_date
-                ? masterMill.amc_starting_date instanceof Date
-                    ? masterMill.amc_starting_date.toISOString()
-                    : masterMill.amc_starting_date
-                : null,
-            amc_starting_date: masterMill?.amc_starting_date
-                ? masterMill.amc_starting_date instanceof Date
-                    ? masterMill.amc_starting_date.toISOString()
-                    : masterMill.amc_starting_date
-                : null,
-            amc_closing_date: masterMill?.amc_closing_date
-                ? masterMill.amc_closing_date instanceof Date
-                    ? masterMill.amc_closing_date.toISOString()
-                    : masterMill.amc_closing_date
-                : null,
+            amc_period: amcPeriod,
+            amc_start_date: amcStartDate,
+            amc_starting_date: amcStartDate,
+            amc_closing_date: amcClosingDate,
             amc_amount: masterMill?.amc_amount ? Number(masterMill.amc_amount) : null,
             amc_particular: masterMill?.amc_particular ?? null,
             amc_particulars: masterMill?.amc_particular ?? null,
