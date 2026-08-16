@@ -167,13 +167,6 @@ export class StoresService {
         : serviceTypeText;
     }
 
-    const existingFrame = await this.prisma.store.findFirst({
-      where: { frame_number: data.frame_number },
-    });
-    if (existingFrame) {
-      throw new ConflictException('Frame number already exists');
-    }
-
     // Auto-resolve customer_id from master_mills by frame_number if not provided
     let resolvedCustomerId = customer_id;
     if (!resolvedCustomerId && data.frame_number) {
@@ -255,18 +248,6 @@ export class StoresService {
       data.remarks = data.remarks
         ? `${data.remarks} | ${serviceTypeText}`
         : serviceTypeText;
-    }
-
-    if (data.frame_number) {
-      const existingFrame = await this.prisma.store.findFirst({
-        where: {
-          frame_number: data.frame_number,
-          id: { not: id },
-        },
-      });
-      if (existingFrame) {
-        throw new ConflictException('Frame number already exists');
-      }
     }
 
     if (material_quantities && material_quantities.length > 0) {

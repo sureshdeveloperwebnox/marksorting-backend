@@ -140,12 +140,6 @@ let StoresService = class StoresService {
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
         }
-        const existingFrame = await this.prisma.store.findFirst({
-            where: { frame_number: data.frame_number },
-        });
-        if (existingFrame) {
-            throw new common_1.ConflictException('Frame number already exists');
-        }
         let resolvedCustomerId = customer_id;
         if (!resolvedCustomerId && data.frame_number) {
             const masterMill = await this.prisma.masterMill.findFirst({
@@ -207,17 +201,6 @@ let StoresService = class StoresService {
             data.remarks = data.remarks
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
-        }
-        if (data.frame_number) {
-            const existingFrame = await this.prisma.store.findFirst({
-                where: {
-                    frame_number: data.frame_number,
-                    id: { not: id },
-                },
-            });
-            if (existingFrame) {
-                throw new common_1.ConflictException('Frame number already exists');
-            }
         }
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
