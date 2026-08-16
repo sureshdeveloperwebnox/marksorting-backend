@@ -62,7 +62,7 @@ export class StoresService {
   }
 
   private async enrichStoresWithCustomer(stores: any[]) {
-    const unassigned = stores.filter((s) => !s.customer && s.frame_number);
+    const unassigned = stores.filter((s) => (!s.customer || !s.mill) && s.frame_number);
     if (unassigned.length === 0) return stores;
 
     const frameNumbers = unassigned.map((s) => s.frame_number);
@@ -81,20 +81,36 @@ export class StoresService {
     });
 
     const customerByFrame = new Map<string, { id: string; name: string }>();
+    const millByFrame = new Map<string, { id: string; name: string }>();
     for (const mm of masterMills) {
-      if (mm.frame_no && mm.mill?.customer) {
-        customerByFrame.set(mm.frame_no, mm.mill.customer);
+      if (mm.frame_no && mm.mill) {
+        millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+        if (mm.mill.customer) {
+          customerByFrame.set(mm.frame_no, mm.mill.customer);
+        } else if (mm.mill.name) {
+          // If mill doesn't have a parent customer, fallback to mill name
+          customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+        }
       }
     }
 
     return stores.map((s) => {
-      if (!s.customer && s.frame_number && customerByFrame.has(s.frame_number)) {
-        return {
-          ...s,
-          customer: customerByFrame.get(s.frame_number),
-        };
-      }
-      return s;
+      const resolvedCustomer =
+        s.customer ||
+        (s.frame_number && customerByFrame.has(s.frame_number)
+          ? customerByFrame.get(s.frame_number)
+          : null);
+      const resolvedMill =
+        s.mill ||
+        (s.frame_number && millByFrame.has(s.frame_number)
+          ? millByFrame.get(s.frame_number)
+          : null);
+
+      return {
+        ...s,
+        customer: resolvedCustomer,
+        mill: resolvedMill,
+      };
     });
   }
 
