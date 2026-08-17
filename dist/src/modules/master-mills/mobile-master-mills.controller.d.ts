@@ -31,9 +31,9 @@ export declare class MobileMasterMillsController {
             status: string;
             place: string | null;
             phone: string | null;
+            ref_no: string | null;
             address: string | null;
             customer_id: string | null;
-            ref_no: string | null;
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
@@ -49,9 +49,9 @@ export declare class MobileMasterMillsController {
         warranty_start_date?: Date | null | undefined;
         warranty_years?: number | null | undefined;
         warranty_months?: number | null | undefined;
-        address?: string | null | undefined;
-        ref_no?: string | null | undefined;
         invoice_no?: string | undefined;
+        ref_no?: string | null | undefined;
+        address?: string | null | undefined;
         state?: string | null | undefined;
         phone_no?: string | null | undefined;
         mc_model?: string | null | undefined;

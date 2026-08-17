@@ -150,7 +150,7 @@ const DATE_FIELDS: RowField[] = [
 
 const YES_NO_FIELDS: RowField[] = ['ac_provided', 'auto_drain_valve_working'];
 
-const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+const VALID_STATUSES = ['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'];
 
 // ─── Service ──────────────────────────────────────────────────────────────────────
 

@@ -311,10 +311,10 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'PENDING',
-        enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+        enum: ['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'],
         required: false,
     }),
-    (0, class_validator_1.IsIn)(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
+    (0, class_validator_1.IsIn)(['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS']),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "status", void 0);

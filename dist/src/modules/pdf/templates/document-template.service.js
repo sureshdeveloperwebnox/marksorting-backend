@@ -64,9 +64,11 @@ let DocumentTemplateService = class DocumentTemplateService {
         const statusStr = String(value).toUpperCase().trim();
         const mapping = {
             PENDING: 'Pending',
-            IN_PROGRESS: 'Work In Progress',
-            COMPLETED: 'Completed',
-            CANCELLED: 'Cancelled',
+            COMPLETED: 'Complete',
+            NON_SUCCEED: 'Non-succeed',
+            'NON-SUCCEED': 'Non-succeed',
+            CANCELLED: 'Non-succeed',
+            IN_PROGRESS: 'In Progress',
         };
         return mapping[statusStr] || this.text(value);
     }

@@ -26,9 +26,9 @@ export declare class MillsService {
         status: string;
         place: string | null;
         phone: string | null;
+        ref_no: string | null;
         address: string | null;
         customer_id: string | null;
-        ref_no: string | null;
         city: string | null;
         phone_2: string | null;
         phone_3: string | null;
@@ -44,9 +44,9 @@ export declare class MillsService {
             status: string;
             place: string | null;
             phone: string | null;
+            ref_no: string | null;
             address: string | null;
             customer_id: string | null;
-            ref_no: string | null;
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
@@ -61,9 +61,9 @@ export declare class MillsService {
             status: string;
             place: string | null;
             phone: string | null;
+            ref_no: string | null;
             address: string | null;
             customer_id: string | null;
-            ref_no: string | null;
             city: string | null;
             phone_2: string | null;
             phone_3: string | null;
@@ -79,9 +79,9 @@ export declare class MillsService {
         status: string;
         place: string | null;
         phone: string | null;
+        ref_no: string | null;
         address: string | null;
         customer_id: string | null;
-        ref_no: string | null;
         city: string | null;
         phone_2: string | null;
         phone_3: string | null;

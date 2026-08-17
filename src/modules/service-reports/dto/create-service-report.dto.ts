@@ -213,10 +213,10 @@ export class CreateServiceReportDto {
 
   @ApiProperty({
     example: 'PENDING',
-    enum: ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'],
+    enum: ['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'],
     required: false,
   })
-  @IsIn(['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+  @IsIn(['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'])
   @IsOptional()
   status?: string;
 }

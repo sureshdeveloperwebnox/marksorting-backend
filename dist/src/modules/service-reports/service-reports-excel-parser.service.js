@@ -171,7 +171,7 @@ const DATE_FIELDS = [
     'machine_installation_date',
 ];
 const YES_NO_FIELDS = ['ac_provided', 'auto_drain_valve_working'];
-const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+const VALID_STATUSES = ['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'];
 let ServiceReportsExcelParserService = class ServiceReportsExcelParserService {
     async generateTemplate() {
         const workbook = new ExcelJS.Workbook();

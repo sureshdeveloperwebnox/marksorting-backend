@@ -37,7 +37,7 @@ export class MobileCreateStoreDto {
   @Min(1)
   quantity: number;
 
-  @ApiProperty({ example: 'Supplementary' })
+  @ApiProperty({ example: 'AMC With Spare' })
   @IsString()
   @IsNotEmpty()
   warranty_status: string;

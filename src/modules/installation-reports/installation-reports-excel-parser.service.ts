@@ -159,7 +159,7 @@ const YES_NO_FIELDS: RowField[] = [
   'auto_drain_valve_working',
 ];
 
-const VALID_STATUSES = ['PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'];
+const VALID_STATUSES = ['PENDING', 'COMPLETED', 'NON_SUCCEED', 'CANCELLED', 'IN_PROGRESS'];
 
 const VALID_CHANNEL_VALUES = [
   'PRIMARY',
