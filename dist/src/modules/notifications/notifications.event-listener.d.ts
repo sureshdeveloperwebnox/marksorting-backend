@@ -37,4 +37,18 @@ export declare class NotificationsEventListener {
         subject: string;
         assignedTechnicianUserIds: string[];
     }): Promise<void>;
+    onStoreCreated(payload: {
+        storeId: string;
+        frameNumber?: string;
+        technicianUserId: string;
+        creatorUserId?: string;
+        inflowStatus?: string;
+        quantity?: number;
+    }): Promise<void>;
+    onStoreReturnUpdated(payload: {
+        storeId: string;
+        frameNumber?: string;
+        returnStatus: string;
+        technicianUserId: string;
+    }): Promise<void>;
 }

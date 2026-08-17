@@ -13,6 +13,7 @@ export enum NotificationType {
   INSTALLATION = 'INSTALLATION',
   EXPENSE = 'EXPENSE',
   TICKET = 'TICKET',
+  STORE = 'STORE',
   BROADCAST = 'BROADCAST',
 }
 

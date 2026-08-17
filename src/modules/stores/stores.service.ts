@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
@@ -20,6 +21,7 @@ export class StoresService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(params: {
@@ -217,6 +219,15 @@ export class StoresService {
     });
 
     await this.invalidateCache();
+
+    this.eventEmitter.emit('store.created', {
+      storeId: store.id,
+      frameNumber: store.frame_number,
+      technicianUserId: store.service_engineer_id,
+      inflowStatus: store.inflow_status,
+      quantity: store.quantity,
+    });
+
     return store;
   }
 
@@ -293,6 +304,16 @@ export class StoresService {
     });
 
     await this.invalidateCache(id);
+
+    if (store.return_status && store.return_status !== existing.return_status) {
+      this.eventEmitter.emit('store.return_updated', {
+        storeId: store.id,
+        frameNumber: store.frame_number,
+        returnStatus: store.return_status,
+        technicianUserId: store.service_engineer_id,
+      });
+    }
+
     return { before: existing, after: store };
   }
 
@@ -534,6 +555,16 @@ export class StoresService {
     });
 
     await this.invalidateCache(storeId);
+
+    if (store.return_status && store.return_status !== existing.return_status) {
+      this.eventEmitter.emit('store.return_updated', {
+        storeId: store.id,
+        frameNumber: store.frame_number,
+        returnStatus: store.return_status,
+        technicianUserId: store.service_engineer_id,
+      });
+    }
+
     return { before: existing, after: store };
   }
 

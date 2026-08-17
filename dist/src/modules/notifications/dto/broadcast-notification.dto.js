@@ -18,6 +18,7 @@ var NotificationType;
     NotificationType["INSTALLATION"] = "INSTALLATION";
     NotificationType["EXPENSE"] = "EXPENSE";
     NotificationType["TICKET"] = "TICKET";
+    NotificationType["STORE"] = "STORE";
     NotificationType["BROADCAST"] = "BROADCAST";
 })(NotificationType || (exports.NotificationType = NotificationType = {}));
 var NotificationTarget;

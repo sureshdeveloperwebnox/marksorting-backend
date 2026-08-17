@@ -167,4 +167,58 @@ export class NotificationsEventListener {
       this.logger.error('Error handling ticket.assigned event', err);
     }
   }
+
+  @OnEvent('store.created')
+  async onStoreCreated(payload: {
+    storeId: string;
+    frameNumber?: string;
+    technicianUserId: string;
+    creatorUserId?: string;
+    inflowStatus?: string;
+    quantity?: number;
+  }) {
+    try {
+      const { frameNumber, technicianUserId, inflowStatus } = payload;
+      const title = 'New Store Record Created';
+      const message = frameNumber
+        ? `A new store record (${inflowStatus || 'Inflow'}) for machine ${frameNumber} has been assigned to you.`
+        : `A new store record (${inflowStatus || 'Inflow'}) has been created and assigned to you.`;
+
+      await this.notificationsService.sendToUsers(
+        [technicianUserId],
+        title,
+        message,
+        NotificationType.STORE,
+        { storeId: payload.storeId, frameNumber },
+      );
+    } catch (err) {
+      this.logger.error('Error handling store.created event', err);
+    }
+  }
+
+  @OnEvent('store.return_updated')
+  async onStoreReturnUpdated(payload: {
+    storeId: string;
+    frameNumber?: string;
+    returnStatus: string;
+    technicianUserId: string;
+  }) {
+    try {
+      const { frameNumber, returnStatus, technicianUserId } = payload;
+      const title = 'Store Return Status Updated';
+      const message = frameNumber
+        ? `Store return for machine ${frameNumber} has been updated to "${returnStatus}".`
+        : `Your store return record has been updated to "${returnStatus}".`;
+
+      await this.notificationsService.sendToUsers(
+        [technicianUserId],
+        title,
+        message,
+        NotificationType.STORE,
+        { storeId: payload.storeId, returnStatus, frameNumber },
+      );
+    } catch (err) {
+      this.logger.error('Error handling store.return_updated event', err);
+    }
+  }
 }

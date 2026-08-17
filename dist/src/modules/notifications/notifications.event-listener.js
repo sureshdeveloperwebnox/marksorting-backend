@@ -88,6 +88,32 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             this.logger.error('Error handling ticket.assigned event', err);
         }
     }
+    async onStoreCreated(payload) {
+        try {
+            const { frameNumber, technicianUserId, inflowStatus } = payload;
+            const title = 'New Store Record Created';
+            const message = frameNumber
+                ? `A new store record (${inflowStatus || 'Inflow'}) for machine ${frameNumber} has been assigned to you.`
+                : `A new store record (${inflowStatus || 'Inflow'}) has been created and assigned to you.`;
+            await this.notificationsService.sendToUsers([technicianUserId], title, message, broadcast_notification_dto_1.NotificationType.STORE, { storeId: payload.storeId, frameNumber });
+        }
+        catch (err) {
+            this.logger.error('Error handling store.created event', err);
+        }
+    }
+    async onStoreReturnUpdated(payload) {
+        try {
+            const { frameNumber, returnStatus, technicianUserId } = payload;
+            const title = 'Store Return Status Updated';
+            const message = frameNumber
+                ? `Store return for machine ${frameNumber} has been updated to "${returnStatus}".`
+                : `Your store return record has been updated to "${returnStatus}".`;
+            await this.notificationsService.sendToUsers([technicianUserId], title, message, broadcast_notification_dto_1.NotificationType.STORE, { storeId: payload.storeId, returnStatus, frameNumber });
+        }
+        catch (err) {
+            this.logger.error('Error handling store.return_updated event', err);
+        }
+    }
 };
 exports.NotificationsEventListener = NotificationsEventListener;
 __decorate([
@@ -126,6 +152,18 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], NotificationsEventListener.prototype, "onTicketAssigned", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('store.created'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationsEventListener.prototype, "onStoreCreated", null);
+__decorate([
+    (0, event_emitter_1.OnEvent)('store.return_updated'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], NotificationsEventListener.prototype, "onStoreReturnUpdated", null);
 exports.NotificationsEventListener = NotificationsEventListener = NotificationsEventListener_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [notifications_service_1.NotificationsService])

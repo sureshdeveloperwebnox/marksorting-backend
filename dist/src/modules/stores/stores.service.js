@@ -13,14 +13,17 @@ exports.StoresService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
+const event_emitter_1 = require("@nestjs/event-emitter");
 let StoresService = class StoresService {
     prisma;
     redis;
+    eventEmitter;
     CACHE_PREFIX = 'store:';
     LIST_CACHE_KEY = 'stores:list:';
-    constructor(prisma, redis) {
+    constructor(prisma, redis, eventEmitter) {
         this.prisma = prisma;
         this.redis = redis;
+        this.eventEmitter = eventEmitter;
     }
     async findAll(params) {
         const { skip, take, where, orderBy } = params;
@@ -180,6 +183,13 @@ let StoresService = class StoresService {
             },
         });
         await this.invalidateCache();
+        this.eventEmitter.emit('store.created', {
+            storeId: store.id,
+            frameNumber: store.frame_number,
+            technicianUserId: store.service_engineer_id,
+            inflowStatus: store.inflow_status,
+            quantity: store.quantity,
+        });
         return store;
     }
     async update(id, dto) {
@@ -238,6 +248,14 @@ let StoresService = class StoresService {
             },
         });
         await this.invalidateCache(id);
+        if (store.return_status && store.return_status !== existing.return_status) {
+            this.eventEmitter.emit('store.return_updated', {
+                storeId: store.id,
+                frameNumber: store.frame_number,
+                returnStatus: store.return_status,
+                technicianUserId: store.service_engineer_id,
+            });
+        }
         return { before: existing, after: store };
     }
     async remove(id) {
@@ -423,6 +441,14 @@ let StoresService = class StoresService {
             },
         });
         await this.invalidateCache(storeId);
+        if (store.return_status && store.return_status !== existing.return_status) {
+            this.eventEmitter.emit('store.return_updated', {
+                storeId: store.id,
+                frameNumber: store.frame_number,
+                returnStatus: store.return_status,
+                technicianUserId: store.service_engineer_id,
+            });
+        }
         return { before: existing, after: store };
     }
     async findByIdAndTechnician(id, technicianId) {
@@ -473,6 +499,7 @@ exports.StoresService = StoresService;
 exports.StoresService = StoresService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        redis_service_1.RedisService])
+        redis_service_1.RedisService,
+        event_emitter_1.EventEmitter2])
 ], StoresService);
 //# sourceMappingURL=stores.service.js.map

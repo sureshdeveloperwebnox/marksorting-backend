@@ -3,6 +3,7 @@ export declare enum NotificationType {
     INSTALLATION = "INSTALLATION",
     EXPENSE = "EXPENSE",
     TICKET = "TICKET",
+    STORE = "STORE",
     BROADCAST = "BROADCAST"
 }
 export declare enum NotificationTarget {
