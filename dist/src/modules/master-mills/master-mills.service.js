@@ -949,6 +949,161 @@ let MasterMillsService = class MasterMillsService {
             console.error('Error in syncFromServiceReport:', error);
         }
     }
+    async syncFromInstallationReport(params) {
+        try {
+            const { millId, frameNo, mcModel, mfgDate, installationDate, invoiceNo, invoiceDate, warrantyYears, warrantyMonths, warrantyStartDate, warrantyClosingDate, amcStartingDate, amcClosingDate, amcPeriod, amcParticular, amcAmount, place, } = params;
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: millId },
+                include: { customer: true },
+            });
+            if (!mill)
+                return;
+            let existing = null;
+            if (frameNo && frameNo.trim()) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        frame_no: frameNo.trim(),
+                    },
+                });
+            }
+            if (!existing && invoiceNo && invoiceNo.trim()) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        invoice_no: invoiceNo.trim(),
+                    },
+                });
+            }
+            if (!existing) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        mill_id: millId,
+                    },
+                });
+            }
+            let finalWarrantyClosingDate = warrantyClosingDate;
+            const baseDate = warrantyStartDate || installationDate;
+            if (!finalWarrantyClosingDate && baseDate) {
+                const totalMonths = (warrantyMonths ?? 0) + (warrantyYears ?? 0) * 12;
+                if (totalMonths > 0) {
+                    const calcDate = new Date(baseDate);
+                    calcDate.setMonth(calcDate.getMonth() + totalMonths);
+                    calcDate.setDate(calcDate.getDate() - 1);
+                    finalWarrantyClosingDate = calcDate;
+                }
+            }
+            let finalAmcStartingDate = amcStartingDate;
+            const wEndForAmc = finalWarrantyClosingDate ||
+                (existing?.warranty_closing_date
+                    ? new Date(existing.warranty_closing_date)
+                    : null);
+            if (!finalAmcStartingDate && amcPeriod && amcPeriod > 0 && wEndForAmc) {
+                const autoStart = new Date(wEndForAmc);
+                autoStart.setDate(autoStart.getDate() + 1);
+                finalAmcStartingDate = autoStart;
+            }
+            let finalAmcClosingDate = amcClosingDate;
+            if (!finalAmcClosingDate &&
+                finalAmcStartingDate &&
+                amcPeriod &&
+                amcPeriod > 0) {
+                const calcDate = new Date(finalAmcStartingDate);
+                calcDate.setMonth(calcDate.getMonth() + amcPeriod);
+                calcDate.setDate(calcDate.getDate() - 1);
+                finalAmcClosingDate = calcDate;
+            }
+            let allWarranty = 'Non Warranty';
+            const now = new Date();
+            const wClose = finalWarrantyClosingDate || (existing?.warranty_closing_date ? new Date(existing.warranty_closing_date) : null);
+            const aClose = finalAmcClosingDate || (existing?.amc_closing_date ? new Date(existing.amc_closing_date) : null);
+            if (wClose && wClose > now) {
+                allWarranty = 'Under Warranty';
+            }
+            else if (aClose && aClose > now) {
+                allWarranty = 'Under AMC';
+            }
+            else if (wClose || aClose) {
+                allWarranty = 'Expired';
+            }
+            if (existing) {
+                const updates = { all_warranty: allWarranty };
+                if (frameNo && frameNo.trim() && existing.frame_no !== frameNo.trim())
+                    updates.frame_no = frameNo.trim();
+                if (mcModel && mcModel.trim() && existing.mc_model !== mcModel.trim())
+                    updates.mc_model = mcModel.trim();
+                if (mfgDate)
+                    updates.mfg_date = mfgDate;
+                if (installationDate)
+                    updates.installation_date = installationDate;
+                if (invoiceNo && invoiceNo.trim() && existing.invoice_no !== invoiceNo.trim())
+                    updates.invoice_no = invoiceNo.trim();
+                if (invoiceDate)
+                    updates.invoice_date = invoiceDate;
+                if (warrantyYears !== undefined && warrantyYears !== null)
+                    updates.warranty_years = warrantyYears;
+                if (warrantyMonths !== undefined && warrantyMonths !== null)
+                    updates.warranty_months = warrantyMonths;
+                if (warrantyStartDate)
+                    updates.warranty_start_date = warrantyStartDate;
+                if (finalWarrantyClosingDate)
+                    updates.warranty_closing_date = finalWarrantyClosingDate;
+                if (finalAmcStartingDate)
+                    updates.amc_starting_date = finalAmcStartingDate;
+                if (finalAmcClosingDate)
+                    updates.amc_closing_date = finalAmcClosingDate;
+                if (amcPeriod !== undefined && amcPeriod !== null)
+                    updates.amc_period = amcPeriod;
+                if (amcParticular && amcParticular.trim())
+                    updates.amc_particular = amcParticular.trim();
+                if (amcAmount !== undefined && amcAmount !== null)
+                    updates.amc_amount = amcAmount;
+                if (place && place.trim())
+                    updates.place = place.trim();
+                if (existing.mill_id !== millId)
+                    updates.mill_id = millId;
+                await this.prisma.masterMill.update({
+                    where: { id: existing.id },
+                    data: updates,
+                });
+            }
+            else {
+                const fallbackInvoiceNo = invoiceNo?.trim() ||
+                    `INV-IR-${mill.ref_no || millId.slice(0, 8)}-${Date.now()}`;
+                await this.prisma.masterMill.create({
+                    data: {
+                        invoice_no: fallbackInvoiceNo,
+                        invoice_date: invoiceDate || undefined,
+                        ref_no: mill.ref_no || undefined,
+                        frame_no: frameNo?.trim() || undefined,
+                        mc_model: mcModel?.trim() || undefined,
+                        mfg_date: mfgDate || undefined,
+                        installation_date: installationDate || undefined,
+                        warranty_years: warrantyYears ?? 0,
+                        warranty_months: warrantyMonths ?? 0,
+                        warranty_start_date: warrantyStartDate || undefined,
+                        warranty_closing_date: finalWarrantyClosingDate || undefined,
+                        all_warranty: allWarranty,
+                        amc_starting_date: finalAmcStartingDate || undefined,
+                        amc_period: amcPeriod ?? undefined,
+                        amc_particular: amcParticular?.trim() || undefined,
+                        amc_closing_date: finalAmcClosingDate || undefined,
+                        amc_amount: amcAmount ?? 0,
+                        address: mill.address || undefined,
+                        place: place?.trim() || mill.place || undefined,
+                        phone_no: mill.phone || undefined,
+                        mill_id: millId,
+                        status: 'ACTIVE',
+                    },
+                });
+            }
+            await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+        }
+        catch (error) {
+            console.error('Error in syncFromInstallationReport:', error);
+        }
+    }
     async invalidateCache(id) {
         const promises = [
             this.redis.delByPrefix(this.LIST_CACHE_KEY),

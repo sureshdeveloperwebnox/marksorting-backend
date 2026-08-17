@@ -2,6 +2,7 @@ import { OmitType } from '@nestjs/swagger';
 import { CreateInstallationReportDto } from './create-installation-report.dto';
 import { IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateMobileInstallationReportDto extends OmitType(
   CreateInstallationReportDto,
@@ -13,7 +14,9 @@ export class CreateMobileInstallationReportDto extends OmitType(
     description:
       'Single technician UUID assigned to this installation report (optional). Used by the mobile client.',
   })
+  @Transform(({ value }) => (value === '' || value === null ? undefined : value))
   @IsUUID()
   @IsOptional()
   technician_id?: string;
 }
+

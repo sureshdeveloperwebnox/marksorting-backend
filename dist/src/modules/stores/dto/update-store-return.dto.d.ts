@@ -3,4 +3,6 @@ export declare class UpdateStoreReturnDto {
     invoice_number?: string;
     remarks?: string;
     return_status?: string;
+    courier_photos?: any[];
+    products?: any[];
 }

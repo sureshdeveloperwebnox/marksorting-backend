@@ -14,6 +14,7 @@ const swagger_1 = require("@nestjs/swagger");
 const create_installation_report_dto_1 = require("./create-installation-report.dto");
 const class_validator_1 = require("class-validator");
 const swagger_2 = require("@nestjs/swagger");
+const class_transformer_1 = require("class-transformer");
 class CreateMobileInstallationReportDto extends (0, swagger_1.OmitType)(create_installation_report_dto_1.CreateInstallationReportDto, ['technician_ids', 'visit_date', 'visit_time']) {
     technician_id;
 }
@@ -24,6 +25,7 @@ __decorate([
         required: false,
         description: 'Single technician UUID assigned to this installation report (optional). Used by the mobile client.',
     }),
+    (0, class_transformer_1.Transform)(({ value }) => (value === '' || value === null ? undefined : value)),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

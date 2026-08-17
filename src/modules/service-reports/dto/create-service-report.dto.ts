@@ -31,6 +31,7 @@ export class CreateServiceReportDto {
   technician_ids: string[];
 
   @ApiProperty({ example: 'uuid-of-customer', required: false })
+  @Transform(({ value }) => (value === '' || value === null ? undefined : value))
   @IsUUID()
   @IsOptional()
   customer_id?: string;

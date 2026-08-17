@@ -46,9 +46,57 @@ let StoresService = class StoresService {
             }),
             this.prisma.store.count({ where: { ...where, deleted_at: null } }),
         ]);
-        const result = { stores, total };
+        const enrichedStores = await this.enrichStoresWithCustomer(stores);
+        const result = { stores: enrichedStores, total };
         await this.redis.setJson(cacheKey, result, 300);
         return result;
+    }
+    async enrichStoresWithCustomer(stores) {
+        const unassigned = stores.filter((s) => (!s.customer || !s.mill) && s.frame_number);
+        if (unassigned.length === 0)
+            return stores;
+        const frameNumbers = unassigned.map((s) => s.frame_number);
+        const masterMills = await this.prisma.masterMill.findMany({
+            where: {
+                frame_no: { in: frameNumbers },
+                deleted_at: null,
+            },
+            include: {
+                mill: {
+                    include: {
+                        customer: { select: { id: true, name: true } },
+                    },
+                },
+            },
+        });
+        const customerByFrame = new Map();
+        const millByFrame = new Map();
+        for (const mm of masterMills) {
+            if (mm.frame_no && mm.mill) {
+                millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+                if (mm.mill.customer) {
+                    customerByFrame.set(mm.frame_no, mm.mill.customer);
+                }
+                else if (mm.mill.name) {
+                    customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+                }
+            }
+        }
+        return stores.map((s) => {
+            const resolvedCustomer = s.customer ||
+                (s.frame_number && customerByFrame.has(s.frame_number)
+                    ? customerByFrame.get(s.frame_number)
+                    : null);
+            const resolvedMill = s.mill ||
+                (s.frame_number && millByFrame.has(s.frame_number)
+                    ? millByFrame.get(s.frame_number)
+                    : null);
+            return {
+                ...s,
+                customer: resolvedCustomer,
+                mill: resolvedMill,
+            };
+        });
     }
     async findById(id) {
         const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
@@ -67,8 +115,15 @@ let StoresService = class StoresService {
                 },
             },
         });
-        if (store)
-            await this.redis.setJson(cacheKey, store, 3600);
+        if (store) {
+            let enrichedStore = store;
+            if (!store.customer && store.frame_number) {
+                const [enriched] = await this.enrichStoresWithCustomer([store]);
+                enrichedStore = enriched;
+            }
+            await this.redis.setJson(cacheKey, enrichedStore, 3600);
+            return enrichedStore;
+        }
         return store;
     }
     async create(dto) {
@@ -85,11 +140,15 @@ let StoresService = class StoresService {
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
         }
-        const existingFrame = await this.prisma.store.findFirst({
-            where: { frame_number: data.frame_number },
-        });
-        if (existingFrame) {
-            throw new common_1.ConflictException('Frame number already exists');
+        let resolvedCustomerId = customer_id;
+        if (!resolvedCustomerId && data.frame_number) {
+            const masterMill = await this.prisma.masterMill.findFirst({
+                where: { frame_no: data.frame_number, deleted_at: null },
+                include: { mill: { select: { customer_id: true } } },
+            });
+            if (masterMill?.mill?.customer_id) {
+                resolvedCustomerId = masterMill.mill.customer_id;
+            }
         }
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
@@ -98,7 +157,7 @@ let StoresService = class StoresService {
             data: {
                 ...data,
                 service_engineer: { connect: { id: service_engineer_id } },
-                ...(customer_id ? { customer: { connect: { id: customer_id } } } : {}),
+                ...(resolvedCustomerId ? { customer: { connect: { id: resolvedCustomerId } } } : {}),
                 materials: {
                     create: material_ids.map((id) => {
                         const qtyObj = material_quantities?.find((q) => q.material_id === id);
@@ -142,17 +201,6 @@ let StoresService = class StoresService {
             data.remarks = data.remarks
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
-        }
-        if (data.frame_number) {
-            const existingFrame = await this.prisma.store.findFirst({
-                where: {
-                    frame_number: data.frame_number,
-                    id: { not: id },
-                },
-            });
-            if (existingFrame) {
-                throw new common_1.ConflictException('Frame number already exists');
-            }
         }
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
@@ -265,15 +313,21 @@ let StoresService = class StoresService {
             }),
             this.prisma.store.count({ where }),
         ]);
-        return { stores, total };
+        const enrichedStores = await this.enrichStoresWithCustomer(stores);
+        return { stores: enrichedStores, total };
     }
     async findPendingByTechnician(technicianId, params) {
-        const { skip, take, search } = params;
+        const { skip, take, search, status } = params || {};
+        const returnStatus = status || 'Pending';
         const where = {
-            service_engineer_id: technicianId,
-            return_status: 'Pending',
             deleted_at: null,
         };
+        if (technicianId) {
+            where.service_engineer_id = technicianId;
+        }
+        if (returnStatus.toLowerCase() !== 'all') {
+            where.return_status = { equals: returnStatus, mode: 'insensitive' };
+        }
         if (search) {
             where.OR = [
                 { frame_number: { contains: search, mode: 'insensitive' } },
@@ -303,21 +357,23 @@ let StoresService = class StoresService {
             }),
             this.prisma.store.count({ where }),
         ]);
-        return { stores, total };
+        const enrichedStores = await this.enrichStoresWithCustomer(stores);
+        return { stores: enrichedStores, total };
     }
-    async submitReturnDetails(storeId, technicianId, dto) {
+    async submitReturnDetails(storeId, technicianId, dto = {}, isUserAdmin = false) {
         const existing = await this.prisma.store.findFirst({
             where: { id: storeId, deleted_at: null },
         });
         if (!existing) {
             throw new common_1.NotFoundException('Store record not found');
         }
-        if (existing.service_engineer_id !== technicianId) {
+        if (!isUserAdmin && technicianId && existing.service_engineer_id !== technicianId) {
             throw new common_1.ForbiddenException('You are not authorized to update this store record');
         }
-        if (existing.return_status === 'In Progress' ||
-            existing.return_status === 'Returned' ||
-            existing.return_status === 'Completed') {
+        if (!isUserAdmin &&
+            (existing.return_status === 'In Progress' ||
+                existing.return_status === 'Returned' ||
+                existing.return_status === 'Completed')) {
             throw new common_1.BadRequestException('Store return is already completed and locked. It cannot be edited in the app.');
         }
         const hasCourier = Boolean(dto.provider_name &&
@@ -327,12 +383,33 @@ let StoresService = class StoresService {
         const targetStatus = hasCourier
             ? 'In Progress'
             : dto.return_status || existing.return_status || 'Pending';
+        let finalRemarks = dto.remarks;
+        if ((!finalRemarks || finalRemarks.trim() === '') &&
+            dto.products &&
+            Array.isArray(dto.products)) {
+            const extractedRemarks = dto.products
+                .map((p) => {
+                if (typeof p === 'string')
+                    return p;
+                const r = p?.barcode_remarks?.remarks || p?.remarks;
+                const isUsed = p?.is_used !== undefined ? p.is_used : p?.barcode_remarks?.is_used;
+                if (r && r.trim() !== '') {
+                    return isUsed !== undefined ? `${isUsed ? '[USED]' : '[NEW]'} ${r}` : r;
+                }
+                return null;
+            })
+                .filter(Boolean)
+                .join(' | ');
+            if (extractedRemarks) {
+                finalRemarks = extractedRemarks;
+            }
+        }
         const store = await this.prisma.store.update({
             where: { id: storeId },
             data: {
                 ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
                 ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
-                ...(dto.remarks !== undefined ? { remarks: dto.remarks } : {}),
+                ...(finalRemarks !== undefined ? { remarks: finalRemarks } : {}),
                 return_status: targetStatus,
             },
             include: {

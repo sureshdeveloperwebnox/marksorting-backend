@@ -2,7 +2,9 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -20,6 +22,7 @@ import {
   renderInstallationReportPdfOptions,
   renderInstallationReportTemplate,
 } from '../pdf/templates/installation-report.template';
+import { MasterMillsService } from '../master-mills/master-mills.service';
 
 const INCLUDE_SHAPE = {
   mill: {
@@ -83,7 +86,89 @@ export class InstallationReportsService {
     private pdfService: PdfService,
     private documentTemplateService: DocumentTemplateService,
     private eventEmitter: EventEmitter2,
+    private masterMillsService: MasterMillsService,
   ) {}
+
+  private enrichReportWithAmc(report: any, masterMill?: any) {
+    if (!report) return report;
+
+    let amcStartDate = masterMill?.amc_starting_date
+      ? masterMill.amc_starting_date instanceof Date
+        ? masterMill.amc_starting_date.toISOString()
+        : masterMill.amc_starting_date
+      : null;
+
+    let amcClosingDate = masterMill?.amc_closing_date
+      ? masterMill.amc_closing_date instanceof Date
+        ? masterMill.amc_closing_date.toISOString()
+        : masterMill.amc_closing_date
+      : null;
+
+    const amcPeriod =
+      masterMill?.amc_period !== undefined && masterMill?.amc_period !== null
+        ? Number(masterMill.amc_period)
+        : null;
+
+    // If AMC dates are null in DB but AMC Period exists, auto-calculate from warranty end date
+    if (!amcStartDate && amcPeriod && amcPeriod > 0) {
+      const wEnd =
+        report.warranty_end_date ||
+        masterMill?.warranty_closing_date;
+      if (wEnd) {
+        const autoStart = new Date(wEnd);
+        autoStart.setDate(autoStart.getDate() + 1);
+        amcStartDate = autoStart.toISOString();
+
+        if (!amcClosingDate) {
+          const autoClose = new Date(autoStart);
+          autoClose.setMonth(autoClose.getMonth() + amcPeriod);
+          autoClose.setDate(autoClose.getDate() - 1);
+          amcClosingDate = autoClose.toISOString();
+        }
+      }
+    }
+
+    return {
+      ...report,
+      amc_period: amcPeriod,
+      amc_start_date: amcStartDate,
+      amc_starting_date: amcStartDate,
+      amc_closing_date: amcClosingDate,
+      amc_amount: masterMill?.amc_amount ? Number(masterMill.amc_amount) : null,
+      amc_particular: masterMill?.amc_particular ?? null,
+      amc_particulars: masterMill?.amc_particular ?? null,
+    };
+  }
+
+  private async fetchMasterMillForReport(report: any) {
+    if (!report) return null;
+    let masterMill = null;
+    if (report.serial_or_frame_no) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          frame_no: report.serial_or_frame_no,
+        },
+      });
+    }
+    if (!masterMill && report.invoice_number) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          invoice_no: report.invoice_number,
+        },
+      });
+    }
+    if (!masterMill && report.mill_id) {
+      masterMill = await this.prisma.masterMill.findFirst({
+        where: {
+          deleted_at: null,
+          mill_id: report.mill_id,
+        },
+      });
+    }
+    return masterMill;
+  }
 
   async findAll(
     params: {
@@ -218,7 +303,45 @@ export class InstallationReportsService {
       this.prisma.installationReport.count({ where }),
     ]);
 
-    const result = { installationReports, total };
+    const frameNos = installationReports
+      .map((r) => r.serial_or_frame_no)
+      .filter((f): f is string => Boolean(f));
+    const invoiceNos = installationReports
+      .map((r) => r.invoice_number)
+      .filter((n): n is string => Boolean(n));
+    const millIds = installationReports
+      .map((r) => r.mill_id)
+      .filter((m): m is string => Boolean(m));
+
+    const masterMills = await this.prisma.masterMill.findMany({
+      where: {
+        deleted_at: null,
+        OR: [
+          ...(frameNos.length > 0 ? [{ frame_no: { in: frameNos } }] : []),
+          ...(invoiceNos.length > 0 ? [{ invoice_no: { in: invoiceNos } }] : []),
+          ...(millIds.length > 0 ? [{ mill_id: { in: millIds } }] : []),
+        ],
+      },
+    });
+
+    const mmByFrame = new Map<string, any>();
+    const mmByInvoice = new Map<string, any>();
+    const mmByMill = new Map<string, any>();
+    for (const mm of masterMills) {
+      if (mm.frame_no) mmByFrame.set(mm.frame_no, mm);
+      if (mm.invoice_no) mmByInvoice.set(mm.invoice_no, mm);
+      if (mm.mill_id && !mmByMill.has(mm.mill_id)) mmByMill.set(mm.mill_id, mm);
+    }
+
+    const enrichedReports = installationReports.map((r) => {
+      const mm =
+        (r.serial_or_frame_no ? mmByFrame.get(r.serial_or_frame_no) : null) ||
+        (r.invoice_number ? mmByInvoice.get(r.invoice_number) : null) ||
+        (r.mill_id ? mmByMill.get(r.mill_id) : null);
+      return this.enrichReportWithAmc(r, mm);
+    });
+
+    const result = { installationReports: enrichedReports, total };
     await this.redis.setJson(cacheKey, result, 300); // Cache for 5 mins
     return result;
   }
@@ -250,8 +373,11 @@ export class InstallationReportsService {
       }
     }
 
-    await this.redis.setJson(cacheKey, installationReport, 3600); // Cache for 1 hour
-    return installationReport;
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    const enriched = this.enrichReportWithAmc(installationReport, masterMill);
+
+    await this.redis.setJson(cacheKey, enriched, 3600); // Cache for 1 hour
+    return enriched;
   }
 
   async create(
@@ -260,125 +386,214 @@ export class InstallationReportsService {
   ) {
     const rawDto = dto as any;
 
-    if (
-      (!rawDto.mill_whatsapp_number || !rawDto.mill_email) &&
-      rawDto.mill_id
-    ) {
-      const mill = await this.prisma.mill.findUnique({
+    let mill: { id: string; phone: string | null; email: string | null } | null = null;
+    if (rawDto.mill_id) {
+      mill = await this.prisma.mill.findUnique({
         where: { id: rawDto.mill_id },
-        select: { phone: true, email: true },
+        select: { id: true, phone: true, email: true },
       });
+      if (!mill) {
+        throw new BadRequestException(
+          `Mill with ID "${rawDto.mill_id}" not found. Please provide a valid mill_id.`,
+        );
+      }
       if (!rawDto.mill_whatsapp_number) {
-        rawDto.mill_whatsapp_number = mill?.phone || '';
+        rawDto.mill_whatsapp_number = mill.phone || '';
       }
       if (!rawDto.mill_email) {
-        rawDto.mill_email = mill?.email || '';
+        rawDto.mill_email = mill.email || '';
       }
     }
+
+    const amcData = {
+      amc_period:
+        rawDto.amc_period !== undefined && rawDto.amc_period !== null
+          ? Number(rawDto.amc_period)
+          : undefined,
+      amc_start_date: rawDto.amc_start_date || rawDto.amc_starting_date,
+      amc_closing_date: rawDto.amc_closing_date,
+      amc_amount:
+        rawDto.amc_amount !== undefined && rawDto.amc_amount !== null
+          ? Number(rawDto.amc_amount)
+          : undefined,
+      amc_particular: rawDto.amc_particular || rawDto.amc_particulars,
+    };
 
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
+    delete reportData.amc_period;
+    delete reportData.amc_start_date;
+    delete reportData.amc_starting_date;
+    delete reportData.amc_closing_date;
+    delete reportData.amc_amount;
+    delete reportData.amc_particular;
+    delete reportData.amc_particulars;
 
-    const finalTechnicianIds = [...(technician_ids || [])];
+    const candidateTechnicianIds = [...(technician_ids || [])];
     if (
       rawDto.technician_id &&
-      !finalTechnicianIds.includes(rawDto.technician_id)
+      !candidateTechnicianIds.includes(rawDto.technician_id)
     ) {
-      finalTechnicianIds.push(rawDto.technician_id);
+      candidateTechnicianIds.push(rawDto.technician_id);
     }
     if (
       user &&
       user.role === 'Service Engineer' &&
-      !finalTechnicianIds.includes(user.userId)
+      !candidateTechnicianIds.includes(user.userId)
     ) {
-      finalTechnicianIds.push(user.userId);
+      candidateTechnicianIds.push(user.userId);
     }
 
-    const installationReport = await this.prisma.$transaction(async (tx) => {
-      // Compute today's UTC date boundaries
-      const todayStart = new Date();
-      todayStart.setUTCHours(0, 0, 0, 0);
-      const todayEnd = new Date();
-      todayEnd.setUTCHours(23, 59, 59, 999);
-
-      // Count reports created today
-      const count = await tx.installationReport.count({
-        where: { created_at: { gte: todayStart, lte: todayEnd } },
+    // Filter to technician IDs that actually exist in the database to prevent foreign key errors
+    let finalTechnicianIds: string[] = [];
+    if (candidateTechnicianIds.length > 0) {
+      const validTechs = await this.prisma.technician.findMany({
+        where: { id: { in: candidateTechnicianIds } },
+        select: { id: true },
       });
-
-      // Format: IR-YYYYMMDD-X (unpadded sequence, starting at 1)
-      const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
-      const seq = String(count + 1);
-      const report_number = `IR-${dateStr}-${seq}`;
-
-      const wYears = reportData.warranty_years ?? 0;
-      const wMonths = reportData.warranty_months ?? 0;
-      const wStartDate =
-        reportData.warranty_start_date && reportData.warranty_start_date.trim()
-          ? new Date(reportData.warranty_start_date)
-          : undefined;
-
-      let wEndDate: Date | undefined =
-        reportData.warranty_end_date && reportData.warranty_end_date.trim()
-          ? new Date(reportData.warranty_end_date)
-          : undefined;
-
-      const totalMonths = wMonths + wYears * 12;
-      if (!wEndDate && wStartDate && totalMonths > 0) {
-        const calcDate = new Date(wStartDate);
-        calcDate.setMonth(calcDate.getMonth() + totalMonths);
-        calcDate.setDate(calcDate.getDate() - 1);
-        wEndDate = calcDate;
+      const validTechSet = new Set(validTechs.map((t) => t.id));
+      finalTechnicianIds = candidateTechnicianIds.filter((id) =>
+        validTechSet.has(id),
+      );
+    }
+    if (
+      user &&
+      user.userId &&
+      !finalTechnicianIds.includes(user.userId)
+    ) {
+      const userIsTech = await this.prisma.technician.findUnique({
+        where: { id: user.userId },
+        select: { id: true },
+      });
+      if (userIsTech) {
+        finalTechnicianIds.push(user.userId);
       }
+    }
 
-      // Insert the installation report record
-      const created = await tx.installationReport.create({
-        data: {
-          ...reportData,
-          report_number,
-          visit_time:
-            reportData.visit_time && reportData.visit_time.trim()
-              ? reportData.visit_time
-              : getAutoVisitTime(),
-          visit_date: reportData.visit_date
-            ? new Date(reportData.visit_date)
-            : new Date(),
-          call_registered_date: new Date(reportData.call_registered_date),
-          machine_mfg_date:
-            reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
-              ? new Date(reportData.machine_mfg_date)
-              : undefined,
-          invoice_date:
-            reportData.invoice_date && reportData.invoice_date.trim()
-              ? new Date(reportData.invoice_date)
-              : undefined,
-          warranty_start_date: wStartDate,
-          warranty_end_date: wEndDate,
-          warranty_years: wYears,
-          warranty_months: wMonths,
-        },
-        include: INCLUDE_SHAPE,
-      });
+    let installationReport: any;
+    try {
+      installationReport = await this.prisma.$transaction(async (tx) => {
+        // Compute today's UTC date boundaries
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setUTCHours(23, 59, 59, 999);
 
-      // Create InstallationReportTechnician join rows
-      await tx.installationReportTechnician.createMany({
-        data: finalTechnicianIds.map((tid) => ({
-          installation_report_id: created.id,
-          technician_id: tid,
-        })),
-      });
+        // Count reports created today
+        const count = await tx.installationReport.count({
+          where: { created_at: { gte: todayStart, lte: todayEnd } },
+        });
 
-      // Re-fetch with technicians included
-      return tx.installationReport.findFirst({
-        where: { id: created.id },
-        include: INCLUDE_SHAPE,
+        // Format: IR-YYYYMMDD-X (unpadded sequence, starting at 1)
+        const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
+        const seq = String(count + 1);
+        const report_number = `IR-${dateStr}-${seq}`;
+
+        const wYears = reportData.warranty_years ?? 0;
+        const wMonths = reportData.warranty_months ?? 0;
+        const wStartDate =
+          reportData.warranty_start_date && reportData.warranty_start_date.trim()
+            ? new Date(reportData.warranty_start_date)
+            : undefined;
+
+        let wEndDate: Date | undefined =
+          reportData.warranty_end_date && reportData.warranty_end_date.trim()
+            ? new Date(reportData.warranty_end_date)
+            : undefined;
+
+        const totalMonths = wMonths + wYears * 12;
+        if (!wEndDate && wStartDate && totalMonths > 0) {
+          const calcDate = new Date(wStartDate);
+          calcDate.setMonth(calcDate.getMonth() + totalMonths);
+          calcDate.setDate(calcDate.getDate() - 1);
+          wEndDate = calcDate;
+        }
+
+        // Insert the installation report record
+        const created = await tx.installationReport.create({
+          data: {
+            ...reportData,
+            report_number,
+            visit_time:
+              reportData.visit_time && reportData.visit_time.trim()
+                ? reportData.visit_time
+                : getAutoVisitTime(),
+            visit_date: reportData.visit_date
+              ? new Date(reportData.visit_date)
+              : new Date(),
+            call_registered_date: new Date(reportData.call_registered_date),
+            machine_mfg_date:
+              reportData.machine_mfg_date && reportData.machine_mfg_date.trim()
+                ? new Date(reportData.machine_mfg_date)
+                : undefined,
+            invoice_date:
+              reportData.invoice_date && reportData.invoice_date.trim()
+                ? new Date(reportData.invoice_date)
+                : undefined,
+            customer_signature: reportData.customer_signature || '',
+            warranty_start_date: wStartDate,
+            warranty_end_date: wEndDate,
+            warranty_years: wYears,
+            warranty_months: wMonths,
+          },
+          include: INCLUDE_SHAPE,
+        });
+
+        // Create InstallationReportTechnician join rows
+        if (finalTechnicianIds.length > 0) {
+          await tx.installationReportTechnician.createMany({
+            data: finalTechnicianIds.map((tid) => ({
+              installation_report_id: created.id,
+              technician_id: tid,
+            })),
+          });
+        }
+
+        // Re-fetch with technicians included
+        return tx.installationReport.findFirst({
+          where: { id: created.id },
+          include: INCLUDE_SHAPE,
+        });
       });
-    });
+    } catch (error: any) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2003') {
+          throw new BadRequestException(
+            'Invalid reference: mill_id or technician_id does not exist in the database.',
+          );
+        }
+      }
+      throw error;
+    }
 
     await this.invalidateCache();
 
     if (installationReport) {
+      void this.masterMillsService.syncFromInstallationReport({
+        millId: installationReport.mill_id,
+        frameNo: installationReport.serial_or_frame_no,
+        mcModel: installationReport.machine_model,
+        mfgDate: installationReport.machine_mfg_date,
+        installationDate: installationReport.visit_date,
+        invoiceNo: installationReport.invoice_number,
+        invoiceDate: installationReport.invoice_date,
+        warrantyYears: installationReport.warranty_years,
+        warrantyMonths: installationReport.warranty_months,
+        warrantyStartDate: installationReport.warranty_start_date,
+        warrantyClosingDate: installationReport.warranty_end_date,
+        amcStartingDate: amcData.amc_start_date
+          ? new Date(amcData.amc_start_date)
+          : undefined,
+        amcClosingDate: amcData.amc_closing_date
+          ? new Date(amcData.amc_closing_date)
+          : undefined,
+        amcPeriod: amcData.amc_period,
+        amcParticular: amcData.amc_particular,
+        amcAmount: amcData.amc_amount,
+        place: installationReport.place,
+      });
+
       this.eventEmitter.emit('installation-report.created', {
         reportNumber: installationReport.report_number,
         millName: installationReport.mill?.name || '',
@@ -398,7 +613,8 @@ export class InstallationReportsService {
       });
     }
 
-    return installationReport;
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    return this.enrichReportWithAmc(installationReport, masterMill);
   }
 
   async update(
@@ -426,9 +642,30 @@ export class InstallationReportsService {
       }
     }
 
+    const amcData = {
+      amc_period:
+        rawDto.amc_period !== undefined && rawDto.amc_period !== null
+          ? Number(rawDto.amc_period)
+          : undefined,
+      amc_start_date: rawDto.amc_start_date || rawDto.amc_starting_date,
+      amc_closing_date: rawDto.amc_closing_date,
+      amc_amount:
+        rawDto.amc_amount !== undefined && rawDto.amc_amount !== null
+          ? Number(rawDto.amc_amount)
+          : undefined,
+      amc_particular: rawDto.amc_particular || rawDto.amc_particulars,
+    };
+
     const { technician_ids, ...reportData } = rawDto;
     delete reportData.customer_id;
     delete reportData.technician_id;
+    delete reportData.amc_period;
+    delete reportData.amc_start_date;
+    delete reportData.amc_starting_date;
+    delete reportData.amc_closing_date;
+    delete reportData.amc_amount;
+    delete reportData.amc_particular;
+    delete reportData.amc_particulars;
 
     let finalTechnicianIds =
       technician_ids !== undefined ? [...technician_ids] : undefined;
@@ -537,8 +774,36 @@ export class InstallationReportsService {
       });
     }
 
+    void this.masterMillsService.syncFromInstallationReport({
+      millId: installationReport.mill_id,
+      frameNo: installationReport.serial_or_frame_no,
+      mcModel: installationReport.machine_model,
+      mfgDate: installationReport.machine_mfg_date,
+      installationDate: installationReport.visit_date,
+      invoiceNo: installationReport.invoice_number,
+      invoiceDate: installationReport.invoice_date,
+      warrantyYears: installationReport.warranty_years,
+      warrantyMonths: installationReport.warranty_months,
+      warrantyStartDate: installationReport.warranty_start_date,
+      warrantyClosingDate: installationReport.warranty_end_date,
+      amcStartingDate: amcData.amc_start_date
+        ? new Date(amcData.amc_start_date)
+        : undefined,
+      amcClosingDate: amcData.amc_closing_date
+        ? new Date(amcData.amc_closing_date)
+        : undefined,
+      amcPeriod: amcData.amc_period,
+      amcParticular: amcData.amc_particular,
+      amcAmount: amcData.amc_amount,
+      place: installationReport.place,
+    });
+
     await this.invalidateCache(id);
-    return { before: existingReport, after: installationReport };
+
+    const masterMill = await this.fetchMasterMillForReport(installationReport);
+    const enrichedAfter = this.enrichReportWithAmc(installationReport, masterMill);
+
+    return { before: existingReport, after: enrichedAfter };
   }
 
   async remove(id: string, user?: { userId: string; role: string }) {

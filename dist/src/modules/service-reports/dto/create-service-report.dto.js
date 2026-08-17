@@ -70,6 +70,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "technician_ids", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
+    (0, class_transformer_1.Transform)(({ value }) => (value === '' || value === null ? undefined : value)),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

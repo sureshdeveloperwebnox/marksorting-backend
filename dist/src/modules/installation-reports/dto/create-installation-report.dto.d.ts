@@ -40,4 +40,11 @@ export declare class CreateInstallationReportDto {
     mill_email?: string;
     customer_remarks?: string;
     status?: string;
+    amc_period?: number;
+    amc_start_date?: string;
+    amc_starting_date?: string;
+    amc_closing_date?: string;
+    amc_amount?: number;
+    amc_particular?: string;
+    amc_particulars?: string;
 }

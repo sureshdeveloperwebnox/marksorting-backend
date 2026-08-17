@@ -35,8 +35,36 @@ let MobileStoreReturnsController = class MobileStoreReturnsController {
             search,
         });
     }
-    submitReturn(id, dto, req) {
-        return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    findOne(id, req) {
+        return this.storesService.findByIdAndTechnician(id, req.user.userId);
+    }
+    async submitReturn(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsAlias1(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsAlias2(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnDetailsAlias3(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
     }
 };
 exports.MobileStoreReturnsController = MobileStoreReturnsController;
@@ -78,6 +106,25 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MobileStoreReturnsController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Get single pending store return details by ID',
+        description: 'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Store return details found' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'Forbidden from accessing other engineers records',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Store record not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], MobileStoreReturnsController.prototype, "findOne", null);
+__decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({
         summary: '[Mobile] Submit store return details',
@@ -118,8 +165,35 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MobileStoreReturnsController.prototype, "submitReturn", null);
+__decorate([
+    (0, common_1.Put)(':id/details'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoreReturnsController.prototype, "submitReturnDetailsAlias1", null);
+__decorate([
+    (0, common_1.Put)('return/:id/details'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoreReturnsController.prototype, "submitReturnDetailsAlias2", null);
+__decorate([
+    (0, common_1.Put)('return/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoreReturnsController.prototype, "submitReturnDetailsAlias3", null);
 exports.MobileStoreReturnsController = MobileStoreReturnsController = __decorate([
     (0, swagger_1.ApiTags)('mobile / store-returns'),
     (0, swagger_1.ApiBearerAuth)(),
@@ -142,11 +216,54 @@ let MobileStoresController = class MobileStoresController {
             warranty_status: warranty_status || warrantyStatus,
         });
     }
-    submitReturn(id, dto, req) {
-        return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    findReturns(req, skip, take, page, limit, search, status) {
+        const effectiveTake = limit
+            ? parseInt(limit, 10)
+            : take
+                ? parseInt(take, 10)
+                : 10;
+        const effectiveSkip = page
+            ? (parseInt(page, 10) - 1) * effectiveTake
+            : skip
+                ? parseInt(skip, 10)
+                : 0;
+        return this.storesService.findPendingByTechnician(req.user.userId, {
+            skip: effectiveSkip,
+            take: effectiveTake,
+            search,
+            status: status || 'Pending',
+        });
     }
-    submitReturnAlias(id, dto, req) {
-        return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    async submitReturnPath1(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnPath2(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnPath3(id, dto, req) {
+        const userId = req.user?.userId || req.user?.id;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturn(id, dto, req) {
+        const result = await this.storesService.submitReturnDetails(id, req.user.userId, dto);
+        req.logData = result;
+        return result.after;
+    }
+    async submitReturnAlias(id, dto, req) {
+        const result = await this.storesService.submitReturnDetails(id, req.user.userId, dto);
+        req.logData = result;
+        return result.after;
     }
     create(dto, req) {
         return this.storesService.create({
@@ -157,8 +274,10 @@ let MobileStoresController = class MobileStoresController {
     findOne(id, req) {
         return this.storesService.findByIdAndTechnician(id, req.user.userId);
     }
-    update(id, dto, req) {
-        return this.storesService.updateByTechnician(id, req.user.userId, dto);
+    async update(id, dto, req) {
+        const result = await this.storesService.updateByTechnician(id, req.user.userId, dto);
+        req.logData = result;
+        return result.after;
     }
     remove(id, req) {
         return this.storesService.removeByTechnician(id, req.user.userId);
@@ -224,6 +343,78 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MobileStoresController.prototype, "findAll", null);
 __decorate([
+    (0, common_1.Get)('return'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] List store returns assigned to the logged-in engineer',
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Paginated list of store returns' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Missing or invalid JWT token' }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('skip')),
+    __param(2, (0, common_1.Query)('take')),
+    __param(3, (0, common_1.Query)('page')),
+    __param(4, (0, common_1.Query)('limit')),
+    __param(5, (0, common_1.Query)('search')),
+    __param(6, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], MobileStoresController.prototype, "findReturns", null);
+__decorate([
+    (0, common_1.Put)('return/:id/details'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Submit store return details (return/:id/details)',
+        description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
+    }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoresController.prototype, "submitReturnPath1", null);
+__decorate([
+    (0, common_1.Put)('return/:id'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Submit store return details (return/:id)',
+        description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
+    }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoresController.prototype, "submitReturnPath2", null);
+__decorate([
+    (0, common_1.Put)(':id/details'),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Submit store return details (:id/details)',
+        description: 'Submits courier/provider name and invoice/receipt number to complete a store return.',
+    }),
+    (0, swagger_1.ApiBody)({ type: update_store_return_dto_1.UpdateStoreReturnDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Store return completed successfully',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
+    __metadata("design:returntype", Promise)
+], MobileStoresController.prototype, "submitReturnPath3", null);
+__decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({
         summary: '[Mobile] Submit store return details',
@@ -264,7 +455,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MobileStoresController.prototype, "submitReturn", null);
 __decorate([
     (0, common_1.Put)(':id/return'),
@@ -307,7 +498,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_store_return_dto_1.UpdateStoreReturnDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MobileStoresController.prototype, "submitReturnAlias", null);
 __decorate([
     (0, common_1.Post)(),
@@ -403,7 +594,7 @@ __decorate([
     __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, mobile_update_store_dto_1.MobileUpdateStoreDto, Object]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], MobileStoresController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),

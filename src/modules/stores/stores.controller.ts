@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  Request,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,6 +23,7 @@ import { StoresService } from './stores.service';
 import { Prisma } from '@prisma/client';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { LogActivity } from '../activity-logs/decorators/log-activity.decorator';
 import { ActivityAction } from '../activity-logs/enums/activity-action.enum';
@@ -232,13 +235,51 @@ export class StoresController {
     });
   }
 
+  @Get('return')
+  @ApiOperation({ summary: 'Get store returns' })
+  @ApiResponse({ status: 200, description: 'List of store returns' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  findReturns(
+    @Request() req: any,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('return_status') returnStatus?: string,
+  ) {
+    const effectiveTake = limit
+      ? parseInt(limit, 10)
+      : take
+        ? parseInt(take, 10)
+        : 10;
+    const effectiveSkip = page
+      ? (parseInt(page, 10) - 1) * effectiveTake
+      : skip
+        ? parseInt(skip, 10)
+        : 0;
+    const targetStatus = status || returnStatus || 'Pending';
+    const userId = req.user?.userId || req.user?.id;
+    return this.storesService.findPendingByTechnician(userId, {
+      skip: effectiveSkip,
+      take: effectiveTake,
+      search,
+      status: targetStatus,
+    });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get store record by ID' })
   @ApiResponse({ status: 200, description: 'Store record details' })
   @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
   @ApiResponse({ status: 404, description: 'Store record not found' })
-  findOne(@Param('id') id: string) {
-    return this.storesService.findById(id);
+  async findOne(@Param('id') id: string) {
+    const store = await this.storesService.findById(id);
+    if (!store) {
+      throw new NotFoundException('Store record not found');
+    }
+    return store;
   }
 
   @Post()
@@ -278,6 +319,119 @@ export class StoresController {
     return this.storesService.create(dto);
   }
 
+  @Put('return/:id/details')
+  @ApiOperation({ summary: 'Submit store return details (return/:id/details)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  @LogActivity({
+    action: ActivityAction.UPDATE,
+    entityType: 'stores',
+    entityIdParam: 'id',
+    description: (ctx) => {
+      const before = ctx.result?.before;
+      const after = ctx.result?.after;
+      const frame =
+        after?.frame_number || before?.frame_number || ctx.params.id;
+      const diff =
+        before && after ? buildDiffSummary(before, after, ctx.body) : '';
+      const who = ctx.user.full_name
+        ? `${ctx.user.full_name} completed return`
+        : 'Completed return';
+      return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
+    },
+  })
+  async submitReturnDetailsPath1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  @ApiOperation({ summary: 'Submit store return details (return/:id)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  @ApiOperation({ summary: 'Submit store return details (:id/details)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/return')
+  @ApiOperation({ summary: 'Submit store return details (:id/return)' })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return details completed successfully',
+  })
+  async submitReturnDetailsPath4(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
   @Put(':id')
   @ApiOperation({ summary: 'Update existing store record' })
   @ApiBody({ type: UpdateStoreDto })
@@ -307,8 +461,14 @@ export class StoresController {
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
     },
   })
-  update(@Param('id') id: string, @Body() dto: UpdateStoreDto) {
-    return this.storesService.update(id, dto);
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreDto,
+    @Request() req: any,
+  ) {
+    const result = await this.storesService.update(id, dto);
+    req.logData = result;
+    return result.after;
   }
 
   @Delete(':id')

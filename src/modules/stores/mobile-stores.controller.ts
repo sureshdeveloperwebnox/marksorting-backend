@@ -81,6 +81,23 @@ export class MobileStoreReturnsController {
     });
   }
 
+  @Get(':id')
+  @ApiOperation({
+    summary: '[Mobile] Get single pending store return details by ID',
+    description:
+      'Retrieves the details of a single store record if it belongs to the logged-in technician.',
+  })
+  @ApiResponse({ status: 200, description: 'Store return details found' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden from accessing other engineers records',
+  })
+  @ApiResponse({ status: 404, description: 'Store record not found' })
+  findOne(@Param('id') id: string, @Request() req: any) {
+    return this.storesService.findByIdAndTechnician(id, req.user.userId);
+  }
+
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',
@@ -119,12 +136,75 @@ export class MobileStoreReturnsController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturn(
+  async submitReturn(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  async submitReturnDetailsAlias1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id/details')
+  async submitReturnDetailsAlias2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  async submitReturnDetailsAlias3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
   }
 }
 
@@ -203,6 +283,123 @@ export class MobileStoresController {
     });
   }
 
+  @Get('return')
+  @ApiOperation({
+    summary: '[Mobile] List store returns assigned to the logged-in engineer',
+  })
+  @ApiResponse({ status: 200, description: 'Paginated list of store returns' })
+  @ApiResponse({ status: 401, description: 'Missing or invalid JWT token' })
+  findReturns(
+    @Request() req: any,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+  ) {
+    const effectiveTake = limit
+      ? parseInt(limit, 10)
+      : take
+        ? parseInt(take, 10)
+        : 10;
+    const effectiveSkip = page
+      ? (parseInt(page, 10) - 1) * effectiveTake
+      : skip
+        ? parseInt(skip, 10)
+        : 0;
+    return this.storesService.findPendingByTechnician(req.user.userId, {
+      skip: effectiveSkip,
+      take: effectiveTake,
+      search,
+      status: status || 'Pending',
+    });
+  }
+
+  @Put('return/:id/details')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (return/:id/details)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath1(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put('return/:id')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (return/:id)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath2(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
+  @Put(':id/details')
+  @ApiOperation({
+    summary: '[Mobile] Submit store return details (:id/details)',
+    description:
+      'Submits courier/provider name and invoice/receipt number to complete a store return.',
+  })
+  @ApiBody({ type: UpdateStoreReturnDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store return completed successfully',
+  })
+  async submitReturnPath3(
+    @Param('id') id: string,
+    @Body() dto: UpdateStoreReturnDto,
+    @Request() req: any,
+  ) {
+    const userId = req.user?.userId || req.user?.id;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      userId,
+      dto,
+      isUserAdmin,
+    );
+    req.logData = result;
+    return result.after;
+  }
+
   @Put(':id')
   @ApiOperation({
     summary: '[Mobile] Submit store return details',
@@ -241,12 +438,18 @@ export class MobileStoresController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturn(
+  async submitReturn(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Put(':id/return')
@@ -287,12 +490,18 @@ export class MobileStoresController {
       return `${who} for Store Record "Frame ${frame}" — ${diff || 'updated return details'}`;
     },
   })
-  submitReturnAlias(
+  async submitReturnAlias(
     @Param('id') id: string,
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
-    return this.storesService.submitReturnDetails(id, req.user.userId, dto);
+    const result = await this.storesService.submitReturnDetails(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Post()
@@ -389,12 +598,18 @@ export class MobileStoresController {
         : `${who} Store Record "Frame ${frame}" (no changes detected)`;
     },
   })
-  update(
+  async update(
     @Param('id') id: string,
     @Body() dto: MobileUpdateStoreDto,
     @Request() req: any,
   ) {
-    return this.storesService.updateByTechnician(id, req.user.userId, dto);
+    const result = await this.storesService.updateByTechnician(
+      id,
+      req.user.userId,
+      dto,
+    );
+    req.logData = result;
+    return result.after;
   }
 
   @Delete(':id')
