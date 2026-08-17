@@ -16,7 +16,7 @@ const redis_service_1 = require("../../redis/redis.service");
 let DashboardService = class DashboardService {
     prisma;
     redis;
-    CACHE_KEY = 'dashboard:data:v2';
+    CACHE_KEY = 'dashboard:data:v4';
     constructor(prisma, redis) {
         this.prisma = prisma;
         this.redis = redis;
@@ -108,7 +108,27 @@ let DashboardService = class DashboardService {
             }
             return result;
         };
-        const [customersCount, newCustomersThisMonth, newCustomersLastMonth, recentCustomers, allCustomers6Months, installationsCount, newInstallationsThisMonth, newInstallationsLastMonth, recentInstallations, allInstallations6Months, servicesCount, newServicesThisMonth, newServicesLastMonth, recentServices, allServices6Months, expensesCount, expensesSumResult, expensesThisMonth, expensesLastMonth, recentExpenses, allExpenses6Months, expensesPast12Months,] = await Promise.all([
+        const [storesCount, newStoresThisMonth, newStoresLastMonth, customersCount, newCustomersThisMonth, newCustomersLastMonth, recentCustomers, allCustomers6Months, installationsCount, newInstallationsThisMonth, newInstallationsLastMonth, recentInstallations, allInstallations6Months, servicesCount, newServicesThisMonth, newServicesLastMonth, recentServices, allServices6Months, expensesCount, expensesSumResult, expensesThisMonth, expensesLastMonth, recentExpenses, allExpenses6Months, expensesPast12Months,] = await Promise.all([
+            this.prisma.store.count({
+                where: {
+                    deleted_at: null,
+                    ...(startDate && endDate
+                        ? { created_at: { gte: currentStartDate, lte: currentEndDate } }
+                        : {}),
+                },
+            }),
+            this.prisma.store.count({
+                where: {
+                    deleted_at: null,
+                    created_at: { gte: currentStartDate, lte: currentEndDate },
+                },
+            }),
+            this.prisma.store.count({
+                where: {
+                    deleted_at: null,
+                    created_at: { gte: previousStartDate, lte: previousEndDate },
+                },
+            }),
             this.prisma.customer.count({
                 where: {
                     deleted_at: null,
@@ -297,6 +317,7 @@ let DashboardService = class DashboardService {
                 return { change: `${pct.toFixed(1)}%`, trend: 'down' };
             return { change: '0%', trend: 'neutral' };
         };
+        const storeTrend = calculateTrend(newStoresThisMonth, newStoresLastMonth);
         const customerTrend = calculateTrend(newCustomersThisMonth, newCustomersLastMonth);
         const installationTrend = calculateTrend(newInstallationsThisMonth, newInstallationsLastMonth);
         const serviceTrend = calculateTrend(newServicesThisMonth, newServicesLastMonth);
@@ -442,30 +463,21 @@ let DashboardService = class DashboardService {
         const periodSubtitle = startDate && endDate ? 'selected period' : 'this month';
         const finalStats = [
             {
-                id: 'customers',
-                title: 'Total Customers',
-                value: customersCount > 0 ? customersCount.toString() : '1',
-                change: customersCount > 0 ? customerTrend.change : '+15.8%',
-                trend: customersCount > 0 ? customerTrend.trend : 'up',
+                id: 'services',
+                title: 'Total Services',
+                value: servicesCount > 0 ? servicesCount.toString() : '0',
+                change: servicesCount > 0 ? serviceTrend.change : '0.0%',
+                trend: servicesCount > 0 ? serviceTrend.trend : 'neutral',
                 variant: 'emerald',
                 subtitle: periodSubtitle,
             },
             {
                 id: 'installations',
-                title: 'Installations Done',
-                value: installationsCount > 0 ? installationsCount.toString() : '2',
-                change: installationsCount > 0 ? installationTrend.change : '+34.0%',
-                trend: installationsCount > 0 ? installationTrend.trend : 'up',
+                title: 'Total Installations',
+                value: installationsCount > 0 ? installationsCount.toString() : '0',
+                change: installationsCount > 0 ? installationTrend.change : '0.0%',
+                trend: installationsCount > 0 ? installationTrend.trend : 'neutral',
                 variant: 'rose',
-                subtitle: periodSubtitle,
-            },
-            {
-                id: 'services',
-                title: 'Services Completed',
-                value: servicesCount > 0 ? servicesCount.toString() : '1',
-                change: servicesCount > 0 ? serviceTrend.change : '+24.2%',
-                trend: servicesCount > 0 ? serviceTrend.trend : 'up',
-                variant: 'blue',
                 subtitle: periodSubtitle,
             },
             {
@@ -473,13 +485,22 @@ let DashboardService = class DashboardService {
                 title: 'Total Expenses',
                 value: expensesSumResult._sum.amount
                     ? `₹ ${Number(expensesSumResult._sum.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : '₹ 5,222.00',
-                change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
-                trend: expensesCount > 0 ? expenseTrend.trend : 'up',
+                    : '₹ 0.00',
+                change: expensesCount > 0 ? expenseTrend.change : '0.0%',
+                trend: expensesCount > 0 ? expenseTrend.trend : 'neutral',
                 variant: 'amber',
                 subtitle: startDate && endDate
                     ? `${expensesCount} transactions`
-                    : `${expensesCount > 0 ? expensesCount : 1} transactions`,
+                    : `${expensesCount > 0 ? expensesCount : 0} transactions`,
+            },
+            {
+                id: 'stores',
+                title: 'STORE RETURNS',
+                value: storesCount > 0 ? storesCount.toString() : '0',
+                change: storesCount > 0 ? storeTrend.change : '0.0%',
+                trend: storesCount > 0 ? storeTrend.trend : 'neutral',
+                variant: 'blue',
+                subtitle: periodSubtitle,
             },
         ];
         const hasData = (arr, key = 'total') => arr.some((item) => Number(item[key]) > 0);

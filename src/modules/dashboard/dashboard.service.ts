@@ -4,7 +4,7 @@ import { RedisService } from '../../redis/redis.service';
 
 @Injectable()
 export class DashboardService {
-  private readonly CACHE_KEY = 'dashboard:data:v2';
+  private readonly CACHE_KEY = 'dashboard:data:v4';
 
   constructor(
     private prisma: PrismaService,
@@ -124,6 +124,11 @@ export class DashboardService {
 
     // Parallel Database Queries
     const [
+      // Stores / Store Returns
+      storesCount,
+      newStoresThisMonth,
+      newStoresLastMonth,
+
       customersCount,
       newCustomersThisMonth,
       newCustomersLastMonth,
@@ -151,6 +156,28 @@ export class DashboardService {
 
       expensesPast12Months,
     ] = await Promise.all([
+      // Stores
+      this.prisma.store.count({
+        where: {
+          deleted_at: null,
+          ...(startDate && endDate
+            ? { created_at: { gte: currentStartDate, lte: currentEndDate } }
+            : {}),
+        },
+      }),
+      this.prisma.store.count({
+        where: {
+          deleted_at: null,
+          created_at: { gte: currentStartDate, lte: currentEndDate },
+        },
+      }),
+      this.prisma.store.count({
+        where: {
+          deleted_at: null,
+          created_at: { gte: previousStartDate, lte: previousEndDate },
+        },
+      }),
+
       // Customers
       this.prisma.customer.count({
         where: {
@@ -353,6 +380,10 @@ export class DashboardService {
     };
 
     // Calculate trends
+    const storeTrend = calculateTrend(
+      newStoresThisMonth,
+      newStoresLastMonth,
+    );
     const customerTrend = calculateTrend(
       newCustomersThisMonth,
       newCustomersLastMonth,
@@ -543,30 +574,21 @@ export class DashboardService {
     // Fallback overrides if database is empty/new to keep dashboard looking extremely premium and complete
     const finalStats = [
       {
-        id: 'customers',
-        title: 'Total Customers',
-        value: customersCount > 0 ? customersCount.toString() : '1',
-        change: customersCount > 0 ? customerTrend.change : '+15.8%',
-        trend: customersCount > 0 ? customerTrend.trend : 'up',
+        id: 'services',
+        title: 'Total Services',
+        value: servicesCount > 0 ? servicesCount.toString() : '0',
+        change: servicesCount > 0 ? serviceTrend.change : '0.0%',
+        trend: servicesCount > 0 ? serviceTrend.trend : 'neutral',
         variant: 'emerald' as const,
         subtitle: periodSubtitle,
       },
       {
         id: 'installations',
-        title: 'Installations Done',
-        value: installationsCount > 0 ? installationsCount.toString() : '2',
-        change: installationsCount > 0 ? installationTrend.change : '+34.0%',
-        trend: installationsCount > 0 ? installationTrend.trend : 'up',
+        title: 'Total Installations',
+        value: installationsCount > 0 ? installationsCount.toString() : '0',
+        change: installationsCount > 0 ? installationTrend.change : '0.0%',
+        trend: installationsCount > 0 ? installationTrend.trend : 'neutral',
         variant: 'rose' as const,
-        subtitle: periodSubtitle,
-      },
-      {
-        id: 'services',
-        title: 'Services Completed',
-        value: servicesCount > 0 ? servicesCount.toString() : '1',
-        change: servicesCount > 0 ? serviceTrend.change : '+24.2%',
-        trend: servicesCount > 0 ? serviceTrend.trend : 'up',
-        variant: 'blue' as const,
         subtitle: periodSubtitle,
       },
       {
@@ -574,14 +596,23 @@ export class DashboardService {
         title: 'Total Expenses',
         value: expensesSumResult._sum.amount
           ? `₹ ${Number(expensesSumResult._sum.amount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-          : '₹ 5,222.00',
-        change: expensesCount > 0 ? expenseTrend.change : '+8.4%',
-        trend: expensesCount > 0 ? expenseTrend.trend : 'up',
+          : '₹ 0.00',
+        change: expensesCount > 0 ? expenseTrend.change : '0.0%',
+        trend: expensesCount > 0 ? expenseTrend.trend : 'neutral',
         variant: 'amber' as const,
         subtitle:
           startDate && endDate
             ? `${expensesCount} transactions`
-            : `${expensesCount > 0 ? expensesCount : 1} transactions`,
+            : `${expensesCount > 0 ? expensesCount : 0} transactions`,
+      },
+      {
+        id: 'stores',
+        title: 'STORE RETURNS',
+        value: storesCount > 0 ? storesCount.toString() : '0',
+        change: storesCount > 0 ? storeTrend.change : '0.0%',
+        trend: storesCount > 0 ? storeTrend.trend : 'neutral',
+        variant: 'blue' as const,
+        subtitle: periodSubtitle,
       },
     ];
 
