@@ -226,7 +226,12 @@ export class TicketsService {
     user?: { userId: string; role: string },
   ) {
     const existing = await this.findById(id, user);
-    const nextCustomerId = dto.customer_id ?? existing.customer_id;
+    const nextCustomerId = Object.prototype.hasOwnProperty.call(
+      dto,
+      'customer_id',
+    )
+      ? this.normalizeNullableId(dto.customer_id)
+      : existing.customer_id;
     const nextMillId = Object.prototype.hasOwnProperty.call(dto, 'mill_id')
       ? this.normalizeNullableId(dto.mill_id)
       : existing.mill_id;
@@ -341,10 +346,14 @@ export class TicketsService {
   private normalizePayload<T extends CreateTicketDto | UpdateTicketDto>(
     dto: T,
   ) {
-    return {
-      ...dto,
-      mill_id: this.normalizeNullableId(dto.mill_id),
-    };
+    const payload: any = { ...dto };
+    if ('customer_id' in dto) {
+      payload.customer_id = this.normalizeNullableId(dto.customer_id);
+    }
+    if ('mill_id' in dto) {
+      payload.mill_id = this.normalizeNullableId(dto.mill_id);
+    }
+    return payload;
   }
 
   private normalizeNullableId(value?: string | null) {
@@ -402,24 +411,27 @@ export class TicketsService {
       throw new BadRequestException('Service engineer is required');
     }
 
-    if (!customer_id) {
-      throw new BadRequestException('Customer is required');
-    }
-
-    const [serviceEngineer, customer] = await Promise.all([
+    const promises: Promise<any>[] = [
       this.prisma.technician.findFirst({
         where: { id: service_engineer_id, deleted_at: null },
       }),
-      this.prisma.customer.findFirst({
-        where: { id: customer_id, deleted_at: null },
-      }),
-    ]);
+    ];
+
+    if (customer_id) {
+      promises.push(
+        this.prisma.customer.findFirst({
+          where: { id: customer_id, deleted_at: null },
+        }),
+      );
+    }
+
+    const [serviceEngineer, customer] = await Promise.all(promises);
 
     if (!serviceEngineer) {
       throw new NotFoundException('Service engineer not found');
     }
 
-    if (!customer) {
+    if (customer_id && !customer) {
       throw new NotFoundException('Customer not found');
     }
 
@@ -435,7 +447,7 @@ export class TicketsService {
       throw new NotFoundException('Mill not found');
     }
 
-    if (mill.customer_id !== customer_id) {
+    if (customer_id && mill.customer_id && mill.customer_id !== customer_id) {
       throw new BadRequestException(
         'Selected mill does not belong to the selected customer',
       );

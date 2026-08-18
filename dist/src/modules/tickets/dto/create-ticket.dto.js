@@ -28,8 +28,9 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTicketDto.prototype, "service_engineer_id", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer' }),
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
     (0, class_validator_1.IsUUID)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateTicketDto.prototype, "customer_id", void 0);
 __decorate([

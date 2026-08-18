@@ -185,7 +185,9 @@ let TicketsService = class TicketsService {
     }
     async update(id, dto, user) {
         const existing = await this.findById(id, user);
-        const nextCustomerId = dto.customer_id ?? existing.customer_id;
+        const nextCustomerId = Object.prototype.hasOwnProperty.call(dto, 'customer_id')
+            ? this.normalizeNullableId(dto.customer_id)
+            : existing.customer_id;
         const nextMillId = Object.prototype.hasOwnProperty.call(dto, 'mill_id')
             ? this.normalizeNullableId(dto.mill_id)
             : existing.mill_id;
@@ -277,10 +279,14 @@ let TicketsService = class TicketsService {
         await Promise.all(promises);
     }
     normalizePayload(dto) {
-        return {
-            ...dto,
-            mill_id: this.normalizeNullableId(dto.mill_id),
-        };
+        const payload = { ...dto };
+        if ('customer_id' in dto) {
+            payload.customer_id = this.normalizeNullableId(dto.customer_id);
+        }
+        if ('mill_id' in dto) {
+            payload.mill_id = this.normalizeNullableId(dto.mill_id);
+        }
+        return payload;
     }
     normalizeNullableId(value) {
         return value === '' ? null : value;
@@ -325,21 +331,21 @@ let TicketsService = class TicketsService {
         if (!service_engineer_id) {
             throw new common_1.BadRequestException('Service engineer is required');
         }
-        if (!customer_id) {
-            throw new common_1.BadRequestException('Customer is required');
-        }
-        const [serviceEngineer, customer] = await Promise.all([
+        const promises = [
             this.prisma.technician.findFirst({
                 where: { id: service_engineer_id, deleted_at: null },
             }),
-            this.prisma.customer.findFirst({
+        ];
+        if (customer_id) {
+            promises.push(this.prisma.customer.findFirst({
                 where: { id: customer_id, deleted_at: null },
-            }),
-        ]);
+            }));
+        }
+        const [serviceEngineer, customer] = await Promise.all(promises);
         if (!serviceEngineer) {
             throw new common_1.NotFoundException('Service engineer not found');
         }
-        if (!customer) {
+        if (customer_id && !customer) {
             throw new common_1.NotFoundException('Customer not found');
         }
         if (!mill_id) {
@@ -351,7 +357,7 @@ let TicketsService = class TicketsService {
         if (!mill) {
             throw new common_1.NotFoundException('Mill not found');
         }
-        if (mill.customer_id !== customer_id) {
+        if (customer_id && mill.customer_id && mill.customer_id !== customer_id) {
             throw new common_1.BadRequestException('Selected mill does not belong to the selected customer');
         }
     }

@@ -20,6 +20,7 @@ export declare class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDe
     onModuleInit(): Promise<void>;
     onModuleDestroy(): Promise<void>;
     private connect;
+    isConnected(): boolean;
     private disconnect;
     publishMessage(message: WhatsAppQueueMessage): Promise<boolean>;
     consumeMessages(handler: (message: WhatsAppQueueMessage) => Promise<boolean>): Promise<void>;
@@ -28,5 +29,4 @@ export declare class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDe
         unacked: number;
         total: number;
     }>;
-    isConnected(): boolean;
 }

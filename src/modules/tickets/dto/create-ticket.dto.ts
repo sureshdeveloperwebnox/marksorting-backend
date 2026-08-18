@@ -12,9 +12,10 @@ export class CreateTicketDto {
   @IsUUID()
   service_engineer_id: string;
 
-  @ApiProperty({ example: 'uuid-of-customer' })
+  @ApiProperty({ example: 'uuid-of-customer', required: false })
   @IsUUID()
-  customer_id: string;
+  @IsOptional()
+  customer_id?: string;
 
   @ApiProperty({ example: 'uuid-of-mill', required: false })
   @IsUUID()

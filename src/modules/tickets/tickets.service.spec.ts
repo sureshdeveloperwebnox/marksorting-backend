@@ -88,6 +88,35 @@ describe('TicketsService', () => {
     expect(prisma.ticketTimeline.create).not.toHaveBeenCalled();
   });
 
+  it('creates a ticket without customer (optional customer)', async () => {
+    const created = {
+      id: 'ticket-id',
+      service_engineer_id: 'engineer-id',
+      customer_id: null,
+      mill_id: 'mill-id',
+    };
+    prisma.supportTicket.create.mockResolvedValue(created);
+
+    await expect(
+      service.create({
+        service_engineer_id: 'engineer-id',
+        mill_id: 'mill-id',
+        subject: 'Printer issue without customer',
+        description: 'Printer is not responding',
+        priority: 'HIGH',
+      }),
+    ).resolves.toEqual(created);
+
+    expect(prisma.supportTicket.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          service_engineer_id: 'engineer-id',
+          mill_id: 'mill-id',
+        }),
+      }),
+    );
+  });
+
   it('rejects a mill that does not belong to the selected customer', async () => {
     prisma.mill.findFirst.mockResolvedValue({
       id: 'mill-id',

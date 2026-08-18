@@ -35,7 +35,7 @@ const EXAMPLE_ROW = [
   'John Doe',
   'Chennai',
   'Tamil Nadu',
-  '9876543210',
+  '',
   '123, Main Street, Chennai - 600001',
   'FRM-001',
   'Model XYZ',

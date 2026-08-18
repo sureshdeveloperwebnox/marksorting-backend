@@ -61,9 +61,11 @@ let WhatsAppRabbitMQService = WhatsAppRabbitMQService_1 = class WhatsAppRabbitMQ
             this.logger.log('RabbitMQ connected for WhatsApp messaging');
         }
         catch (error) {
-            this.logger.error('Failed to connect to RabbitMQ', error);
-            throw error;
+            this.logger.warn(`RabbitMQ connection failed (${error.message}). WhatsApp queue processing is disabled.`);
         }
+    }
+    isConnected() {
+        return !!this.channel;
     }
     async disconnect() {
         try {
@@ -101,7 +103,8 @@ let WhatsAppRabbitMQService = WhatsAppRabbitMQService_1 = class WhatsAppRabbitMQ
     }
     async consumeMessages(handler) {
         if (!this.channel) {
-            throw new Error('RabbitMQ channel not available');
+            this.logger.warn('RabbitMQ channel not available, skipping consumer initialization.');
+            return;
         }
         await this.channel.consume(this.QUEUE_NAME, async (msg) => {
             if (!msg)
@@ -140,9 +143,6 @@ let WhatsAppRabbitMQService = WhatsAppRabbitMQService_1 = class WhatsAppRabbitMQ
             unacked: 0,
             total: messageCount,
         };
-    }
-    isConnected() {
-        return this.connection !== null && this.channel !== null;
     }
 };
 exports.WhatsAppRabbitMQService = WhatsAppRabbitMQService;

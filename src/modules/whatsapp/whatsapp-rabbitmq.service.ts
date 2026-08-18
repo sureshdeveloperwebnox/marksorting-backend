@@ -78,10 +78,15 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
       await this.channel.prefetch(1);
 
       this.logger.log('RabbitMQ connected for WhatsApp messaging');
-    } catch (error) {
-      this.logger.error('Failed to connect to RabbitMQ', error);
-      throw error;
+    } catch (error: any) {
+      this.logger.warn(
+        `RabbitMQ connection failed (${error.message}). WhatsApp queue processing is disabled.`,
+      );
     }
+  }
+
+  public isConnected(): boolean {
+    return !!this.channel;
   }
 
   private async disconnect(): Promise<void> {
@@ -141,7 +146,8 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
     handler: (message: WhatsAppQueueMessage) => Promise<boolean>,
   ): Promise<void> {
     if (!this.channel) {
-      throw new Error('RabbitMQ channel not available');
+      this.logger.warn('RabbitMQ channel not available, skipping consumer initialization.');
+      return;
     }
 
     await this.channel.consume(
@@ -203,10 +209,4 @@ export class WhatsAppRabbitMQService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  /**
-   * Check connection health
-   */
-  isConnected(): boolean {
-    return this.connection !== null && this.channel !== null;
-  }
 }
