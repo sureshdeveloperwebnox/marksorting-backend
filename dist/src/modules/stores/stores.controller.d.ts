@@ -32,6 +32,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -44,7 +45,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -70,6 +70,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -82,7 +83,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -108,6 +108,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -120,7 +121,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -146,6 +146,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -158,7 +159,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -184,6 +184,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -196,7 +197,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -222,6 +222,7 @@ export declare class StoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -234,12 +235,12 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
     }>;
     remove(id: string): Promise<{
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -252,7 +253,6 @@ export declare class StoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

@@ -31,6 +31,7 @@ export declare class MobileStoreReturnsController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -43,7 +44,6 @@ export declare class MobileStoreReturnsController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -69,6 +69,7 @@ export declare class MobileStoreReturnsController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -81,7 +82,6 @@ export declare class MobileStoreReturnsController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -107,6 +107,7 @@ export declare class MobileStoreReturnsController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -119,7 +120,6 @@ export declare class MobileStoreReturnsController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -145,6 +145,7 @@ export declare class MobileStoreReturnsController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -157,7 +158,6 @@ export declare class MobileStoreReturnsController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -195,6 +195,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -207,7 +208,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -233,6 +233,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -245,7 +246,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -271,6 +271,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -283,7 +284,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -309,6 +309,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -321,7 +322,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -347,6 +347,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -359,7 +360,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -385,6 +385,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -397,7 +398,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
@@ -424,6 +424,7 @@ export declare class MobileStoresController {
             full_name: string;
         };
     } & {
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -436,12 +437,12 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
     }>;
     remove(id: string, req: any): Promise<{
+        id: string;
         service_engineer_id: string;
         customer_id: string | null;
         quantity: number;
@@ -454,7 +455,6 @@ export declare class MobileStoresController {
         provider_name: string | null;
         invoice_number: string | null;
         remarks: string | null;
-        id: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;

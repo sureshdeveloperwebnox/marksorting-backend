@@ -57,7 +57,11 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
     async onExpenseStatusUpdated(payload) {
         try {
             const { expenseNumber, status, technicianUserIds } = payload;
-            const statusLabel = status === 'COMPLETED' ? 'approved' : status.toLowerCase();
+            const statusLabel = status === 'COMPLETED'
+                ? 'approved'
+                : status === 'CANCELLED'
+                    ? 'rejected'
+                    : status.toLowerCase();
             const title = 'Expense Status Updated';
             const message = `Your expense ${expenseNumber} has been ${statusLabel}.`;
             await this.notificationsService.sendToUsers(technicianUserIds, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, { expenseNumber, status });
