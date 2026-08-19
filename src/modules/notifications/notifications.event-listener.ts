@@ -99,7 +99,11 @@ export class NotificationsEventListener {
     try {
       const { expenseNumber, status, technicianUserIds } = payload;
       const statusLabel =
-        status === 'COMPLETED' ? 'approved' : status.toLowerCase();
+        status === 'COMPLETED'
+          ? 'approved'
+          : status === 'CANCELLED'
+            ? 'rejected'
+            : status.toLowerCase();
       const title = 'Expense Status Updated';
       const message = `Your expense ${expenseNumber} has been ${statusLabel}.`;
 
