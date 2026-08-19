@@ -11,6 +11,14 @@ export declare class MobileStoreReturnsController {
     }>;
     findOne(id: string, req: any): Promise<any>;
     submitReturn(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -22,18 +30,15 @@ export declare class MobileStoreReturnsController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -42,13 +47,16 @@ export declare class MobileStoreReturnsController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnDetailsAlias1(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -60,18 +68,15 @@ export declare class MobileStoreReturnsController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -80,13 +85,16 @@ export declare class MobileStoreReturnsController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnDetailsAlias2(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -98,18 +106,15 @@ export declare class MobileStoreReturnsController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -118,13 +123,16 @@ export declare class MobileStoreReturnsController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnDetailsAlias3(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -136,18 +144,15 @@ export declare class MobileStoreReturnsController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -156,11 +161,6 @@ export declare class MobileStoreReturnsController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
 }
 export declare class MobileStoresController {
@@ -175,6 +175,14 @@ export declare class MobileStoresController {
         total: number;
     }>;
     submitReturnPath1(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -186,18 +194,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -206,13 +211,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnPath2(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -224,18 +232,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -244,13 +249,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnPath3(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -262,18 +270,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -282,13 +287,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturn(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -300,18 +308,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -320,13 +325,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     submitReturnAlias(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -338,18 +346,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -358,13 +363,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     create(dto: MobileCreateStoreDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -376,18 +384,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -396,14 +401,17 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     findOne(id: string, req: any): Promise<any>;
     update(id: string, dto: MobileUpdateStoreDto, req: any): Promise<{
+        customer: {
+            id: string;
+            name: string;
+        } | null;
+        service_engineer: {
+            id: string;
+            full_name: string;
+        };
         materials: ({
             material: {
                 id: string;
@@ -415,18 +423,15 @@ export declare class MobileStoresController {
             store_id: string;
             material_id: string;
         })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
     } & {
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -435,16 +440,16 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     remove(id: string, req: any): Promise<{
         id: string;
-        service_engineer_id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         customer_id: string | null;
+        service_engineer_id: string;
+        remarks: string | null;
         quantity: number;
         warranty_status: string;
         frame_number: string;
@@ -453,10 +458,5 @@ export declare class MobileStoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
-        remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
 }
