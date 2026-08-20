@@ -46,7 +46,7 @@ marksorting-backend/src/
 14. **`mills`**: Mill factory facilities linked to customers.
 15. **`master-mills`**: Master catalog of mill machine models and specs.
 16. **`technicians`**: Field technician roster and skill assignments.
-17. **`stores`**: Machine returns, inflow tracking, vendor details, return status.
+17. **`stores`**: Inventory inflows/outflows, machine returns, depth-safe semicolon serialization for per-barcode return & engineer/admin acknowledge status (`RET:Returned`, `ENG_ACK:Acknowledged`, `ADM_ACK:Pending`), and automated `quantity_summary` calculation.
 18. **`materials`**: Store material inventory and barcode tracking (`store_materials`).
 19. **`upload`**: AWS S3 presigned URL generation for direct client uploads (`/upload/presigned-url`).
 20. **`pdf`**: PDF generation triggers using Puppeteer HTML templates.
