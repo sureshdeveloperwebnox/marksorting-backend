@@ -307,6 +307,7 @@ export class ServiceReportsService {
         data: {
           ...reportData,
           report_number,
+          serial_or_frame_no: reportData.serial_or_frame_no ?? '',
           visit_time:
             reportData.visit_time && reportData.visit_time.trim()
               ? reportData.visit_time

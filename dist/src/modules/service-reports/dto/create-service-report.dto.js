@@ -13,6 +13,7 @@ exports.CreateServiceReportDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
+const emptyToUndefined = ({ value }) => value === '' || value === null ? undefined : value;
 class CreateServiceReportDto {
     service_category_id;
     technician_ids;
@@ -70,7 +71,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "technician_ids", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'uuid-of-customer', required: false }),
-    (0, class_transformer_1.Transform)(({ value }) => (value === '' || value === null ? undefined : value)),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -88,6 +89,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "place", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '+919876543210', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -99,6 +101,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "visit_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '10:30', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -116,14 +119,16 @@ __decorate([
 ], CreateServiceReportDto.prototype, "machine_model", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2020-03-01', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "machine_mfg_date", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'SN-2024-00123' }),
+    (0, swagger_1.ApiProperty)({ example: 'SN-2024-00123', required: false }),
+    (0, class_transformer_1.Transform)(({ value }) => (value === null || value === undefined ? '' : String(value).trim())),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "serial_or_frame_no", void 0);
 __decorate([
@@ -134,6 +139,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "authorized_person", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '+919876543210', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -172,18 +178,21 @@ __decorate([
 ], CreateServiceReportDto.prototype, "customer_signature", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'mill@example.com', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "mill_email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2020-06-15', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsDateString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "machine_installation_date", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Suresh Babu', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -193,36 +202,42 @@ __decorate([
         example: 'Vibration noise from sorting chamber',
         required: false,
     }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "problem_observed", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Rice', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "commodity", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '2%', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "contamination", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '500 kg/hr', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "output_capacity_per_hour", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '0.5%', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "rejection_ratio", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '99.5%', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -248,24 +263,28 @@ __decorate([
 ], CreateServiceReportDto.prototype, "ac_provided", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Atlas Copco GA11, 11 kW', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "compressor_details", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Refrigerated type, working fine', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "air_drier_details", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Clean', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateServiceReportDto.prototype, "line_filter_condition", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Needs replacement', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
@@ -278,6 +297,7 @@ __decorate([
 ], CreateServiceReportDto.prototype, "auto_drain_valve_working", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Satisfied with the service', required: false }),
+    (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

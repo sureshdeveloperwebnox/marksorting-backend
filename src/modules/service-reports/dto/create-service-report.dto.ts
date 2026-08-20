@@ -14,6 +14,9 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
+const emptyToUndefined = ({ value }: { value: any }) =>
+  value === '' || value === null ? undefined : value;
+
 export class CreateServiceReportDto {
   // ── Required fields ──────────────────────────────────────────────────────────
 
@@ -31,7 +34,7 @@ export class CreateServiceReportDto {
   technician_ids: string[];
 
   @ApiProperty({ example: 'uuid-of-customer', required: false })
-  @Transform(({ value }) => (value === '' || value === null ? undefined : value))
+  @Transform(emptyToUndefined)
   @IsUUID()
   @IsOptional()
   customer_id?: string;
@@ -46,6 +49,7 @@ export class CreateServiceReportDto {
   place: string;
 
   @ApiProperty({ example: '+919876543210', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   mill_whatsapp_number?: string;
@@ -55,6 +59,7 @@ export class CreateServiceReportDto {
   visit_date: string;
 
   @ApiProperty({ example: '10:30', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   visit_time?: string;
@@ -69,14 +74,16 @@ export class CreateServiceReportDto {
   machine_model: string;
 
   @ApiProperty({ example: '2020-03-01', required: false })
+  @Transform(emptyToUndefined)
   @IsDateString()
   @IsOptional()
   machine_mfg_date?: string;
 
-  @ApiProperty({ example: 'SN-2024-00123' })
+  @ApiProperty({ example: 'SN-2024-00123', required: false })
+  @Transform(({ value }) => (value === null || value === undefined ? '' : String(value).trim()))
   @IsString()
-  @IsNotEmpty()
-  serial_or_frame_no: string;
+  @IsOptional()
+  serial_or_frame_no?: string;
 
   @ApiProperty({ example: 'Rajesh Kumar' })
   @IsString()
@@ -84,6 +91,7 @@ export class CreateServiceReportDto {
   authorized_person: string;
 
   @ApiProperty({ example: '+919876543210', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   authorized_person_phone?: string;
@@ -118,16 +126,19 @@ export class CreateServiceReportDto {
   // ── Optional fields ───────────────────────────────────────────────────────────
 
   @ApiProperty({ example: 'mill@example.com', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   mill_email?: string;
 
   @ApiProperty({ example: '2020-06-15', required: false })
+  @Transform(emptyToUndefined)
   @IsDateString()
   @IsOptional()
   machine_installation_date?: string;
 
   @ApiProperty({ example: 'Suresh Babu', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   previous_visit_engineer?: string;
@@ -136,31 +147,37 @@ export class CreateServiceReportDto {
     example: 'Vibration noise from sorting chamber',
     required: false,
   })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   problem_observed?: string;
 
   @ApiProperty({ example: 'Rice', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   commodity?: string;
 
   @ApiProperty({ example: '2%', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   contamination?: string;
 
   @ApiProperty({ example: '500 kg/hr', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   output_capacity_per_hour?: string;
 
   @ApiProperty({ example: '0.5%', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   rejection_ratio?: string;
 
   @ApiProperty({ example: '99.5%', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   purity?: string;
@@ -183,21 +200,25 @@ export class CreateServiceReportDto {
   ac_provided?: boolean;
 
   @ApiProperty({ example: 'Atlas Copco GA11, 11 kW', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   compressor_details?: string;
 
   @ApiProperty({ example: 'Refrigerated type, working fine', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   air_drier_details?: string;
 
   @ApiProperty({ example: 'Clean', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   line_filter_condition?: string;
 
   @ApiProperty({ example: 'Needs replacement', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   machine_filter_condition?: string;
@@ -208,6 +229,7 @@ export class CreateServiceReportDto {
   auto_drain_valve_working?: boolean;
 
   @ApiProperty({ example: 'Satisfied with the service', required: false })
+  @Transform(emptyToUndefined)
   @IsString()
   @IsOptional()
   customer_remarks?: string;
