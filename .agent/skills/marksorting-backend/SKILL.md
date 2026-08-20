@@ -43,10 +43,10 @@ marksorting-backend/src/
 11. **`service-records`**: Historical machine servicing logs.
 12. **`services`**: Master list of offered service types.
 13. **`customers`**: Corporate clients owning mill facilities.
-14. **`mills`**: Mill factory facilities linked to customers.
-15. **`master-mills`**: Master catalog of mill machine models and specs.
+14. **`mills`**: Mill factory facilities linked to customers. Includes smart search by mill name, customer, ref_no, machine frames, and phone normalization.
+15. **`master-mills`**: Master catalog of mill machine models, specs, and bulk import engine (`quickRegister` and `bulk-upload`).
 16. **`technicians`**: Field technician roster and skill assignments.
-17. **`stores`**: Inventory inflows/outflows, machine returns, depth-safe semicolon serialization for per-barcode return & engineer/admin acknowledge status (`RET:Returned`, `ENG_ACK:Acknowledged`, `ADM_ACK:Pending`), and automated `quantity_summary` calculation.
+17. **`stores`**: Inventory inflows/outflows, machine returns, depth-safe remarks serialization for per-barcode return & engineer/admin acknowledge status (`RET:Returned`, `ENG_ACK:Acknowledged`, `ADM_ACK:Pending`), automatic resolution of `mill` and `ref_no` via `master_mills.frame_no`, and automated `quantity_summary` calculation.
 18. **`materials`**: Store material inventory and barcode tracking (`store_materials`).
 19. **`upload`**: AWS S3 presigned URL generation for direct client uploads (`/upload/presigned-url`).
 20. **`pdf`**: PDF generation triggers using Puppeteer HTML templates.
@@ -57,12 +57,31 @@ marksorting-backend/src/
 25. **`logging`**: Centralized log query and management services.
 26. **`activity-logs`**: Audit queries for user activities.
 27. **`dashboard`**: Executive dashboard metrics, charts, ticket counts, technician performance summaries.
-28. **`reports`**: Business intelligence and export queries.
+28. **`reports`**: Business intelligence, analytics KPI metrics, and multi-format exports (Excel, PDF, CSV) across 6 modules: Services, Installations, Expenses, Masters, Stores, and Mills.
 29. **`settings`**: Platform system configuration.
 
 ---
 
-## 2. Authentication & Dual-Auth Handling
+## 2. Reporting & ExcelJS Export Engine
+
+The Reports Module ([reports.service.ts](file:///d:/Office/marksorting/marksorting-backend/src/modules/reports/reports.service.ts)) provides cached analytics queries and ExcelJS-powered reporting:
+
+1. **Masters Report (`exportMasterMills`)**:
+   - Produces full 20-column reports matching the Bulk Upload schema.
+   - Dynamic worksheet tab naming with date range (e.g. `Masters 01-08-2026 - 05-08-2026`) within Excel's 31-character limit.
+   - Header row styled with bold font, `#D3D3D3` background, and thin borders.
+
+2. **Mills Report (`getMills` & `exportMills`)**:
+   - Real-time KPI counts: Total Mills, Active Mills, Inactive Mills, Total Machines.
+   - Relational fallbacks: Automatically resolves machine `ref_no`, `customer.name`, `city`, and `place` from associated `master_mills` records when not set directly on `mill`.
+
+3. **Stores Report (`getStores` & `exportStores`)**:
+   - Enriched with machine `ref_no`, `mill.name`, and `frame_number`.
+   - **Itemized Material & Barcode Unit Breakdown**: Expands every material into individual barcode unit rows containing **Material Name**, **Stock Type**, **Barcode / Serial No**, **Material Status** (`Used Material` / `Unused Material`), **Unit Return Status**, **Engineer Acknowledge**, **Admin Acknowledge**, **Warranty**, **Courier**, **Tracking ID**, and **Remarks**.
+
+---
+
+## 3. Authentication & Dual-Auth Handling
 
 The NestJS backend supports both Web (Cookies) and Mobile (Bearer JWT) clients.
 
@@ -84,7 +103,7 @@ export class TicketsController {
 
 ---
 
-## 3. File Upload Protocol (AWS S3 Presigned URLs)
+## 4. File Upload Protocol (AWS S3 Presigned URLs)
 
 1. Client requests presigned upload URL from `POST /api/v1/upload/presigned-url`.
 2. Client sends raw binary via HTTP `PUT` directly to S3 `upload_url`.
@@ -92,7 +111,7 @@ export class TicketsController {
 
 ---
 
-## 4. Audit & Security Logging
+## 5. Audit & Security Logging
 
 When modifying domain entities, backend services MUST write audit logs:
 ```typescript
