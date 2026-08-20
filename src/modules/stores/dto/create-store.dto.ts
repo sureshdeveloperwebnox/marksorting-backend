@@ -52,10 +52,10 @@ export class CreateStoreDto {
   @IsOptional()
   service_type?: string;
 
-  @ApiProperty({ example: 'FRM10245' })
+  @ApiProperty({ example: 'FRM10245', required: false })
   @IsString()
-  @IsNotEmpty()
-  frame_number: string;
+  @IsOptional()
+  frame_number?: string;
 
   @ApiProperty({ example: 'Pending' })
   @IsString()

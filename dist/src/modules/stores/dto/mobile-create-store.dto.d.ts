@@ -9,7 +9,7 @@ export declare class MobileCreateStoreDto {
     quantity: number;
     warranty_status: string;
     service_type?: string;
-    frame_number: string;
+    frame_number?: string;
     return_status: string;
     inflow_status: string;
     stock_type?: string;

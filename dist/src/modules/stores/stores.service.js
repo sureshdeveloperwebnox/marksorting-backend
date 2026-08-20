@@ -160,6 +160,7 @@ let StoresService = class StoresService {
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
         }
+        data.frame_number = data.frame_number?.trim() || '';
         let resolvedCustomerId = customer_id;
         if (!resolvedCustomerId && data.frame_number) {
             const masterMill = await this.prisma.masterMill.findFirst({
@@ -242,6 +243,9 @@ let StoresService = class StoresService {
             data.remarks = data.remarks
                 ? `${data.remarks} | ${serviceTypeText}`
                 : serviceTypeText;
+        }
+        if (dto.frame_number !== undefined) {
+            data.frame_number = dto.frame_number?.trim() || '';
         }
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);

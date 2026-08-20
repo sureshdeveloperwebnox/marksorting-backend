@@ -187,6 +187,8 @@ export class StoresService {
         : serviceTypeText;
     }
 
+    data.frame_number = data.frame_number?.trim() || '';
+
     // Auto-resolve customer_id from master_mills by frame_number if not provided
     let resolvedCustomerId = customer_id;
     if (!resolvedCustomerId && data.frame_number) {
@@ -296,6 +298,10 @@ export class StoresService {
       data.remarks = data.remarks
         ? `${data.remarks} | ${serviceTypeText}`
         : serviceTypeText;
+    }
+
+    if (dto.frame_number !== undefined) {
+      data.frame_number = dto.frame_number?.trim() || '';
     }
 
     if (material_quantities && material_quantities.length > 0) {
