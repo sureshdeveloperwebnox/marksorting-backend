@@ -1982,7 +1982,6 @@ export class ReportsService {
       'Admin Acknowledge Status',
       'Warranty Status',
       'Overall Return Status',
-      'Stock Status',
       'Courier / Provider',
       'Tracking / Invoice No',
       'Remarks',
@@ -2005,7 +2004,6 @@ export class ReportsService {
       const engineer = r.service_engineer?.full_name || '-';
       const warranty = r.warranty_status || '-';
       const overallReturn = r.return_status || '-';
-      const stockStatus = r.inflow_status || '-';
       const provider = r.provider_name || '-';
       const invoiceNo = r.invoice_number || '-';
 
@@ -2026,7 +2024,6 @@ export class ReportsService {
           '-',
           warranty,
           overallReturn,
-          stockStatus,
           provider,
           invoiceNo,
           cleanRemarks,
@@ -2065,7 +2062,6 @@ export class ReportsService {
               admAck,
               warranty,
               overallReturn,
-              stockStatus,
               provider,
               invoiceNo,
               cleanRemarks,
@@ -2089,7 +2085,6 @@ export class ReportsService {
             '-',
             warranty,
             overallReturn,
-            stockStatus,
             provider,
             invoiceNo,
             cleanRemarks,

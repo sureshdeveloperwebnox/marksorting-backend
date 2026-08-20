@@ -1621,7 +1621,6 @@ let ReportsService = class ReportsService {
             'Admin Acknowledge Status',
             'Warranty Status',
             'Overall Return Status',
-            'Stock Status',
             'Courier / Provider',
             'Tracking / Invoice No',
             'Remarks',
@@ -1641,7 +1640,6 @@ let ReportsService = class ReportsService {
             const engineer = r.service_engineer?.full_name || '-';
             const warranty = r.warranty_status || '-';
             const overallReturn = r.return_status || '-';
-            const stockStatus = r.inflow_status || '-';
             const provider = r.provider_name || '-';
             const invoiceNo = r.invoice_number || '-';
             if (!r.materials || r.materials.length === 0) {
@@ -1661,7 +1659,6 @@ let ReportsService = class ReportsService {
                     '-',
                     warranty,
                     overallReturn,
-                    stockStatus,
                     provider,
                     invoiceNo,
                     cleanRemarks,
@@ -1695,7 +1692,6 @@ let ReportsService = class ReportsService {
                             admAck,
                             warranty,
                             overallReturn,
-                            stockStatus,
                             provider,
                             invoiceNo,
                             cleanRemarks,
@@ -1720,7 +1716,6 @@ let ReportsService = class ReportsService {
                         '-',
                         warranty,
                         overallReturn,
-                        stockStatus,
                         provider,
                         invoiceNo,
                         cleanRemarks,
