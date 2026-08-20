@@ -95,6 +95,22 @@ let MasterMillsService = class MasterMillsService {
         if (data.phone_no) {
             data.phone_no = this.formatPhoneNumber(data.phone_no);
         }
+        if (data.frame_no !== undefined)
+            data.frame_no = data.frame_no || null;
+        if (data.ref_no !== undefined)
+            data.ref_no = data.ref_no || null;
+        if (data.mill_id !== undefined)
+            data.mill_id = data.mill_id || null;
+        if (data.mc_model !== undefined)
+            data.mc_model = data.mc_model || null;
+        if (data.address !== undefined)
+            data.address = data.address || null;
+        if (data.place !== undefined)
+            data.place = data.place || null;
+        if (data.state !== undefined)
+            data.state = data.state || null;
+        if (data.amc_particular !== undefined)
+            data.amc_particular = data.amc_particular || null;
         if (!data.warranty_closing_date) {
             const baseDate = data.warranty_start_date
                 ? new Date(data.warranty_start_date)
