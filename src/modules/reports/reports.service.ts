@@ -37,6 +37,8 @@ interface ReportParams {
   warrantyStatus?: string;
   returnStatus?: string;
   inflowStatus?: string;
+  place?: string;
+  city?: string;
 }
 
 interface UserSessionPayload {
@@ -1881,6 +1883,287 @@ export class ReportsService {
       return {
         buffer,
         fileName: `stores_report_${Date.now()}.pdf`,
+        contentType: 'application/pdf',
+      };
+    }
+
+    return null;
+  }
+
+  // ─── MILLS REPORT ──────────────────────────────────────────────────────────
+
+  private getMillsWhereClause(
+    params: ReportParams,
+    user: UserSessionPayload,
+  ) {
+    const { search, status, dateFrom, dateTo, customerId, place, city, refNo } = params;
+    const where: any = { deleted_at: null };
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { ref_no: { contains: search, mode: 'insensitive' } },
+        { city: { contains: search, mode: 'insensitive' } },
+        { place: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+        { customer: { name: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (customerId) {
+      where.customer_id = customerId;
+    }
+
+    if (refNo) {
+      where.ref_no = { contains: refNo, mode: 'insensitive' };
+    }
+
+    if (place) {
+      where.place = { contains: place, mode: 'insensitive' };
+    }
+
+    if (city) {
+      where.city = { contains: city, mode: 'insensitive' };
+    }
+
+    if (dateFrom || dateTo) {
+      where.created_at = {};
+      if (dateFrom) {
+        const [fy, fm, fd] = dateFrom.split('-').map(Number);
+        const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+        where.created_at.gte = fromDate;
+      }
+      if (dateTo) {
+        const [ty, tm, td] = dateTo.split('-').map(Number);
+        const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+        where.created_at.lte = toDate;
+      }
+    }
+
+    return where;
+  }
+
+  async getMills(params: ReportParams, user: UserSessionPayload) {
+    const cacheKey = `${this.CACHE_PREFIX}mills:${JSON.stringify(params)}:${JSON.stringify(user)}`;
+    const cached = await this.redis.getJson<any>(cacheKey);
+    if (cached) return cached;
+
+    const where = this.getMillsWhereClause(params, user);
+
+    const [total, mills, activeCount, inactiveCount, totalMachines] = await Promise.all([
+      this.prisma.mill.count({ where }),
+      this.prisma.mill.findMany({
+        where,
+        include: {
+          customer: { select: { id: true, name: true } },
+          masterMills: {
+            where: { deleted_at: null },
+            select: {
+              ref_no: true,
+              place: true,
+              state: true,
+            },
+            orderBy: { created_at: 'desc' },
+          },
+          _count: {
+            select: {
+              masterMills: { where: { deleted_at: null } },
+              serviceReports: { where: { deleted_at: null } },
+              installationReports: { where: { deleted_at: null } },
+            },
+          },
+        },
+        orderBy: { created_at: 'desc' },
+        skip: params.skip || 0,
+        take: params.take || 10,
+      }),
+      this.prisma.mill.count({ where: { ...where, status: 'ACTIVE' } }),
+      this.prisma.mill.count({ where: { ...where, status: 'INACTIVE' } }),
+      this.prisma.masterMill.count({
+        where: {
+          deleted_at: null,
+          mill: where,
+        },
+      }),
+    ]);
+
+    const mappedMills = mills.map((m) => {
+      const firstMM = m.masterMills?.[0];
+      return {
+        ...m,
+        ref_no: m.ref_no || firstMM?.ref_no || null,
+        customer: m.customer || (m.name ? { id: m.id, name: m.name } : null),
+        place: m.place || firstMM?.place || null,
+        city: m.city || m.place || firstMM?.place || null,
+      };
+    });
+
+    const result = {
+      total,
+      mills: mappedMills,
+      metrics: {
+        totalCount: total,
+        activeCount,
+        inactiveCount,
+        totalMachines,
+      },
+    };
+    await this.redis.setJson(cacheKey, result, 300); // 5 mins cache
+    return result;
+  }
+
+  async exportMills(
+    params: ReportParams,
+    user: UserSessionPayload,
+    formatType: 'pdf' | 'csv' | 'excel',
+  ): Promise<{ buffer: Buffer; fileName: string; contentType: string } | null> {
+    const where = this.getMillsWhereClause(params, user);
+    const reports = await this.prisma.mill.findMany({
+      where,
+      include: {
+        customer: { select: { id: true, name: true } },
+        masterMills: {
+          where: { deleted_at: null },
+          select: {
+            ref_no: true,
+            place: true,
+            state: true,
+          },
+          orderBy: { created_at: 'desc' },
+        },
+        _count: {
+          select: {
+            masterMills: { where: { deleted_at: null } },
+            serviceReports: { where: { deleted_at: null } },
+            installationReports: { where: { deleted_at: null } },
+          },
+        },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+
+    const headers = [
+      'Ref No',
+      'Mill Name',
+      'Customer Name',
+      'City',
+      'Place',
+      'Primary Phone',
+      'Secondary Phone',
+      'Email',
+      'Address',
+      'Machines Count',
+      'Services Count',
+      'Installations Count',
+      'Status',
+      'Created At',
+    ];
+
+    const data = reports.map((m) => {
+      const firstMM = m.masterMills?.[0];
+      const refNo = m.ref_no || firstMM?.ref_no || '-';
+      const customerName = m.customer?.name || m.name || '-';
+      const city = m.city || m.place || firstMM?.place || '-';
+      const place = m.place || firstMM?.place || m.city || '-';
+
+      return [
+        refNo,
+        m.name,
+        customerName,
+        city,
+        place,
+        m.phone || '-',
+        m.phone_2 || '-',
+        m.email || '-',
+        m.address || '-',
+        String(m._count?.masterMills ?? 0),
+        String(m._count?.serviceReports ?? 0),
+        String(m._count?.installationReports ?? 0),
+        m.status,
+        m.created_at ? m.created_at.toISOString().slice(0, 10) : '-',
+      ];
+    });
+
+    if (formatType === 'csv') {
+      const buffer = this.generateCsv(headers, data);
+      return {
+        buffer,
+        fileName: `mills_report_${Date.now()}.csv`,
+        contentType: 'text/csv',
+      };
+    }
+
+    if (formatType === 'excel') {
+      const buffer = this.generateExcel('Mills', headers, data);
+      return {
+        buffer,
+        fileName: `mills_report_${Date.now()}.xlsx`,
+        contentType:
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      };
+    }
+
+    if (formatType === 'pdf') {
+      const now = new Date();
+      const activeCount = reports.filter((m) => m.status === 'ACTIVE').length;
+      const inactiveCount = reports.filter((m) => m.status === 'INACTIVE').length;
+
+      const pdfData = {
+        title: 'Mills Directory Report',
+        filters: this.getFiltersSummary(params),
+        metrics: [
+          {
+            label: 'Total Mills',
+            value: String(reports.length),
+            colorClass: 'text-primary',
+          },
+          {
+            label: 'Active Mills',
+            value: String(activeCount),
+            colorClass: 'text-success',
+          },
+          {
+            label: 'Inactive Mills',
+            value: String(inactiveCount),
+            colorClass: 'text-warning',
+          },
+        ],
+        headers,
+        rows: data,
+        company: await this.getCompanyPdfSettings(),
+        generatedAt: now.toLocaleString(),
+      };
+
+      pdfData.company.logoUrl = await this.pdfService.embedImageAsDataUrl(
+        pdfData.company.logoUrl,
+      );
+      const html = renderTabularReportTemplate(
+        pdfData,
+        this.documentTemplateService,
+      );
+      const landscapeHtml = html.replace(
+        '@page { size: A4; }',
+        '@page { size: A4 landscape; }',
+      );
+
+      const pdfOptions = renderTabularReportPdfOptions(
+        pdfData.company,
+        this.documentTemplateService,
+      );
+      pdfOptions.landscape = true;
+
+      const buffer = await this.pdfService.renderHtmlToPdf(
+        landscapeHtml,
+        pdfOptions,
+      );
+      return {
+        buffer,
+        fileName: `mills_report_${Date.now()}.pdf`,
         contentType: 'application/pdf',
       };
     }

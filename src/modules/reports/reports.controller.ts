@@ -444,4 +444,84 @@ export class ReportsController {
     const data = await this.reportsService.getStores(params, req.user);
     return res.json(data);
   }
+
+  @Get('mills')
+  @ApiOperation({ summary: 'Get mills reports log or export it' })
+  @LogActivity({
+    action: ActivityAction.EXPORT,
+    entityType: 'reports',
+    description: (ctx) => {
+      const exportType = ctx.query.export;
+      return exportType
+        ? `Exported mills reports as ${exportType.toUpperCase()}`
+        : 'Viewed mills reports list';
+    },
+    ignoreNullEntity: true,
+  })
+  @ApiQuery({ name: 'skip', required: false, type: String })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'customerId', required: false, type: String })
+  @ApiQuery({ name: 'refNo', required: false, type: String })
+  @ApiQuery({ name: 'place', required: false, type: String })
+  @ApiQuery({ name: 'city', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({
+    name: 'export',
+    required: false,
+    type: String,
+    description: 'pdf, csv, excel',
+  })
+  async getMills(
+    @Request() req: any,
+    @Res() res: Response,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('customerId') customerId?: string,
+    @Query('refNo') refNo?: string,
+    @Query('place') place?: string,
+    @Query('city') city?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+    @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
+  ) {
+    const params = {
+      skip: skip ? parseInt(skip, 10) : 0,
+      take: take ? parseInt(take, 10) : 10,
+      search,
+      status,
+      customerId,
+      refNo,
+      place,
+      city,
+      dateFrom,
+      dateTo,
+    };
+
+    if (exportType) {
+      const resData = await this.reportsService.exportMills(
+        params,
+        req.user,
+        exportType,
+      );
+      if (resData) {
+        const { buffer, fileName, contentType } = resData;
+        res.setHeader('Content-Type', contentType);
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${fileName}"`,
+        );
+        res.setHeader('Content-Length', buffer.length);
+        return res.end(buffer);
+      }
+      return res.status(400).json({ message: 'Failed to export mills report' });
+    }
+
+    const data = await this.reportsService.getMills(params, req.user);
+    return res.json(data);
+  }
 }

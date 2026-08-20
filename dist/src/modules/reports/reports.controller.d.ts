@@ -1,0 +1,16 @@
+import type { Response } from 'express';
+import { ReportsService } from './reports.service';
+export declare class ReportsController {
+    private readonly reportsService;
+    constructor(reportsService: ReportsService);
+    getFilterOptions(type?: string): Promise<{
+        refNos: string[];
+        frameNos: string[];
+    }>;
+    getServices(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, categoryId?: string, dateFrom?: string, dateTo?: string, millId?: string, technicianId?: string, millName?: string, frameNo?: string, refNo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getInstallations(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, millId?: string, technicianId?: string, millName?: string, frameNo?: string, refNo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getExpenses(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, categoryId?: string, dateFrom?: string, dateTo?: string, createdDateFrom?: string, createdDateTo?: string, expenseDateFrom?: string, expenseDateTo?: string, millId?: string, technicianId?: string, millName?: string, frameNo?: string, refNo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getMasterMills(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, dateFrom?: string, dateTo?: string, millId?: string, millName?: string, frameNo?: string, refNo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getStores(req: any, res: Response, skip?: string, take?: string, search?: string, serviceEngineerId?: string, customerId?: string, materialId?: string, warrantyStatus?: string, returnStatus?: string, inflowStatus?: string, dateFrom?: string, dateTo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+    getMills(req: any, res: Response, skip?: string, take?: string, search?: string, status?: string, customerId?: string, refNo?: string, place?: string, city?: string, dateFrom?: string, dateTo?: string, exportType?: 'pdf' | 'csv' | 'excel'): Promise<Response<any, Record<string, any>>>;
+}
