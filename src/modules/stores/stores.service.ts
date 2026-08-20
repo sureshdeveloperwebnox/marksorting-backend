@@ -64,72 +64,130 @@ export class StoresService {
   }
 
   private async enrichStoresWithCustomer(stores: any[]) {
-    const unassigned = stores.filter((s) => (!s.customer || !s.mill || !s.ref_no) && s.frame_number);
-    if (unassigned.length === 0) return stores;
+    if (!stores || stores.length === 0) return stores;
 
-    const frameNumbers = unassigned.map((s) => s.frame_number);
-    const masterMills = await this.prisma.masterMill.findMany({
-      where: {
-        frame_no: { in: frameNumbers },
-        deleted_at: null,
-      },
-      select: {
-        frame_no: true,
-        ref_no: true,
-        mill: {
-          select: {
-            id: true,
-            name: true,
-            ref_no: true,
-            customer: { select: { id: true, name: true } },
-          },
-        },
-      },
-    });
+    const frameNumbers = stores
+      .map((s) => s.frame_number?.trim())
+      .filter((f): f is string => Boolean(f));
+
+    const customerIds = stores
+      .map((s) => s.customer_id || s.customer?.id)
+      .filter((c): c is string => Boolean(c));
 
     const customerByFrame = new Map<string, { id: string; name: string }>();
-    const millByFrame = new Map<string, { id: string; name: string }>();
+    const millByFrame = new Map<string, { id: string; name: string; ref_no?: string; place?: string; address?: string }>();
     const refNoByFrame = new Map<string, string>();
+    const mcModelByFrame = new Map<string, string>();
 
-    for (const mm of masterMills) {
-      if (mm.frame_no) {
-        const ref = mm.ref_no || mm.mill?.ref_no;
-        if (ref) {
-          refNoByFrame.set(mm.frame_no, ref);
-        }
-        if (mm.mill) {
-          millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
-          if (mm.mill.customer) {
-            customerByFrame.set(mm.frame_no, mm.mill.customer);
-          } else if (mm.mill.name) {
-            customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+    if (frameNumbers.length > 0) {
+      const masterMills = await this.prisma.masterMill.findMany({
+        where: {
+          frame_no: { in: frameNumbers },
+          deleted_at: null,
+        },
+        select: {
+          frame_no: true,
+          ref_no: true,
+          mc_model: true,
+          mill: {
+            select: {
+              id: true,
+              name: true,
+              ref_no: true,
+              place: true,
+              address: true,
+              customer: { select: { id: true, name: true } },
+            },
+          },
+        },
+      });
+
+      for (const mm of masterMills) {
+        if (mm.frame_no) {
+          const ref = mm.ref_no || mm.mill?.ref_no;
+          if (ref) {
+            refNoByFrame.set(mm.frame_no, ref);
+          }
+          if (mm.mc_model) {
+            mcModelByFrame.set(mm.frame_no, mm.mc_model);
+          }
+          if (mm.mill) {
+            millByFrame.set(mm.frame_no, {
+              id: mm.mill.id,
+              name: mm.mill.name,
+              ref_no: mm.mill.ref_no || mm.ref_no || undefined,
+              place: mm.mill.place || undefined,
+              address: mm.mill.address || undefined,
+            });
+            if (mm.mill.customer) {
+              customerByFrame.set(mm.frame_no, mm.mill.customer);
+            } else if (mm.mill.name) {
+              customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+            }
           }
         }
       }
     }
 
+    // Secondary fallback: Lookup primary mill by customer_id if mill is still not resolved
+    const millByCustomerId = new Map<string, { id: string; name: string; ref_no?: string; place?: string; address?: string }>();
+    if (customerIds.length > 0) {
+      const customerMills = await this.prisma.mill.findMany({
+        where: {
+          customer_id: { in: customerIds },
+          deleted_at: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          ref_no: true,
+          place: true,
+          address: true,
+          customer_id: true,
+        },
+      });
+      for (const m of customerMills) {
+        if (m.customer_id && !millByCustomerId.has(m.customer_id)) {
+          millByCustomerId.set(m.customer_id, {
+            id: m.id,
+            name: m.name,
+            ref_no: m.ref_no || undefined,
+            place: m.place || undefined,
+            address: m.address || undefined,
+          });
+        }
+      }
+    }
+
     return stores.map((s) => {
+      const fn = s.frame_number?.trim();
+      const cid = s.customer_id || s.customer?.id;
+
       const resolvedCustomer =
         s.customer ||
-        (s.frame_number && customerByFrame.has(s.frame_number)
-          ? customerByFrame.get(s.frame_number)
-          : null);
+        (fn && customerByFrame.has(fn) ? customerByFrame.get(fn) : null);
+
       const resolvedMill =
         s.mill ||
-        (s.frame_number && millByFrame.has(s.frame_number)
-          ? millByFrame.get(s.frame_number)
-          : null);
+        (fn && millByFrame.has(fn) ? millByFrame.get(fn) : null) ||
+        (cid && millByCustomerId.has(cid) ? millByCustomerId.get(cid) : null);
+
       const resolvedRefNo =
         s.ref_no ||
-        (s.frame_number && refNoByFrame.has(s.frame_number)
-          ? refNoByFrame.get(s.frame_number)
-          : null);
+        (fn && refNoByFrame.has(fn) ? refNoByFrame.get(fn) : null) ||
+        resolvedMill?.ref_no ||
+        null;
+
+      const resolvedMcModel =
+        s.mc_model ||
+        (fn && mcModelByFrame.has(fn) ? mcModelByFrame.get(fn) : null);
 
       return {
         ...s,
         customer: resolvedCustomer,
         mill: resolvedMill,
         ref_no: resolvedRefNo,
+        mc_model: resolvedMcModel,
       };
     });
   }
@@ -153,11 +211,7 @@ export class StoresService {
     });
 
     if (store) {
-      let enrichedStore = store;
-      if (!store.customer && store.frame_number) {
-        const [enriched] = await this.enrichStoresWithCustomer([store]);
-        enrichedStore = enriched;
-      }
+      const [enrichedStore] = await this.enrichStoresWithCustomer([store]);
       await this.redis.setJson(cacheKey, enrichedStore, 3600);
       return enrichedStore;
     }
