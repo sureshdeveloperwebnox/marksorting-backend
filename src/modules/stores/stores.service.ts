@@ -517,19 +517,10 @@ export class StoresService {
       dto.products &&
       Array.isArray(dto.products)
     ) {
-      const extractedRemarks = dto.products
-        .map((p) => {
-          if (typeof p === 'string') return p;
-          const r = p?.barcode_remarks?.remarks || p?.remarks;
-          const isUsed =
-            p?.is_used !== undefined ? p.is_used : p?.barcode_remarks?.is_used;
-          if (r && r.trim() !== '') {
-            return isUsed !== undefined ? `${isUsed ? '[USED]' : '[NEW]'} ${r}` : r;
-          }
-          return null;
-        })
-        .filter(Boolean)
-        .join(' | ');
+      const extractedRemarks = this.constructRemarksFromProducts(
+        existing.remarks,
+        dto.products,
+      );
       if (extractedRemarks) {
         finalRemarks = extractedRemarks;
       }
@@ -565,7 +556,11 @@ export class StoresService {
       });
     }
 
-    return { before: existing, after: store };
+    return {
+      before: existing,
+      after: store,
+      quantity_summary: this.calculateQuantitySummary(store),
+    };
   }
 
   async findByIdAndTechnician(id: string, technicianId: string) {
@@ -615,6 +610,339 @@ export class StoresService {
     return this.remove(id);
   }
 
+  private extractCleanRemarks(remarks?: string | null): string {
+    if (!remarks) return '';
+    let cleaned = remarks;
+    const serialIdx = cleaned.search(/\(?\s*Serial Nos:/i);
+    if (serialIdx !== -1) {
+      cleaned = cleaned.substring(0, serialIdx);
+    }
+    const stIdx = cleaned.search(/\(?\s*Service Type:/i);
+    if (stIdx !== -1) {
+      cleaned = cleaned.substring(0, stIdx);
+    }
+    cleaned = cleaned.replace(/[\(\)\|\s,]+$/, '').trim();
+    return cleaned;
+  }
+
+  private parseServiceTypeFromRemarks(remarks?: string | null): string {
+    if (!remarks) return 'Acknowledgement';
+    const matches = [...remarks.matchAll(/Service Type:\s*([^\s|)]+)/gi)];
+    if (matches.length > 0) {
+      const lastMatch = matches[matches.length - 1];
+      if (lastMatch && lastMatch[1]) {
+        const val = lastMatch[1].trim();
+        if (/^replacement$/i.test(val)) return 'Replacement';
+        if (/^acknowledgement|payment$/i.test(val)) return 'Acknowledgement';
+      }
+    }
+    return 'Acknowledgement';
+  }
+
+  private splitSerialsString(str: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let parenDepth = 0;
+
+    for (let i = 0; i < str.length; i++) {
+      const char = str[i];
+      if (char === '(') {
+        parenDepth++;
+        current += char;
+      } else if (char === ')') {
+        if (parenDepth > 0) parenDepth--;
+        current += char;
+      } else if (char === ',' && parenDepth === 0) {
+        if (current.trim()) result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    if (current.trim()) {
+      result.push(current.trim());
+    }
+
+    return result.filter((s: string) => {
+      const t = s.trim();
+      const isOrphan = /^(RETURNED|NOT_RETURNED|ENG_ACK:|ADM_ACK:)/i.test(t);
+      return !isOrphan && t.length > 0;
+    });
+  }
+
+  private cleanBarcodeString(str: string): string {
+    let clean = str;
+    // Remove parenthesized content
+    clean = clean.replace(/\(.*?\)/g, '');
+    clean = clean.replace(/\[.*?\]/g, '');
+    // Remove unclosed/unopened tag keywords and everything after them
+    clean = clean.replace(
+      /(?:,\s*)?(?:RETURNED|NOT_RETURNED|ENG_ACK:[^,;)]+|ADM_ACK:[^,;)]+|RET:[^,;)]+|USED).*/gi,
+      '',
+    );
+    // Strip leftover punctuation
+    clean = clean.replace(/[()\[\];,:]+/g, ' ');
+    return clean.trim();
+  }
+
+  private parseSerialMapFromRemarks(
+    remarks?: string | null,
+  ): Record<
+    string,
+    {
+      barcode: string;
+      used: boolean;
+      return_status?: string;
+      engineer_ack?: string;
+      admin_ack?: string;
+    }[]
+  > {
+    if (!remarks) return {};
+    const map: Record<
+      string,
+      {
+        barcode: string;
+        used: boolean;
+        return_status?: string;
+        engineer_ack?: string;
+        admin_ack?: string;
+      }[]
+    > = {};
+
+    const serialNosIdx = remarks.indexOf('Serial Nos:');
+    if (serialNosIdx === -1) return {};
+
+    let serialStr = remarks.substring(serialNosIdx + 'Serial Nos:'.length);
+    const stIdx = serialStr.indexOf('Service Type:');
+    if (stIdx !== -1) {
+      serialStr = serialStr.substring(0, stIdx);
+    }
+    serialStr = serialStr.replace(/[\)\|\s]+$/, '').trim();
+
+    const parts = serialStr.split('|');
+    parts.forEach((part) => {
+      const colIdx = part.indexOf(':');
+      if (colIdx !== -1) {
+        const matName = part.substring(0, colIdx).trim();
+        const serialsStr = part.substring(colIdx + 1).trim();
+        const bracketMatch = serialsStr.match(/\[(.*?)\]/);
+        if (bracketMatch && bracketMatch[1]) {
+          const rawSerials = this.splitSerialsString(bracketMatch[1]);
+          const serials = rawSerials
+            .map((s: string) => s.trim())
+            .filter(Boolean)
+            .map((s: string) => {
+              const used = /\(USED/i.test(s) || /USED/i.test(s);
+              const isNotReturned = /NOT_RETURNED|RET:Not Returned|Not Returned/i.test(s);
+              const engAckMatch = s.match(/ENG_ACK:(Acknowledged|Pending)/i);
+              const admAckMatch = s.match(/ADM_ACK:(Acknowledged|Pending)/i);
+              const cleanCode = this.cleanBarcodeString(s);
+
+              return {
+                barcode: cleanCode,
+                used,
+                return_status: used
+                  ? isNotReturned
+                    ? 'Not Returned'
+                    : 'Returned'
+                  : undefined,
+                engineer_ack: used
+                  ? engAckMatch
+                    ? engAckMatch[1]
+                    : 'Acknowledged'
+                  : undefined,
+                admin_ack: used
+                  ? admAckMatch
+                    ? admAckMatch[1]
+                    : 'Pending'
+                  : undefined,
+              };
+            })
+            .filter((s: { barcode: string }) => s.barcode);
+          map[matName] = serials;
+        }
+      }
+    });
+
+    return map;
+  }
+
+  private constructRemarksFromProducts(
+    existingRemarks: string | null | undefined,
+    products: any[],
+  ): string | null {
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return null;
+    }
+
+    const hasStructuredBarcodes = products.some(
+      (p) => p && Array.isArray(p.barcodes) && p.barcodes.length > 0,
+    );
+
+    if (hasStructuredBarcodes) {
+      const cleanRemarks = this.extractCleanRemarks(existingRemarks);
+      const serviceType = this.parseServiceTypeFromRemarks(existingRemarks);
+      const currentSerialMap = this.parseSerialMapFromRemarks(existingRemarks);
+
+      for (const prod of products) {
+        const matName = prod.material_name || prod.name;
+        if (!matName || !Array.isArray(prod.barcodes)) continue;
+
+        currentSerialMap[matName] = prod.barcodes.map((b: any) => {
+          const barcode = b.barcode || (typeof b === 'string' ? b : '');
+          const used = Boolean(b.used);
+          const retStatus = used
+            ? b.return_status === 'Not Returned'
+              ? 'Not Returned'
+              : 'Returned'
+            : undefined;
+          const engAck = used
+            ? b.acknowledge_status === 'Pending'
+              ? 'Pending'
+              : 'Acknowledged'
+            : undefined;
+          const admAck = b.admin_acknowledge_status || 'Pending';
+          return {
+            barcode,
+            used,
+            return_status: retStatus,
+            engineer_ack: engAck,
+            admin_ack: admAck,
+          };
+        });
+      }
+
+      const serialSummaries: string[] = [];
+      Object.entries(currentSerialMap).forEach(([matName, items]) => {
+        if (items.length > 0) {
+          const itemStrs = items.map((it: any) => {
+            if (!it.used) return it.barcode;
+            const tags: string[] = ['USED'];
+            if (it.return_status) {
+              tags.push(`RET:${it.return_status}`);
+            }
+            if (it.engineer_ack) tags.push(`ENG_ACK:${it.engineer_ack}`);
+            if (it.admin_ack) tags.push(`ADM_ACK:${it.admin_ack}`);
+            return `${it.barcode} (${tags.join('; ')})`;
+          });
+          serialSummaries.push(`${matName}: [${itemStrs.join(', ')}]`);
+        }
+      });
+
+      const extraParts: string[] = [];
+      if (serialSummaries.length > 0) {
+        extraParts.push(`Serial Nos: ${serialSummaries.join(' | ')}`);
+      }
+      if (serviceType) {
+        extraParts.push(`Service Type: ${serviceType}`);
+      }
+
+      const extraText = extraParts.join(' | ');
+      return cleanRemarks ? `${cleanRemarks} (${extraText})` : `(${extraText})`;
+    }
+
+    // Fallback to legacy array of objects / strings
+    const extractedRemarks = products
+      .map((p) => {
+        if (typeof p === 'string') return p;
+        if (p && typeof p === 'object') {
+          const name = p.name || p.material_name || p.barcode || '';
+          const qty = p.quantity !== undefined ? p.quantity : p.qty;
+          const parts: string[] = [];
+          if (name) parts.push(name);
+          if (qty !== undefined) parts.push(`qty: ${qty}`);
+          if (p.used !== undefined) parts.push(`used: ${p.used}`);
+          if (p.return_status) parts.push(`return_status: ${p.return_status}`);
+          if (p.acknowledge_status)
+            parts.push(`acknowledge_status: ${p.acknowledge_status}`);
+          return parts.join(' - ');
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join(' | ');
+
+    return extractedRemarks || null;
+  }
+
+  calculateQuantitySummary(store: any): any {
+    const fullSerialMap = this.parseSerialMapFromRemarks(store?.remarks);
+    const materials = store?.materials || [];
+
+    let totalQty = 0;
+    let usedQty = 0;
+    let returnedQty = 0;
+    let notReturnedQty = 0;
+    let engAckQty = 0;
+    let engPendingQty = 0;
+    let admAckQty = 0;
+    let admPendingQty = 0;
+
+    const materialsBreakdown = materials.map((m: any) => {
+      const matName = m.material?.name || '';
+      const units = fullSerialMap[matName] || [];
+      const mTotal = m.quantity || units.length || 1;
+      const mUsed = units.filter((u: any) => u.used).length;
+      const mUnused = Math.max(0, mTotal - mUsed);
+      const mReturned = units.filter((u: any) => u.used && u.return_status === 'Returned').length;
+      const mNotReturned = units.filter((u: any) => u.used && u.return_status === 'Not Returned').length;
+      const mEngAck = units.filter((u: any) => u.used && u.engineer_ack === 'Acknowledged').length;
+      const mEngPending = units.filter((u: any) => u.used && u.engineer_ack === 'Pending').length;
+      const mAdmAck = units.filter((u: any) => u.used && u.admin_ack === 'Acknowledged').length;
+      const mAdmPending = units.filter((u: any) => u.used && u.admin_ack === 'Pending').length;
+
+      totalQty += mTotal;
+      usedQty += mUsed;
+      returnedQty += mReturned;
+      notReturnedQty += mNotReturned;
+      engAckQty += mEngAck;
+      engPendingQty += mEngPending;
+      admAckQty += mAdmAck;
+      admPendingQty += mAdmPending;
+
+      return {
+        material_id: m.material_id,
+        material_name: matName,
+        total_quantity: mTotal,
+        used_quantity: mUsed,
+        unused_quantity: mUnused,
+        return_status_quantity: {
+          returned: mReturned,
+          not_returned: mNotReturned,
+        },
+        engineer_ack_quantity: {
+          acknowledged: mEngAck,
+          pending: mEngPending,
+        },
+        admin_ack_quantity: {
+          acknowledged: mAdmAck,
+          pending: mAdmPending,
+        },
+      };
+    });
+
+    const unusedQty = Math.max(0, totalQty - usedQty);
+
+    return {
+      total_quantity: totalQty,
+      used_quantity: usedQty,
+      unused_quantity: unusedQty,
+      return_status_quantity: {
+        returned: returnedQty,
+        not_returned: notReturnedQty,
+      },
+      engineer_ack_quantity: {
+        acknowledged: engAckQty,
+        pending: engPendingQty,
+      },
+      admin_ack_quantity: {
+        acknowledged: admAckQty,
+        pending: admPendingQty,
+      },
+      materials_breakdown: materialsBreakdown,
+    };
+  }
+
   private async invalidateCache(id?: string) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix('stores:'),
@@ -626,3 +954,4 @@ export class StoresService {
     await Promise.all(promises);
   }
 }
+

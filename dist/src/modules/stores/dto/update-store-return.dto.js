@@ -41,8 +41,8 @@ __decorate([
 ], UpdateStoreReturnDto.prototype, "invoice_number", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED)])',
-        description: 'Remarks and serial number breakdown',
+        example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED:Returned, ENG_ACK:Acknowledged), BAR-002] | Service Type: Replacement)',
+        description: 'Remarks and serial number breakdown with used, return, and acknowledge status tags',
     }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
@@ -67,7 +67,25 @@ __decorate([
 ], UpdateStoreReturnDto.prototype, "courier_photos", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Products / barcode remarks details list',
+        example: [
+            {
+                material_id: 'uuid-of-material',
+                material_name: 'Screw',
+                barcodes: [
+                    {
+                        barcode: '59681654',
+                        used: true,
+                        return_status: 'Returned',
+                        acknowledge_status: 'Acknowledged',
+                    },
+                    {
+                        barcode: '59681655',
+                        used: false,
+                    },
+                ],
+            },
+        ],
+        description: 'Products list with per-barcode Used toggle, conditional Return Status (Returned / Not Returned for used units), and Engineer Acknowledge Status (Acknowledged / Pending for used units)',
     }),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsOptional)(),

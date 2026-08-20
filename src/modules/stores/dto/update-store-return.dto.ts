@@ -19,8 +19,8 @@ export class UpdateStoreReturnDto {
   invoice_number?: string;
 
   @ApiPropertyOptional({
-    example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED)])',
-    description: 'Remarks and serial number breakdown',
+    example: '(Serial Nos: MAIN BOARD: [BAR-001 (USED:Returned, ENG_ACK:Acknowledged), BAR-002] | Service Type: Replacement)',
+    description: 'Remarks and serial number breakdown with used, return, and acknowledge status tags',
   })
   @IsString()
   @IsOptional()
@@ -42,10 +42,30 @@ export class UpdateStoreReturnDto {
   courier_photos?: any[];
 
   @ApiPropertyOptional({
-    description: 'Products / barcode remarks details list',
+    example: [
+      {
+        material_id: 'uuid-of-material',
+        material_name: 'Screw',
+        barcodes: [
+          {
+            barcode: '59681654',
+            used: true,
+            return_status: 'Returned',
+            acknowledge_status: 'Acknowledged',
+          },
+          {
+            barcode: '59681655',
+            used: false,
+          },
+        ],
+      },
+    ],
+    description:
+      'Products list with per-barcode Used toggle, conditional Return Status (Returned / Not Returned for used units), and Engineer Acknowledge Status (Acknowledged / Pending for used units)',
   })
   @IsArray()
   @IsOptional()
   products?: any[];
 }
+
 

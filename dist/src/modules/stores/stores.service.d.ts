@@ -211,6 +211,7 @@ export declare class StoresService {
             barcode: string | null;
             provider_name: string | null;
         };
+        quantity_summary: any;
     }>;
     findByIdAndTechnician(id: string, technicianId: string): Promise<any>;
     updateByTechnician(id: string, technicianId: string, dto: UpdateStoreDto): Promise<{
@@ -289,5 +290,12 @@ export declare class StoresService {
         barcode: string | null;
         provider_name: string | null;
     }>;
+    private extractCleanRemarks;
+    private parseServiceTypeFromRemarks;
+    private splitSerialsString;
+    private cleanBarcodeString;
+    private parseSerialMapFromRemarks;
+    private constructRemarksFromProducts;
+    calculateQuantitySummary(store: any): any;
     private invalidateCache;
 }
