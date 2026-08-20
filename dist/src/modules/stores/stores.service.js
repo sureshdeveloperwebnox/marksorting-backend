@@ -25,6 +25,9 @@ let StoresService = class StoresService {
         this.redis = redis;
         this.eventEmitter = eventEmitter;
     }
+    async onModuleInit() {
+        await this.invalidateCache();
+    }
     async findAll(params) {
         const { skip, take, where, orderBy } = params;
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;

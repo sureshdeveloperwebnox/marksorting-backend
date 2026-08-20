@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -14,7 +15,7 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
 
 @Injectable()
-export class StoresService {
+export class StoresService implements OnModuleInit {
   private readonly CACHE_PREFIX = 'store:';
   private readonly LIST_CACHE_KEY = 'stores:list:';
 
@@ -23,6 +24,10 @@ export class StoresService {
     private redis: RedisService,
     private eventEmitter: EventEmitter2,
   ) {}
+
+  async onModuleInit() {
+    await this.invalidateCache();
+  }
 
   async findAll(params: {
     skip?: number;

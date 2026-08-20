@@ -1,3 +1,4 @@
+import { OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -5,13 +6,14 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
-export declare class StoresService {
+export declare class StoresService implements OnModuleInit {
     private prisma;
     private redis;
     private eventEmitter;
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
     constructor(prisma: PrismaService, redis: RedisService, eventEmitter: EventEmitter2);
+    onModuleInit(): Promise<void>;
     findAll(params: {
         skip?: number;
         take?: number;
