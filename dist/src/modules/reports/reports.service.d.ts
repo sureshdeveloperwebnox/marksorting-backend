@@ -74,7 +74,12 @@ export declare class ReportsService {
     private getFiltersSummary;
     private getCompanyPdfSettings;
     private getStoresWhereClause;
+    private enrichStoresWithMillAndRefNo;
     getStores(params: ReportParams, user: UserSessionPayload): Promise<any>;
+    private cleanBarcodeString;
+    private splitSerialsString;
+    private extractCleanRemarks;
+    private parseFullSerialMapFromRemarks;
     exportStores(params: ReportParams, user: UserSessionPayload, formatType: 'pdf' | 'csv' | 'excel'): Promise<{
         buffer: Buffer;
         fileName: string;

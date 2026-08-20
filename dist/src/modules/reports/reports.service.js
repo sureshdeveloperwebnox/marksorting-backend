@@ -1371,6 +1371,71 @@ let ReportsService = class ReportsService {
         }
         return where;
     }
+    async enrichStoresWithMillAndRefNo(stores) {
+        const frameNumbers = stores
+            .map((s) => s.frame_number)
+            .filter((fn) => Boolean(fn));
+        if (frameNumbers.length === 0)
+            return stores;
+        const masterMills = await this.prisma.masterMill.findMany({
+            where: {
+                frame_no: { in: frameNumbers },
+                deleted_at: null,
+            },
+            select: {
+                frame_no: true,
+                ref_no: true,
+                mill: {
+                    select: {
+                        id: true,
+                        name: true,
+                        ref_no: true,
+                        customer: { select: { id: true, name: true } },
+                    },
+                },
+            },
+        });
+        const customerByFrame = new Map();
+        const millByFrame = new Map();
+        const refNoByFrame = new Map();
+        for (const mm of masterMills) {
+            if (mm.frame_no) {
+                const ref = mm.ref_no || mm.mill?.ref_no;
+                if (ref) {
+                    refNoByFrame.set(mm.frame_no, ref);
+                }
+                if (mm.mill) {
+                    millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+                    if (mm.mill.customer) {
+                        customerByFrame.set(mm.frame_no, mm.mill.customer);
+                    }
+                    else if (mm.mill.name) {
+                        customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+                    }
+                }
+            }
+        }
+        return stores.map((s) => {
+            const resolvedCustomer = s.customer ||
+                (s.frame_number && customerByFrame.has(s.frame_number)
+                    ? customerByFrame.get(s.frame_number)
+                    : null);
+            const resolvedMill = s.mill ||
+                (s.frame_number && millByFrame.has(s.frame_number)
+                    ? millByFrame.get(s.frame_number)
+                    : null);
+            const resolvedRefNo = s.ref_no ||
+                (s.frame_number && refNoByFrame.has(s.frame_number)
+                    ? refNoByFrame.get(s.frame_number)
+                    : null);
+            return {
+                ...s,
+                customer: resolvedCustomer,
+                mill: resolvedMill,
+                ref_no: resolvedRefNo,
+            };
+        });
+    }
     async getStores(params, user) {
         const cacheKey = `${this.CACHE_PREFIX}stores:${JSON.stringify(params)}:${JSON.stringify(user)}`;
         const cached = await this.redis.getJson(cacheKey);
@@ -1399,9 +1464,10 @@ let ReportsService = class ReportsService {
             this.prisma.store.count({ where: { ...where, return_status: 'Not Returned' } }),
             this.prisma.store.count({ where: { ...where, return_status: 'Completed' } }),
         ]);
+        const enrichedStores = await this.enrichStoresWithMillAndRefNo(stores);
         const result = {
             total,
-            stores,
+            stores: enrichedStores,
             metrics: {
                 totalCount: total,
                 returnedCount,
@@ -1412,6 +1478,116 @@ let ReportsService = class ReportsService {
         };
         await this.redis.setJson(cacheKey, result, 300);
         return result;
+    }
+    cleanBarcodeString(str) {
+        let clean = str;
+        clean = clean.replace(/\(.*?\)/g, '');
+        clean = clean.replace(/\[.*?\]/g, '');
+        clean = clean.replace(/(?:,\s*)?(?:RETURNED|NOT_RETURNED|ENG_ACK:[^,;)]+|ADM_ACK:[^,;)]+|RET:[^,;)]+|USED).*/gi, '');
+        clean = clean.replace(/[()[\];,:]+/g, ' ');
+        return clean.trim();
+    }
+    splitSerialsString(str) {
+        const result = [];
+        let current = '';
+        let parenDepth = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            if (char === '(') {
+                parenDepth++;
+                current += char;
+            }
+            else if (char === ')') {
+                if (parenDepth > 0)
+                    parenDepth--;
+                current += char;
+            }
+            else if (char === ',' && parenDepth === 0) {
+                if (current.trim())
+                    result.push(current.trim());
+                current = '';
+            }
+            else {
+                current += char;
+            }
+        }
+        if (current.trim()) {
+            result.push(current.trim());
+        }
+        return result.filter((s) => {
+            const t = s.trim();
+            const isOrphan = /^(RETURNED|NOT_RETURNED|ENG_ACK:|ADM_ACK:)/i.test(t);
+            return !isOrphan && t.length > 0;
+        });
+    }
+    extractCleanRemarks(remarks) {
+        if (!remarks)
+            return '-';
+        let text = remarks;
+        const serialNosIdx = text.indexOf('Serial Nos:');
+        if (serialNosIdx !== -1) {
+            text = text.substring(0, serialNosIdx);
+        }
+        text = text.replace(/[\(\)\|\s]+$/, '').trim();
+        return text || '-';
+    }
+    parseFullSerialMapFromRemarks(remarks) {
+        if (!remarks)
+            return {};
+        const map = {};
+        const serialNosIdx = remarks.indexOf('Serial Nos:');
+        if (serialNosIdx === -1)
+            return {};
+        let serialStr = remarks.substring(serialNosIdx + 'Serial Nos:'.length);
+        const stIdx = serialStr.indexOf('Service Type:');
+        if (stIdx !== -1) {
+            serialStr = serialStr.substring(0, stIdx);
+        }
+        serialStr = serialStr.replace(/[\)\|\s]+$/, '').trim();
+        const parts = serialStr.split('|');
+        parts.forEach((part) => {
+            const colIdx = part.indexOf(':');
+            if (colIdx !== -1) {
+                const matName = part.substring(0, colIdx).trim();
+                const serialsStr = part.substring(colIdx + 1).trim();
+                const bracketMatch = serialsStr.match(/\[(.*?)\]/);
+                if (bracketMatch && bracketMatch[1]) {
+                    const rawSerials = this.splitSerialsString(bracketMatch[1]);
+                    const serials = rawSerials
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .map((s) => {
+                        const used = /\(USED/i.test(s) || /USED/i.test(s);
+                        const isNotReturned = /NOT_RETURNED|RET:Not Returned|Not Returned/i.test(s);
+                        const engAckMatch = s.match(/ENG_ACK:(Acknowledged|Pending)/i);
+                        const admAckMatch = s.match(/ADM_ACK:(Acknowledged|Pending)/i);
+                        const barcode = this.cleanBarcodeString(s);
+                        return {
+                            barcode,
+                            used,
+                            return_status: used
+                                ? isNotReturned
+                                    ? 'Not Returned'
+                                    : 'Returned'
+                                : undefined,
+                            engineer_ack: used
+                                ? engAckMatch
+                                    ? engAckMatch[1]
+                                    : 'Acknowledged'
+                                : undefined,
+                            admin_ack: used
+                                ? admAckMatch
+                                    ? admAckMatch[1]
+                                    : 'Pending'
+                                : undefined,
+                        };
+                    })
+                        .filter((s) => s.barcode);
+                    map[matName] = serials;
+                }
+            }
+        });
+        return map;
     }
     async exportStores(params, user, formatType) {
         const where = this.getStoresWhereClause(params, user);
@@ -1428,37 +1604,131 @@ let ReportsService = class ReportsService {
             },
             orderBy: { created_at: 'desc' },
         });
+        const enrichedReports = await this.enrichStoresWithMillAndRefNo(reports);
         const headers = [
-            'Service Engineer',
+            'Ref No',
+            'Mill Name',
             'Customer',
-            'Materials',
-            'Qty',
+            'Frame Number',
+            'Service Engineer',
+            'Material Name',
+            'Quantity',
+            'Stock Type',
+            'Barcode / Serial No',
+            'Material Status',
+            'Unit Return Status',
+            'Engineer Acknowledge Status',
+            'Admin Acknowledge Status',
             'Warranty Status',
-            'Return Status',
+            'Overall Return Status',
             'Stock Status',
-            'Provider Name',
-            'Invoice/Receipt Number',
-            'Barcode',
+            'Courier / Provider',
+            'Tracking / Invoice No',
+            'Remarks',
             'Created At',
         ];
-        const data = reports.map((r) => {
-            const materialsStr = r.materials
-                .map((m) => `${m.material.name} (x${m.quantity || 1})`)
-                .join(', ') || '-';
-            return [
-                r.service_engineer?.full_name || '-',
-                r.customer?.name || '-',
-                materialsStr,
-                String(r.quantity),
-                r.warranty_status || '-',
-                r.return_status || '-',
-                r.inflow_status || '-',
-                r.provider_name || '-',
-                r.invoice_number || '-',
-                r.barcode || '-',
-                r.created_at ? r.created_at.toISOString().slice(0, 10) : '-',
-            ];
-        });
+        const data = [];
+        for (const r of enrichedReports) {
+            const cleanRemarks = this.extractCleanRemarks(r.remarks);
+            const serialMap = this.parseFullSerialMapFromRemarks(r.remarks);
+            const createdAt = r.created_at
+                ? new Date(r.created_at).toLocaleDateString('en-GB')
+                : '-';
+            const refNo = r.ref_no || '-';
+            const millName = r.mill?.name || '-';
+            const customer = r.customer?.name || r.mill?.name || '-';
+            const frameNo = r.frame_number || '-';
+            const engineer = r.service_engineer?.full_name || '-';
+            const warranty = r.warranty_status || '-';
+            const overallReturn = r.return_status || '-';
+            const stockStatus = r.inflow_status || '-';
+            const provider = r.provider_name || '-';
+            const invoiceNo = r.invoice_number || '-';
+            if (!r.materials || r.materials.length === 0) {
+                data.push([
+                    refNo,
+                    millName,
+                    customer,
+                    frameNo,
+                    engineer,
+                    '-',
+                    String(r.quantity || 0),
+                    r.stock_type || 'Inflow',
+                    r.barcode || '-',
+                    '-',
+                    overallReturn,
+                    '-',
+                    '-',
+                    warranty,
+                    overallReturn,
+                    stockStatus,
+                    provider,
+                    invoiceNo,
+                    cleanRemarks,
+                    createdAt,
+                ]);
+                continue;
+            }
+            for (const m of r.materials) {
+                const matName = m.material?.name || '-';
+                const stockType = m.stock_type || r.stock_type || 'Inflow';
+                const units = serialMap[matName] || [];
+                if (units.length > 0) {
+                    for (const unit of units) {
+                        const matStatus = unit.used ? 'Used Material' : 'Unused Material';
+                        const unitRetStatus = unit.return_status || (unit.used ? 'Returned' : overallReturn);
+                        const engAck = unit.engineer_ack || (unit.used ? 'Acknowledged' : '-');
+                        const admAck = unit.admin_ack || (unit.used ? 'Pending' : '-');
+                        data.push([
+                            refNo,
+                            millName,
+                            customer,
+                            frameNo,
+                            engineer,
+                            matName,
+                            '1',
+                            stockType,
+                            unit.barcode || '-',
+                            matStatus,
+                            unitRetStatus,
+                            engAck,
+                            admAck,
+                            warranty,
+                            overallReturn,
+                            stockStatus,
+                            provider,
+                            invoiceNo,
+                            cleanRemarks,
+                            createdAt,
+                        ]);
+                    }
+                }
+                else {
+                    data.push([
+                        refNo,
+                        millName,
+                        customer,
+                        frameNo,
+                        engineer,
+                        matName,
+                        String(m.quantity || 1),
+                        stockType,
+                        r.barcode || '-',
+                        '-',
+                        overallReturn,
+                        '-',
+                        '-',
+                        warranty,
+                        overallReturn,
+                        stockStatus,
+                        provider,
+                        invoiceNo,
+                        cleanRemarks,
+                        createdAt,
+                    ]);
+                }
+            }
+        }
         if (formatType === 'csv') {
             const buffer = this.generateCsv(headers, data);
             return {
@@ -1468,7 +1738,72 @@ let ReportsService = class ReportsService {
             };
         }
         if (formatType === 'excel') {
-            const buffer = this.generateExcel('Stores', headers, data);
+            const formatSheetDate = (dStr) => {
+                if (!dStr)
+                    return '';
+                const parts = dStr.trim().split(/[-/]/);
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        return `${parts[2].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[0]}`;
+                    }
+                    return `${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[2]}`;
+                }
+                return dStr;
+            };
+            let sheetName = 'Stores';
+            if (params.dateFrom && params.dateTo) {
+                const fromStr = formatSheetDate(params.dateFrom);
+                const toStr = formatSheetDate(params.dateTo);
+                sheetName = `Stores ${fromStr} - ${toStr}`;
+                if (sheetName.length > 31) {
+                    const shortFrom = `${fromStr.slice(0, 6)}${fromStr.slice(-2)}`;
+                    const shortTo = `${toStr.slice(0, 6)}${toStr.slice(-2)}`;
+                    sheetName = `Stores ${shortFrom} to ${shortTo}`;
+                }
+            }
+            else if (params.dateFrom) {
+                sheetName = `Stores From ${formatSheetDate(params.dateFrom)}`;
+            }
+            else if (params.dateTo) {
+                sheetName = `Stores To ${formatSheetDate(params.dateTo)}`;
+            }
+            sheetName = sheetName.replace(/[\\/?*:[\]]/g, '-').slice(0, 31);
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet(sheetName);
+            worksheet.columns = headers.map((header) => ({
+                header,
+                key: header,
+                width: Math.max(header.length + 4, 16),
+            }));
+            const headerRow = worksheet.getRow(1);
+            headerRow.eachCell((cell) => {
+                cell.font = { bold: true };
+                cell.fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: 'FFD3D3D3' },
+                };
+                cell.border = {
+                    top: { style: 'thin' },
+                    left: { style: 'thin' },
+                    bottom: { style: 'thin' },
+                    right: { style: 'thin' },
+                };
+                cell.alignment = { vertical: 'middle', horizontal: 'left' };
+            });
+            for (const rowData of data) {
+                const row = worksheet.addRow(rowData);
+                row.eachCell((cell) => {
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' },
+                    };
+                    cell.alignment = { vertical: 'middle', horizontal: 'left' };
+                });
+            }
+            const buffer = Buffer.from(await workbook.xlsx.writeBuffer());
             return {
                 buffer,
                 fileName: `stores_report_${Date.now()}.xlsx`,

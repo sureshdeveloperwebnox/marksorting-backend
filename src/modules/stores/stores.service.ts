@@ -64,7 +64,7 @@ export class StoresService {
   }
 
   private async enrichStoresWithCustomer(stores: any[]) {
-    const unassigned = stores.filter((s) => (!s.customer || !s.mill) && s.frame_number);
+    const unassigned = stores.filter((s) => (!s.customer || !s.mill || !s.ref_no) && s.frame_number);
     if (unassigned.length === 0) return stores;
 
     const frameNumbers = unassigned.map((s) => s.frame_number);
@@ -73,9 +73,14 @@ export class StoresService {
         frame_no: { in: frameNumbers },
         deleted_at: null,
       },
-      include: {
+      select: {
+        frame_no: true,
+        ref_no: true,
         mill: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            ref_no: true,
             customer: { select: { id: true, name: true } },
           },
         },
@@ -84,14 +89,21 @@ export class StoresService {
 
     const customerByFrame = new Map<string, { id: string; name: string }>();
     const millByFrame = new Map<string, { id: string; name: string }>();
+    const refNoByFrame = new Map<string, string>();
+
     for (const mm of masterMills) {
-      if (mm.frame_no && mm.mill) {
-        millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
-        if (mm.mill.customer) {
-          customerByFrame.set(mm.frame_no, mm.mill.customer);
-        } else if (mm.mill.name) {
-          // If mill doesn't have a parent customer, fallback to mill name
-          customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+      if (mm.frame_no) {
+        const ref = mm.ref_no || mm.mill?.ref_no;
+        if (ref) {
+          refNoByFrame.set(mm.frame_no, ref);
+        }
+        if (mm.mill) {
+          millByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+          if (mm.mill.customer) {
+            customerByFrame.set(mm.frame_no, mm.mill.customer);
+          } else if (mm.mill.name) {
+            customerByFrame.set(mm.frame_no, { id: mm.mill.id, name: mm.mill.name });
+          }
         }
       }
     }
@@ -107,11 +119,17 @@ export class StoresService {
         (s.frame_number && millByFrame.has(s.frame_number)
           ? millByFrame.get(s.frame_number)
           : null);
+      const resolvedRefNo =
+        s.ref_no ||
+        (s.frame_number && refNoByFrame.has(s.frame_number)
+          ? refNoByFrame.get(s.frame_number)
+          : null);
 
       return {
         ...s,
         customer: resolvedCustomer,
         mill: resolvedMill,
+        ref_no: resolvedRefNo,
       };
     });
   }
