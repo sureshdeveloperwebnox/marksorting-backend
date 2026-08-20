@@ -173,35 +173,49 @@ let StoresService = class StoresService {
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
         }
-        const store = await this.prisma.store.create({
-            data: {
-                ...data,
-                service_engineer: { connect: { id: service_engineer_id } },
-                ...(resolvedCustomerId ? { customer: { connect: { id: resolvedCustomerId } } } : {}),
-                materials: {
-                    create: material_ids.map((id) => {
-                        const qtyObj = material_quantities?.find((q) => q.material_id === id);
-                        return {
-                            material: { connect: { id } },
-                            quantity: qtyObj ? qtyObj.quantity : 1,
-                            stock_type: qtyObj?.stock_type || 'Inflow',
-                        };
-                    }),
-                },
-            },
-            include: {
-                service_engineer: { select: { id: true, full_name: true } },
-                customer: { select: { id: true, name: true } },
-                materials: {
-                    include: {
-                        material: { select: { id: true, name: true } },
+        const store = await this.prisma.$transaction(async (tx) => {
+            const todayStart = new Date();
+            todayStart.setUTCHours(0, 0, 0, 0);
+            const todayEnd = new Date();
+            todayEnd.setUTCHours(23, 59, 59, 999);
+            const count = await tx.store.count({
+                where: { created_at: { gte: todayStart, lte: todayEnd } },
+            });
+            const dateStr = todayStart.toISOString().slice(0, 10).replace(/-/g, '');
+            const seq = String(count + 1);
+            const store_number = `ST-${dateStr}-${seq}`;
+            return tx.store.create({
+                data: {
+                    ...data,
+                    store_number,
+                    service_engineer: { connect: { id: service_engineer_id } },
+                    ...(resolvedCustomerId ? { customer: { connect: { id: resolvedCustomerId } } } : {}),
+                    materials: {
+                        create: material_ids.map((id) => {
+                            const qtyObj = material_quantities?.find((q) => q.material_id === id);
+                            return {
+                                material: { connect: { id } },
+                                quantity: qtyObj ? qtyObj.quantity : 1,
+                                stock_type: qtyObj?.stock_type || 'Inflow',
+                            };
+                        }),
                     },
                 },
-            },
+                include: {
+                    service_engineer: { select: { id: true, full_name: true } },
+                    customer: { select: { id: true, name: true } },
+                    materials: {
+                        include: {
+                            material: { select: { id: true, name: true } },
+                        },
+                    },
+                },
+            });
         });
         await this.invalidateCache();
         this.eventEmitter.emit('store.created', {
             storeId: store.id,
+            storeNumber: store.store_number,
             frameNumber: store.frame_number,
             technicianUserId: store.service_engineer_id,
             inflowStatus: store.inflow_status,

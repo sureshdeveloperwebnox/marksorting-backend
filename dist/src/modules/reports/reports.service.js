@@ -1606,6 +1606,7 @@ let ReportsService = class ReportsService {
         });
         const enrichedReports = await this.enrichStoresWithMillAndRefNo(reports);
         const headers = [
+            'Store ID',
             'Ref No',
             'Mill Name',
             'Customer',
@@ -1633,6 +1634,7 @@ let ReportsService = class ReportsService {
             const createdAt = r.created_at
                 ? new Date(r.created_at).toLocaleDateString('en-GB')
                 : '-';
+            const storeId = r.store_number || '-';
             const refNo = r.ref_no || '-';
             const millName = r.mill?.name || '-';
             const customer = r.customer?.name || r.mill?.name || '-';
@@ -1644,6 +1646,7 @@ let ReportsService = class ReportsService {
             const invoiceNo = r.invoice_number || '-';
             if (!r.materials || r.materials.length === 0) {
                 data.push([
+                    storeId,
                     refNo,
                     millName,
                     customer,
@@ -1677,6 +1680,7 @@ let ReportsService = class ReportsService {
                         const engAck = unit.engineer_ack || (unit.used ? 'Acknowledged' : '-');
                         const admAck = unit.admin_ack || (unit.used ? 'Pending' : '-');
                         data.push([
+                            storeId,
                             refNo,
                             millName,
                             customer,
@@ -1701,6 +1705,7 @@ let ReportsService = class ReportsService {
                 }
                 else {
                     data.push([
+                        storeId,
                         refNo,
                         millName,
                         customer,

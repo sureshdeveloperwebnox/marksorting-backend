@@ -599,6 +599,7 @@ model Material {
 
 model Store {
   id                  String          @id @default(uuid())
+  store_number        String?         @unique
   service_engineer_id String
   customer_id         String?
   quantity            Int
@@ -619,6 +620,7 @@ model Store {
   service_engineer    Technician      @relation(fields: [service_engineer_id], references: [id])
 
   @@index([frame_number])
+  @@index([store_number])
   @@map("stores")
 }
 

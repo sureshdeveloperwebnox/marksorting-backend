@@ -68,8 +68,8 @@ export declare class MobileExpensesController {
                 created_at: Date;
                 updated_at: Date;
                 expense_id: string;
-                expense_category_id: string;
                 remarks: string | null;
+                expense_category_id: string;
                 amount: import("@prisma/client/runtime/client").Decimal;
                 admin_amount: import("@prisma/client/runtime/client").Decimal;
                 expense_images: string[];
@@ -87,12 +87,12 @@ export declare class MobileExpensesController {
             visit_time: string;
             service_report_id: string | null;
             installation_report_id: string | null;
+            remarks: string | null;
             expense_number: string;
             expense_type: string;
             report_type: string;
             expense_category_id: string | null;
             others: string | null;
-            remarks: string | null;
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
@@ -138,8 +138,8 @@ export declare class MobileExpensesController {
             created_at: Date;
             updated_at: Date;
             expense_id: string;
-            expense_category_id: string;
             remarks: string | null;
+            expense_category_id: string;
             amount: import("@prisma/client/runtime/client").Decimal;
             admin_amount: import("@prisma/client/runtime/client").Decimal;
             expense_images: string[];
@@ -157,12 +157,12 @@ export declare class MobileExpensesController {
         visit_time: string;
         service_report_id: string | null;
         installation_report_id: string | null;
+        remarks: string | null;
         expense_number: string;
         expense_type: string;
         report_type: string;
         expense_category_id: string | null;
         others: string | null;
-        remarks: string | null;
         amount: import("@prisma/client/runtime/client").Decimal;
         admin_amount: import("@prisma/client/runtime/client").Decimal;
         expense_images: string[];

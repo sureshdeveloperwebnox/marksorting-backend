@@ -39,6 +39,7 @@ let StoresController = class StoresController {
         const stkType = stockType || stockTypeCamel;
         if (search) {
             where.OR = [
+                { store_number: { contains: search, mode: 'insensitive' } },
                 { frame_number: { contains: search, mode: 'insensitive' } },
                 { barcode: { contains: search, mode: 'insensitive' } },
                 {
