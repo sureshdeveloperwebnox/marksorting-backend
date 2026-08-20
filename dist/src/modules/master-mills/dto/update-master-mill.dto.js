@@ -18,9 +18,9 @@ class UpdateMasterMillDto extends (0, swagger_1.PartialType)(create_master_mill_
 }
 exports.UpdateMasterMillDto = UpdateMasterMillDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: true }),
+    (0, swagger_1.ApiProperty)({ example: '2024-01-15', required: false }),
     (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateMasterMillDto.prototype, "mfg_date", void 0);
 //# sourceMappingURL=update-master-mill.dto.js.map

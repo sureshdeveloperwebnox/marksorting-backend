@@ -11,10 +11,10 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Type, Transform } from 'class-transformer';
 
-/** Converts empty strings to undefined so @IsOptional() + @IsDateString()
- *  / @IsUUID() validators correctly skip validation for blank form fields. */
-const emptyStringToUndefined = Transform(({ value }) =>
-  value === '' || value === null ? undefined : value,
+/** Converts empty strings to null so @IsOptional() correctly skips validation
+ *  for blank form fields, while allowing fields to be explicitly cleared in the database. */
+const emptyStringToNull = Transform(({ value }) =>
+  value === '' ? null : value,
 );
 
 export class CreateMasterMillDto {
@@ -23,59 +23,58 @@ export class CreateMasterMillDto {
   @IsNotEmpty()
   invoice_no: string;
 
-
   @ApiProperty({ example: '2024-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   invoice_date?: string;
 
   @ApiProperty({ example: 'P-0005-17-18', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   ref_no?: string;
 
   @ApiProperty({ example: 'uuid-of-mill', required: false })
   @IsUUID()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   mill_id?: string;
 
   @ApiProperty({ example: 'Old Fatehpura, Udaipur-Jodhpur', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   address?: string;
 
   @ApiProperty({ example: 'Udaipur-Jodhpur', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   place?: string;
 
   @ApiProperty({ example: 'Rajasthan', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   state?: string;
 
   @ApiProperty({ example: '+919876543210', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   phone_no?: string;
 
   @ApiProperty({ example: 'RX-40 B FOR ZX-40', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   mc_model?: string;
 
   @ApiProperty({ example: 'FN-123456', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   frame_no?: string;
 
   @ApiProperty({ example: '2024-01-15', required: true })
@@ -100,31 +99,31 @@ export class CreateMasterMillDto {
   @ApiProperty({ example: '2024-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   installation_date?: string;
 
   @ApiProperty({ example: '2024-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   warranty_start_date?: string;
 
   @ApiProperty({ example: '2025-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   warranty_closing_date?: string;
 
   @ApiProperty({ example: 'Non Warranty', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   all_warranty?: string;
 
   @ApiProperty({ example: '2025-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   amc_starting_date?: string;
 
   @ApiProperty({ example: 12, required: false })
@@ -137,13 +136,13 @@ export class CreateMasterMillDto {
   @ApiProperty({ example: 'Annual Maintenance Contract', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   amc_particular?: string;
 
   @ApiProperty({ example: '2026-01-15', required: false })
   @IsDateString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   amc_closing_date?: string;
 
   @ApiProperty({ example: 5000.0, required: false })
@@ -156,6 +155,6 @@ export class CreateMasterMillDto {
   @ApiProperty({ example: 'ACTIVE', required: false })
   @IsString()
   @IsOptional()
-  @emptyStringToUndefined
+  @emptyStringToNull
   status?: string;
 }

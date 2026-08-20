@@ -193,83 +193,139 @@ export class MasterMillsService {
     });
     if (!existing) throw new NotFoundException('Master Mill record not found');
 
-    const data: any = { ...dto };
-    if (data.phone_no) {
-      data.phone_no = this.formatPhoneNumber(data.phone_no);
+    const data: any = {};
+
+    // String fields - set to null if empty string or null in dto
+    if (dto.invoice_no !== undefined) data.invoice_no = dto.invoice_no;
+    if (dto.ref_no !== undefined) data.ref_no = dto.ref_no || null;
+    if (dto.mill_id !== undefined) data.mill_id = dto.mill_id || null;
+    if (dto.address !== undefined) data.address = dto.address || null;
+    if (dto.place !== undefined) data.place = dto.place || null;
+    if (dto.state !== undefined) data.state = dto.state || null;
+    if (dto.phone_no !== undefined) {
+      data.phone_no = dto.phone_no ? this.formatPhoneNumber(dto.phone_no) || null : null;
+    }
+    if (dto.mc_model !== undefined) data.mc_model = dto.mc_model || null;
+    if (dto.frame_no !== undefined) data.frame_no = dto.frame_no || null;
+    if (dto.status !== undefined) data.status = dto.status;
+    if (dto.warranty_years !== undefined) data.warranty_years = dto.warranty_years ?? 0;
+    if (dto.warranty_months !== undefined) data.warranty_months = dto.warranty_months ?? 0;
+    if (dto.amc_particular !== undefined) data.amc_particular = dto.amc_particular || null;
+
+    if (dto.amc_period !== undefined) {
+      data.amc_period =
+        dto.amc_period !== null && dto.amc_period !== undefined && !isNaN(Number(dto.amc_period))
+          ? Number(dto.amc_period)
+          : null;
+    }
+    if (dto.amc_amount !== undefined) {
+      data.amc_amount =
+        dto.amc_amount !== null && dto.amc_amount !== undefined && !isNaN(Number(dto.amc_amount))
+          ? Number(dto.amc_amount)
+          : null;
     }
 
-    // Re-calculate warranty_closing_date if relevant fields change and not overridden
-    const installDate = data.installation_date
-      ? new Date(data.installation_date)
-      : existing.installation_date
-        ? new Date(existing.installation_date)
-        : null;
+    // Date fields - parse to Date object or set to null
+    if (dto.mfg_date !== undefined) {
+      data.mfg_date = dto.mfg_date ? new Date(dto.mfg_date) : null;
+    }
+    if (dto.invoice_date !== undefined) {
+      data.invoice_date = dto.invoice_date ? new Date(dto.invoice_date) : null;
+    }
+    if (dto.installation_date !== undefined) {
+      data.installation_date = dto.installation_date ? new Date(dto.installation_date) : null;
+    }
+    if (dto.warranty_start_date !== undefined) {
+      data.warranty_start_date = dto.warranty_start_date ? new Date(dto.warranty_start_date) : null;
+    }
+    if (dto.warranty_closing_date !== undefined) {
+      data.warranty_closing_date = dto.warranty_closing_date ? new Date(dto.warranty_closing_date) : null;
+    }
+    if (dto.amc_starting_date !== undefined) {
+      data.amc_starting_date = dto.amc_starting_date ? new Date(dto.amc_starting_date) : null;
+    }
+    if (dto.amc_closing_date !== undefined) {
+      data.amc_closing_date = dto.amc_closing_date ? new Date(dto.amc_closing_date) : null;
+    }
 
-    const startOfWarranty = data.warranty_start_date
-      ? new Date(data.warranty_start_date)
-      : existing.warranty_start_date
-        ? new Date(existing.warranty_start_date)
-        : null;
+    // Re-calculate warranty_closing_date if relevant fields change and not explicitly overridden
+    const installDate = data.installation_date !== undefined
+      ? data.installation_date
+      : existing.installation_date;
+
+    const startOfWarranty = data.warranty_start_date !== undefined
+      ? data.warranty_start_date
+      : existing.warranty_start_date;
 
     const baseDate = startOfWarranty || installDate;
 
-    if (baseDate && !data.warranty_closing_date) {
+    if (baseDate && data.warranty_closing_date === undefined) {
       const years = data.warranty_years ?? existing.warranty_years ?? 0;
       const months = data.warranty_months ?? existing.warranty_months ?? 0;
       const totalMonths = months + years * 12;
       const closing = new Date(baseDate);
       closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
       closing.setDate(closing.getDate() - 1);
-      data.warranty_closing_date = closing.toISOString();
+      data.warranty_closing_date = closing;
     }
 
     // Re-calculate or clear amc_closing_date if relevant fields change
     const amcStart = data.amc_starting_date !== undefined
-      ? (data.amc_starting_date ? new Date(data.amc_starting_date) : null)
-      : (existing.amc_starting_date ? new Date(existing.amc_starting_date) : null);
-    const amcPeriod = data.amc_period ?? existing.amc_period;
+      ? data.amc_starting_date
+      : existing.amc_starting_date;
+    const amcPeriod = data.amc_period !== undefined
+      ? data.amc_period
+      : existing.amc_period;
 
     if (!amcStart) {
-      data.amc_closing_date = null as any;
-    } else if (amcStart && amcPeriod) {
+      data.amc_closing_date = null;
+    } else if (amcStart && amcPeriod && data.amc_closing_date === undefined) {
       const amcClose = new Date(amcStart);
       amcClose.setMonth(amcClose.getMonth() + amcPeriod);
       amcClose.setDate(amcClose.getDate() - 1);
-      data.amc_closing_date = amcClose.toISOString();
+      data.amc_closing_date = amcClose;
     }
 
     // Determine warranty status dynamically
     let allWarranty = 'Non Warranty';
     const now = new Date();
-    const warrantyClose = data.warranty_closing_date ? new Date(data.warranty_closing_date) : (existing.warranty_closing_date ? new Date(existing.warranty_closing_date) : null);
-    const amcClose = data.amc_closing_date ? new Date(data.amc_closing_date) : (existing.amc_closing_date ? new Date(existing.amc_closing_date) : null);
-    if (warrantyClose && warrantyClose > now) {
+    const warrantyClose = data.warranty_closing_date !== undefined
+      ? data.warranty_closing_date
+      : existing.warranty_closing_date;
+    const amcClose = data.amc_closing_date !== undefined
+      ? data.amc_closing_date
+      : existing.amc_closing_date;
+
+    if (warrantyClose && new Date(warrantyClose) > now) {
       allWarranty = 'Under Warranty';
-    } else if (amcClose && amcClose > now) {
+    } else if (amcClose && new Date(amcClose) > now) {
       allWarranty = 'Under AMC';
     } else if (warrantyClose || amcClose) {
       allWarranty = 'Expired';
     }
     data.all_warranty = allWarranty;
 
-
-    // Convert date strings to Date objects for Prisma
-    if (data.mfg_date) data.mfg_date = new Date(data.mfg_date);
-    if (data.invoice_date) data.invoice_date = new Date(data.invoice_date);
-    if (data.installation_date)
-      data.installation_date = new Date(data.installation_date);
-    if (data.warranty_start_date)
-      data.warranty_start_date = new Date(data.warranty_start_date);
-    if (data.warranty_closing_date)
-      data.warranty_closing_date = new Date(data.warranty_closing_date);
-    if (data.amc_starting_date)
-      data.amc_starting_date = new Date(data.amc_starting_date);
-    if (data.amc_closing_date)
-      data.amc_closing_date = new Date(data.amc_closing_date);
-
     const updated = await this.prisma.masterMill.update({
       where: { id },
       data,
+      include: {
+        mill: {
+          select: {
+            id: true,
+            name: true,
+            ref_no: true,
+            place: true,
+            phone: true,
+            customer_id: true,
+            customer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     await this.invalidateCache(id);
@@ -1291,6 +1347,8 @@ export class MasterMillsService {
   private async invalidateCache(id?: string) {
     const promises: Promise<any>[] = [
       this.redis.delByPrefix(this.LIST_CACHE_KEY),
+      this.redis.delByPrefix('master_mills:'),
+      this.redis.delByPrefix('reports:master-mills'),
     ];
     if (id) {
       promises.push(this.redis.del(`${this.CACHE_PREFIX}id:${id}`));

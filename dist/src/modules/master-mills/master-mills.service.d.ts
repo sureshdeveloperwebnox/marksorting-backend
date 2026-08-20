@@ -90,6 +90,19 @@ export declare class MasterMillsService {
             amc_amount: Prisma.Decimal | null;
         };
         after: {
+            mill: {
+                id: string;
+                name: string;
+                place: string | null;
+                phone: string | null;
+                ref_no: string | null;
+                customer_id: string | null;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
+            } | null;
+        } & {
             id: string;
             created_at: Date;
             updated_at: Date;
