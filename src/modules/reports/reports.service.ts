@@ -10,6 +10,7 @@ import {
   CompanyPdfSettings,
 } from './templates/reports.template';
 import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import { Prisma } from '@prisma/client';
 
 interface ReportParams {
@@ -1282,37 +1283,83 @@ export class ReportsService {
     const reports = await this.prisma.masterMill.findMany({
       where,
       include: {
-        mill: { select: { id: true, name: true } },
+        mill: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            phone: true,
+            customer: {
+              select: { id: true, name: true },
+            },
+          },
+        },
       },
       orderBy: { installation_date: 'desc' },
     });
 
+    const formatDate = (date: Date | null | undefined): string => {
+      if (!date) return '';
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '';
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
     const headers = [
-      'Ref No / Frame No',
+      'Invoice No',
+      'Invoice Date',
+      'Ref No',
       'Mill Name',
+      'Customer Name',
       'Place',
-      'Machine Model',
+      'State',
+      'Phone No',
+      'Address',
+      'Frame No',
+      'MC Model',
+      'MFG Date',
       'Installation Date',
-      'Warranty Status',
-      'AMC Period',
-      'Status',
+      'Warranty Start Date',
+      'Warranty Period (Months)',
+      'AMC Starting Date',
+      'AMC Closing Date',
+      'AMC Period (Months)',
+      'AMC Amount',
+      'AMC Particulars',
     ];
 
-    const data = reports.map((r) => [
-      `${r.ref_no || '-'} / ${r.frame_no || '-'}`,
-      r.mill?.name || '-',
-      r.place || '-',
-      r.mc_model || '-',
-      r.installation_date
-        ? r.installation_date.toISOString().slice(0, 10)
-        : '-',
-      r.all_warranty || 'Non Warranty',
-      r.amc_period ? `${r.amc_period} Months` : '-',
-      r.status,
+    const dataRows = reports.map((r) => [
+      r.invoice_no || '',
+      formatDate(r.invoice_date),
+      r.ref_no || '',
+      r.mill?.name || '',
+      r.mill?.customer?.name || '',
+      r.place || '',
+      r.state || '',
+      r.phone_no || r.mill?.phone || '',
+      r.address || r.mill?.address || '',
+      r.frame_no || '',
+      r.mc_model || '',
+      formatDate(r.mfg_date),
+      formatDate(r.installation_date),
+      formatDate(r.warranty_start_date),
+      r.warranty_months !== null && r.warranty_months !== undefined
+        ? r.warranty_months
+        : r.warranty_years
+          ? r.warranty_years * 12
+          : 0,
+      formatDate(r.amc_starting_date),
+      formatDate(r.amc_closing_date),
+      r.amc_period !== null && r.amc_period !== undefined ? r.amc_period : '',
+      r.amc_amount !== null && r.amc_amount !== undefined ? Number(r.amc_amount) : 0,
+      r.amc_particular || '',
     ]);
 
     if (formatType === 'csv') {
-      const buffer = this.generateCsv(headers, data);
+      const buffer = this.generateCsv(headers, dataRows);
       return {
         buffer,
         fileName: `master_mills_report_${Date.now()}.csv`,
@@ -1321,7 +1368,72 @@ export class ReportsService {
     }
 
     if (formatType === 'excel') {
-      const buffer = this.generateExcel('Master Mills', headers, data);
+      const formatSheetDate = (dStr: string) => {
+        if (!dStr) return '';
+        const parts = dStr.trim().split(/[-/]/);
+        if (parts.length === 3) {
+          if (parts[0].length === 4) {
+            // YYYY-MM-DD -> DD-MM-YYYY
+            return `${parts[2].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[0]}`;
+          }
+          return `${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}-${parts[2]}`;
+        }
+        return dStr;
+      };
+
+      let sheetName = 'Masters';
+      if (params.dateFrom && params.dateTo) {
+        const fromStr = formatSheetDate(params.dateFrom);
+        const toStr = formatSheetDate(params.dateTo);
+        sheetName = `Masters ${fromStr} - ${toStr}`;
+        if (sheetName.length > 31) {
+          // Compact format if exceeds 31 chars: e.g. "Masters 01-08-26 to 05-08-26"
+          const shortFrom = `${fromStr.slice(0, 6)}${fromStr.slice(-2)}`;
+          const shortTo = `${toStr.slice(0, 6)}${toStr.slice(-2)}`;
+          sheetName = `Masters ${shortFrom} to ${shortTo}`;
+        }
+      } else if (params.dateFrom) {
+        sheetName = `Masters From ${formatSheetDate(params.dateFrom)}`;
+      } else if (params.dateTo) {
+        sheetName = `Masters To ${formatSheetDate(params.dateTo)}`;
+      }
+      sheetName = sheetName.replace(/[\\/?*:[\]]/g, '-').slice(0, 31);
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet(sheetName);
+
+      // Set column definitions with headers
+      worksheet.columns = headers.map((header) => ({
+        header,
+        key: header,
+        width: Math.max(header.length + 4, 15),
+      }));
+
+      // Style the header row (bold, grey background #FFD3D3D3, borders)
+      const headerRow = worksheet.getRow(1);
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFD3D3D3' },
+        };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' },
+        };
+      });
+
+      // Add data rows
+      dataRows.forEach((row) => {
+        worksheet.addRow(row);
+      });
+
+      const arrayBuffer = await workbook.xlsx.writeBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
       return {
         buffer,
         fileName: `master_mills_report_${Date.now()}.xlsx`,
