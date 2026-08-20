@@ -312,6 +312,9 @@ model Notification {
   user       User?    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
+  @@index([user_id, status, created_at])
+  @@index([user_id, type, created_at])
+  @@index([user_id, created_at])
   @@map("notifications")
 }
 

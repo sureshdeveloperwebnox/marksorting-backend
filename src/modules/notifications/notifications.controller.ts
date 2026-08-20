@@ -47,15 +47,30 @@ export class NotificationsController {
   @ApiOperation({ summary: 'Get paginated notifications for the current user' })
   @ApiQuery({ name: 'skip', required: false, type: Number })
   @ApiQuery({ name: 'take', required: false, type: Number })
+  @ApiQuery({ name: 'type', required: false, type: String })
+  @ApiQuery({ name: 'types', required: false, type: String, description: 'Comma-separated notification types' })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
   getNotifications(
     @Request() req: any,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
+    @Query('type') type?: string,
+    @Query('types') types?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
+    const typesArray = types ? types.split(',').map((t) => t.trim()).filter(Boolean) : undefined;
     return this.notificationsService.getUserNotifications(
       req.user.userId,
       skip ? parseInt(skip, 10) : 0,
       take ? parseInt(take, 10) : 20,
+      {
+        type,
+        types: typesArray,
+        startDate,
+        endDate,
+      },
     );
   }
 

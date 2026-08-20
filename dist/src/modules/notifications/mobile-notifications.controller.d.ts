@@ -11,7 +11,7 @@ export declare class MobileNotificationsController {
         token: string;
         device_type: string;
     }>;
-    getNotifications(req: any, skip?: string, take?: string): Promise<{
+    getNotifications(req: any, skip?: string, take?: string, type?: string, types?: string, startDate?: string, endDate?: string): Promise<{
         notifications: {
             id: string;
             user_id: string | null;

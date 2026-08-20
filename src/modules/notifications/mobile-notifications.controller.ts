@@ -189,11 +189,22 @@ export class MobileNotificationsController {
     @Request() req: any,
     @Query('skip') skip?: string,
     @Query('take') take?: string,
+    @Query('type') type?: string,
+    @Query('types') types?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
   ) {
+    const typesArray = types ? types.split(',').map((t) => t.trim()).filter(Boolean) : undefined;
     return this.notificationsService.getUserNotifications(
       req.user.userId,
       skip ? parseInt(skip, 10) : 0,
       take ? parseInt(take, 10) : 20,
+      {
+        type,
+        types: typesArray,
+        startDate,
+        endDate,
+      },
     );
   }
 

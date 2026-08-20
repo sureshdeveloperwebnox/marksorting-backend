@@ -79,17 +79,39 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         });
         return admins.map((a) => a.id);
     }
-    async getUserNotifications(userId, skip = 0, take = 20) {
+    async getUserNotifications(userId, skip = 0, take = 20, options) {
+        const where = { user_id: userId };
+        if (options?.types && options.types.length > 0) {
+            where.type = { in: options.types };
+        }
+        else if (options?.type && options.type !== 'ALL') {
+            where.type = options.type;
+        }
+        if (options?.startDate || options?.endDate) {
+            where.created_at = {};
+            if (options.startDate) {
+                const startStr = options.startDate.includes('T')
+                    ? options.startDate
+                    : `${options.startDate}T00:00:00.000Z`;
+                where.created_at.gte = new Date(startStr);
+            }
+            if (options.endDate) {
+                const endStr = options.endDate.includes('T')
+                    ? options.endDate
+                    : `${options.endDate}T23:59:59.999Z`;
+                where.created_at.lte = new Date(endStr);
+            }
+        }
         const [notifications, total, unreadCount] = await Promise.all([
             this.prisma.notification.findMany({
-                where: { user_id: userId },
+                where,
                 orderBy: { created_at: 'desc' },
                 skip,
                 take,
             }),
-            this.prisma.notification.count({ where: { user_id: userId } }),
+            this.prisma.notification.count({ where }),
             this.prisma.notification.count({
-                where: { user_id: userId, status: 'UNREAD' },
+                where: { ...where, status: 'UNREAD' },
             }),
         ]);
         return { notifications, total, unreadCount };

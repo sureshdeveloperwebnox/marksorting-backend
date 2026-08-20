@@ -29,8 +29,14 @@ let NotificationsController = class NotificationsController {
     registerPushToken(req, dto) {
         return this.notificationsService.registerPushToken(req.user.userId, dto.token, dto.device_type);
     }
-    getNotifications(req, skip, take) {
-        return this.notificationsService.getUserNotifications(req.user.userId, skip ? parseInt(skip, 10) : 0, take ? parseInt(take, 10) : 20);
+    getNotifications(req, skip, take, type, types, startDate, endDate) {
+        const typesArray = types ? types.split(',').map((t) => t.trim()).filter(Boolean) : undefined;
+        return this.notificationsService.getUserNotifications(req.user.userId, skip ? parseInt(skip, 10) : 0, take ? parseInt(take, 10) : 20, {
+            type,
+            types: typesArray,
+            startDate,
+            endDate,
+        });
     }
     markAsRead(req, id) {
         return this.notificationsService.markAsRead(req.user.userId, id);
@@ -71,11 +77,19 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get paginated notifications for the current user' }),
     (0, swagger_1.ApiQuery)({ name: 'skip', required: false, type: Number }),
     (0, swagger_1.ApiQuery)({ name: 'take', required: false, type: Number }),
+    (0, swagger_1.ApiQuery)({ name: 'type', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'types', required: false, type: String, description: 'Comma-separated notification types' }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', required: false, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', required: false, type: String }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Query)('skip')),
     __param(2, (0, common_1.Query)('take')),
+    __param(3, (0, common_1.Query)('type')),
+    __param(4, (0, common_1.Query)('types')),
+    __param(5, (0, common_1.Query)('startDate')),
+    __param(6, (0, common_1.Query)('endDate')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:paramtypes", [Object, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], NotificationsController.prototype, "getNotifications", null);
 __decorate([

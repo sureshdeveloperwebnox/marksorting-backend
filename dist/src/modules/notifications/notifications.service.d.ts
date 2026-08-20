@@ -24,7 +24,12 @@ export declare class NotificationsService {
     broadcastToRole(roleName: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcastToRoles(roleNames: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     getAdminUserIds(): Promise<string[]>;
-    getUserNotifications(userId: string, skip?: number, take?: number): Promise<{
+    getUserNotifications(userId: string, skip?: number, take?: number, options?: {
+        type?: string;
+        types?: string[];
+        startDate?: string;
+        endDate?: string;
+    }): Promise<{
         notifications: {
             id: string;
             user_id: string | null;
