@@ -16,6 +16,7 @@ const class_transformer_1 = require("class-transformer");
 class CreateStoreDto {
     service_engineer_id;
     customer_id;
+    mill_id;
     material_ids;
     material_quantities;
     quantity;
@@ -44,6 +45,13 @@ __decorate([
     (0, class_validator_1.IsUUID)(),
     __metadata("design:type", String)
 ], CreateStoreDto.prototype, "customer_id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'uuid-of-mill', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_transformer_1.Transform)(({ value }) => (value === '' || value === null ? undefined : value)),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateStoreDto.prototype, "mill_id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: ['uuid-of-material-1', 'uuid-of-material-2'] }),
     (0, class_validator_1.IsArray)(),

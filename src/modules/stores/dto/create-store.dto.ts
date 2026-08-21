@@ -23,6 +23,12 @@ export class CreateStoreDto {
   @IsUUID()
   customer_id?: string;
 
+  @ApiProperty({ example: 'uuid-of-mill', required: false })
+  @IsOptional()
+  @Transform(({ value }) => (value === '' || value === null ? undefined : value))
+  @IsUUID()
+  mill_id?: string;
+
   @ApiProperty({ example: ['uuid-of-material-1', 'uuid-of-material-2'] })
   @IsArray()
   @IsUUID(undefined, { each: true })

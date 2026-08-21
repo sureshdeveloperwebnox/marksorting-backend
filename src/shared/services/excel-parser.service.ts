@@ -83,6 +83,7 @@ const HEADER_TO_FIELD_MAP: Record<
 // Required fields — must be present and non-empty
 const REQUIRED_FIELDS: Array<keyof PreviewRow> = [
   'invoice_no',
+  'ref_no',
   'mill_name',
   'place',
 ];
@@ -256,10 +257,18 @@ export class ExcelParserService {
       };
 
       // Validate required fields — must be present and non-empty
+      const FIELD_LABELS: Record<string, string> = {
+        invoice_no: 'Invoice No',
+        ref_no: 'Ref No',
+        mill_name: 'Mill Name',
+        place: 'Place',
+      };
+
       for (const field of REQUIRED_FIELDS) {
         const value = previewRow[field] as string;
         if (!value || value.trim() === '') {
-          previewRow.errors[field as string] = `${field} is required`;
+          const label = FIELD_LABELS[field as string] || field;
+          previewRow.errors[field as string] = `${label} is required`;
         }
       }
 

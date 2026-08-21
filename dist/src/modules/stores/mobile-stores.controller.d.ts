@@ -373,85 +373,9 @@ export declare class MobileStoresController {
         provider_name: string | null;
         remarks: string | null;
     }>;
-    create(dto: MobileCreateStoreDto, req: any): Promise<{
-        materials: ({
-            material: {
-                id: string;
-                name: string;
-            };
-        } & {
-            quantity: number;
-            stock_type: string | null;
-            store_id: string;
-            material_id: string;
-        })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
-    } & {
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
-        store_number: string | null;
-        service_engineer_id: string;
-        customer_id: string | null;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        stock_type: string | null;
-        barcode: string | null;
-        provider_name: string | null;
-        remarks: string | null;
-    }>;
+    create(dto: MobileCreateStoreDto, req: any): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
-    update(id: string, dto: MobileUpdateStoreDto, req: any): Promise<{
-        materials: ({
-            material: {
-                id: string;
-                name: string;
-            };
-        } & {
-            quantity: number;
-            stock_type: string | null;
-            store_id: string;
-            material_id: string;
-        })[];
-        customer: {
-            id: string;
-            name: string;
-        } | null;
-        service_engineer: {
-            id: string;
-            full_name: string;
-        };
-    } & {
-        id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
-        store_number: string | null;
-        service_engineer_id: string;
-        customer_id: string | null;
-        quantity: number;
-        warranty_status: string;
-        frame_number: string;
-        return_status: string;
-        inflow_status: string;
-        stock_type: string | null;
-        barcode: string | null;
-        provider_name: string | null;
-        remarks: string | null;
-    }>;
+    update(id: string, dto: MobileUpdateStoreDto, req: any): Promise<any>;
     remove(id: string, req: any): Promise<{
         id: string;
         created_at: Date;

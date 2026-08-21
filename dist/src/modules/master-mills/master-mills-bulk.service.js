@@ -107,6 +107,10 @@ let MasterMillsBulkService = class MasterMillsBulkService {
             const cleanFrame = row.frame_no?.trim().toLowerCase();
             const cleanMillName = row.mill_name?.trim().toLowerCase();
             const cleanCustomerName = row.customer_name?.trim().toLowerCase();
+            if (!cleanRef) {
+                row.errors.ref_no = 'Ref No is required';
+                row.isValid = false;
+            }
             if (cleanRef) {
                 const key = `${cleanRef}`;
                 if (sheetRefKeys.has(key)) {

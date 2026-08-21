@@ -137,6 +137,12 @@ export class MasterMillsBulkService {
       const cleanMillName = row.mill_name?.trim().toLowerCase();
       const cleanCustomerName = row.customer_name?.trim().toLowerCase();
 
+      // 0. Ensure Ref No is present
+      if (!cleanRef) {
+        row.errors.ref_no = 'Ref No is required';
+        row.isValid = false;
+      }
+
       // 1. Check for duplicates in the spreadsheet itself
       if (cleanRef) {
         const key = `${cleanRef}`;

@@ -235,6 +235,7 @@ export class StoresService implements OnModuleInit {
       service_engineer_id,
       customer_id,
       service_type,
+      mill_id,
       ...data
     } = dto;
 
@@ -253,7 +254,7 @@ export class StoresService implements OnModuleInit {
 
     data.frame_number = data.frame_number?.trim() || '';
 
-    // Auto-resolve customer_id from master_mills by frame_number if not provided
+    // Auto-resolve customer_id from master_mills or mill if not provided
     let resolvedCustomerId = customer_id;
     if (!resolvedCustomerId && data.frame_number) {
       const masterMill = await this.prisma.masterMill.findFirst({
@@ -262,6 +263,24 @@ export class StoresService implements OnModuleInit {
       });
       if (masterMill?.mill?.customer_id) {
         resolvedCustomerId = masterMill.mill.customer_id;
+      }
+    }
+    if (!resolvedCustomerId && mill_id) {
+      const mill = await this.prisma.mill.findUnique({
+        where: { id: mill_id },
+        select: { customer_id: true },
+      });
+      if (mill?.customer_id) {
+        resolvedCustomerId = mill.customer_id;
+      }
+    }
+    if (!data.frame_number && mill_id) {
+      const masterMill = await this.prisma.masterMill.findFirst({
+        where: { mill_id, deleted_at: null },
+        select: { frame_no: true },
+      });
+      if (masterMill?.frame_no) {
+        data.frame_number = masterMill.frame_no;
       }
     }
 
@@ -331,7 +350,8 @@ export class StoresService implements OnModuleInit {
       quantity: store.quantity,
     });
 
-    return store;
+    const enriched = (await this.enrichStoresWithCustomer([store]))[0];
+    return enriched || store;
   }
 
   async update(id: string, dto: UpdateStoreDto) {
@@ -421,7 +441,8 @@ export class StoresService implements OnModuleInit {
       });
     }
 
-    return { before: existing, after: store };
+    const enrichedAfter = (await this.enrichStoresWithCustomer([store]))[0];
+    return { before: existing, after: enrichedAfter || store };
   }
 
   async remove(id: string) {

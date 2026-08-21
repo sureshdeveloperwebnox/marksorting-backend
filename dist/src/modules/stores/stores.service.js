@@ -197,7 +197,7 @@ let StoresService = class StoresService {
         return store;
     }
     async create(dto) {
-        const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, ...data } = dto;
+        const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, mill_id, ...data } = dto;
         if (service_type) {
             if (data.remarks) {
                 data.remarks = data.remarks
@@ -219,6 +219,24 @@ let StoresService = class StoresService {
             });
             if (masterMill?.mill?.customer_id) {
                 resolvedCustomerId = masterMill.mill.customer_id;
+            }
+        }
+        if (!resolvedCustomerId && mill_id) {
+            const mill = await this.prisma.mill.findUnique({
+                where: { id: mill_id },
+                select: { customer_id: true },
+            });
+            if (mill?.customer_id) {
+                resolvedCustomerId = mill.customer_id;
+            }
+        }
+        if (!data.frame_number && mill_id) {
+            const masterMill = await this.prisma.masterMill.findFirst({
+                where: { mill_id, deleted_at: null },
+                select: { frame_no: true },
+            });
+            if (masterMill?.frame_no) {
+                data.frame_number = masterMill.frame_no;
             }
         }
         if (material_quantities && material_quantities.length > 0) {
@@ -272,7 +290,8 @@ let StoresService = class StoresService {
             inflowStatus: store.inflow_status,
             quantity: store.quantity,
         });
-        return store;
+        const enriched = (await this.enrichStoresWithCustomer([store]))[0];
+        return enriched || store;
     }
     async update(id, dto) {
         const existing = await this.prisma.store.findFirst({
@@ -341,7 +360,8 @@ let StoresService = class StoresService {
                 technicianUserId: store.service_engineer_id,
             });
         }
-        return { before: existing, after: store };
+        const enrichedAfter = (await this.enrichStoresWithCustomer([store]))[0];
+        return { before: existing, after: enrichedAfter || store };
     }
     async remove(id) {
         const existing = await this.prisma.store.findFirst({

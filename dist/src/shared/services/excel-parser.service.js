@@ -113,6 +113,7 @@ const HEADER_TO_FIELD_MAP = {
 };
 const REQUIRED_FIELDS = [
     'invoice_no',
+    'ref_no',
     'mill_name',
     'place',
 ];
@@ -234,10 +235,17 @@ let ExcelParserService = class ExcelParserService {
                 isValid: true,
                 rowIndex: dataRowIndex,
             };
+            const FIELD_LABELS = {
+                invoice_no: 'Invoice No',
+                ref_no: 'Ref No',
+                mill_name: 'Mill Name',
+                place: 'Place',
+            };
             for (const field of REQUIRED_FIELDS) {
                 const value = previewRow[field];
                 if (!value || value.trim() === '') {
-                    previewRow.errors[field] = `${field} is required`;
+                    const label = FIELD_LABELS[field] || field;
+                    previewRow.errors[field] = `${label} is required`;
                 }
             }
             for (const field of DATE_FIELDS) {
