@@ -11,7 +11,7 @@ export declare class NotificationsController {
         updated_at: Date;
         token: string;
         device_type: string;
-    }>;
+    } | null>;
     getNotifications(req: any, skip?: string, take?: string, type?: string, types?: string, startDate?: string, endDate?: string): Promise<{
         notifications: {
             id: string;

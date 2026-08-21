@@ -266,10 +266,14 @@ let MobileStoresController = class MobileStoresController {
         return result.after;
     }
     create(dto, req) {
+        const user = req?.user
+            ? { userId: req.user.userId || req.user.id, role: req.user.role }
+            : undefined;
+        const engineerId = user?.userId || req.user?.userId || req.user?.id;
         return this.storesService.create({
             ...dto,
-            service_engineer_id: req.user.userId,
-        });
+            service_engineer_id: engineerId,
+        }, user);
     }
     findOne(id, req) {
         return this.storesService.findByIdAndTechnician(id, req.user.userId);

@@ -19,6 +19,7 @@ const bullmq_1 = require("@nestjs/bullmq");
 const bullmq_2 = require("bullmq");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const notifications_gateway_1 = require("./notifications.gateway");
+const register_push_token_dto_1 = require("./dto/register-push-token.dto");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
     prisma;
     notificationsQueue;
@@ -30,6 +31,16 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         this.gateway = gateway;
     }
     async createNotification(userId, title, message, type, metaData) {
+        if (!userId)
+            return null;
+        const userExists = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { id: true },
+        });
+        if (!userExists) {
+            this.logger.warn(`Cannot create notification: User ${userId} does not exist in the database.`);
+            return null;
+        }
         const notification = await this.prisma.notification.create({
             data: {
                 user_id: userId,
@@ -41,10 +52,10 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             },
         });
         this.gateway.emitToUser(userId, 'notification', notification);
-        const recordId = metaData?.reportId ||
+        const recordId = metaData?.storeId ||
+            metaData?.reportId ||
             metaData?.expenseId ||
             metaData?.ticketId ||
-            metaData?.storeId ||
             metaData?.id ||
             notification.id;
         await this.notificationsQueue.add('send-push', {
@@ -55,11 +66,18 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             message,
             type,
             metaData,
-        }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
+        }, {
+            jobId: `push_${notification.id}_${userId}`,
+            removeOnComplete: true,
+            removeOnFail: false,
+            attempts: 2,
+            backoff: { type: 'exponential', delay: 5000 },
+        });
         return notification;
     }
     async sendToUsers(userIds, title, message, type, metaData) {
-        await Promise.all(userIds.map((uid) => this.createNotification(uid, title, message, type, metaData)));
+        const uniqueUserIds = Array.from(new Set((userIds || []).filter(Boolean)));
+        await Promise.all(uniqueUserIds.map((uid) => this.createNotification(uid, title, message, type, metaData)));
     }
     async broadcast(title, message, type, metaData) {
         const users = await this.prisma.user.findMany({
@@ -150,16 +168,38 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     }
     async notifyStakeholders(technicianUserIds, creatorUserId, title, message, type, metaData) {
         const adminIds = await this.getAdminUserIds();
-        const recipientIds = new Set([...adminIds, ...technicianUserIds]);
+        const validTechIds = (technicianUserIds || []).filter(Boolean);
+        const recipientIds = new Set([...adminIds, ...validTechIds]);
         if (creatorUserId) {
             recipientIds.delete(creatorUserId);
+        }
+        if (recipientIds.size === 0 && creatorUserId) {
+            recipientIds.add(creatorUserId);
         }
         await this.sendToUsers(Array.from(recipientIds), title, message, type, metaData);
     }
     async registerPushToken(userId, token, deviceType) {
+        const cleanToken = token?.trim();
+        if (!cleanToken || !userId)
+            return null;
+        await this.prisma.pushToken.deleteMany({
+            where: {
+                token: cleanToken,
+                user_id: { not: userId },
+            },
+        });
+        if (deviceType !== register_push_token_dto_1.DeviceType.WEB) {
+            await this.prisma.pushToken.deleteMany({
+                where: {
+                    user_id: userId,
+                    device_type: deviceType,
+                    token: { not: cleanToken },
+                },
+            });
+        }
         return this.prisma.pushToken.upsert({
-            where: { user_id_token: { user_id: userId, token } },
-            create: { user_id: userId, token, device_type: deviceType },
+            where: { user_id_token: { user_id: userId, token: cleanToken } },
+            create: { user_id: userId, token: cleanToken, device_type: deviceType },
             update: { device_type: deviceType, updated_at: new Date() },
         });
     }

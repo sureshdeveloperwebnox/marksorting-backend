@@ -228,7 +228,10 @@ export class StoresService implements OnModuleInit {
     return store;
   }
 
-  async create(dto: CreateStoreDto) {
+  async create(
+    dto: CreateStoreDto,
+    user?: { userId: string; role?: string },
+  ) {
     const {
       material_ids,
       material_quantities,
@@ -346,6 +349,7 @@ export class StoresService implements OnModuleInit {
       storeNumber: store.store_number,
       frameNumber: store.frame_number,
       technicianUserId: store.service_engineer_id,
+      creatorUserId: user?.userId,
       inflowStatus: store.inflow_status,
       quantity: store.quantity,
     });
@@ -354,7 +358,11 @@ export class StoresService implements OnModuleInit {
     return enriched || store;
   }
 
-  async update(id: string, dto: UpdateStoreDto) {
+  async update(
+    id: string,
+    dto: UpdateStoreDto,
+    user?: { userId: string; role?: string },
+  ) {
     const existing = await this.prisma.store.findFirst({
       where: { id, deleted_at: null },
     });
@@ -457,9 +465,11 @@ export class StoresService implements OnModuleInit {
     if (store.return_status && store.return_status !== existing.return_status) {
       this.eventEmitter.emit('store.return_updated', {
         storeId: store.id,
+        storeNumber: store.store_number,
         frameNumber: store.frame_number,
         returnStatus: store.return_status,
         technicianUserId: store.service_engineer_id,
+        creatorUserId: user?.userId,
       });
     }
 
@@ -701,9 +711,11 @@ export class StoresService implements OnModuleInit {
     if (store.return_status && store.return_status !== existing.return_status) {
       this.eventEmitter.emit('store.return_updated', {
         storeId: store.id,
+        storeNumber: store.store_number,
         frameNumber: store.frame_number,
         returnStatus: store.return_status,
         technicianUserId: store.service_engineer_id,
+        creatorUserId: technicianId,
       });
     }
 

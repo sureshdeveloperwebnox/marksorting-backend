@@ -23,6 +23,19 @@ export class NotificationsService {
     type: NotificationType,
     metaData?: Record<string, any>,
   ) {
+    if (!userId) return null;
+
+    const userExists = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!userExists) {
+      this.logger.warn(
+        `Cannot create notification: User ${userId} does not exist in the database.`,
+      );
+      return null;
+    }
+
     const notification = await this.prisma.notification.create({
       data: {
         user_id: userId,
@@ -37,10 +50,10 @@ export class NotificationsService {
     this.gateway.emitToUser(userId, 'notification', notification);
 
     const recordId =
+      metaData?.storeId ||
       metaData?.reportId ||
       metaData?.expenseId ||
       metaData?.ticketId ||
-      metaData?.storeId ||
       metaData?.id ||
       notification.id;
 
@@ -55,7 +68,13 @@ export class NotificationsService {
         type,
         metaData,
       },
-      { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
+      {
+        jobId: `push_${notification.id}_${userId}`,
+        removeOnComplete: true,
+        removeOnFail: false,
+        attempts: 2,
+        backoff: { type: 'exponential', delay: 5000 },
+      },
     );
 
     return notification;
@@ -68,8 +87,9 @@ export class NotificationsService {
     type: NotificationType,
     metaData?: Record<string, any>,
   ) {
+    const uniqueUserIds = Array.from(new Set((userIds || []).filter(Boolean)));
     await Promise.all(
-      userIds.map((uid) =>
+      uniqueUserIds.map((uid) =>
         this.createNotification(uid, title, message, type, metaData),
       ),
     );
@@ -219,9 +239,14 @@ export class NotificationsService {
     metaData?: Record<string, any>,
   ) {
     const adminIds = await this.getAdminUserIds();
-    const recipientIds = new Set([...adminIds, ...technicianUserIds]);
+    const validTechIds = (technicianUserIds || []).filter(Boolean);
+    const recipientIds = new Set([...adminIds, ...validTechIds]);
     if (creatorUserId) {
       recipientIds.delete(creatorUserId);
+    }
+    // If only the creator was the recipient, keep creator so an action notification is logged
+    if (recipientIds.size === 0 && creatorUserId) {
+      recipientIds.add(creatorUserId);
     }
     await this.sendToUsers(
       Array.from(recipientIds),
@@ -237,9 +262,33 @@ export class NotificationsService {
     token: string,
     deviceType: DeviceType,
   ) {
+    const cleanToken = token?.trim();
+    if (!cleanToken || !userId) return null;
+
+    // 1. A physical device token must belong to only ONE active user at a time.
+    // Delete this token from any other accounts (e.g. previous user who logged in on this phone).
+    await this.prisma.pushToken.deleteMany({
+      where: {
+        token: cleanToken,
+        user_id: { not: userId },
+      },
+    });
+
+    // 2. Keep only 1 active mobile token per user for this deviceType to prevent stale token accumulation
+    if (deviceType !== DeviceType.WEB) {
+      await this.prisma.pushToken.deleteMany({
+        where: {
+          user_id: userId,
+          device_type: deviceType,
+          token: { not: cleanToken },
+        },
+      });
+    }
+
+    // 3. Upsert the token for the current user
     return this.prisma.pushToken.upsert({
-      where: { user_id_token: { user_id: userId, token } },
-      create: { user_id: userId, token, device_type: deviceType },
+      where: { user_id_token: { user_id: userId, token: cleanToken } },
+      create: { user_id: userId, token: cleanToken, device_type: deviceType },
       update: { device_type: deviceType, updated_at: new Date() },
     });
   }

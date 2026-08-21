@@ -202,25 +202,35 @@ export class NotificationsEventListener {
   @OnEvent('store.created')
   async onStoreCreated(payload: {
     storeId: string;
+    storeNumber?: string;
     frameNumber?: string;
-    technicianUserId: string;
+    technicianUserId?: string;
     creatorUserId?: string;
     inflowStatus?: string;
     quantity?: number;
   }) {
     try {
-      const { frameNumber, technicianUserId, inflowStatus } = payload;
+      const {
+        storeId,
+        storeNumber,
+        frameNumber,
+        technicianUserId,
+        creatorUserId,
+        inflowStatus,
+      } = payload;
       const title = 'New Store Record Created';
-      const message = frameNumber
-        ? `A new store record (${inflowStatus || 'Inflow'}) for machine ${frameNumber} has been assigned to you.`
-        : `A new store record (${inflowStatus || 'Inflow'}) has been created and assigned to you.`;
+      const label =
+        storeNumber || (frameNumber ? `Frame ${frameNumber}` : 'Store Record');
+      const message = `A new store record (${inflowStatus || 'Inflow'}) for ${label} has been created.`;
 
-      await this.notificationsService.sendToUsers(
-        [technicianUserId],
+      const technicianIds = technicianUserId ? [technicianUserId] : [];
+      await this.notificationsService.notifyStakeholders(
+        technicianIds,
+        creatorUserId,
         title,
         message,
         NotificationType.STORE,
-        { storeId: payload.storeId, frameNumber },
+        { storeId, storeNumber, frameNumber, inflowStatus },
       );
     } catch (err) {
       this.logger.error('Error handling store.created event', err);
@@ -230,23 +240,35 @@ export class NotificationsEventListener {
   @OnEvent('store.return_updated')
   async onStoreReturnUpdated(payload: {
     storeId: string;
+    storeNumber?: string;
     frameNumber?: string;
     returnStatus: string;
-    technicianUserId: string;
+    technicianUserId?: string;
+    creatorUserId?: string;
   }) {
     try {
-      const { frameNumber, returnStatus, technicianUserId } = payload;
+      const {
+        storeId,
+        storeNumber,
+        frameNumber,
+        returnStatus,
+        technicianUserId,
+        creatorUserId,
+      } = payload;
       const title = 'Store Return Status Updated';
-      const message = frameNumber
-        ? `Store return for machine ${frameNumber} has been updated to "${returnStatus}".`
-        : `Your store return record has been updated to "${returnStatus}".`;
+      const label =
+        storeNumber ||
+        (frameNumber ? `machine ${frameNumber}` : 'store return');
+      const message = `Store return for ${label} has been updated to "${returnStatus}".`;
 
-      await this.notificationsService.sendToUsers(
-        [technicianUserId],
+      const technicianIds = technicianUserId ? [technicianUserId] : [];
+      await this.notificationsService.notifyStakeholders(
+        technicianIds,
+        creatorUserId,
         title,
         message,
         NotificationType.STORE,
-        { storeId: payload.storeId, returnStatus, frameNumber },
+        { storeId, storeNumber, returnStatus, frameNumber },
       );
     } catch (err) {
       this.logger.error('Error handling store.return_updated event', err);

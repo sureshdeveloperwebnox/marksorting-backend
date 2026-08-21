@@ -105,11 +105,16 @@ export class NotificationProcessor extends WorkerHost {
     const pushTokens = await this.prisma.pushToken.findMany({
       where: { user_id: userId },
       select: { token: true },
+      orderBy: { updated_at: 'desc' },
     });
 
     if (!pushTokens.length) return;
 
-    const tokens = pushTokens.map((pt) => pt.token);
+    const tokens = Array.from(
+      new Set(pushTokens.map((pt) => pt.token.trim())),
+    ).filter(Boolean);
+
+    if (!tokens.length) return;
 
     try {
       const response = await this.firebaseApp.messaging().sendEachForMulticast({

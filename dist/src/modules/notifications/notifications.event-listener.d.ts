@@ -45,16 +45,19 @@ export declare class NotificationsEventListener {
     }): Promise<void>;
     onStoreCreated(payload: {
         storeId: string;
+        storeNumber?: string;
         frameNumber?: string;
-        technicianUserId: string;
+        technicianUserId?: string;
         creatorUserId?: string;
         inflowStatus?: string;
         quantity?: number;
     }): Promise<void>;
     onStoreReturnUpdated(payload: {
         storeId: string;
+        storeNumber?: string;
         frameNumber?: string;
         returnStatus: string;
-        technicianUserId: string;
+        technicianUserId?: string;
+        creatorUserId?: string;
     }): Promise<void>;
 }

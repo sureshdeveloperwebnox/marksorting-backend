@@ -539,10 +539,17 @@ export class MobileStoresController {
     },
   })
   create(@Body() dto: MobileCreateStoreDto, @Request() req: any) {
-    return this.storesService.create({
-      ...dto,
-      service_engineer_id: req.user.userId,
-    });
+    const user = req?.user
+      ? { userId: req.user.userId || req.user.id, role: req.user.role }
+      : undefined;
+    const engineerId = user?.userId || req.user?.userId || req.user?.id;
+    return this.storesService.create(
+      {
+        ...dto,
+        service_engineer_id: engineerId,
+      },
+      user,
+    );
   }
 
   @Get(':id')

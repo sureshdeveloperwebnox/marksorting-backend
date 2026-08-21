@@ -316,8 +316,11 @@ export class StoresController {
       );
     },
   })
-  create(@Body() dto: CreateStoreDto) {
-    return this.storesService.create(dto);
+  create(@Body() dto: CreateStoreDto, @Request() req: any) {
+    const user = req?.user
+      ? { userId: req.user.userId || req.user.id, role: req.user.role }
+      : undefined;
+    return this.storesService.create(dto, user);
   }
 
   @Put('return/:id/details')
@@ -467,7 +470,10 @@ export class StoresController {
     @Body() dto: UpdateStoreDto,
     @Request() req: any,
   ) {
-    const result = await this.storesService.update(id, dto);
+    const user = req?.user
+      ? { userId: req.user.userId || req.user.id, role: req.user.role }
+      : undefined;
+    const result = await this.storesService.update(id, dto, user);
     req.logData = result;
     return result.after;
   }

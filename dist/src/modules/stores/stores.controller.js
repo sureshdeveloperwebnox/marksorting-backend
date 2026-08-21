@@ -141,8 +141,11 @@ let StoresController = class StoresController {
         }
         return store;
     }
-    create(dto) {
-        return this.storesService.create(dto);
+    create(dto, req) {
+        const user = req?.user
+            ? { userId: req.user.userId || req.user.id, role: req.user.role }
+            : undefined;
+        return this.storesService.create(dto, user);
     }
     async submitReturnDetailsPath1(id, dto, req) {
         const userId = req.user?.userId || req.user?.id;
@@ -173,7 +176,10 @@ let StoresController = class StoresController {
         return result.after;
     }
     async update(id, dto, req) {
-        const result = await this.storesService.update(id, dto);
+        const user = req?.user
+            ? { userId: req.user.userId || req.user.id, role: req.user.role }
+            : undefined;
+        const result = await this.storesService.update(id, dto, user);
         req.logData = result;
         return result.after;
     }
@@ -342,8 +348,9 @@ __decorate([
         },
     }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_store_dto_1.CreateStoreDto]),
+    __metadata("design:paramtypes", [create_store_dto_1.CreateStoreDto, Object]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "create", null);
 __decorate([

@@ -18,7 +18,7 @@ export declare class NotificationsService {
         title: string;
         message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
-    }>;
+    } | null>;
     sendToUsers(userIds: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcast(title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
     broadcastToRole(roleName: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
@@ -62,6 +62,6 @@ export declare class NotificationsService {
         updated_at: Date;
         token: string;
         device_type: string;
-    }>;
+    } | null>;
     removePushToken(userId: string, token: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
 }

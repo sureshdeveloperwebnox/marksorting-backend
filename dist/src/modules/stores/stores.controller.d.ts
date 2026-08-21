@@ -11,7 +11,7 @@ export declare class StoresController {
         total: number;
     }>;
     findOne(id: string): Promise<any>;
-    create(dto: CreateStoreDto): Promise<any>;
+    create(dto: CreateStoreDto, req: any): Promise<any>;
     submitReturnDetailsPath1(id: string, dto: UpdateStoreReturnDto, req: any): Promise<{
         materials: ({
             material: {

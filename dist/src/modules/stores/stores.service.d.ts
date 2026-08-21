@@ -22,8 +22,14 @@ export declare class StoresService implements OnModuleInit {
     }): Promise<any>;
     private enrichStoresWithCustomer;
     findById(id: string): Promise<any>;
-    create(dto: CreateStoreDto): Promise<any>;
-    update(id: string, dto: UpdateStoreDto): Promise<{
+    create(dto: CreateStoreDto, user?: {
+        userId: string;
+        role?: string;
+    }): Promise<any>;
+    update(id: string, dto: UpdateStoreDto, user?: {
+        userId: string;
+        role?: string;
+    }): Promise<{
         before: {
             id: string;
             created_at: Date;

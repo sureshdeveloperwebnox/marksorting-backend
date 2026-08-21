@@ -196,7 +196,7 @@ let StoresService = class StoresService {
         }
         return store;
     }
-    async create(dto) {
+    async create(dto, user) {
         const { material_ids, material_quantities, service_engineer_id, customer_id, service_type, mill_id, ...data } = dto;
         if (service_type) {
             if (data.remarks) {
@@ -287,13 +287,14 @@ let StoresService = class StoresService {
             storeNumber: store.store_number,
             frameNumber: store.frame_number,
             technicianUserId: store.service_engineer_id,
+            creatorUserId: user?.userId,
             inflowStatus: store.inflow_status,
             quantity: store.quantity,
         });
         const enriched = (await this.enrichStoresWithCustomer([store]))[0];
         return enriched || store;
     }
-    async update(id, dto) {
+    async update(id, dto, user) {
         const existing = await this.prisma.store.findFirst({
             where: { id, deleted_at: null },
         });
@@ -376,9 +377,11 @@ let StoresService = class StoresService {
         if (store.return_status && store.return_status !== existing.return_status) {
             this.eventEmitter.emit('store.return_updated', {
                 storeId: store.id,
+                storeNumber: store.store_number,
                 frameNumber: store.frame_number,
                 returnStatus: store.return_status,
                 technicianUserId: store.service_engineer_id,
+                creatorUserId: user?.userId,
             });
         }
         const enrichedAfter = (await this.enrichStoresWithCustomer([store]))[0];
@@ -558,9 +561,11 @@ let StoresService = class StoresService {
         if (store.return_status && store.return_status !== existing.return_status) {
             this.eventEmitter.emit('store.return_updated', {
                 storeId: store.id,
+                storeNumber: store.store_number,
                 frameNumber: store.frame_number,
                 returnStatus: store.return_status,
                 technicianUserId: store.service_engineer_id,
+                creatorUserId: technicianId,
             });
         }
         return {
