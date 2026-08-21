@@ -368,6 +368,7 @@ export class StoresService implements OnModuleInit {
       service_engineer_id,
       customer_id,
       service_type,
+      mill_id,
       ...data
     } = dto;
 
@@ -386,6 +387,25 @@ export class StoresService implements OnModuleInit {
 
     if (dto.frame_number !== undefined) {
       data.frame_number = dto.frame_number?.trim() || '';
+    } else if (mill_id && !existing.frame_number) {
+      const masterMill = await this.prisma.masterMill.findFirst({
+        where: { mill_id, deleted_at: null },
+        select: { frame_no: true },
+      });
+      if (masterMill?.frame_no) {
+        data.frame_number = masterMill.frame_no;
+      }
+    }
+
+    let resolvedCustomerId = customer_id;
+    if (!resolvedCustomerId && mill_id) {
+      const mill = await this.prisma.mill.findUnique({
+        where: { id: mill_id },
+        select: { customer_id: true },
+      });
+      if (mill?.customer_id) {
+        resolvedCustomerId = mill.customer_id;
+      }
     }
 
     if (material_quantities && material_quantities.length > 0) {
@@ -402,7 +422,9 @@ export class StoresService implements OnModuleInit {
         service_engineer: service_engineer_id
           ? { connect: { id: service_engineer_id } }
           : undefined,
-        customer: customer_id ? { connect: { id: customer_id } } : undefined,
+        customer: resolvedCustomerId !== undefined
+          ? (resolvedCustomerId ? { connect: { id: resolvedCustomerId } } : { disconnect: true })
+          : undefined,
         materials: material_ids
           ? {
               deleteMany: {},
