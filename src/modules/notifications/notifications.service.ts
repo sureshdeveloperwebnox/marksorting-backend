@@ -36,9 +36,25 @@ export class NotificationsService {
 
     this.gateway.emitToUser(userId, 'notification', notification);
 
+    const recordId =
+      metaData?.reportId ||
+      metaData?.expenseId ||
+      metaData?.ticketId ||
+      metaData?.storeId ||
+      metaData?.id ||
+      notification.id;
+
     await this.notificationsQueue.add(
       'send-push',
-      { id: notification.id, userId, title, message, type, metaData },
+      {
+        id: notification.id,
+        recordId,
+        userId,
+        title,
+        message,
+        type,
+        metaData,
+      },
       { attempts: 3, backoff: { type: 'exponential', delay: 5000 } },
     );
 
@@ -225,6 +241,12 @@ export class NotificationsService {
       where: { user_id_token: { user_id: userId, token } },
       create: { user_id: userId, token, device_type: deviceType },
       update: { device_type: deviceType, updated_at: new Date() },
+    });
+  }
+
+  async removePushToken(userId: string, token: string) {
+    return this.prisma.pushToken.deleteMany({
+      where: { user_id: userId, token },
     });
   }
 }

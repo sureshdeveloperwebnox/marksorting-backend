@@ -211,6 +211,7 @@ export class TicketsService {
 
     const assignedIds = service_engineer_id ? [service_engineer_id] : [];
     this.eventEmitter.emit('ticket.created', {
+      ticketId: ticket.id,
       ticketNumber: ticket.ticket_number,
       subject: ticket.subject,
       assignedTechnicianUserIds: assignedIds,
@@ -312,6 +313,7 @@ export class TicketsService {
       nextServiceEngineerId !== existing.service_engineer_id
     ) {
       this.eventEmitter.emit('ticket.assigned', {
+        ticketId: ticket.id,
         ticketNumber: ticket.ticket_number,
         subject: ticket.subject,
         assignedTechnicianUserIds: [nextServiceEngineerId],

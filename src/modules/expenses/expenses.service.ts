@@ -635,6 +635,7 @@ export class ExpensesService {
 
     if (expense) {
       this.eventEmitter.emit('expense.created', {
+        expenseId: expense.id,
         expenseNumber: expense.expense_number,
         amount: expense.amount?.toString() || '0',
         creatorUserId: user?.userId,
@@ -1143,6 +1144,7 @@ export class ExpensesService {
       const technicianUserIds: string[] =
         (expense as any).technicians?.map((t: any) => t.technician_id) ?? [];
       this.eventEmitter.emit('expense.status_updated', {
+        expenseId: expense.id,
         expenseNumber: expense.expense_number,
         status: expense.status,
         technicianUserIds,

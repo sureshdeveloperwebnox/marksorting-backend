@@ -4,35 +4,41 @@ export declare class NotificationsEventListener {
     private readonly logger;
     constructor(notificationsService: NotificationsService);
     onServiceReportCreated(payload: {
+        reportId?: string;
         reportNumber: string;
         millName: string;
         technicianUserIds: string[];
         creatorUserId?: string;
     }): Promise<void>;
     onInstallationReportCreated(payload: {
+        reportId?: string;
         reportNumber: string;
         millName: string;
         technicianUserIds: string[];
         creatorUserId?: string;
     }): Promise<void>;
     onExpenseCreated(payload: {
+        expenseId?: string;
         expenseNumber: string;
         amount: string;
         creatorUserId?: string;
         technicianUserIds?: string[];
     }): Promise<void>;
     onExpenseStatusUpdated(payload: {
+        expenseId?: string;
         expenseNumber: string;
         status: string;
         technicianUserIds: string[];
     }): Promise<void>;
     onTicketCreated(payload: {
+        ticketId?: string;
         ticketNumber: string;
         subject: string;
         assignedTechnicianUserIds: string[];
         creatorUserId?: string;
     }): Promise<void>;
     onTicketAssigned(payload: {
+        ticketId?: string;
         ticketNumber: string;
         subject: string;
         assignedTechnicianUserIds: string[];

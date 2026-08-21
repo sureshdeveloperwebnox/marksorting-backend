@@ -595,6 +595,7 @@ export class InstallationReportsService {
       });
 
       this.eventEmitter.emit('installation-report.created', {
+        reportId: installationReport.id,
         reportNumber: installationReport.report_number,
         millName: installationReport.mill?.name || '',
         technicianUserIds: finalTechnicianIds,

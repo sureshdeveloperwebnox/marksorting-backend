@@ -11,6 +11,7 @@ export declare class MobileNotificationsController {
         token: string;
         device_type: string;
     }>;
+    deregisterPushToken(req: any, token: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     getNotifications(req: any, skip?: string, take?: string, type?: string, types?: string, startDate?: string, endDate?: string): Promise<{
         notifications: {
             id: string;

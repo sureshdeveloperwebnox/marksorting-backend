@@ -488,6 +488,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         }
         if (expense) {
             this.eventEmitter.emit('expense.created', {
+                expenseId: expense.id,
                 expenseNumber: expense.expense_number,
                 amount: expense.amount?.toString() || '0',
                 creatorUserId: user?.userId,
@@ -884,6 +885,7 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
         if (dto.status && expense) {
             const technicianUserIds = expense.technicians?.map((t) => t.technician_id) ?? [];
             this.eventEmitter.emit('expense.status_updated', {
+                expenseId: expense.id,
                 expenseNumber: expense.expense_number,
                 status: expense.status,
                 technicianUserIds,

@@ -3,6 +3,7 @@ import {
   Get,
   Patch,
   Post,
+  Delete,
   Param,
   Query,
   Body,
@@ -147,6 +148,44 @@ export class MobileNotificationsController {
       dto.token,
       dto.device_type,
     );
+  }
+
+  // ── DELETE /push-token ────────────────────────────────────────────────────
+
+  @Delete('push-token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '[Mobile] Deregister FCM push token',
+    description:
+      'Deregisters the FCM device push token for the authenticated user upon logout.\n\n' +
+      'Pass the token in the request body to remove it from receiving further notifications.',
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        token: { type: 'string', example: 'fcm_token_string_here' },
+      },
+      required: ['token'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token deregistered successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        count: { type: 'integer', example: 1 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Missing or invalid JWT bearer token',
+    schema: errorSchema('Unauthorized'),
+  })
+  deregisterPushToken(@Request() req: any, @Body('token') token: string) {
+    return this.notificationsService.removePushToken(req.user.userId, token);
   }
 
   // ── GET / ─────────────────────────────────────────────────────────────────

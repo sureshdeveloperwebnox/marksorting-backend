@@ -4,6 +4,26 @@ import { Job } from 'bullmq';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 
+function mapNotificationType(type: string): string {
+  const upper = String(type || '').toUpperCase();
+  switch (upper) {
+    case 'TICKET':
+      return 'ticket';
+    case 'EXPENSE':
+      return 'expense';
+    case 'STORE':
+    case 'STORE_RETURN':
+      return 'store_return';
+    case 'INSTALLATION':
+    case 'INSTALLATION_REPORT':
+      return 'installation_report';
+    case 'SERVICE_REPORT':
+      return 'service_report';
+    default:
+      return String(type || '').toLowerCase();
+  }
+}
+
 @Processor('notifications')
 export class NotificationProcessor extends WorkerHost {
   private readonly logger = new Logger(NotificationProcessor.name);
@@ -63,11 +83,21 @@ export class NotificationProcessor extends WorkerHost {
 
   private async handleSendPush(job: Job<any>) {
     this.initFirebase();
-    const { id, userId, title, message, type } = job.data;
+    const { id, userId, title, message, type, recordId } = job.data;
+    const targetRecordId =
+      recordId ||
+      job.data.metaData?.reportId ||
+      job.data.metaData?.expenseId ||
+      job.data.metaData?.ticketId ||
+      job.data.metaData?.storeId ||
+      job.data.metaData?.id ||
+      id ||
+      '';
+    const mappedType = mapNotificationType(type);
 
     if (this.firebaseMockMode) {
       this.logger.log(
-        `[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${type}, id: ${id})`,
+        `[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${mappedType}, id: ${targetRecordId})`,
       );
       return;
     }
@@ -89,13 +119,17 @@ export class NotificationProcessor extends WorkerHost {
           body: message,
         },
         data: {
-          id: String(id || ''),
-          type: String(type || ''),
+          id: String(targetRecordId || ''),
+          type: mappedType,
           title: String(title || ''),
           body: String(message || ''),
+          click_action: 'FLUTTER_NOTIFICATION_CLICK',
           ...(job.data.metaData
             ? Object.fromEntries(
-                Object.entries(job.data.metaData).map(([k, v]) => [k, String(v)]),
+                Object.entries(job.data.metaData).map(([k, v]) => [
+                  k,
+                  String(v ?? ''),
+                ]),
               )
             : {}),
         },
@@ -103,10 +137,12 @@ export class NotificationProcessor extends WorkerHost {
           priority: 'high',
           notification: {
             channelId: 'high_importance_channel',
+            icon: '@mipmap/launcher_icon',
             sound: 'default',
             defaultSound: true,
             defaultVibrateTimings: true,
-            priority: 'max',
+            notificationPriority: 'PRIORITY_MAX',
+            visibility: 'PUBLIC',
           },
         },
         apns: {
@@ -128,7 +164,19 @@ export class NotificationProcessor extends WorkerHost {
       );
 
       const failed = response.responses
-        .map((r: any, i: number) => (!r.success ? tokens[i] : null))
+        .map((r: any, i: number) => {
+          if (!r.success) {
+            const errCode = r.error?.code;
+            if (
+              errCode === 'messaging/invalid-registration-token' ||
+              errCode === 'messaging/registration-token-not-registered' ||
+              !errCode
+            ) {
+              return tokens[i];
+            }
+          }
+          return null;
+        })
         .filter(Boolean);
 
       if (failed.length > 0) {

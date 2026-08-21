@@ -11,14 +11,20 @@ export class NotificationsEventListener {
 
   @OnEvent('service-report.created')
   async onServiceReportCreated(payload: {
+    reportId?: string;
     reportNumber: string;
     millName: string;
     technicianUserIds: string[];
     creatorUserId?: string;
   }) {
     try {
-      const { reportNumber, millName, technicianUserIds, creatorUserId } =
-        payload;
+      const {
+        reportId,
+        reportNumber,
+        millName,
+        technicianUserIds,
+        creatorUserId,
+      } = payload;
       const title = 'New Service Report Created';
       const message = `Service Report ${reportNumber} has been created for mill "${millName}".`;
 
@@ -28,7 +34,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.SERVICE_REPORT,
-        { reportNumber, millName },
+        { reportId, reportNumber, millName },
       );
     } catch (err) {
       this.logger.error('Error handling service-report.created event', err);
@@ -37,14 +43,20 @@ export class NotificationsEventListener {
 
   @OnEvent('installation-report.created')
   async onInstallationReportCreated(payload: {
+    reportId?: string;
     reportNumber: string;
     millName: string;
     technicianUserIds: string[];
     creatorUserId?: string;
   }) {
     try {
-      const { reportNumber, millName, technicianUserIds, creatorUserId } =
-        payload;
+      const {
+        reportId,
+        reportNumber,
+        millName,
+        technicianUserIds,
+        creatorUserId,
+      } = payload;
       const title = 'New Installation Report Created';
       const message = `Installation Report ${reportNumber} has been created for mill "${millName}".`;
 
@@ -54,7 +66,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.INSTALLATION,
-        { reportNumber, millName },
+        { reportId, reportNumber, millName },
       );
     } catch (err) {
       this.logger.error(
@@ -66,14 +78,20 @@ export class NotificationsEventListener {
 
   @OnEvent('expense.created')
   async onExpenseCreated(payload: {
+    expenseId?: string;
     expenseNumber: string;
     amount: string;
     creatorUserId?: string;
     technicianUserIds?: string[];
   }) {
     try {
-      const { expenseNumber, amount, creatorUserId, technicianUserIds } =
-        payload;
+      const {
+        expenseId,
+        expenseNumber,
+        amount,
+        creatorUserId,
+        technicianUserIds,
+      } = payload;
       const title = 'New Expense Submitted';
       const message = `Expense ${expenseNumber} of ₹${amount} has been submitted for approval.`;
 
@@ -83,7 +101,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.EXPENSE,
-        { expenseNumber, amount },
+        { expenseId, expenseNumber, amount },
       );
     } catch (err) {
       this.logger.error('Error handling expense.created event', err);
@@ -92,12 +110,13 @@ export class NotificationsEventListener {
 
   @OnEvent('expense.status_updated')
   async onExpenseStatusUpdated(payload: {
+    expenseId?: string;
     expenseNumber: string;
     status: string;
     technicianUserIds: string[];
   }) {
     try {
-      const { expenseNumber, status, technicianUserIds } = payload;
+      const { expenseId, expenseNumber, status, technicianUserIds } = payload;
       const statusLabel =
         status === 'COMPLETED'
           ? 'approved'
@@ -112,7 +131,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.EXPENSE,
-        { expenseNumber, status },
+        { expenseId, expenseNumber, status },
       );
     } catch (err) {
       this.logger.error('Error handling expense.status_updated event', err);
@@ -121,6 +140,7 @@ export class NotificationsEventListener {
 
   @OnEvent('ticket.created')
   async onTicketCreated(payload: {
+    ticketId?: string;
     ticketNumber: string;
     subject: string;
     assignedTechnicianUserIds: string[];
@@ -128,6 +148,7 @@ export class NotificationsEventListener {
   }) {
     try {
       const {
+        ticketId,
         ticketNumber,
         subject,
         assignedTechnicianUserIds,
@@ -142,7 +163,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.TICKET,
-        { ticketNumber, subject },
+        { ticketId, ticketNumber, subject },
       );
     } catch (err) {
       this.logger.error('Error handling ticket.created event', err);
@@ -151,12 +172,18 @@ export class NotificationsEventListener {
 
   @OnEvent('ticket.assigned')
   async onTicketAssigned(payload: {
+    ticketId?: string;
     ticketNumber: string;
     subject: string;
     assignedTechnicianUserIds: string[];
   }) {
     try {
-      const { ticketNumber, subject, assignedTechnicianUserIds } = payload;
+      const {
+        ticketId,
+        ticketNumber,
+        subject,
+        assignedTechnicianUserIds,
+      } = payload;
       const title = 'Ticket Assigned to You';
       const message = `You have been assigned to Ticket ${ticketNumber}: "${subject}".`;
 
@@ -165,7 +192,7 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.TICKET,
-        { ticketNumber, subject },
+        { ticketId, ticketNumber, subject },
       );
     } catch (err) {
       this.logger.error('Error handling ticket.assigned event', err);

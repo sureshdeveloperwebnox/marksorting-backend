@@ -15,6 +15,25 @@ const bullmq_1 = require("@nestjs/bullmq");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const prisma_service_1 = require("../../prisma/prisma.service");
+function mapNotificationType(type) {
+    const upper = String(type || '').toUpperCase();
+    switch (upper) {
+        case 'TICKET':
+            return 'ticket';
+        case 'EXPENSE':
+            return 'expense';
+        case 'STORE':
+        case 'STORE_RETURN':
+            return 'store_return';
+        case 'INSTALLATION':
+        case 'INSTALLATION_REPORT':
+            return 'installation_report';
+        case 'SERVICE_REPORT':
+            return 'service_report';
+        default:
+            return String(type || '').toLowerCase();
+    }
+}
 let NotificationProcessor = NotificationProcessor_1 = class NotificationProcessor extends bullmq_1.WorkerHost {
     configService;
     prisma;
@@ -66,9 +85,18 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
     }
     async handleSendPush(job) {
         this.initFirebase();
-        const { id, userId, title, message, type } = job.data;
+        const { id, userId, title, message, type, recordId } = job.data;
+        const targetRecordId = recordId ||
+            job.data.metaData?.reportId ||
+            job.data.metaData?.expenseId ||
+            job.data.metaData?.ticketId ||
+            job.data.metaData?.storeId ||
+            job.data.metaData?.id ||
+            id ||
+            '';
+        const mappedType = mapNotificationType(type);
         if (this.firebaseMockMode) {
-            this.logger.log(`[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${type}, id: ${id})`);
+            this.logger.log(`[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${mappedType}, id: ${targetRecordId})`);
             return;
         }
         const pushTokens = await this.prisma.pushToken.findMany({
@@ -86,22 +114,28 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                     body: message,
                 },
                 data: {
-                    id: String(id || ''),
-                    type: String(type || ''),
+                    id: String(targetRecordId || ''),
+                    type: mappedType,
                     title: String(title || ''),
                     body: String(message || ''),
+                    click_action: 'FLUTTER_NOTIFICATION_CLICK',
                     ...(job.data.metaData
-                        ? Object.fromEntries(Object.entries(job.data.metaData).map(([k, v]) => [k, String(v)]))
+                        ? Object.fromEntries(Object.entries(job.data.metaData).map(([k, v]) => [
+                            k,
+                            String(v ?? ''),
+                        ]))
                         : {}),
                 },
                 android: {
                     priority: 'high',
                     notification: {
                         channelId: 'high_importance_channel',
+                        icon: '@mipmap/launcher_icon',
                         sound: 'default',
                         defaultSound: true,
                         defaultVibrateTimings: true,
-                        priority: 'max',
+                        notificationPriority: 'PRIORITY_MAX',
+                        visibility: 'PUBLIC',
                     },
                 },
                 apns: {
@@ -119,7 +153,17 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
             });
             this.logger.log(`Successfully sent FCM push to user ${userId} with ${tokens.length} tokens. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
             const failed = response.responses
-                .map((r, i) => (!r.success ? tokens[i] : null))
+                .map((r, i) => {
+                if (!r.success) {
+                    const errCode = r.error?.code;
+                    if (errCode === 'messaging/invalid-registration-token' ||
+                        errCode === 'messaging/registration-token-not-registered' ||
+                        !errCode) {
+                        return tokens[i];
+                    }
+                }
+                return null;
+            })
                 .filter(Boolean);
             if (failed.length > 0) {
                 await this.prisma.pushToken.deleteMany({

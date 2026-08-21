@@ -63,4 +63,5 @@ export declare class NotificationsService {
         token: string;
         device_type: string;
     }>;
+    removePushToken(userId: string, token: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
 }

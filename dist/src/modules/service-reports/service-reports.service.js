@@ -282,6 +282,7 @@ let ServiceReportsService = class ServiceReportsService {
         }
         if (serviceReport) {
             this.eventEmitter.emit('service-report.created', {
+                reportId: serviceReport.id,
                 reportNumber: serviceReport.report_number,
                 millName: serviceReport.mill?.name || '',
                 technicianUserIds: finalTechnicianIds,
