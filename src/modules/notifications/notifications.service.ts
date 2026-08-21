@@ -6,6 +6,8 @@ import { NotificationsGateway } from './notifications.gateway';
 import { NotificationType } from './dto/broadcast-notification.dto';
 import { DeviceType } from './dto/register-push-token.dto';
 
+import { NotificationProcessor } from './notification.processor';
+
 @Injectable()
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
@@ -14,6 +16,7 @@ export class NotificationsService {
     private prisma: PrismaService,
     @InjectQueue('notifications') private notificationsQueue: Queue,
     private gateway: NotificationsGateway,
+    private notificationProcessor: NotificationProcessor,
   ) {}
 
   async createNotification(
@@ -57,25 +60,33 @@ export class NotificationsService {
       metaData?.id ||
       notification.id;
 
-    await this.notificationsQueue.add(
-      'send-push',
-      {
-        id: notification.id,
-        recordId,
-        userId,
-        title,
-        message,
-        type,
-        metaData,
-      },
-      {
-        jobId: `push_${notification.id}_${userId}`,
-        removeOnComplete: true,
-        removeOnFail: false,
-        attempts: 2,
-        backoff: { type: 'exponential', delay: 5000 },
-      },
-    );
+    const pushPayload = {
+      id: notification.id,
+      recordId,
+      userId,
+      title,
+      message,
+      type,
+      metaData,
+    };
+
+    // Execute direct push immediately with zero delay
+    this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
+      this.logger.warn(
+        `Immediate FCM push error for user ${userId}, queuing to BullMQ: ${pushErr?.message}`,
+      );
+      try {
+        await this.notificationsQueue.add('send-push', pushPayload, {
+          jobId: `push_${notification.id}_${userId}`,
+          removeOnComplete: true,
+          removeOnFail: false,
+          attempts: 2,
+          backoff: { type: 'exponential', delay: 5000 },
+        });
+      } catch (qErr) {
+        this.logger.error(`Failed to enqueue push notification job`, qErr);
+      }
+    });
 
     return notification;
   }

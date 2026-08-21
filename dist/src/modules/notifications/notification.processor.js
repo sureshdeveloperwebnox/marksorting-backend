@@ -80,18 +80,18 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
     }
     async process(job) {
         if (job.name === 'send-push') {
-            await this.handleSendPush(job);
+            await this.sendPush(job.data);
         }
     }
-    async handleSendPush(job) {
+    async sendPush(data) {
         this.initFirebase();
-        const { id, userId, title, message, type, recordId } = job.data;
+        const { id, userId, title, message, type, recordId } = data;
         const targetRecordId = recordId ||
-            job.data.metaData?.reportId ||
-            job.data.metaData?.expenseId ||
-            job.data.metaData?.ticketId ||
-            job.data.metaData?.storeId ||
-            job.data.metaData?.id ||
+            data.metaData?.reportId ||
+            data.metaData?.expenseId ||
+            data.metaData?.ticketId ||
+            data.metaData?.storeId ||
+            data.metaData?.id ||
             id ||
             '';
         const mappedType = mapNotificationType(type);
@@ -122,8 +122,8 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                     title: String(title || ''),
                     body: String(message || ''),
                     click_action: 'FLUTTER_NOTIFICATION_CLICK',
-                    ...(job.data.metaData
-                        ? Object.fromEntries(Object.entries(job.data.metaData).map(([k, v]) => [
+                    ...(data.metaData
+                        ? Object.fromEntries(Object.entries(data.metaData).map(([k, v]) => [
                             k,
                             String(v ?? ''),
                         ]))

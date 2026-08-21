@@ -205,6 +205,7 @@ export class NotificationsEventListener {
     storeNumber?: string;
     frameNumber?: string;
     technicianUserId?: string;
+    serviceEngineerName?: string;
     creatorUserId?: string;
     inflowStatus?: string;
     quantity?: number;
@@ -215,22 +216,36 @@ export class NotificationsEventListener {
         storeNumber,
         frameNumber,
         technicianUserId,
+        serviceEngineerName,
         creatorUserId,
         inflowStatus,
       } = payload;
-      const title = 'New Store Record Created';
       const label =
-        storeNumber || (frameNumber ? `Frame ${frameNumber}` : 'Store Record');
-      const message = `A new store record (${inflowStatus || 'Inflow'}) for ${label} has been created.`;
+        frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Record');
+      const statusLabel = inflowStatus || 'Inflow';
 
-      const technicianIds = technicianUserId ? [technicianUserId] : [];
+      // 1. Direct personalized push notification to the assigned Service Engineer
+      if (technicianUserId) {
+        await this.notificationsService.createNotification(
+          technicianUserId,
+          'New Store Record Assigned',
+          `A new store record (${statusLabel}) for ${label} has been assigned to you.`,
+          NotificationType.STORE,
+          { storeId, storeNumber, frameNumber, inflowStatus },
+        );
+      }
+
+      // 2. Notification to Admins / Stakeholders
+      const adminMessage = `A new store record (${statusLabel}) for ${label} has been created${
+        serviceEngineerName ? ` (Assigned to ${serviceEngineerName})` : ''
+      }.`;
       await this.notificationsService.notifyStakeholders(
-        technicianIds,
-        creatorUserId,
-        title,
-        message,
+        [],
+        creatorUserId || undefined,
+        'New Store Record Created',
+        adminMessage,
         NotificationType.STORE,
-        { storeId, storeNumber, frameNumber, inflowStatus },
+        { storeId, storeNumber, frameNumber, inflowStatus, technicianUserId },
       );
     } catch (err) {
       this.logger.error('Error handling store.created event', err);
@@ -255,18 +270,27 @@ export class NotificationsEventListener {
         technicianUserId,
         creatorUserId,
       } = payload;
-      const title = 'Store Return Status Updated';
       const label =
-        storeNumber ||
-        (frameNumber ? `machine ${frameNumber}` : 'store return');
-      const message = `Store return for ${label} has been updated to "${returnStatus}".`;
+        frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Return');
 
-      const technicianIds = technicianUserId ? [technicianUserId] : [];
+      // 1. Direct notification to assigned Service Engineer
+      if (technicianUserId && technicianUserId !== creatorUserId) {
+        await this.notificationsService.createNotification(
+          technicianUserId,
+          'Store Return Updated',
+          `Store return details for ${label} have been updated (Status: ${returnStatus}).`,
+          NotificationType.STORE,
+          { storeId, storeNumber, returnStatus, frameNumber },
+        );
+      }
+
+      // 2. Notification to Admins / Stakeholders
+      const adminMessage = `Store return for ${label} has been updated to "${returnStatus}".`;
       await this.notificationsService.notifyStakeholders(
-        technicianIds,
-        creatorUserId,
-        title,
-        message,
+        [],
+        creatorUserId || undefined,
+        'Store Return Status Updated',
+        adminMessage,
         NotificationType.STORE,
         { storeId, storeNumber, returnStatus, frameNumber },
       );

@@ -3,12 +3,14 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsGateway } from './notifications.gateway';
 import { NotificationType } from './dto/broadcast-notification.dto';
 import { DeviceType } from './dto/register-push-token.dto';
+import { NotificationProcessor } from './notification.processor';
 export declare class NotificationsService {
     private prisma;
     private notificationsQueue;
     private gateway;
+    private notificationProcessor;
     private readonly logger;
-    constructor(prisma: PrismaService, notificationsQueue: Queue, gateway: NotificationsGateway);
+    constructor(prisma: PrismaService, notificationsQueue: Queue, gateway: NotificationsGateway, notificationProcessor: NotificationProcessor);
     createNotification(userId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
         id: string;
         user_id: string | null;

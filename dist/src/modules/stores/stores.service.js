@@ -287,6 +287,7 @@ let StoresService = class StoresService {
             storeNumber: store.store_number,
             frameNumber: store.frame_number,
             technicianUserId: store.service_engineer_id,
+            serviceEngineerName: store.service_engineer?.full_name,
             creatorUserId: user?.userId,
             inflowStatus: store.inflow_status,
             quantity: store.quantity,

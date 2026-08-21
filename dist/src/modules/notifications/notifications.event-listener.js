@@ -94,12 +94,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
     }
     async onStoreCreated(payload) {
         try {
-            const { storeId, storeNumber, frameNumber, technicianUserId, creatorUserId, inflowStatus, } = payload;
-            const title = 'New Store Record Created';
-            const label = storeNumber || (frameNumber ? `Frame ${frameNumber}` : 'Store Record');
-            const message = `A new store record (${inflowStatus || 'Inflow'}) for ${label} has been created.`;
-            const technicianIds = technicianUserId ? [technicianUserId] : [];
-            await this.notificationsService.notifyStakeholders(technicianIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, frameNumber, inflowStatus });
+            const { storeId, storeNumber, frameNumber, technicianUserId, serviceEngineerName, creatorUserId, inflowStatus, } = payload;
+            const label = frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Record');
+            const statusLabel = inflowStatus || 'Inflow';
+            if (technicianUserId) {
+                await this.notificationsService.createNotification(technicianUserId, 'New Store Record Assigned', `A new store record (${statusLabel}) for ${label} has been assigned to you.`, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, frameNumber, inflowStatus });
+            }
+            const adminMessage = `A new store record (${statusLabel}) for ${label} has been created${serviceEngineerName ? ` (Assigned to ${serviceEngineerName})` : ''}.`;
+            await this.notificationsService.notifyStakeholders([], creatorUserId || undefined, 'New Store Record Created', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, frameNumber, inflowStatus, technicianUserId });
         }
         catch (err) {
             this.logger.error('Error handling store.created event', err);
@@ -108,12 +110,12 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
     async onStoreReturnUpdated(payload) {
         try {
             const { storeId, storeNumber, frameNumber, returnStatus, technicianUserId, creatorUserId, } = payload;
-            const title = 'Store Return Status Updated';
-            const label = storeNumber ||
-                (frameNumber ? `machine ${frameNumber}` : 'store return');
-            const message = `Store return for ${label} has been updated to "${returnStatus}".`;
-            const technicianIds = technicianUserId ? [technicianUserId] : [];
-            await this.notificationsService.notifyStakeholders(technicianIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, returnStatus, frameNumber });
+            const label = frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Return');
+            if (technicianUserId && technicianUserId !== creatorUserId) {
+                await this.notificationsService.createNotification(technicianUserId, 'Store Return Updated', `Store return details for ${label} have been updated (Status: ${returnStatus}).`, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, returnStatus, frameNumber });
+            }
+            const adminMessage = `Store return for ${label} has been updated to "${returnStatus}".`;
+            await this.notificationsService.notifyStakeholders([], creatorUserId || undefined, 'Store Return Status Updated', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, returnStatus, frameNumber });
         }
         catch (err) {
             this.logger.error('Error handling store.return_updated event', err);

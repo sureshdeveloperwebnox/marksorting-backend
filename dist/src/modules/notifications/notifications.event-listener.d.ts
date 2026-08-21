@@ -48,6 +48,7 @@ export declare class NotificationsEventListener {
         storeNumber?: string;
         frameNumber?: string;
         technicianUserId?: string;
+        serviceEngineerName?: string;
         creatorUserId?: string;
         inflowStatus?: string;
         quantity?: number;

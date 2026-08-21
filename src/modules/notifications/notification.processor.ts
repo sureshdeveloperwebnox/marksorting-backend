@@ -77,20 +77,28 @@ export class NotificationProcessor extends WorkerHost {
 
   async process(job: Job<any>) {
     if (job.name === 'send-push') {
-      await this.handleSendPush(job);
+      await this.sendPush(job.data);
     }
   }
 
-  private async handleSendPush(job: Job<any>) {
+  async sendPush(data: {
+    id?: string;
+    userId: string;
+    title: string;
+    message: string;
+    type: any;
+    recordId?: string;
+    metaData?: Record<string, any>;
+  }) {
     this.initFirebase();
-    const { id, userId, title, message, type, recordId } = job.data;
+    const { id, userId, title, message, type, recordId } = data;
     const targetRecordId =
       recordId ||
-      job.data.metaData?.reportId ||
-      job.data.metaData?.expenseId ||
-      job.data.metaData?.ticketId ||
-      job.data.metaData?.storeId ||
-      job.data.metaData?.id ||
+      data.metaData?.reportId ||
+      data.metaData?.expenseId ||
+      data.metaData?.ticketId ||
+      data.metaData?.storeId ||
+      data.metaData?.id ||
       id ||
       '';
     const mappedType = mapNotificationType(type);
@@ -129,9 +137,9 @@ export class NotificationProcessor extends WorkerHost {
           title: String(title || ''),
           body: String(message || ''),
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
-          ...(job.data.metaData
+          ...(data.metaData
             ? Object.fromEntries(
-                Object.entries(job.data.metaData).map(([k, v]) => [
+                Object.entries(data.metaData).map(([k, v]) => [
                   k,
                   String(v ?? ''),
                 ]),

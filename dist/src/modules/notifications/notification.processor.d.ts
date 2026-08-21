@@ -12,5 +12,13 @@ export declare class NotificationProcessor extends WorkerHost {
     constructor(configService: ConfigService, prisma: PrismaService);
     private initFirebase;
     process(job: Job<any>): Promise<void>;
-    private handleSendPush;
+    sendPush(data: {
+        id?: string;
+        userId: string;
+        title: string;
+        message: string;
+        type: any;
+        recordId?: string;
+        metaData?: Record<string, any>;
+    }): Promise<void>;
 }

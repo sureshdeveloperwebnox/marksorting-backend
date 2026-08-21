@@ -20,15 +20,18 @@ const bullmq_2 = require("bullmq");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const notifications_gateway_1 = require("./notifications.gateway");
 const register_push_token_dto_1 = require("./dto/register-push-token.dto");
+const notification_processor_1 = require("./notification.processor");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
     prisma;
     notificationsQueue;
     gateway;
+    notificationProcessor;
     logger = new common_1.Logger(NotificationsService_1.name);
-    constructor(prisma, notificationsQueue, gateway) {
+    constructor(prisma, notificationsQueue, gateway, notificationProcessor) {
         this.prisma = prisma;
         this.notificationsQueue = notificationsQueue;
         this.gateway = gateway;
+        this.notificationProcessor = notificationProcessor;
     }
     async createNotification(userId, title, message, type, metaData) {
         if (!userId)
@@ -58,7 +61,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             metaData?.ticketId ||
             metaData?.id ||
             notification.id;
-        await this.notificationsQueue.add('send-push', {
+        const pushPayload = {
             id: notification.id,
             recordId,
             userId,
@@ -66,12 +69,21 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             message,
             type,
             metaData,
-        }, {
-            jobId: `push_${notification.id}_${userId}`,
-            removeOnComplete: true,
-            removeOnFail: false,
-            attempts: 2,
-            backoff: { type: 'exponential', delay: 5000 },
+        };
+        this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
+            this.logger.warn(`Immediate FCM push error for user ${userId}, queuing to BullMQ: ${pushErr?.message}`);
+            try {
+                await this.notificationsQueue.add('send-push', pushPayload, {
+                    jobId: `push_${notification.id}_${userId}`,
+                    removeOnComplete: true,
+                    removeOnFail: false,
+                    attempts: 2,
+                    backoff: { type: 'exponential', delay: 5000 },
+                });
+            }
+            catch (qErr) {
+                this.logger.error(`Failed to enqueue push notification job`, qErr);
+            }
         });
         return notification;
     }
@@ -215,6 +227,7 @@ exports.NotificationsService = NotificationsService = NotificationsService_1 = _
     __param(1, (0, bullmq_1.InjectQueue)('notifications')),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         bullmq_2.Queue,
-        notifications_gateway_1.NotificationsGateway])
+        notifications_gateway_1.NotificationsGateway,
+        notification_processor_1.NotificationProcessor])
 ], NotificationsService);
 //# sourceMappingURL=notifications.service.js.map
