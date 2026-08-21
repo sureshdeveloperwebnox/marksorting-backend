@@ -140,14 +140,15 @@ export class NotificationProcessor extends WorkerHost {
         },
         android: {
           priority: 'high',
+          ttl: 86400 * 1000,
           notification: {
             channelId: 'high_importance_channel',
             icon: '@mipmap/launcher_icon',
             sound: 'default',
             defaultSound: true,
             defaultVibrateTimings: true,
-            notificationPriority: 'PRIORITY_MAX',
-            visibility: 'PUBLIC',
+            priority: 'max',
+            visibility: 'public',
           },
         },
         apns: {
@@ -156,6 +157,10 @@ export class NotificationProcessor extends WorkerHost {
           },
           payload: {
             aps: {
+              alert: {
+                title,
+                body: message,
+              },
               sound: 'default',
               badge: 1,
               contentAvailable: true,

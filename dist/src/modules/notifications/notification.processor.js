@@ -131,14 +131,15 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                 },
                 android: {
                     priority: 'high',
+                    ttl: 86400 * 1000,
                     notification: {
                         channelId: 'high_importance_channel',
                         icon: '@mipmap/launcher_icon',
                         sound: 'default',
                         defaultSound: true,
                         defaultVibrateTimings: true,
-                        notificationPriority: 'PRIORITY_MAX',
-                        visibility: 'PUBLIC',
+                        priority: 'max',
+                        visibility: 'public',
                     },
                 },
                 apns: {
@@ -147,6 +148,10 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                     },
                     payload: {
                         aps: {
+                            alert: {
+                                title,
+                                body: message,
+                            },
                             sound: 'default',
                             badge: 1,
                             contentAvailable: true,
