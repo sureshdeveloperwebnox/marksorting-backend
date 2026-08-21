@@ -13,6 +13,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
+import {
+  isAcknowledgeRequired,
+  normalizeWarrantyStatus,
+} from './helpers/store-warranty.helper';
 
 @Injectable()
 export class StoresService implements OnModuleInit {
@@ -193,6 +197,7 @@ export class StoresService implements OnModuleInit {
         mill: resolvedMill,
         ref_no: resolvedRefNo,
         mc_model: resolvedMcModel,
+        is_acknowledge_required: isAcknowledgeRequired(s.warranty_status),
       };
     });
   }
@@ -622,6 +627,7 @@ export class StoresService implements OnModuleInit {
       const extractedRemarks = this.constructRemarksFromProducts(
         existing.remarks,
         dto.products,
+        existing.warranty_status,
       );
       if (extractedRemarks) {
         finalRemarks = extractedRemarks;
@@ -872,10 +878,13 @@ export class StoresService implements OnModuleInit {
   private constructRemarksFromProducts(
     existingRemarks: string | null | undefined,
     products: any[],
+    warrantyStatus?: string | null,
   ): string | null {
     if (!products || !Array.isArray(products) || products.length === 0) {
       return null;
     }
+
+    const acknowledgeRequired = isAcknowledgeRequired(warrantyStatus);
 
     const hasStructuredBarcodes = products.some(
       (p) => p && Array.isArray(p.barcodes) && p.barcodes.length > 0,
@@ -898,12 +907,14 @@ export class StoresService implements OnModuleInit {
               ? 'Not Returned'
               : 'Returned'
             : undefined;
-          const engAck = used
+          const engAck = used && acknowledgeRequired
             ? b.acknowledge_status === 'Pending'
               ? 'Pending'
               : 'Acknowledged'
             : undefined;
-          const admAck = b.admin_acknowledge_status || 'Pending';
+          const admAck = used && acknowledgeRequired
+            ? b.admin_acknowledge_status || 'Pending'
+            : undefined;
           return {
             barcode,
             used,
@@ -923,8 +934,10 @@ export class StoresService implements OnModuleInit {
             if (it.return_status) {
               tags.push(`RET:${it.return_status}`);
             }
-            if (it.engineer_ack) tags.push(`ENG_ACK:${it.engineer_ack}`);
-            if (it.admin_ack) tags.push(`ADM_ACK:${it.admin_ack}`);
+            if (acknowledgeRequired) {
+              if (it.engineer_ack) tags.push(`ENG_ACK:${it.engineer_ack}`);
+              if (it.admin_ack) tags.push(`ADM_ACK:${it.admin_ack}`);
+            }
             return `${it.barcode} (${tags.join('; ')})`;
           });
           serialSummaries.push(`${matName}: [${itemStrs.join(', ')}]`);
@@ -955,7 +968,7 @@ export class StoresService implements OnModuleInit {
           if (qty !== undefined) parts.push(`qty: ${qty}`);
           if (p.used !== undefined) parts.push(`used: ${p.used}`);
           if (p.return_status) parts.push(`return_status: ${p.return_status}`);
-          if (p.acknowledge_status)
+          if (acknowledgeRequired && p.acknowledge_status)
             parts.push(`acknowledge_status: ${p.acknowledge_status}`);
           return parts.join(' - ');
         }
@@ -968,6 +981,7 @@ export class StoresService implements OnModuleInit {
   }
 
   calculateQuantitySummary(store: any): any {
+    const acknowledgeRequired = isAcknowledgeRequired(store?.warranty_status);
     const fullSerialMap = this.parseSerialMapFromRemarks(store?.remarks);
     const materials = store?.materials || [];
 
@@ -988,10 +1002,18 @@ export class StoresService implements OnModuleInit {
       const mUnused = Math.max(0, mTotal - mUsed);
       const mReturned = units.filter((u: any) => u.used && u.return_status === 'Returned').length;
       const mNotReturned = units.filter((u: any) => u.used && u.return_status === 'Not Returned').length;
-      const mEngAck = units.filter((u: any) => u.used && u.engineer_ack === 'Acknowledged').length;
-      const mEngPending = units.filter((u: any) => u.used && u.engineer_ack === 'Pending').length;
-      const mAdmAck = units.filter((u: any) => u.used && u.admin_ack === 'Acknowledged').length;
-      const mAdmPending = units.filter((u: any) => u.used && u.admin_ack === 'Pending').length;
+      const mEngAck = acknowledgeRequired
+        ? units.filter((u: any) => u.used && u.engineer_ack === 'Acknowledged').length
+        : 0;
+      const mEngPending = acknowledgeRequired
+        ? units.filter((u: any) => u.used && u.engineer_ack === 'Pending').length
+        : 0;
+      const mAdmAck = acknowledgeRequired
+        ? units.filter((u: any) => u.used && u.admin_ack === 'Acknowledged').length
+        : 0;
+      const mAdmPending = acknowledgeRequired
+        ? units.filter((u: any) => u.used && u.admin_ack === 'Pending').length
+        : 0;
 
       totalQty += mTotal;
       usedQty += mUsed;
@@ -1029,6 +1051,7 @@ export class StoresService implements OnModuleInit {
       total_quantity: totalQty,
       used_quantity: usedQty,
       unused_quantity: unusedQty,
+      is_acknowledge_required: acknowledgeRequired,
       return_status_quantity: {
         returned: returnedQty,
         not_returned: notReturnedQty,

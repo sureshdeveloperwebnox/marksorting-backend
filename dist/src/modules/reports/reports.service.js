@@ -52,6 +52,7 @@ const document_template_service_1 = require("../pdf/templates/document-template.
 const reports_template_1 = require("./templates/reports.template");
 const XLSX = __importStar(require("xlsx"));
 const ExcelJS = __importStar(require("exceljs"));
+const store_warranty_helper_1 = require("../stores/helpers/store-warranty.helper");
 let ReportsService = class ReportsService {
     prisma;
     redis;
@@ -1673,12 +1674,19 @@ let ReportsService = class ReportsService {
                 const matName = m.material?.name || '-';
                 const stockType = m.stock_type || r.stock_type || 'Inflow';
                 const units = serialMap[matName] || [];
+                const isAckReq = (0, store_warranty_helper_1.isAcknowledgeRequired)(r.warranty_status);
                 if (units.length > 0) {
                     for (const unit of units) {
                         const matStatus = unit.used ? 'Used Material' : 'Unused Material';
-                        const unitRetStatus = unit.return_status || (unit.used ? 'Returned' : overallReturn);
-                        const engAck = unit.engineer_ack || (unit.used ? 'Acknowledged' : '-');
-                        const admAck = unit.admin_ack || (unit.used ? 'Pending' : '-');
+                        const unitRetStatus = unit.used
+                            ? (unit.return_status || 'Returned')
+                            : '-';
+                        const engAck = isAckReq
+                            ? (unit.used ? (unit.engineer_ack || 'Acknowledged') : '-')
+                            : 'N/A';
+                        const admAck = isAckReq
+                            ? (unit.used ? (unit.admin_ack || 'Pending') : '-')
+                            : 'N/A';
                         data.push([
                             storeId,
                             refNo,

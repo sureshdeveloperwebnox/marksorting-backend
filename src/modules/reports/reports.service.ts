@@ -12,6 +12,7 @@ import {
 import * as XLSX from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { Prisma } from '@prisma/client';
+import { isAcknowledgeRequired } from '../stores/helpers/store-warranty.helper';
 
 interface ReportParams {
   skip?: number;
@@ -2040,14 +2041,19 @@ export class ReportsService {
         const stockType = m.stock_type || r.stock_type || 'Inflow';
         const units = serialMap[matName] || [];
 
+        const isAckReq = isAcknowledgeRequired(r.warranty_status);
         if (units.length > 0) {
           for (const unit of units) {
             const matStatus = unit.used ? 'Used Material' : 'Unused Material';
-            const unitRetStatus =
-              unit.return_status || (unit.used ? 'Returned' : overallReturn);
-            const engAck =
-              unit.engineer_ack || (unit.used ? 'Acknowledged' : '-');
-            const admAck = unit.admin_ack || (unit.used ? 'Pending' : '-');
+            const unitRetStatus = unit.used
+              ? (unit.return_status || 'Returned')
+              : '-';
+            const engAck = isAckReq
+              ? (unit.used ? (unit.engineer_ack || 'Acknowledged') : '-')
+              : 'N/A';
+            const admAck = isAckReq
+              ? (unit.used ? (unit.admin_ack || 'Pending') : '-')
+              : 'N/A';
 
             data.push([
               storeId,

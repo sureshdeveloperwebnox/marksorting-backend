@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const redis_service_1 = require("../../redis/redis.service");
 const event_emitter_1 = require("@nestjs/event-emitter");
+const store_warranty_helper_1 = require("./helpers/store-warranty.helper");
 let StoresService = class StoresService {
     prisma;
     redis;
@@ -167,6 +168,7 @@ let StoresService = class StoresService {
                 mill: resolvedMill,
                 ref_no: resolvedRefNo,
                 mc_model: resolvedMcModel,
+                is_acknowledge_required: (0, store_warranty_helper_1.isAcknowledgeRequired)(s.warranty_status),
             };
         });
     }
@@ -488,7 +490,7 @@ let StoresService = class StoresService {
         if ((!finalRemarks || finalRemarks.trim() === '') &&
             dto.products &&
             Array.isArray(dto.products)) {
-            const extractedRemarks = this.constructRemarksFromProducts(existing.remarks, dto.products);
+            const extractedRemarks = this.constructRemarksFromProducts(existing.remarks, dto.products, existing.warranty_status);
             if (extractedRemarks) {
                 finalRemarks = extractedRemarks;
             }
@@ -690,10 +692,11 @@ let StoresService = class StoresService {
         });
         return map;
     }
-    constructRemarksFromProducts(existingRemarks, products) {
+    constructRemarksFromProducts(existingRemarks, products, warrantyStatus) {
         if (!products || !Array.isArray(products) || products.length === 0) {
             return null;
         }
+        const acknowledgeRequired = (0, store_warranty_helper_1.isAcknowledgeRequired)(warrantyStatus);
         const hasStructuredBarcodes = products.some((p) => p && Array.isArray(p.barcodes) && p.barcodes.length > 0);
         if (hasStructuredBarcodes) {
             const cleanRemarks = this.extractCleanRemarks(existingRemarks);
@@ -711,12 +714,14 @@ let StoresService = class StoresService {
                             ? 'Not Returned'
                             : 'Returned'
                         : undefined;
-                    const engAck = used
+                    const engAck = used && acknowledgeRequired
                         ? b.acknowledge_status === 'Pending'
                             ? 'Pending'
                             : 'Acknowledged'
                         : undefined;
-                    const admAck = b.admin_acknowledge_status || 'Pending';
+                    const admAck = used && acknowledgeRequired
+                        ? b.admin_acknowledge_status || 'Pending'
+                        : undefined;
                     return {
                         barcode,
                         used,
@@ -736,10 +741,12 @@ let StoresService = class StoresService {
                         if (it.return_status) {
                             tags.push(`RET:${it.return_status}`);
                         }
-                        if (it.engineer_ack)
-                            tags.push(`ENG_ACK:${it.engineer_ack}`);
-                        if (it.admin_ack)
-                            tags.push(`ADM_ACK:${it.admin_ack}`);
+                        if (acknowledgeRequired) {
+                            if (it.engineer_ack)
+                                tags.push(`ENG_ACK:${it.engineer_ack}`);
+                            if (it.admin_ack)
+                                tags.push(`ADM_ACK:${it.admin_ack}`);
+                        }
                         return `${it.barcode} (${tags.join('; ')})`;
                     });
                     serialSummaries.push(`${matName}: [${itemStrs.join(', ')}]`);
@@ -771,7 +778,7 @@ let StoresService = class StoresService {
                     parts.push(`used: ${p.used}`);
                 if (p.return_status)
                     parts.push(`return_status: ${p.return_status}`);
-                if (p.acknowledge_status)
+                if (acknowledgeRequired && p.acknowledge_status)
                     parts.push(`acknowledge_status: ${p.acknowledge_status}`);
                 return parts.join(' - ');
             }
@@ -782,6 +789,7 @@ let StoresService = class StoresService {
         return extractedRemarks || null;
     }
     calculateQuantitySummary(store) {
+        const acknowledgeRequired = (0, store_warranty_helper_1.isAcknowledgeRequired)(store?.warranty_status);
         const fullSerialMap = this.parseSerialMapFromRemarks(store?.remarks);
         const materials = store?.materials || [];
         let totalQty = 0;
@@ -800,10 +808,18 @@ let StoresService = class StoresService {
             const mUnused = Math.max(0, mTotal - mUsed);
             const mReturned = units.filter((u) => u.used && u.return_status === 'Returned').length;
             const mNotReturned = units.filter((u) => u.used && u.return_status === 'Not Returned').length;
-            const mEngAck = units.filter((u) => u.used && u.engineer_ack === 'Acknowledged').length;
-            const mEngPending = units.filter((u) => u.used && u.engineer_ack === 'Pending').length;
-            const mAdmAck = units.filter((u) => u.used && u.admin_ack === 'Acknowledged').length;
-            const mAdmPending = units.filter((u) => u.used && u.admin_ack === 'Pending').length;
+            const mEngAck = acknowledgeRequired
+                ? units.filter((u) => u.used && u.engineer_ack === 'Acknowledged').length
+                : 0;
+            const mEngPending = acknowledgeRequired
+                ? units.filter((u) => u.used && u.engineer_ack === 'Pending').length
+                : 0;
+            const mAdmAck = acknowledgeRequired
+                ? units.filter((u) => u.used && u.admin_ack === 'Acknowledged').length
+                : 0;
+            const mAdmPending = acknowledgeRequired
+                ? units.filter((u) => u.used && u.admin_ack === 'Pending').length
+                : 0;
             totalQty += mTotal;
             usedQty += mUsed;
             returnedQty += mReturned;
@@ -837,6 +853,7 @@ let StoresService = class StoresService {
             total_quantity: totalQty,
             used_quantity: usedQty,
             unused_quantity: unusedQty,
+            is_acknowledge_required: acknowledgeRequired,
             return_status_quantity: {
                 returned: returnedQty,
                 not_returned: notReturnedQty,
