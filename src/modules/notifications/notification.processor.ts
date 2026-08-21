@@ -84,15 +84,42 @@ export class NotificationProcessor extends WorkerHost {
     try {
       const response = await this.firebaseApp.messaging().sendEachForMulticast({
         tokens,
-        notification: { title, body: message },
+        notification: {
+          title,
+          body: message,
+        },
         data: {
           id: String(id || ''),
           type: String(type || ''),
+          title: String(title || ''),
+          body: String(message || ''),
           ...(job.data.metaData
             ? Object.fromEntries(
                 Object.entries(job.data.metaData).map(([k, v]) => [k, String(v)]),
               )
             : {}),
+        },
+        android: {
+          priority: 'high',
+          notification: {
+            channelId: 'high_importance_channel',
+            sound: 'default',
+            defaultSound: true,
+            defaultVibrateTimings: true,
+            priority: 'max',
+          },
+        },
+        apns: {
+          headers: {
+            'apns-priority': '10',
+          },
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+              contentAvailable: true,
+            },
+          },
         },
       });
 
