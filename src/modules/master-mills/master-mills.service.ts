@@ -127,13 +127,11 @@ export class MasterMillsService implements OnModuleInit {
     if (data.state !== undefined) data.state = data.state || null;
     if (data.amc_particular !== undefined) data.amc_particular = data.amc_particular || null;
 
-    // Auto-calculate warranty_closing_date if not supplied
+    // Auto-calculate warranty_closing_date if not supplied (strictly from warranty_start_date)
     if (!data.warranty_closing_date) {
       const baseDate = data.warranty_start_date
         ? new Date(data.warranty_start_date)
-        : data.installation_date
-          ? new Date(data.installation_date)
-          : null;
+        : null;
       if (baseDate) {
         const years = data.warranty_years ?? 0;
         const months = data.warranty_months ?? 0;
@@ -141,6 +139,8 @@ export class MasterMillsService implements OnModuleInit {
         baseDate.setMonth(baseDate.getMonth() + (totalMonths > 0 ? totalMonths : 12));
         baseDate.setDate(baseDate.getDate() - 1);
         data.warranty_closing_date = baseDate.toISOString();
+      } else {
+        data.warranty_closing_date = null as any;
       }
     }
 
@@ -272,24 +272,24 @@ export class MasterMillsService implements OnModuleInit {
     }
 
     // Re-calculate warranty_closing_date if relevant fields change and not explicitly overridden
-    const installDate = data.installation_date !== undefined
-      ? data.installation_date
-      : existing.installation_date;
-
     const startOfWarranty = data.warranty_start_date !== undefined
       ? data.warranty_start_date
       : existing.warranty_start_date;
 
-    const baseDate = startOfWarranty || installDate;
+    const baseDate = startOfWarranty;
 
-    if (baseDate && data.warranty_closing_date === undefined) {
-      const years = data.warranty_years ?? existing.warranty_years ?? 0;
-      const months = data.warranty_months ?? existing.warranty_months ?? 0;
-      const totalMonths = months + years * 12;
-      const closing = new Date(baseDate);
-      closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
-      closing.setDate(closing.getDate() - 1);
-      data.warranty_closing_date = closing;
+    if (data.warranty_closing_date === undefined) {
+      if (baseDate) {
+        const years = data.warranty_years ?? existing.warranty_years ?? 0;
+        const months = data.warranty_months ?? existing.warranty_months ?? 0;
+        const totalMonths = months + years * 12;
+        const closing = new Date(baseDate);
+        closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
+        closing.setDate(closing.getDate() - 1);
+        data.warranty_closing_date = closing;
+      } else if (data.warranty_start_date === null) {
+        data.warranty_closing_date = null;
+      }
     }
 
     // Re-calculate or clear amc_closing_date if relevant fields change
@@ -595,8 +595,8 @@ export class MasterMillsService implements OnModuleInit {
       warranty_years: record.warranty_years,
       warranty_months: record.warranty_months,
       installation_date: record.installation_date,
-      warranty_start_date: record.warranty_start_date || record.installation_date,
-      warranty_closing_date: (record.warranty_start_date || record.installation_date) ? record.warranty_closing_date : null,
+      warranty_start_date: record.warranty_start_date,
+      warranty_closing_date: record.warranty_start_date ? record.warranty_closing_date : null,
       all_warranty: record.all_warranty,
       amc_starting_date: record.amc_starting_date,
       amc_period: record.amc_period,
@@ -781,9 +781,9 @@ export class MasterMillsService implements OnModuleInit {
     const amcAmount = dto.amc_amount !== undefined && dto.amc_amount !== null ? Number(dto.amc_amount) : null;
     const amcParticulars = dto.amc_particulars?.trim();
 
-    // Auto-calculate warranty closing date if start date or installation date is provided
+    // Auto-calculate warranty closing date strictly if warranty_start_date is provided
     let warrantyClosingDate: Date | null = null;
-    const baseDateForWarranty = warrantyStartDate || installationDate;
+    const baseDateForWarranty = warrantyStartDate;
     if (baseDateForWarranty) {
       const closing = new Date(baseDateForWarranty);
       closing.setFullYear(closing.getFullYear() + warrantyYears);
@@ -1243,9 +1243,9 @@ export class MasterMillsService implements OnModuleInit {
         });
       }
 
-      // Compute warranty closing date if not provided
+      // Compute warranty closing date strictly if warranty_start_date is provided
       let finalWarrantyClosingDate = warrantyClosingDate;
-      const baseDate = warrantyStartDate || installationDate;
+      const baseDate = warrantyStartDate;
       if (!finalWarrantyClosingDate && baseDate) {
         const totalMonths = (warrantyMonths ?? 0) + (warrantyYears ?? 0) * 12;
         if (totalMonths > 0) {

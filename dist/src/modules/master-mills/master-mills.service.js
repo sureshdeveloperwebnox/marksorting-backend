@@ -127,9 +127,7 @@ let MasterMillsService = class MasterMillsService {
         if (!data.warranty_closing_date) {
             const baseDate = data.warranty_start_date
                 ? new Date(data.warranty_start_date)
-                : data.installation_date
-                    ? new Date(data.installation_date)
-                    : null;
+                : null;
             if (baseDate) {
                 const years = data.warranty_years ?? 0;
                 const months = data.warranty_months ?? 0;
@@ -137,6 +135,9 @@ let MasterMillsService = class MasterMillsService {
                 baseDate.setMonth(baseDate.getMonth() + (totalMonths > 0 ? totalMonths : 12));
                 baseDate.setDate(baseDate.getDate() - 1);
                 data.warranty_closing_date = baseDate.toISOString();
+            }
+            else {
+                data.warranty_closing_date = null;
             }
         }
         if (!data.amc_starting_date) {
@@ -268,21 +269,23 @@ let MasterMillsService = class MasterMillsService {
         if (dto.amc_closing_date !== undefined) {
             data.amc_closing_date = dto.amc_closing_date ? new Date(dto.amc_closing_date) : null;
         }
-        const installDate = data.installation_date !== undefined
-            ? data.installation_date
-            : existing.installation_date;
         const startOfWarranty = data.warranty_start_date !== undefined
             ? data.warranty_start_date
             : existing.warranty_start_date;
-        const baseDate = startOfWarranty || installDate;
-        if (baseDate && data.warranty_closing_date === undefined) {
-            const years = data.warranty_years ?? existing.warranty_years ?? 0;
-            const months = data.warranty_months ?? existing.warranty_months ?? 0;
-            const totalMonths = months + years * 12;
-            const closing = new Date(baseDate);
-            closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
-            closing.setDate(closing.getDate() - 1);
-            data.warranty_closing_date = closing;
+        const baseDate = startOfWarranty;
+        if (data.warranty_closing_date === undefined) {
+            if (baseDate) {
+                const years = data.warranty_years ?? existing.warranty_years ?? 0;
+                const months = data.warranty_months ?? existing.warranty_months ?? 0;
+                const totalMonths = months + years * 12;
+                const closing = new Date(baseDate);
+                closing.setMonth(closing.getMonth() + (totalMonths > 0 ? totalMonths : 12));
+                closing.setDate(closing.getDate() - 1);
+                data.warranty_closing_date = closing;
+            }
+            else if (data.warranty_start_date === null) {
+                data.warranty_closing_date = null;
+            }
         }
         const amcStart = data.amc_starting_date !== undefined
             ? data.amc_starting_date
@@ -557,8 +560,8 @@ let MasterMillsService = class MasterMillsService {
             warranty_years: record.warranty_years,
             warranty_months: record.warranty_months,
             installation_date: record.installation_date,
-            warranty_start_date: record.warranty_start_date || record.installation_date,
-            warranty_closing_date: (record.warranty_start_date || record.installation_date) ? record.warranty_closing_date : null,
+            warranty_start_date: record.warranty_start_date,
+            warranty_closing_date: record.warranty_start_date ? record.warranty_closing_date : null,
             all_warranty: record.all_warranty,
             amc_starting_date: record.amc_starting_date,
             amc_period: record.amc_period,
@@ -727,7 +730,7 @@ let MasterMillsService = class MasterMillsService {
         const amcAmount = dto.amc_amount !== undefined && dto.amc_amount !== null ? Number(dto.amc_amount) : null;
         const amcParticulars = dto.amc_particulars?.trim();
         let warrantyClosingDate = null;
-        const baseDateForWarranty = warrantyStartDate || installationDate;
+        const baseDateForWarranty = warrantyStartDate;
         if (baseDateForWarranty) {
             const closing = new Date(baseDateForWarranty);
             closing.setFullYear(closing.getFullYear() + warrantyYears);
@@ -1076,7 +1079,7 @@ let MasterMillsService = class MasterMillsService {
                 });
             }
             let finalWarrantyClosingDate = warrantyClosingDate;
-            const baseDate = warrantyStartDate || installationDate;
+            const baseDate = warrantyStartDate;
             if (!finalWarrantyClosingDate && baseDate) {
                 const totalMonths = (warrantyMonths ?? 0) + (warrantyYears ?? 0) * 12;
                 if (totalMonths > 0) {
