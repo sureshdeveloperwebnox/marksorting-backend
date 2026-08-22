@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
@@ -11,7 +12,7 @@ import { UpdateMasterMillDto } from './dto/update-master-mill.dto';
 import { QuickRegisterDto } from './dto/quick-register.dto';
 
 @Injectable()
-export class MasterMillsService {
+export class MasterMillsService implements OnModuleInit {
   private readonly CACHE_PREFIX = 'master_mill:';
   private readonly LIST_CACHE_KEY = 'master_mills:list:';
 
@@ -19,6 +20,20 @@ export class MasterMillsService {
     private prisma: PrismaService,
     private redis: RedisService,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.prisma.masterMill.updateMany({
+        where: { all_warranty: 'Expired' },
+        data: { all_warranty: 'Non Warranty' },
+      });
+      await this.redis.delByPrefix(this.CACHE_PREFIX);
+      await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+      await this.redis.del('master_mills:stats');
+    } catch (err) {
+      // Non-blocking catch
+    }
+  }
 
   async findAll(params: {
     skip?: number;
@@ -148,8 +163,8 @@ export class MasterMillsService {
       allWarranty = 'Under Warranty';
     } else if (amcClose && amcClose > now) {
       allWarranty = 'Under AMC';
-    } else if (warrantyClose || amcClose) {
-      allWarranty = 'Expired';
+    } else {
+      allWarranty = 'Non Warranty';
     }
     data.all_warranty = allWarranty;
 
@@ -308,8 +323,8 @@ export class MasterMillsService {
       allWarranty = 'Under Warranty';
     } else if (amcClose && new Date(amcClose) > now) {
       allWarranty = 'Under AMC';
-    } else if (warrantyClose || amcClose) {
-      allWarranty = 'Expired';
+    } else {
+      allWarranty = 'Non Warranty';
     }
     data.all_warranty = allWarranty;
 
@@ -1276,8 +1291,8 @@ export class MasterMillsService {
         allWarranty = 'Under Warranty';
       } else if (aClose && aClose > now) {
         allWarranty = 'Under AMC';
-      } else if (wClose || aClose) {
-        allWarranty = 'Expired';
+      } else {
+        allWarranty = 'Non Warranty';
       }
 
       if (existing) {

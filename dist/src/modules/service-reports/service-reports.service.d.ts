@@ -45,21 +45,12 @@ export declare class ServiceReportsService {
         userId: string;
         role: string;
     }): Promise<({
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            service_report_id: string;
-            technician_id: string;
-        })[];
         mill: {
             id: string;
-            name: string;
-            place: string | null;
-            phone: string | null;
             address: string | null;
+            place: string | null;
+            name: string;
+            phone: string | null;
             customer: {
                 id: string;
                 name: string;
@@ -69,25 +60,34 @@ export declare class ServiceReportsService {
             id: string;
             name: string;
         };
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            service_report_id: string;
+            technician_id: string;
+        })[];
     } & {
         id: string;
+        mill_id: string;
+        place: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        machine_model: string;
+        serial_or_frame_no: string;
         report_number: string;
         service_category_id: string;
-        mill_id: string;
-        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
-        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;
@@ -118,21 +118,12 @@ export declare class ServiceReportsService {
     }): Promise<{
         before: any;
         after: {
-            technicians: ({
-                technician: {
-                    id: string;
-                    full_name: string;
-                };
-            } & {
-                service_report_id: string;
-                technician_id: string;
-            })[];
             mill: {
                 id: string;
-                name: string;
-                place: string | null;
-                phone: string | null;
                 address: string | null;
+                place: string | null;
+                name: string;
+                phone: string | null;
                 customer: {
                     id: string;
                     name: string;
@@ -142,25 +133,34 @@ export declare class ServiceReportsService {
                 id: string;
                 name: string;
             };
+            technicians: ({
+                technician: {
+                    id: string;
+                    full_name: string;
+                };
+            } & {
+                service_report_id: string;
+                technician_id: string;
+            })[];
         } & {
             id: string;
+            mill_id: string;
+            place: string;
+            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            status: string;
+            machine_model: string;
+            serial_or_frame_no: string;
             report_number: string;
             service_category_id: string;
-            mill_id: string;
-            place: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
             visit_date: Date;
             visit_time: string;
             call_registered_date: Date;
-            machine_model: string;
             machine_mfg_date: Date | null;
             machine_installation_date: Date | null;
-            serial_or_frame_no: string;
             authorized_person: string;
             previous_visit_engineer: string | null;
             nature_of_complaint: string;
@@ -190,21 +190,12 @@ export declare class ServiceReportsService {
         userId: string;
         role: string;
     }): Promise<{
-        technicians: ({
-            technician: {
-                id: string;
-                full_name: string;
-            };
-        } & {
-            service_report_id: string;
-            technician_id: string;
-        })[];
         mill: {
             id: string;
-            name: string;
-            place: string | null;
-            phone: string | null;
             address: string | null;
+            place: string | null;
+            name: string;
+            phone: string | null;
             customer: {
                 id: string;
                 name: string;
@@ -214,25 +205,34 @@ export declare class ServiceReportsService {
             id: string;
             name: string;
         };
+        technicians: ({
+            technician: {
+                id: string;
+                full_name: string;
+            };
+        } & {
+            service_report_id: string;
+            technician_id: string;
+        })[];
     } & {
         id: string;
+        mill_id: string;
+        place: string;
+        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        status: string;
+        machine_model: string;
+        serial_or_frame_no: string;
         report_number: string;
         service_category_id: string;
-        mill_id: string;
-        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
-        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
-        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;

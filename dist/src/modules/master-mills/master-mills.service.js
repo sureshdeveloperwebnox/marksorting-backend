@@ -22,6 +22,19 @@ let MasterMillsService = class MasterMillsService {
         this.prisma = prisma;
         this.redis = redis;
     }
+    async onModuleInit() {
+        try {
+            await this.prisma.masterMill.updateMany({
+                where: { all_warranty: 'Expired' },
+                data: { all_warranty: 'Non Warranty' },
+            });
+            await this.redis.delByPrefix(this.CACHE_PREFIX);
+            await this.redis.delByPrefix(this.LIST_CACHE_KEY);
+            await this.redis.del('master_mills:stats');
+        }
+        catch (err) {
+        }
+    }
     async findAll(params) {
         const { skip, take, where, orderBy } = params;
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
@@ -145,8 +158,8 @@ let MasterMillsService = class MasterMillsService {
         else if (amcClose && amcClose > now) {
             allWarranty = 'Under AMC';
         }
-        else if (warrantyClose || amcClose) {
-            allWarranty = 'Expired';
+        else {
+            allWarranty = 'Non Warranty';
         }
         data.all_warranty = allWarranty;
         if (data.mfg_date)
@@ -300,8 +313,8 @@ let MasterMillsService = class MasterMillsService {
         else if (amcClose && new Date(amcClose) > now) {
             allWarranty = 'Under AMC';
         }
-        else if (warrantyClose || amcClose) {
-            allWarranty = 'Expired';
+        else {
+            allWarranty = 'Non Warranty';
         }
         data.all_warranty = allWarranty;
         const updated = await this.prisma.masterMill.update({
@@ -1103,8 +1116,8 @@ let MasterMillsService = class MasterMillsService {
             else if (aClose && aClose > now) {
                 allWarranty = 'Under AMC';
             }
-            else if (wClose || aClose) {
-                allWarranty = 'Expired';
+            else {
+                allWarranty = 'Non Warranty';
             }
             if (existing) {
                 const updates = { all_warranty: allWarranty };
