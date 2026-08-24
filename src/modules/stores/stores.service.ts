@@ -660,17 +660,53 @@ export class StoresService implements OnModuleInit {
       );
     }
 
-    // Automatically set status to 'In Progress' for Admin Panel once Courier Service Name and Tracking ID are entered
+    // Partial / null-aware updates for courier details
+    const updateData: Prisma.StoreUpdateInput = {};
+
+    if (
+      dto.provider_name !== undefined &&
+      dto.provider_name !== null &&
+      typeof dto.provider_name === 'string' &&
+      dto.provider_name.trim() !== ''
+    ) {
+      updateData.provider_name = dto.provider_name.trim();
+    }
+
+    if (
+      dto.invoice_number !== undefined &&
+      dto.invoice_number !== null &&
+      typeof dto.invoice_number === 'string' &&
+      dto.invoice_number.trim() !== ''
+    ) {
+      updateData.invoice_number = dto.invoice_number.trim();
+    }
+
+    const effectiveProviderName =
+      updateData.provider_name !== undefined
+        ? (updateData.provider_name as string)
+        : existing.provider_name;
+
+    const effectiveInvoiceNumber =
+      updateData.invoice_number !== undefined
+        ? (updateData.invoice_number as string)
+        : existing.invoice_number;
+
+    // Automatically set status to 'In Progress' once Courier Service Name and Tracking ID are entered
     const hasCourier = Boolean(
-      dto.provider_name &&
-        dto.provider_name.trim() !== '' &&
-        dto.invoice_number &&
-        dto.invoice_number.trim() !== '',
+      effectiveProviderName &&
+        effectiveProviderName.trim() !== '' &&
+        effectiveInvoiceNumber &&
+        effectiveInvoiceNumber.trim() !== '',
     );
 
-    const targetStatus = hasCourier
-      ? 'In Progress'
-      : dto.return_status || existing.return_status || 'Pending';
+    const targetStatus =
+      dto.return_status && dto.return_status.trim() !== ''
+        ? dto.return_status
+        : hasCourier && (!existing.return_status || existing.return_status === 'Pending')
+          ? 'In Progress'
+          : existing.return_status || 'Pending';
+
+    updateData.return_status = targetStatus;
 
     let finalRemarks = dto.remarks;
     if (
@@ -688,14 +724,18 @@ export class StoresService implements OnModuleInit {
       }
     }
 
+    if (
+      finalRemarks !== undefined &&
+      finalRemarks !== null &&
+      typeof finalRemarks === 'string' &&
+      finalRemarks.trim() !== ''
+    ) {
+      updateData.remarks = finalRemarks.trim();
+    }
+
     const store = await this.prisma.store.update({
       where: { id: storeId },
-      data: {
-        ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
-        ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
-        ...(finalRemarks !== undefined ? { remarks: finalRemarks } : {}),
-        return_status: targetStatus,
-      },
+      data: updateData,
       include: {
         service_engineer: { select: { id: true, full_name: true } },
         customer: { select: { id: true, name: true } },

@@ -524,13 +524,35 @@ let StoresService = class StoresService {
                 existing.return_status === 'Completed')) {
             throw new common_1.BadRequestException('Store return is already completed and locked. It cannot be edited in the app.');
         }
-        const hasCourier = Boolean(dto.provider_name &&
-            dto.provider_name.trim() !== '' &&
-            dto.invoice_number &&
-            dto.invoice_number.trim() !== '');
-        const targetStatus = hasCourier
-            ? 'In Progress'
-            : dto.return_status || existing.return_status || 'Pending';
+        const updateData = {};
+        if (dto.provider_name !== undefined &&
+            dto.provider_name !== null &&
+            typeof dto.provider_name === 'string' &&
+            dto.provider_name.trim() !== '') {
+            updateData.provider_name = dto.provider_name.trim();
+        }
+        if (dto.invoice_number !== undefined &&
+            dto.invoice_number !== null &&
+            typeof dto.invoice_number === 'string' &&
+            dto.invoice_number.trim() !== '') {
+            updateData.invoice_number = dto.invoice_number.trim();
+        }
+        const effectiveProviderName = updateData.provider_name !== undefined
+            ? updateData.provider_name
+            : existing.provider_name;
+        const effectiveInvoiceNumber = updateData.invoice_number !== undefined
+            ? updateData.invoice_number
+            : existing.invoice_number;
+        const hasCourier = Boolean(effectiveProviderName &&
+            effectiveProviderName.trim() !== '' &&
+            effectiveInvoiceNumber &&
+            effectiveInvoiceNumber.trim() !== '');
+        const targetStatus = dto.return_status && dto.return_status.trim() !== ''
+            ? dto.return_status
+            : hasCourier && (!existing.return_status || existing.return_status === 'Pending')
+                ? 'In Progress'
+                : existing.return_status || 'Pending';
+        updateData.return_status = targetStatus;
         let finalRemarks = dto.remarks;
         if ((!finalRemarks || finalRemarks.trim() === '') &&
             dto.products &&
@@ -540,14 +562,15 @@ let StoresService = class StoresService {
                 finalRemarks = extractedRemarks;
             }
         }
+        if (finalRemarks !== undefined &&
+            finalRemarks !== null &&
+            typeof finalRemarks === 'string' &&
+            finalRemarks.trim() !== '') {
+            updateData.remarks = finalRemarks.trim();
+        }
         const store = await this.prisma.store.update({
             where: { id: storeId },
-            data: {
-                ...(dto.provider_name !== undefined ? { provider_name: dto.provider_name } : {}),
-                ...(dto.invoice_number !== undefined ? { invoice_number: dto.invoice_number } : {}),
-                ...(finalRemarks !== undefined ? { remarks: finalRemarks } : {}),
-                return_status: targetStatus,
-            },
+            data: updateData,
             include: {
                 service_engineer: { select: { id: true, full_name: true } },
                 customer: { select: { id: true, name: true } },
