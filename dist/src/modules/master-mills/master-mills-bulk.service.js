@@ -99,12 +99,11 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                 },
             },
         });
-        const sheetRefKeys = new Set();
-        const sheetFrameKeys = new Set();
+        const sheetPairKeys = new Set();
         for (const row of rows) {
             row.phone_no = this.formatPhoneNumber(row.phone_no) || '';
             const cleanRef = row.ref_no?.trim().toLowerCase();
-            const cleanFrame = row.frame_no?.trim().toLowerCase();
+            const cleanFrame = row.frame_no?.trim().toLowerCase() || '';
             const cleanMillName = row.mill_name?.trim().toLowerCase();
             const cleanCustomerName = row.customer_name?.trim().toLowerCase();
             if (!cleanRef) {
@@ -112,34 +111,25 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                 row.isValid = false;
             }
             if (cleanRef) {
-                const key = `${cleanRef}`;
-                if (sheetRefKeys.has(key)) {
-                    row.errors.ref_no = `Duplicate Ref No in Excel sheet`;
-                }
-            }
-            if (cleanFrame) {
-                const key = `${cleanFrame}`;
-                if (sheetFrameKeys.has(key)) {
-                    row.errors.frame_no = `Duplicate Frame No in Excel sheet`;
-                }
-            }
-            if (cleanRef && !row.errors.ref_no) {
-                const matchingMM = dbMasterMills.find((m) => m.ref_no?.trim().toLowerCase() === cleanRef);
-                if (matchingMM) {
-                    const isSameMill = matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
-                        (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
-                    if (!isSameMill) {
-                        row.errors.ref_no = 'Ref No already exists under a different customer or mill';
+                const pairKey = `${cleanRef}::${cleanFrame}`;
+                if (sheetPairKeys.has(pairKey)) {
+                    row.errors.ref_no = `Duplicate Ref No & Frame No combination in Excel sheet`;
+                    if (cleanFrame) {
+                        row.errors.frame_no = `Duplicate Ref No & Frame No combination in Excel sheet`;
                     }
                 }
             }
-            if (cleanFrame && !row.errors.frame_no) {
-                const matchingMM = dbMasterMills.find((m) => m.frame_no?.trim().toLowerCase() === cleanFrame);
+            if (cleanRef && !row.errors.ref_no) {
+                const matchingMM = dbMasterMills.find((m) => m.ref_no?.trim().toLowerCase() === cleanRef &&
+                    (m.frame_no?.trim().toLowerCase() || '') === cleanFrame);
                 if (matchingMM) {
                     const isSameMill = matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
                         (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
                     if (!isSameMill) {
-                        row.errors.frame_no = 'Frame No already exists under a different customer or mill';
+                        row.errors.ref_no = 'Ref No & Frame No already exists under a different customer or mill';
+                        if (cleanFrame) {
+                            row.errors.frame_no = 'Ref No & Frame No already exists under a different customer or mill';
+                        }
                     }
                 }
             }
@@ -147,10 +137,8 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                 row.isValid = false;
             }
             if (cleanRef && !row.errors.ref_no) {
-                sheetRefKeys.add(`${cleanRef}`);
-            }
-            if (cleanFrame && !row.errors.frame_no) {
-                sheetFrameKeys.add(`${cleanFrame}`);
+                const pairKey = `${cleanRef}::${cleanFrame}`;
+                sheetPairKeys.add(pairKey);
             }
         }
         const importId = (0, crypto_1.randomUUID)();

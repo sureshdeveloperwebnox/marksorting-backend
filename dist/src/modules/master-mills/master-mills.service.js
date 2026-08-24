@@ -851,24 +851,21 @@ let MasterMillsService = class MasterMillsService {
                 });
             }
             const resolvedMillId = mill.id;
-            const orConditions = [];
-            if (cleanRefNo) {
-                orConditions.push({
-                    ref_no: { equals: cleanRefNo, mode: 'insensitive' },
-                });
-            }
-            if (cleanFrameNo) {
-                orConditions.push({
-                    frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
-                });
-            }
             let masterMill = null;
             if (!options?.skipDuplicateCheck) {
                 masterMill = await tx.masterMill.findFirst({
                     where: {
                         deleted_at: null,
                         mill_id: resolvedMillId,
-                        OR: orConditions.length > 0 ? orConditions : undefined,
+                        ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+                        ...(cleanFrameNo
+                            ? { frame_no: { equals: cleanFrameNo, mode: 'insensitive' } }
+                            : {
+                                OR: [
+                                    { frame_no: null },
+                                    { frame_no: '' },
+                                ],
+                            }),
                     },
                 });
             }

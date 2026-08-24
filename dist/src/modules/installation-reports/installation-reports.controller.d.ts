@@ -14,14 +14,6 @@ export declare class InstallationReportsController {
         after: any;
     }>;
     remove(id: string, req: any): Promise<{
-        mill: {
-            id: string;
-            name: string;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -31,27 +23,31 @@ export declare class InstallationReportsController {
             technician_id: string;
             installation_report_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
     } & {
         id: string;
-        invoice_date: Date | null;
-        mill_id: string;
-        place: string;
-        warranty_years: number | null;
-        warranty_months: number | null;
-        warranty_start_date: Date | null;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        machine_model: string;
-        serial_or_frame_no: string;
+        status: string;
         report_number: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
+        machine_model: string;
         machine_mfg_date: Date | null;
+        serial_or_frame_no: string;
         authorized_person: string;
         commodity: string | null;
         contamination: string | null;
@@ -71,7 +67,11 @@ export declare class InstallationReportsController {
         authorized_person_phone: string | null;
         expense_id: string | null;
         invoice_number: string | null;
+        invoice_date: Date | null;
+        warranty_start_date: Date | null;
         warranty_end_date: Date | null;
+        warranty_years: number | null;
+        warranty_months: number | null;
         ground_earth_provided: boolean;
         running_channel_combination: number | null;
         running_channel_combination_value: string | null;

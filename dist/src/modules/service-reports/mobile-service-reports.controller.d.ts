@@ -8,21 +8,6 @@ export declare class MobileServiceReportsController {
     findAll(req: any, skip?: string, take?: string, search?: string, status?: string, serviceCategoryId?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string, expenseEligibleOnly?: string, excludeExpenseId?: string): Promise<any>;
     findOne(id: string, req: any): Promise<any>;
     create(dto: CreateMobileServiceReportDto, req: any): Promise<({
-        mill: {
-            id: string;
-            address: string | null;
-            place: string | null;
-            name: string;
-            phone: string | null;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
-        serviceCategory: {
-            id: string;
-            name: string;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -32,25 +17,40 @@ export declare class MobileServiceReportsController {
             service_report_id: string;
             technician_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            place: string | null;
+            phone: string | null;
+            address: string | null;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
+        serviceCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
-        mill_id: string;
-        place: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        machine_model: string;
-        serial_or_frame_no: string;
+        status: string;
         report_number: string;
         service_category_id: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
+        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
+        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;
@@ -78,21 +78,6 @@ export declare class MobileServiceReportsController {
     update(id: string, dto: UpdateMobileServiceReportDto, req: any): Promise<{
         before: any;
         after: {
-            mill: {
-                id: string;
-                address: string | null;
-                place: string | null;
-                name: string;
-                phone: string | null;
-                customer: {
-                    id: string;
-                    name: string;
-                } | null;
-            };
-            serviceCategory: {
-                id: string;
-                name: string;
-            };
             technicians: ({
                 technician: {
                     id: string;
@@ -102,25 +87,40 @@ export declare class MobileServiceReportsController {
                 service_report_id: string;
                 technician_id: string;
             })[];
+            mill: {
+                id: string;
+                name: string;
+                place: string | null;
+                phone: string | null;
+                address: string | null;
+                customer: {
+                    id: string;
+                    name: string;
+                } | null;
+            };
+            serviceCategory: {
+                id: string;
+                name: string;
+            };
         } & {
             id: string;
-            mill_id: string;
-            place: string;
-            status: string;
             created_at: Date;
             updated_at: Date;
             deleted_at: Date | null;
-            machine_model: string;
-            serial_or_frame_no: string;
+            status: string;
             report_number: string;
             service_category_id: string;
+            mill_id: string;
+            place: string;
             mill_whatsapp_number: string;
             mill_email: string | null;
             visit_date: Date;
             visit_time: string;
             call_registered_date: Date;
+            machine_model: string;
             machine_mfg_date: Date | null;
             machine_installation_date: Date | null;
+            serial_or_frame_no: string;
             authorized_person: string;
             previous_visit_engineer: string | null;
             nature_of_complaint: string;
@@ -147,21 +147,6 @@ export declare class MobileServiceReportsController {
         };
     }>;
     remove(id: string, req: any): Promise<{
-        mill: {
-            id: string;
-            address: string | null;
-            place: string | null;
-            name: string;
-            phone: string | null;
-            customer: {
-                id: string;
-                name: string;
-            } | null;
-        };
-        serviceCategory: {
-            id: string;
-            name: string;
-        };
         technicians: ({
             technician: {
                 id: string;
@@ -171,25 +156,40 @@ export declare class MobileServiceReportsController {
             service_report_id: string;
             technician_id: string;
         })[];
+        mill: {
+            id: string;
+            name: string;
+            place: string | null;
+            phone: string | null;
+            address: string | null;
+            customer: {
+                id: string;
+                name: string;
+            } | null;
+        };
+        serviceCategory: {
+            id: string;
+            name: string;
+        };
     } & {
         id: string;
-        mill_id: string;
-        place: string;
-        status: string;
         created_at: Date;
         updated_at: Date;
         deleted_at: Date | null;
-        machine_model: string;
-        serial_or_frame_no: string;
+        status: string;
         report_number: string;
         service_category_id: string;
+        mill_id: string;
+        place: string;
         mill_whatsapp_number: string;
         mill_email: string | null;
         visit_date: Date;
         visit_time: string;
         call_registered_date: Date;
+        machine_model: string;
         machine_mfg_date: Date | null;
         machine_installation_date: Date | null;
+        serial_or_frame_no: string;
         authorized_person: string;
         previous_visit_engineer: string | null;
         nature_of_complaint: string;

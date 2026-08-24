@@ -1176,9 +1176,9 @@ let ReportsService = class ReportsService {
                     right: { style: 'thin' },
                 };
             });
-            dataRows.forEach((row) => {
-                worksheet.addRow(row);
-            });
+            if (dataRows.length > 0) {
+                worksheet.addRows(dataRows);
+            }
             const arrayBuffer = await workbook.xlsx.writeBuffer();
             const buffer = Buffer.from(arrayBuffer);
             return {

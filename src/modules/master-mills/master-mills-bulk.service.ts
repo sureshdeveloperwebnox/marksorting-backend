@@ -126,14 +126,13 @@ export class MasterMillsBulkService {
       },
     });
 
-    // Track duplicates within the Excel sheet itself (intra-sheet check)
-    const sheetRefKeys = new Set<string>();
-    const sheetFrameKeys = new Set<string>();
+    // Track duplicate (Ref No, Frame No) pairs within the Excel sheet itself (intra-sheet check)
+    const sheetPairKeys = new Set<string>();
 
     for (const row of rows) {
       row.phone_no = this.formatPhoneNumber(row.phone_no) || '';
       const cleanRef = row.ref_no?.trim().toLowerCase();
-      const cleanFrame = row.frame_no?.trim().toLowerCase();
+      const cleanFrame = row.frame_no?.trim().toLowerCase() || '';
       const cleanMillName = row.mill_name?.trim().toLowerCase();
       const cleanCustomerName = row.customer_name?.trim().toLowerCase();
 
@@ -143,46 +142,33 @@ export class MasterMillsBulkService {
         row.isValid = false;
       }
 
-      // 1. Check for duplicates in the spreadsheet itself
+      // 1. Check for duplicate (Ref No, Frame No) pair in the spreadsheet itself
       if (cleanRef) {
-        const key = `${cleanRef}`;
-        if (sheetRefKeys.has(key)) {
-          row.errors.ref_no = `Duplicate Ref No in Excel sheet`;
-        }
-      }
-      if (cleanFrame) {
-        const key = `${cleanFrame}`;
-        if (sheetFrameKeys.has(key)) {
-          row.errors.frame_no = `Duplicate Frame No in Excel sheet`;
-        }
-      }
-
-      // 2. Check for duplicates in the database (only if not already marked as sheet duplicate)
-      if (cleanRef && !row.errors.ref_no) {
-        const matchingMM = dbMasterMills.find(
-          (m) =>
-            m.ref_no?.trim().toLowerCase() === cleanRef,
-        );
-        if (matchingMM) {
-          const isSameMill =
-            matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
-            (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
-          if (!isSameMill) {
-            row.errors.ref_no = 'Ref No already exists under a different customer or mill';
+        const pairKey = `${cleanRef}::${cleanFrame}`;
+        if (sheetPairKeys.has(pairKey)) {
+          row.errors.ref_no = `Duplicate Ref No & Frame No combination in Excel sheet`;
+          if (cleanFrame) {
+            row.errors.frame_no = `Duplicate Ref No & Frame No combination in Excel sheet`;
           }
         }
       }
-      if (cleanFrame && !row.errors.frame_no) {
+
+      // 2. Check for duplicate (Ref No, Frame No) pair in the database under a different mill/customer
+      if (cleanRef && !row.errors.ref_no) {
         const matchingMM = dbMasterMills.find(
           (m) =>
-            m.frame_no?.trim().toLowerCase() === cleanFrame,
+            m.ref_no?.trim().toLowerCase() === cleanRef &&
+            (m.frame_no?.trim().toLowerCase() || '') === cleanFrame,
         );
         if (matchingMM) {
           const isSameMill =
             matchingMM.mill?.name?.trim().toLowerCase() === cleanMillName &&
             (!cleanCustomerName || matchingMM.mill?.customer?.name?.trim().toLowerCase() === cleanCustomerName);
           if (!isSameMill) {
-            row.errors.frame_no = 'Frame No already exists under a different customer or mill';
+            row.errors.ref_no = 'Ref No & Frame No already exists under a different customer or mill';
+            if (cleanFrame) {
+              row.errors.frame_no = 'Ref No & Frame No already exists under a different customer or mill';
+            }
           }
         }
       }
@@ -192,12 +178,10 @@ export class MasterMillsBulkService {
         row.isValid = false;
       }
 
-      // 4. If unique in sheet so far, add to sheet tracking
+      // 4. If unique pair in sheet so far, add to sheet tracking
       if (cleanRef && !row.errors.ref_no) {
-        sheetRefKeys.add(`${cleanRef}`);
-      }
-      if (cleanFrame && !row.errors.frame_no) {
-        sheetFrameKeys.add(`${cleanFrame}`);
+        const pairKey = `${cleanRef}::${cleanFrame}`;
+        sheetPairKeys.add(pairKey);
       }
     }
 

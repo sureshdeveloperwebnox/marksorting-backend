@@ -925,26 +925,24 @@ export class MasterMillsService implements OnModuleInit {
       const resolvedMillId = mill.id;
 
       // 3. Resolve & Update Master Mill
-      // Match by mill_id AND (ref_no OR frame_no) to prevent cross-mill matching
-      const orConditions: Prisma.MasterMillWhereInput[] = [];
-      if (cleanRefNo) {
-        orConditions.push({
-          ref_no: { equals: cleanRefNo, mode: 'insensitive' },
-        });
-      }
-      if (cleanFrameNo) {
-        orConditions.push({
-          frame_no: { equals: cleanFrameNo, mode: 'insensitive' },
-        });
-      }
-
+      // Match by mill_id AND ref_no AND frame_no:
+      // - Same ref_no with SAME frame_no updates existing record
+      // - Same ref_no with DIFFERENT frame_no creates a new record
       let masterMill = null;
       if (!options?.skipDuplicateCheck) {
         masterMill = await tx.masterMill.findFirst({
           where: {
             deleted_at: null,
             mill_id: resolvedMillId,
-            OR: orConditions.length > 0 ? orConditions : undefined,
+            ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+            ...(cleanFrameNo
+              ? { frame_no: { equals: cleanFrameNo, mode: 'insensitive' } }
+              : {
+                  OR: [
+                    { frame_no: null },
+                    { frame_no: '' },
+                  ],
+                }),
           },
         });
       }

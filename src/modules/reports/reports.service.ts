@@ -1429,10 +1429,10 @@ export class ReportsService {
         };
       });
 
-      // Add data rows
-      dataRows.forEach((row) => {
-        worksheet.addRow(row);
-      });
+      // Add data rows in batch for best performance
+      if (dataRows.length > 0) {
+        worksheet.addRows(dataRows);
+      }
 
       const arrayBuffer = await workbook.xlsx.writeBuffer();
       const buffer = Buffer.from(arrayBuffer);

@@ -101,9 +101,78 @@ describe('User Excel Template Bulk Upload Scenario', () => {
     expect(preview.rows[0].isValid).toBe(true);
     expect(Object.keys(preview.rows[0].errors).length).toBe(0);
 
-    // Row 2 should be flagged for duplicate Ref No & Frame No
+    // Row 2 should be flagged for duplicate Ref No & Frame No combination
     expect(preview.rows[1].isValid).toBe(false);
-    expect(preview.rows[1].errors.ref_no).toBe('Duplicate Ref No in Excel sheet');
-    expect(preview.rows[1].errors.frame_no).toBe('Duplicate Frame No in Excel sheet');
+    expect(preview.rows[1].errors.ref_no).toBe('Duplicate Ref No & Frame No combination in Excel sheet');
+    expect(preview.rows[1].errors.frame_no).toBe('Duplicate Ref No & Frame No combination in Excel sheet');
+  });
+
+  it('allows same Ref No with different Frame No in the same sheet', async () => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Template');
+
+    worksheet.columns = [
+      { header: 'Invoice No', key: 'invoice_no' },
+      { header: 'Ref No', key: 'ref_no' },
+      { header: 'Mill Name', key: 'mill_name' },
+      { header: 'Place', key: 'place' },
+      { header: 'Frame No', key: 'frame_no' },
+    ];
+
+    // Row 2: REF-001 with FRM-001
+    worksheet.addRow({
+      invoice_no: 'INV-001',
+      ref_no: 'REF-001',
+      mill_name: 'ABC Mills',
+      place: 'Chennai',
+      frame_no: 'FRM-001',
+    });
+
+    // Row 3: REF-001 with FRM-002 (different frame under same ref)
+    worksheet.addRow({
+      invoice_no: 'INV-002',
+      ref_no: 'REF-001',
+      mill_name: 'ABC Mills',
+      place: 'Chennai',
+      frame_no: 'FRM-002',
+    });
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const parser = new ExcelParserService();
+
+    const redisMock: any = {
+      setJson: jest.fn().mockResolvedValue(undefined),
+      getJson: jest.fn().mockResolvedValue(null),
+    };
+    const prismaMock: any = {
+      masterMill: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+    };
+    const masterMillsServiceMock: any = {
+      quickRegister: jest.fn().mockResolvedValue({ _isUpdate: false }),
+    };
+
+    const bulkService = new MasterMillsBulkService(
+      parser,
+      masterMillsServiceMock,
+      redisMock,
+      prismaMock,
+    );
+
+    const preview = await bulkService.previewUpload({
+      buffer: Buffer.from(buffer),
+      fieldname: 'file',
+      originalname: 'template.xlsx',
+      encoding: '7bit',
+      mimetype: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      size: buffer.byteLength,
+    });
+
+    expect(preview.totalRows).toBe(2);
+    expect(preview.validRows).toBe(2);
+    expect(preview.invalidRows).toBe(0);
+    expect(preview.rows[0].isValid).toBe(true);
+    expect(preview.rows[1].isValid).toBe(true);
   });
 });
