@@ -256,12 +256,16 @@ let MobileStoresController = class MobileStoresController {
         return result.after;
     }
     async submitReturn(id, dto, req) {
-        const result = await this.storesService.submitReturnDetails(id, req.user.userId, dto);
+        const userId = req.user?.userId || req.user?.id || req.user?.sub;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
         req.logData = result;
         return result.after;
     }
     async submitReturnAlias(id, dto, req) {
-        const result = await this.storesService.submitReturnDetails(id, req.user.userId, dto);
+        const userId = req.user?.userId || req.user?.id || req.user?.sub;
+        const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
+        const result = await this.storesService.submitReturnDetails(id, userId, dto, isUserAdmin);
         req.logData = result;
         return result.after;
     }

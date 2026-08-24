@@ -340,6 +340,22 @@ let StoresService = class StoresService {
         if (material_quantities && material_quantities.length > 0) {
             data.quantity = material_quantities.reduce((sum, q) => sum + q.quantity, 0);
         }
+        if (data.provider_name === null ||
+            data.provider_name === undefined ||
+            (typeof data.provider_name === 'string' && data.provider_name.trim() === '')) {
+            delete data.provider_name;
+        }
+        else if (typeof data.provider_name === 'string') {
+            data.provider_name = data.provider_name.trim();
+        }
+        if (data.invoice_number === null ||
+            data.invoice_number === undefined ||
+            (typeof data.invoice_number === 'string' && data.invoice_number.trim() === '')) {
+            delete data.invoice_number;
+        }
+        else if (typeof data.invoice_number === 'string') {
+            data.invoice_number = data.invoice_number.trim();
+        }
         const store = await this.prisma.store.update({
             where: { id },
             data: {
@@ -592,9 +608,10 @@ let StoresService = class StoresService {
                 creatorUserId: technicianId,
             });
         }
+        const enrichedAfter = (await this.enrichStoresWithCustomer([store]))[0];
         return {
             before: existing,
-            after: store,
+            after: enrichedAfter || store,
             quantity_summary: this.calculateQuantitySummary(store),
         };
     }

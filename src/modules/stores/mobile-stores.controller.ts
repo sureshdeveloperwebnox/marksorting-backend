@@ -443,10 +443,13 @@ export class MobileStoresController {
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
+    const userId = req.user?.userId || req.user?.id || req.user?.sub;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
     const result = await this.storesService.submitReturnDetails(
       id,
-      req.user.userId,
+      userId,
       dto,
+      isUserAdmin,
     );
     req.logData = result;
     return result.after;
@@ -495,10 +498,13 @@ export class MobileStoresController {
     @Body() dto: UpdateStoreReturnDto,
     @Request() req: any,
   ) {
+    const userId = req.user?.userId || req.user?.id || req.user?.sub;
+    const isUserAdmin = ['Admin', 'Super Admin'].includes(req.user?.role);
     const result = await this.storesService.submitReturnDetails(
       id,
-      req.user.userId,
+      userId,
       dto,
+      isUserAdmin,
     );
     req.logData = result;
     return result.after;
