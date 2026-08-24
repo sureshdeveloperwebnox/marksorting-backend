@@ -51,13 +51,13 @@ export class MasterMillsController {
     name: 'dateFrom',
     required: false,
     type: String,
-    description: 'Filter from installation date (YYYY-MM-DD)',
+    description: 'Filter from invoice date (YYYY-MM-DD)',
   })
   @ApiQuery({
     name: 'dateTo',
     required: false,
     type: String,
-    description: 'Filter to installation date (YYYY-MM-DD)',
+    description: 'Filter to invoice date (YYYY-MM-DD)',
   })
   findAll(
     @Query('skip') skip?: string,
@@ -110,16 +110,16 @@ export class MasterMillsController {
 
     if (millId) where.mill_id = millId;
     if (dateFrom || dateTo) {
-      where.installation_date = {};
+      where.invoice_date = {};
       if (dateFrom) {
         const [fy, fm, fd] = dateFrom.split('-').map(Number);
         const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-        (where.installation_date as any).gte = from;
+        (where.invoice_date as any).gte = from;
       }
       if (dateTo) {
         const [ty, tm, td] = dateTo.split('-').map(Number);
         const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-        (where.installation_date as any).lte = to;
+        (where.invoice_date as any).lte = to;
       }
     }
 

@@ -2629,7 +2629,7 @@ export class ReportsService {
     let refNos: string[] = [];
     let frameNos: string[] = [];
 
-    if (!type || type === 'master-mills') {
+    if (type === 'master-mills') {
       // Master Mills: ref_no and frame_no are direct columns
       const [refRows, frameRows] = await Promise.all([
         this.prisma.masterMill.findMany({
@@ -2647,6 +2647,15 @@ export class ReportsService {
       ]);
       refNos = refRows.map((r) => r.ref_no!).filter(Boolean);
       frameNos = frameRows.map((r) => r.frame_no!).filter(Boolean);
+    } else if (type === 'mills') {
+      // Mills: ref_no comes directly from mill table
+      const millRows = await this.prisma.mill.findMany({
+        where: { deleted_at: null, ref_no: { not: null } },
+        select: { ref_no: true },
+        distinct: ['ref_no'],
+        orderBy: { ref_no: 'asc' },
+      });
+      refNos = millRows.map((r) => r.ref_no!).filter(Boolean);
     } else if (type === 'services' || type === 'expenses') {
       // Services / Expenses: refNo comes from mill.ref_no, frameNo from serial_or_frame_no
       const [millRows, frameRows] = await Promise.all([
@@ -2682,6 +2691,47 @@ export class ReportsService {
       ]);
       refNos = millRows.map((r) => r.ref_no!).filter(Boolean);
       frameNos = frameRows.map((r) => r.serial_or_frame_no!).filter(Boolean);
+    } else {
+      // Fallback / all: get distinct refNos from Mill & MasterMill, frameNos from reports & MasterMill
+      const [millRows, masterRows, serviceFrames, installFrames, masterFrames] = await Promise.all([
+        this.prisma.mill.findMany({
+          where: { deleted_at: null, ref_no: { not: null } },
+          select: { ref_no: true },
+          distinct: ['ref_no'],
+          orderBy: { ref_no: 'asc' },
+        }),
+        this.prisma.masterMill.findMany({
+          where: { deleted_at: null, ref_no: { not: null } },
+          select: { ref_no: true },
+          distinct: ['ref_no'],
+          orderBy: { ref_no: 'asc' },
+        }),
+        this.prisma.serviceReport.findMany({
+          where: { deleted_at: null, serial_or_frame_no: { gt: '' } },
+          select: { serial_or_frame_no: true },
+          distinct: ['serial_or_frame_no'],
+        }),
+        this.prisma.installationReport.findMany({
+          where: { deleted_at: null, serial_or_frame_no: { gt: '' } },
+          select: { serial_or_frame_no: true },
+          distinct: ['serial_or_frame_no'],
+        }),
+        this.prisma.masterMill.findMany({
+          where: { deleted_at: null, frame_no: { not: null } },
+          select: { frame_no: true },
+          distinct: ['frame_no'],
+        }),
+      ]);
+      const refSet = new Set<string>();
+      millRows.forEach((r) => r.ref_no && refSet.add(r.ref_no));
+      masterRows.forEach((r) => r.ref_no && refSet.add(r.ref_no));
+      refNos = Array.from(refSet).sort();
+
+      const frameSet = new Set<string>();
+      serviceFrames.forEach((r) => r.serial_or_frame_no && frameSet.add(r.serial_or_frame_no));
+      installFrames.forEach((r) => r.serial_or_frame_no && frameSet.add(r.serial_or_frame_no));
+      masterFrames.forEach((r) => r.frame_no && frameSet.add(r.frame_no));
+      frameNos = Array.from(frameSet).sort();
     }
 
     const result = { refNos, frameNos };
