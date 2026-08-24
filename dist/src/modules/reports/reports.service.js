@@ -85,7 +85,9 @@ let ReportsService = class ReportsService {
                 { serial_or_frame_no: { contains: search, mode: 'insensitive' } },
                 { nature_of_complaint: { contains: search, mode: 'insensitive' } },
                 { authorized_person: { contains: search, mode: 'insensitive' } },
+                { status: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
                 {
                     mill: {
                         customer: {
@@ -333,7 +335,25 @@ let ReportsService = class ReportsService {
                 { machine_model: { contains: search, mode: 'insensitive' } },
                 { serial_or_frame_no: { contains: search, mode: 'insensitive' } },
                 { authorized_person: { contains: search, mode: 'insensitive' } },
+                { status: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: {
+                            name: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                },
+                {
+                    technicians: {
+                        some: {
+                            technician: {
+                                full_name: { contains: search, mode: 'insensitive' },
+                            },
+                        },
+                    },
+                },
             ];
         }
         if (status) {
@@ -547,9 +567,37 @@ let ReportsService = class ReportsService {
                 { expense_number: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { others: { contains: search, mode: 'insensitive' } },
+                { status: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                { mill: { ref_no: { contains: search, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: {
+                            name: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                },
                 {
                     expenseCategory: { name: { contains: search, mode: 'insensitive' } },
+                },
+                {
+                    technicians: {
+                        some: {
+                            technician: {
+                                full_name: { contains: search, mode: 'insensitive' },
+                            },
+                        },
+                    },
+                },
+                {
+                    serviceReport: {
+                        serial_or_frame_no: { contains: search, mode: 'insensitive' },
+                    },
+                },
+                {
+                    installationReport: {
+                        serial_or_frame_no: { contains: search, mode: 'insensitive' },
+                    },
                 },
             ];
         }
@@ -953,7 +1001,19 @@ let ReportsService = class ReportsService {
                 { mc_model: { contains: search, mode: 'insensitive' } },
                 { invoice_no: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
+                { state: { contains: search, mode: 'insensitive' } },
+                { address: { contains: search, mode: 'insensitive' } },
+                { phone_no: { contains: search, mode: 'insensitive' } },
+                { all_warranty: { contains: search, mode: 'insensitive' } },
+                { status: { contains: search, mode: 'insensitive' } },
                 { mill: { name: { contains: search, mode: 'insensitive' } } },
+                {
+                    mill: {
+                        customer: {
+                            name: { contains: search, mode: 'insensitive' },
+                        },
+                    },
+                },
             ];
         }
         if (status) {
@@ -1345,7 +1405,7 @@ let ReportsService = class ReportsService {
             where.customer_id = customerId;
         }
         if (warrantyStatus) {
-            where.warranty_status = warrantyStatus;
+            where.warranty_status = { equals: warrantyStatus, mode: 'insensitive' };
         }
         if (returnStatus) {
             where.return_status = returnStatus;
@@ -1377,8 +1437,12 @@ let ReportsService = class ReportsService {
         }
         if (search) {
             where.OR = [
+                { store_number: { contains: search, mode: 'insensitive' } },
                 { frame_number: { contains: search, mode: 'insensitive' } },
                 { barcode: { contains: search, mode: 'insensitive' } },
+                { warranty_status: { contains: search, mode: 'insensitive' } },
+                { return_status: { contains: search, mode: 'insensitive' } },
+                { inflow_status: { contains: search, mode: 'insensitive' } },
                 {
                     service_engineer: {
                         full_name: { contains: search, mode: 'insensitive' },
@@ -1387,6 +1451,15 @@ let ReportsService = class ReportsService {
                 {
                     customer: {
                         name: { contains: search, mode: 'insensitive' },
+                    },
+                },
+                {
+                    materials: {
+                        some: {
+                            material: {
+                                name: { contains: search, mode: 'insensitive' },
+                            },
+                        },
                     },
                 },
             ];
@@ -1904,7 +1977,9 @@ let ReportsService = class ReportsService {
                 { city: { contains: search, mode: 'insensitive' } },
                 { place: { contains: search, mode: 'insensitive' } },
                 { phone: { contains: search, mode: 'insensitive' } },
+                { phone_2: { contains: search, mode: 'insensitive' } },
                 { email: { contains: search, mode: 'insensitive' } },
+                { status: { contains: search, mode: 'insensitive' } },
                 { customer: { name: { contains: search, mode: 'insensitive' } } },
             ];
         }
