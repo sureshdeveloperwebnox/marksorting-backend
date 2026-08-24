@@ -535,8 +535,7 @@ let StoresService = class StoresService {
             throw new common_1.ForbiddenException('You are not authorized to update this store record');
         }
         if (!isUserAdmin &&
-            (existing.return_status === 'In Progress' ||
-                existing.return_status === 'Returned' ||
+            (existing.return_status === 'Returned' ||
                 existing.return_status === 'Completed')) {
             throw new common_1.BadRequestException('Store return is already completed and locked. It cannot be edited in the app.');
         }
@@ -553,22 +552,9 @@ let StoresService = class StoresService {
             dto.invoice_number.trim() !== '') {
             updateData.invoice_number = dto.invoice_number.trim();
         }
-        const effectiveProviderName = updateData.provider_name !== undefined
-            ? updateData.provider_name
-            : existing.provider_name;
-        const effectiveInvoiceNumber = updateData.invoice_number !== undefined
-            ? updateData.invoice_number
-            : existing.invoice_number;
-        const hasCourier = Boolean(effectiveProviderName &&
-            effectiveProviderName.trim() !== '' &&
-            effectiveInvoiceNumber &&
-            effectiveInvoiceNumber.trim() !== '');
-        const targetStatus = dto.return_status && dto.return_status.trim() !== ''
-            ? dto.return_status
-            : hasCourier && (!existing.return_status || existing.return_status === 'Pending')
-                ? 'In Progress'
-                : existing.return_status || 'Pending';
-        updateData.return_status = targetStatus;
+        if (dto.return_status && dto.return_status.trim() !== '') {
+            updateData.return_status = dto.return_status.trim();
+        }
         let finalRemarks = dto.remarks;
         if ((!finalRemarks || finalRemarks.trim() === '') &&
             dto.products &&

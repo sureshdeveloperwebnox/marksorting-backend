@@ -668,11 +668,10 @@ export class StoresService implements OnModuleInit {
       );
     }
 
-    // Once status in app becomes completed (return_status in DB is 'In Progress', 'Returned', or 'Completed'), editing is locked for non-admins
+    // Once return is completed ('Returned' or 'Completed'), editing is locked for non-admins
     if (
       !isUserAdmin &&
-      (existing.return_status === 'In Progress' ||
-        existing.return_status === 'Returned' ||
+      (existing.return_status === 'Returned' ||
         existing.return_status === 'Completed')
     ) {
       throw new BadRequestException(
@@ -701,32 +700,12 @@ export class StoresService implements OnModuleInit {
       updateData.invoice_number = dto.invoice_number.trim();
     }
 
-    const effectiveProviderName =
-      updateData.provider_name !== undefined
-        ? (updateData.provider_name as string)
-        : existing.provider_name;
-
-    const effectiveInvoiceNumber =
-      updateData.invoice_number !== undefined
-        ? (updateData.invoice_number as string)
-        : existing.invoice_number;
-
-    // Automatically set status to 'In Progress' once Courier Service Name and Tracking ID are entered
-    const hasCourier = Boolean(
-      effectiveProviderName &&
-        effectiveProviderName.trim() !== '' &&
-        effectiveInvoiceNumber &&
-        effectiveInvoiceNumber.trim() !== '',
-    );
-
-    const targetStatus =
-      dto.return_status && dto.return_status.trim() !== ''
-        ? dto.return_status
-        : hasCourier && (!existing.return_status || existing.return_status === 'Pending')
-          ? 'In Progress'
-          : existing.return_status || 'Pending';
-
-    updateData.return_status = targetStatus;
+    // Only update return_status if explicitly provided in dto.
+    // Do NOT automatically transition return_status to 'In Progress' or 'Completed' just because courier details exist,
+    // as technicians save product details for individual materials progressively while return status remains 'Pending'.
+    if (dto.return_status && dto.return_status.trim() !== '') {
+      updateData.return_status = dto.return_status.trim();
+    }
 
     let finalRemarks = dto.remarks;
     if (

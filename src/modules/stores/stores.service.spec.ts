@@ -166,4 +166,189 @@ describe('StoresService - submitReturnDetails', () => {
     expect(result.after.invoice_number).toBe('FX-998827361');
     expect(result.after.return_status).toBe('In Progress');
   });
+
+  it('keeps return_status as Pending when saving product details even if courier details are present', async () => {
+    const existingStore = {
+      id: 'store-1',
+      store_number: 'STR-8812',
+      service_engineer_id: 'tech-1',
+      provider_name: 'DHL Test',
+      invoice_number: '123456789',
+      return_status: 'Pending',
+      remarks: '',
+      warranty_status: 'Non Warranty',
+      materials: [
+        {
+          material_id: 'mat-1',
+          material: { id: 'mat-1', name: 'LED ARRAY' },
+          quantity: 2,
+        },
+      ],
+    };
+
+    mockPrisma.store.findFirst.mockResolvedValue(existingStore);
+    mockPrisma.store.update.mockImplementation(({ data }: any) =>
+      Promise.resolve({
+        ...existingStore,
+        ...data,
+      }),
+    );
+
+    // Saving product details for first material without passing return_status
+    const result = await service.submitReturnDetails(
+      'store-1',
+      'tech-1',
+      {
+        products: [
+          {
+            material_id: 'mat-1',
+            material_name: 'LED ARRAY',
+            barcodes: [
+              { barcode: 'LED-001', used: true, return_status: 'Returned' },
+              { barcode: 'LED-002', used: false },
+            ],
+          },
+        ],
+      },
+      false,
+    );
+
+    // Verify update did not overwrite return_status to 'In Progress' or 'Completed'
+    expect(mockPrisma.store.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 'store-1' },
+        data: expect.not.objectContaining({
+          return_status: 'In Progress',
+        }),
+      }),
+    );
+
+    expect(result.after.return_status).toBe('Pending');
+  });
+
+  it('allows progressive saving of multiple materials sequentially while keeping status Pending, and only locks upon explicit finalization', async () => {
+    let currentStore: any = {
+      id: 'store-100',
+      store_number: 'STR-9999',
+      service_engineer_id: 'tech-1',
+      provider_name: 'DHL Test',
+      invoice_number: '123456789',
+      return_status: 'Pending',
+      remarks: '',
+      warranty_status: 'Non Warranty',
+      materials: [
+        {
+          material_id: 'mat-1',
+          material: { id: 'mat-1', name: 'LED ARRAY' },
+          quantity: 2,
+        },
+        {
+          material_id: 'mat-2',
+          material: { id: 'mat-2', name: 'ckd roldess cyclinder 1510' },
+          quantity: 2,
+        },
+        {
+          material_id: 'mat-3',
+          material: { id: 'mat-3', name: 'camera board tt' },
+          quantity: 2,
+        },
+      ],
+    };
+
+    mockPrisma.store.findFirst.mockImplementation(() => Promise.resolve(currentStore));
+    mockPrisma.store.update.mockImplementation(({ data }: any) => {
+      currentStore = {
+        ...currentStore,
+        ...data,
+      };
+      return Promise.resolve(currentStore);
+    });
+
+    // Step 1: Save Material 1 product details
+    const step1Result = await service.submitReturnDetails(
+      'store-100',
+      'tech-1',
+      {
+        products: [
+          {
+            material_id: 'mat-1',
+            material_name: 'LED ARRAY',
+            barcodes: [
+              { barcode: 'LED-001', used: true, return_status: 'Returned' },
+              { barcode: 'LED-002', used: false },
+            ],
+          },
+        ],
+      },
+      false,
+    );
+    expect(step1Result.after.return_status).toBe('Pending');
+    expect(step1Result.after.remarks).toContain('LED ARRAY');
+
+    // Step 2: Save Material 2 product details (must NOT be blocked or locked)
+    const step2Result = await service.submitReturnDetails(
+      'store-100',
+      'tech-1',
+      {
+        products: [
+          {
+            material_id: 'mat-2',
+            material_name: 'ckd roldess cyclinder 1510',
+            barcodes: [
+              { barcode: 'CKD-001', used: true, return_status: 'Returned' },
+              { barcode: 'CKD-002', used: false },
+            ],
+          },
+        ],
+      },
+      false,
+    );
+    expect(step2Result.after.return_status).toBe('Pending');
+    expect(step2Result.after.remarks).toContain('LED ARRAY');
+    expect(step2Result.after.remarks).toContain('ckd roldess cyclinder 1510');
+
+    // Step 3: Save Material 3 product details (must NOT be blocked or locked)
+    const step3Result = await service.submitReturnDetails(
+      'store-100',
+      'tech-1',
+      {
+        products: [
+          {
+            material_id: 'mat-3',
+            material_name: 'camera board tt',
+            barcodes: [
+              { barcode: 'CAM-001', used: true, return_status: 'Returned' },
+              { barcode: 'CAM-002', used: false },
+            ],
+          },
+        ],
+      },
+      false,
+    );
+    expect(step3Result.after.return_status).toBe('Pending');
+    expect(step3Result.after.remarks).toContain('camera board tt');
+
+    // Step 4: Finalize return order explicitly with return_status: 'Returned'
+    const step4Result = await service.submitReturnDetails(
+      'store-100',
+      'tech-1',
+      {
+        return_status: 'Returned',
+      },
+      false,
+    );
+    expect(step4Result.after.return_status).toBe('Returned');
+
+    // Step 5: Verify that once status is 'Returned', subsequent non-admin edit is locked
+    await expect(
+      service.submitReturnDetails(
+        'store-100',
+        'tech-1',
+        {
+          remarks: 'Trying to edit after completion',
+        },
+        false,
+      ),
+    ).rejects.toThrow('Store return is already completed and locked. It cannot be edited in the app.');
+  });
 });
