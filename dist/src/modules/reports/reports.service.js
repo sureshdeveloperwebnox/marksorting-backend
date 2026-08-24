@@ -601,30 +601,30 @@ let ReportsService = class ReportsService {
                 where.technicians = { some: { technician_id: technicianId } };
             }
         }
-        if (expenseDateFrom || expenseDateTo) {
+        const effExpenseDateFrom = expenseDateFrom || dateFrom;
+        const effExpenseDateTo = expenseDateTo || dateTo;
+        if (effExpenseDateFrom || effExpenseDateTo) {
             where.visit_date = {};
-            if (expenseDateFrom) {
-                const [fy, fm, fd] = expenseDateFrom.split('-').map(Number);
+            if (effExpenseDateFrom) {
+                const [fy, fm, fd] = effExpenseDateFrom.split('-').map(Number);
                 const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
                 where.visit_date.gte = fromDate;
             }
-            if (expenseDateTo) {
-                const [ty, tm, td] = expenseDateTo.split('-').map(Number);
+            if (effExpenseDateTo) {
+                const [ty, tm, td] = effExpenseDateTo.split('-').map(Number);
                 const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
                 where.visit_date.lte = toDate;
             }
         }
-        const effExpenseCreatedFrom = createdDateFrom || dateFrom;
-        const effExpenseCreatedTo = createdDateTo || dateTo;
-        if (effExpenseCreatedFrom || effExpenseCreatedTo) {
+        if (createdDateFrom || createdDateTo) {
             where.created_at = {};
-            if (effExpenseCreatedFrom) {
-                const [cy, cm, cd] = effExpenseCreatedFrom.split('-').map(Number);
+            if (createdDateFrom) {
+                const [cy, cm, cd] = createdDateFrom.split('-').map(Number);
                 const cFromDate = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
                 where.created_at.gte = cFromDate;
             }
-            if (effExpenseCreatedTo) {
-                const [cy, cm, cd] = effExpenseCreatedTo.split('-').map(Number);
+            if (createdDateTo) {
+                const [cy, cm, cd] = createdDateTo.split('-').map(Number);
                 const cToDate = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
                 where.created_at.lte = cToDate;
             }
@@ -754,7 +754,7 @@ let ReportsService = class ReportsService {
                 'Expense No',
                 'Mill Name / Details',
                 'Place',
-                'Visit Date',
+                'Expense Date',
                 ...categoryNames,
                 'Total Amount (INR)',
                 'Technicians',
