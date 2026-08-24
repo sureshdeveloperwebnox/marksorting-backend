@@ -55,6 +55,8 @@ export class ReportsController {
   @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
@@ -76,6 +78,8 @@ export class ReportsController {
     @Query('categoryId') categoryId?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
     @Query('millId') millId?: string,
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
@@ -91,6 +95,8 @@ export class ReportsController {
       categoryId,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
       millId,
       technicianId,
       millName,
@@ -133,6 +139,8 @@ export class ReportsController {
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'technicianId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
@@ -153,6 +161,8 @@ export class ReportsController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
     @Query('millId') millId?: string,
     @Query('technicianId') technicianId?: string,
     @Query('millName') millName?: string,
@@ -167,6 +177,8 @@ export class ReportsController {
       status,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
       millId,
       technicianId,
       millName,
@@ -304,6 +316,8 @@ export class ReportsController {
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
   @ApiQuery({ name: 'millId', required: false, type: String })
   @ApiQuery({ name: 'millName', required: false, type: String })
   @ApiQuery({ name: 'frameNo', required: false, type: String })
@@ -323,6 +337,8 @@ export class ReportsController {
     @Query('status') status?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
     @Query('millId') millId?: string,
     @Query('millName') millName?: string,
     @Query('frameNo') frameNo?: string,
@@ -336,6 +352,8 @@ export class ReportsController {
       status,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
       millId,
       millName,
       frameNo,
@@ -386,6 +404,8 @@ export class ReportsController {
   @ApiQuery({ name: 'inflowStatus', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -406,6 +426,8 @@ export class ReportsController {
     @Query('inflowStatus') inflowStatus?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -420,6 +442,8 @@ export class ReportsController {
       inflowStatus,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
     };
 
     if (exportType) {
@@ -468,6 +492,8 @@ export class ReportsController {
   @ApiQuery({ name: 'city', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'createdDateFrom', required: false, type: String })
+  @ApiQuery({ name: 'createdDateTo', required: false, type: String })
   @ApiQuery({
     name: 'export',
     required: false,
@@ -487,6 +513,8 @@ export class ReportsController {
     @Query('city') city?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('createdDateFrom') createdDateFrom?: string,
+    @Query('createdDateTo') createdDateTo?: string,
     @Query('export') exportType?: 'pdf' | 'csv' | 'excel',
   ) {
     const params = {
@@ -500,6 +528,8 @@ export class ReportsController {
       city,
       dateFrom,
       dateTo,
+      createdDateFrom,
+      createdDateTo,
     };
 
     if (exportType) {

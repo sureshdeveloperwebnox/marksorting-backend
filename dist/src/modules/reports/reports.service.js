@@ -68,7 +68,7 @@ let ReportsService = class ReportsService {
         this.documentTemplateService = documentTemplateService;
     }
     getServicesWhereClause(params, user) {
-        const { search, status, categoryId, dateFrom, dateTo, millId, technicianId, millName, frameNo, refNo, } = params;
+        const { search, status, categoryId, dateFrom, dateTo, createdDateFrom, createdDateTo, millId, technicianId, millName, frameNo, refNo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -140,17 +140,19 @@ let ReportsService = class ReportsService {
                 where.technicians = { some: { technician_id: technicianId } };
             }
         }
-        if (dateFrom || dateTo) {
-            where.visit_date = {};
-            if (dateFrom) {
-                const [fy, fm, fd] = dateFrom.split('-').map(Number);
-                const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-                where.visit_date.gte = fromDate;
+        const effServiceCreatedFrom = createdDateFrom || dateFrom;
+        const effServiceCreatedTo = createdDateTo || dateTo;
+        if (effServiceCreatedFrom || effServiceCreatedTo) {
+            where.created_at = {};
+            if (effServiceCreatedFrom) {
+                const [cy, cm, cd] = effServiceCreatedFrom.split('-').map(Number);
+                const fromCreated = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
+                where.created_at.gte = fromCreated;
             }
-            if (dateTo) {
-                const [ty, tm, td] = dateTo.split('-').map(Number);
-                const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-                where.visit_date.lte = toDate;
+            if (effServiceCreatedTo) {
+                const [cy, cm, cd] = effServiceCreatedTo.split('-').map(Number);
+                const toCreated = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
+                where.created_at.lte = toCreated;
             }
         }
         return where;
@@ -315,7 +317,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getInstallationsWhereClause(params, user) {
-        const { search, status, dateFrom, dateTo, millId, technicianId, millName, frameNo, refNo } = params;
+        const { search, status, dateFrom, dateTo, createdDateFrom, createdDateTo, millId, technicianId, millName, frameNo, refNo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.technicians = {
@@ -362,17 +364,19 @@ let ReportsService = class ReportsService {
                 where.technicians = { some: { technician_id: technicianId } };
             }
         }
-        if (dateFrom || dateTo) {
-            where.visit_date = {};
-            if (dateFrom) {
-                const [fy, fm, fd] = dateFrom.split('-').map(Number);
-                const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-                where.visit_date.gte = fromDate;
+        const effInstallationCreatedFrom = createdDateFrom || dateFrom;
+        const effInstallationCreatedTo = createdDateTo || dateTo;
+        if (effInstallationCreatedFrom || effInstallationCreatedTo) {
+            where.created_at = {};
+            if (effInstallationCreatedFrom) {
+                const [cy, cm, cd] = effInstallationCreatedFrom.split('-').map(Number);
+                const fromCreated = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
+                where.created_at.gte = fromCreated;
             }
-            if (dateTo) {
-                const [ty, tm, td] = dateTo.split('-').map(Number);
-                const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-                where.visit_date.lte = toDate;
+            if (effInstallationCreatedTo) {
+                const [cy, cm, cd] = effInstallationCreatedTo.split('-').map(Number);
+                const toCreated = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
+                where.created_at.lte = toCreated;
             }
         }
         return where;
@@ -597,30 +601,30 @@ let ReportsService = class ReportsService {
                 where.technicians = { some: { technician_id: technicianId } };
             }
         }
-        const effExpenseFrom = expenseDateFrom || dateFrom;
-        const effExpenseTo = expenseDateTo || dateTo;
-        if (effExpenseFrom || effExpenseTo) {
+        if (expenseDateFrom || expenseDateTo) {
             where.visit_date = {};
-            if (effExpenseFrom) {
-                const [fy, fm, fd] = effExpenseFrom.split('-').map(Number);
+            if (expenseDateFrom) {
+                const [fy, fm, fd] = expenseDateFrom.split('-').map(Number);
                 const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
                 where.visit_date.gte = fromDate;
             }
-            if (effExpenseTo) {
-                const [ty, tm, td] = effExpenseTo.split('-').map(Number);
+            if (expenseDateTo) {
+                const [ty, tm, td] = expenseDateTo.split('-').map(Number);
                 const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
                 where.visit_date.lte = toDate;
             }
         }
-        if (createdDateFrom || createdDateTo) {
+        const effExpenseCreatedFrom = createdDateFrom || dateFrom;
+        const effExpenseCreatedTo = createdDateTo || dateTo;
+        if (effExpenseCreatedFrom || effExpenseCreatedTo) {
             where.created_at = {};
-            if (createdDateFrom) {
-                const [cy, cm, cd] = createdDateFrom.split('-').map(Number);
+            if (effExpenseCreatedFrom) {
+                const [cy, cm, cd] = effExpenseCreatedFrom.split('-').map(Number);
                 const cFromDate = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
                 where.created_at.gte = cFromDate;
             }
-            if (createdDateTo) {
-                const [cy, cm, cd] = createdDateTo.split('-').map(Number);
+            if (effExpenseCreatedTo) {
+                const [cy, cm, cd] = effExpenseCreatedTo.split('-').map(Number);
                 const cToDate = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
                 where.created_at.lte = cToDate;
             }
@@ -940,7 +944,7 @@ let ReportsService = class ReportsService {
         throw new common_1.BadRequestException(`Format type ${formatType} is not supported`);
     }
     getMasterMillsWhereClause(params, user) {
-        const { search, status, dateFrom, dateTo, millId, millName, frameNo, refNo } = params;
+        const { search, status, dateFrom, dateTo, createdDateFrom, createdDateTo, millId, millName, frameNo, refNo, } = params;
         const where = { deleted_at: null };
         if (search) {
             where.OR = [
@@ -970,16 +974,29 @@ let ReportsService = class ReportsService {
             where.ref_no = { contains: refNo, mode: 'insensitive' };
         }
         if (dateFrom || dateTo) {
-            where.installation_date = {};
+            where.invoice_date = {};
             if (dateFrom) {
                 const [fy, fm, fd] = dateFrom.split('-').map(Number);
                 const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-                where.installation_date.gte = fromDate;
+                where.invoice_date.gte = fromDate;
             }
             if (dateTo) {
                 const [ty, tm, td] = dateTo.split('-').map(Number);
                 const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-                where.installation_date.lte = toDate;
+                where.invoice_date.lte = toDate;
+            }
+        }
+        if (createdDateFrom || createdDateTo) {
+            where.created_at = {};
+            if (createdDateFrom) {
+                const [cy, cm, cd] = createdDateFrom.split('-').map(Number);
+                const fromCreated = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
+                where.created_at.gte = fromCreated;
+            }
+            if (createdDateTo) {
+                const [cy, cm, cd] = createdDateTo.split('-').map(Number);
+                const toCreated = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
+                where.created_at.lte = toCreated;
             }
         }
         return where;
@@ -1316,7 +1333,7 @@ let ReportsService = class ReportsService {
         };
     }
     getStoresWhereClause(params, user) {
-        const { search, serviceEngineerId, customerId, materialId, warrantyStatus, returnStatus, inflowStatus, dateFrom, dateTo, } = params;
+        const { search, serviceEngineerId, customerId, materialId, warrantyStatus, returnStatus, inflowStatus, dateFrom, dateTo, createdDateFrom, createdDateTo, } = params;
         const where = { deleted_at: null };
         if (user && user.role === 'Service Engineer') {
             where.service_engineer_id = user.userId;
@@ -1343,14 +1360,18 @@ let ReportsService = class ReportsService {
                 },
             };
         }
-        if (dateFrom || dateTo) {
+        const effStoreCreatedFrom = createdDateFrom || dateFrom;
+        const effStoreCreatedTo = createdDateTo || dateTo;
+        if (effStoreCreatedFrom || effStoreCreatedTo) {
             where.created_at = {};
-            if (dateFrom) {
-                where.created_at.gte = new Date(dateFrom);
+            if (effStoreCreatedFrom) {
+                const [cy, cm, cd] = effStoreCreatedFrom.split('-').map(Number);
+                const fromDate = new Date(cy, cm - 1, cd, 0, 0, 0, 0);
+                where.created_at.gte = fromDate;
             }
-            if (dateTo) {
-                const toDate = new Date(dateTo);
-                toDate.setUTCHours(23, 59, 59, 999);
+            if (effStoreCreatedTo) {
+                const [cy, cm, cd] = effStoreCreatedTo.split('-').map(Number);
+                const toDate = new Date(cy, cm - 1, cd, 23, 59, 59, 999);
                 where.created_at.lte = toDate;
             }
         }
@@ -1874,7 +1895,7 @@ let ReportsService = class ReportsService {
         return null;
     }
     getMillsWhereClause(params, user) {
-        const { search, status, dateFrom, dateTo, customerId, place, city, refNo } = params;
+        const { search, status, dateFrom, dateTo, createdDateFrom, createdDateTo, customerId, place, city, refNo, } = params;
         const where = { deleted_at: null };
         if (search) {
             where.OR = [
@@ -1902,15 +1923,17 @@ let ReportsService = class ReportsService {
         if (city) {
             where.city = { contains: city, mode: 'insensitive' };
         }
-        if (dateFrom || dateTo) {
+        const effMillCreatedFrom = createdDateFrom || dateFrom;
+        const effMillCreatedTo = createdDateTo || dateTo;
+        if (effMillCreatedFrom || effMillCreatedTo) {
             where.created_at = {};
-            if (dateFrom) {
-                const [fy, fm, fd] = dateFrom.split('-').map(Number);
+            if (effMillCreatedFrom) {
+                const [fy, fm, fd] = effMillCreatedFrom.split('-').map(Number);
                 const fromDate = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
                 where.created_at.gte = fromDate;
             }
-            if (dateTo) {
-                const [ty, tm, td] = dateTo.split('-').map(Number);
+            if (effMillCreatedTo) {
+                const [ty, tm, td] = effMillCreatedTo.split('-').map(Number);
                 const toDate = new Date(ty, tm - 1, td, 23, 59, 59, 999);
                 where.created_at.lte = toDate;
             }
