@@ -1238,24 +1238,27 @@ let ReportsService = class ReportsService {
                 key: header,
                 width: Math.max(header.length + 4, 15),
             }));
-            const headerRow = worksheet.getRow(1);
-            headerRow.eachCell((cell) => {
-                cell.font = { bold: true };
-                cell.fill = {
-                    type: 'pattern',
-                    pattern: 'solid',
-                    fgColor: { argb: 'FFD3D3D3' },
-                };
-                cell.border = {
-                    top: { style: 'thin' },
-                    left: { style: 'thin' },
-                    bottom: { style: 'thin' },
-                    right: { style: 'thin' },
-                };
-            });
             if (dataRows.length > 0) {
                 worksheet.addRows(dataRows);
             }
+            worksheet.eachRow((row, rowNumber) => {
+                row.eachCell({ includeEmpty: true }, (cell) => {
+                    if (rowNumber === 1) {
+                        cell.font = { bold: true };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFD3D3D3' },
+                        };
+                    }
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' },
+                    };
+                });
+            });
             const arrayBuffer = await workbook.xlsx.writeBuffer();
             const buffer = Buffer.from(arrayBuffer);
             return {
