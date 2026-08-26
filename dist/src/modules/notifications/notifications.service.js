@@ -98,7 +98,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 meta_data: metaData ?? undefined,
             },
         });
-        this.gateway.emitToUser(resolvedUserId, 'notification', notification);
+        this.gateway?.emitToUser?.(resolvedUserId, 'notification', notification);
         const recordId = metaData?.storeId ||
             metaData?.reportId ||
             metaData?.expenseId ||
