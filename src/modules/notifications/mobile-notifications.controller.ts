@@ -150,6 +150,19 @@ export class MobileNotificationsController {
     );
   }
 
+  // ── POST /test-my-device ──────────────────────────────────────────────────
+
+  @Post('test-my-device')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '[Mobile] Test push notification on current user device',
+    description:
+      'Sends an immediate test push notification to all active devices registered to the currently authenticated user.',
+  })
+  testMyDevice(@Request() req: any) {
+    return this.notificationsService.testPushDelivery(req.user.userId);
+  }
+
   // ── DELETE /push-token ────────────────────────────────────────────────────
 
   @Delete('push-token')

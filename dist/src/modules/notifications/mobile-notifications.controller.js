@@ -85,6 +85,9 @@ let MobileNotificationsController = class MobileNotificationsController {
     registerPushToken(req, dto) {
         return this.notificationsService.registerPushToken(req.user.userId, dto.token, dto.device_type);
     }
+    testMyDevice(req) {
+        return this.notificationsService.testPushDelivery(req.user.userId);
+    }
     deregisterPushToken(req, token) {
         return this.notificationsService.removePushToken(req.user.userId, token);
     }
@@ -152,6 +155,18 @@ __decorate([
     __metadata("design:paramtypes", [Object, register_push_token_dto_1.RegisterPushTokenDto]),
     __metadata("design:returntype", void 0)
 ], MobileNotificationsController.prototype, "registerPushToken", null);
+__decorate([
+    (0, common_1.Post)('test-my-device'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, swagger_1.ApiOperation)({
+        summary: '[Mobile] Test push notification on current user device',
+        description: 'Sends an immediate test push notification to all active devices registered to the currently authenticated user.',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], MobileNotificationsController.prototype, "testMyDevice", null);
 __decorate([
     (0, common_1.Delete)('push-token'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
