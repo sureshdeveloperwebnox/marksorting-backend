@@ -51,8 +51,8 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
             return;
         const projectId = this.configService.get('firebase.projectId');
         const clientEmail = this.configService.get('firebase.clientEmail');
-        const privateKey = this.configService.get('firebase.privateKey');
-        if (!projectId || !clientEmail || !privateKey) {
+        const rawPrivateKey = this.configService.get('firebase.privateKey');
+        if (!projectId || !clientEmail || !rawPrivateKey) {
             this.logger.warn('Firebase credentials not provided. Running in Mock Mode for push notifications.');
             this.firebaseMockMode = true;
             this.firebaseInitialized = true;
@@ -61,15 +61,21 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
         try {
             const admin = require('firebase-admin');
             if (!admin.apps.length) {
+                const formattedKey = rawPrivateKey
+                    .replace(/^["']|["']$/g, '')
+                    .replace(/\\n/g, '\n')
+                    .replace(/\r\n/g, '\n')
+                    .trim();
                 admin.initializeApp({
                     credential: admin.credential.cert({
-                        projectId,
-                        clientEmail,
-                        privateKey: privateKey.replace(/\\n/g, '\n'),
+                        projectId: projectId.trim(),
+                        clientEmail: clientEmail.trim(),
+                        privateKey: formattedKey,
                     }),
                 });
             }
             this.firebaseApp = admin;
+            this.firebaseMockMode = false;
             this.logger.log('Firebase Admin SDK initialized successfully.');
         }
         catch (err) {
@@ -97,18 +103,33 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
         const mappedType = mapNotificationType(type);
         if (this.firebaseMockMode) {
             this.logger.log(`[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${mappedType}, id: ${targetRecordId})`);
-            return;
+            return {
+                success: true,
+                mockMode: true,
+                message: 'Running in Firebase Mock Mode (credentials not provided)',
+            };
         }
         const pushTokens = await this.prisma.pushToken.findMany({
             where: { user_id: userId },
             select: { token: true },
             orderBy: { updated_at: 'desc' },
         });
-        if (!pushTokens.length)
-            return;
+        if (!pushTokens.length) {
+            this.logger.warn(`No push tokens found in database for user ${userId}`);
+            return {
+                success: false,
+                tokensCount: 0,
+                message: `No active FCM push tokens found for user ${userId}`,
+            };
+        }
         const tokens = Array.from(new Set(pushTokens.map((pt) => pt.token.trim()))).filter(Boolean);
-        if (!tokens.length)
-            return;
+        if (!tokens.length) {
+            return {
+                success: false,
+                tokensCount: 0,
+                message: 'Push tokens array was empty after cleaning',
+            };
+        }
         const targetRoute = data.metaData?.route ||
             (mappedType === 'ticket'
                 ? `/tickets/${targetRecordId}`
@@ -216,10 +237,24 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                 });
                 this.logger.warn(`Removed ${failed.length} invalid FCM tokens.`);
             }
+            return {
+                success: response.successCount > 0,
+                tokensCount: tokens.length,
+                successCount: response.successCount,
+                failureCount: response.failureCount,
+                responses: response.responses.map((r) => ({
+                    success: r.success,
+                    messageId: r.messageId,
+                    error: r.error ? { code: r.error.code, message: r.error.message } : null,
+                })),
+            };
         }
         catch (err) {
             this.logger.error(`Failed to send FCM push for user ${userId}`, err);
-            throw err;
+            return {
+                success: false,
+                error: err.message,
+            };
         }
     }
 };

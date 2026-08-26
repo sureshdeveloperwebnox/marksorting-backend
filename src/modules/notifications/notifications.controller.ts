@@ -141,4 +141,24 @@ export class NotificationsController {
     }
     return { message: 'Broadcast notification dispatched successfully' };
   }
+
+  @Post('test-fcm')
+  @ApiOperation({
+    summary: 'Test direct FCM push delivery with diagnostic report',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+    description: 'Target user ID or email (defaults to latest token user)',
+  })
+  async testFcm(
+    @Request() req: any,
+    @Query('userId') queryUserId?: string,
+    @Body('userId') bodyUserId?: string,
+  ) {
+    const target = queryUserId || bodyUserId || req.user?.userId;
+    return this.notificationsService.testPushDelivery(target);
+  }
 }
+

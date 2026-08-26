@@ -61,6 +61,10 @@ let NotificationsController = class NotificationsController {
         }
         return { message: 'Broadcast notification dispatched successfully' };
     }
+    async testFcm(req, queryUserId, bodyUserId) {
+        const target = queryUserId || bodyUserId || req.user?.userId;
+        return this.notificationsService.testPushDelivery(target);
+    }
 };
 exports.NotificationsController = NotificationsController;
 __decorate([
@@ -135,6 +139,24 @@ __decorate([
     __metadata("design:paramtypes", [broadcast_notification_dto_1.BroadcastNotificationDto]),
     __metadata("design:returntype", Promise)
 ], NotificationsController.prototype, "broadcast", null);
+__decorate([
+    (0, common_1.Post)('test-fcm'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Test direct FCM push delivery with diagnostic report',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'userId',
+        required: false,
+        type: String,
+        description: 'Target user ID or email (defaults to latest token user)',
+    }),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('userId')),
+    __param(2, (0, common_1.Body)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", Promise)
+], NotificationsController.prototype, "testFcm", null);
 exports.NotificationsController = NotificationsController = __decorate([
     (0, swagger_1.ApiTags)('Notifications'),
     (0, swagger_1.ApiBearerAuth)(),

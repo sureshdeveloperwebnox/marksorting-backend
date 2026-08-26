@@ -20,5 +20,41 @@ export declare class NotificationProcessor extends WorkerHost {
         type: any;
         recordId?: string;
         metaData?: Record<string, any>;
-    }): Promise<void>;
+    }): Promise<{
+        success: boolean;
+        mockMode: boolean;
+        message: string;
+        tokensCount?: undefined;
+        successCount?: undefined;
+        failureCount?: undefined;
+        responses?: undefined;
+        error?: undefined;
+    } | {
+        success: boolean;
+        tokensCount: number;
+        message: string;
+        mockMode?: undefined;
+        successCount?: undefined;
+        failureCount?: undefined;
+        responses?: undefined;
+        error?: undefined;
+    } | {
+        success: boolean;
+        tokensCount: number;
+        successCount: any;
+        failureCount: any;
+        responses: any;
+        mockMode?: undefined;
+        message?: undefined;
+        error?: undefined;
+    } | {
+        success: boolean;
+        error: any;
+        mockMode?: undefined;
+        message?: undefined;
+        tokensCount?: undefined;
+        successCount?: undefined;
+        failureCount?: undefined;
+        responses?: undefined;
+    }>;
 }

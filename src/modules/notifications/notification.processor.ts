@@ -43,9 +43,9 @@ export class NotificationProcessor extends WorkerHost {
 
     const projectId = this.configService.get<string>('firebase.projectId');
     const clientEmail = this.configService.get<string>('firebase.clientEmail');
-    const privateKey = this.configService.get<string>('firebase.privateKey');
+    const rawPrivateKey = this.configService.get<string>('firebase.privateKey');
 
-    if (!projectId || !clientEmail || !privateKey) {
+    if (!projectId || !clientEmail || !rawPrivateKey) {
       this.logger.warn(
         'Firebase credentials not provided. Running in Mock Mode for push notifications.',
       );
@@ -57,15 +57,23 @@ export class NotificationProcessor extends WorkerHost {
     try {
       const admin = require('firebase-admin');
       if (!admin.apps.length) {
+        // Robust formatting: handle quotes, literal \n, and windows \r\n
+        const formattedKey = rawPrivateKey
+          .replace(/^["']|["']$/g, '')
+          .replace(/\\n/g, '\n')
+          .replace(/\r\n/g, '\n')
+          .trim();
+
         admin.initializeApp({
           credential: admin.credential.cert({
-            projectId,
-            clientEmail,
-            privateKey: privateKey.replace(/\\n/g, '\n'),
+            projectId: projectId.trim(),
+            clientEmail: clientEmail.trim(),
+            privateKey: formattedKey,
           }),
         });
       }
       this.firebaseApp = admin;
+      this.firebaseMockMode = false;
       this.logger.log('Firebase Admin SDK initialized successfully.');
     } catch (err) {
       this.logger.error('Failed to initialize Firebase Admin SDK', err);
@@ -107,7 +115,11 @@ export class NotificationProcessor extends WorkerHost {
       this.logger.log(
         `[Mock FCM] Would send push to user ${userId}: "${title}" - "${message}" (type: ${mappedType}, id: ${targetRecordId})`,
       );
-      return;
+      return {
+        success: true,
+        mockMode: true,
+        message: 'Running in Firebase Mock Mode (credentials not provided)',
+      };
     }
 
     const pushTokens = await this.prisma.pushToken.findMany({
@@ -116,13 +128,26 @@ export class NotificationProcessor extends WorkerHost {
       orderBy: { updated_at: 'desc' },
     });
 
-    if (!pushTokens.length) return;
+    if (!pushTokens.length) {
+      this.logger.warn(`No push tokens found in database for user ${userId}`);
+      return {
+        success: false,
+        tokensCount: 0,
+        message: `No active FCM push tokens found for user ${userId}`,
+      };
+    }
 
     const tokens = Array.from(
       new Set(pushTokens.map((pt) => pt.token.trim())),
     ).filter(Boolean);
 
-    if (!tokens.length) return;
+    if (!tokens.length) {
+      return {
+        success: false,
+        tokensCount: 0,
+        message: 'Push tokens array was empty after cleaning',
+      };
+    }
 
     const targetRoute =
       data.metaData?.route ||
@@ -244,9 +269,24 @@ export class NotificationProcessor extends WorkerHost {
         });
         this.logger.warn(`Removed ${failed.length} invalid FCM tokens.`);
       }
-    } catch (err) {
+
+      return {
+        success: response.successCount > 0,
+        tokensCount: tokens.length,
+        successCount: response.successCount,
+        failureCount: response.failureCount,
+        responses: response.responses.map((r: any) => ({
+          success: r.success,
+          messageId: r.messageId,
+          error: r.error ? { code: r.error.code, message: r.error.message } : null,
+        })),
+      };
+    } catch (err: any) {
       this.logger.error(`Failed to send FCM push for user ${userId}`, err);
-      throw err;
+      return {
+        success: false,
+        error: err.message,
+      };
     }
   }
 }

@@ -395,4 +395,57 @@ export class NotificationsService {
       where: { user_id: userId, token },
     });
   }
+
+  async testPushDelivery(targetUserIdOrEmail?: string) {
+    let targetUserId = targetUserIdOrEmail;
+    if (targetUserIdOrEmail && targetUserIdOrEmail.includes('@')) {
+      const u = await this.prisma.user.findFirst({
+        where: { email: { equals: targetUserIdOrEmail, mode: 'insensitive' } },
+        select: { id: true },
+      });
+      if (u) targetUserId = u.id;
+    }
+
+    if (!targetUserId) {
+      // Find the most recently active push token user
+      const latestToken = await this.prisma.pushToken.findFirst({
+        orderBy: { updated_at: 'desc' },
+        select: { user_id: true, user: { select: { email: true, full_name: true } } },
+      });
+      if (latestToken) targetUserId = latestToken.user_id;
+    }
+
+    if (!targetUserId) {
+      return {
+        success: false,
+        message: 'No users with registered FCM push tokens found in database.',
+      };
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: targetUserId },
+      select: { id: true, email: true, full_name: true },
+    });
+
+    const tokens = await this.prisma.pushToken.findMany({
+      where: { user_id: targetUserId },
+      select: { token: true, device_type: true, updated_at: true },
+    });
+
+    const pushResult = await this.notificationProcessor.sendPush({
+      userId: targetUserId,
+      title: '🧪 FCM Test Push Notification',
+      message: `Test delivered successfully at ${new Date().toLocaleTimeString()}`,
+      type: 'BROADCAST',
+      metaData: { isTest: true, timestamp: Date.now() },
+    });
+
+    return {
+      success: pushResult?.success ?? false,
+      targetUser: user,
+      registeredTokens: tokens,
+      fcmResult: pushResult,
+    };
+  }
 }
+
