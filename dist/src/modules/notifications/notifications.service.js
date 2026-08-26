@@ -19,7 +19,6 @@ const bullmq_1 = require("@nestjs/bullmq");
 const bullmq_2 = require("bullmq");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const notifications_gateway_1 = require("./notifications.gateway");
-const register_push_token_dto_1 = require("./dto/register-push-token.dto");
 const notification_processor_1 = require("./notification.processor");
 let NotificationsService = NotificationsService_1 = class NotificationsService {
     prisma;
@@ -268,15 +267,6 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 user_id: { not: userId },
             },
         });
-        if (deviceType !== register_push_token_dto_1.DeviceType.WEB) {
-            await this.prisma.pushToken.deleteMany({
-                where: {
-                    user_id: userId,
-                    device_type: deviceType,
-                    token: { not: cleanToken },
-                },
-            });
-        }
         return this.prisma.pushToken.upsert({
             where: { user_id_token: { user_id: userId, token: cleanToken } },
             create: { user_id: userId, token: cleanToken, device_type: deviceType },

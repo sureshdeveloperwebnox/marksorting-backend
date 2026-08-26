@@ -373,16 +373,8 @@ export class NotificationsService {
       },
     });
 
-    // 2. Keep only 1 active mobile token per user for this deviceType to prevent stale token accumulation
-    if (deviceType !== DeviceType.WEB) {
-      await this.prisma.pushToken.deleteMany({
-        where: {
-          user_id: userId,
-          device_type: deviceType,
-          token: { not: cleanToken },
-        },
-      });
-    }
+    // 2. Multi-device support: The same user can be logged into multiple devices (Phone, Tablet, etc.).
+    // All active tokens are preserved and will receive notifications simultaneously.
 
     // 3. Upsert the token for the current user
     return this.prisma.pushToken.upsert({
