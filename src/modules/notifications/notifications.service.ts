@@ -114,7 +114,7 @@ export class NotificationsService {
       },
     });
 
-    this.gateway.emitToUser(resolvedUserId, 'notification', notification);
+    this.gateway?.emitToUser?.(resolvedUserId, 'notification', notification);
 
     const recordId =
       metaData?.storeId ||
