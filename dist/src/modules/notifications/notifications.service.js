@@ -114,8 +114,11 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             type,
             metaData,
         };
-        this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
-            this.logger.warn(`Immediate FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`);
+        try {
+            await this.notificationProcessor.sendPush(pushPayload);
+        }
+        catch (pushErr) {
+            this.logger.warn(`Direct FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`);
             try {
                 await this.notificationsQueue.add('send-push', pushPayload, {
                     jobId: `push_${notification.id}_${resolvedUserId}`,
@@ -128,7 +131,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             catch (qErr) {
                 this.logger.error(`Failed to enqueue push notification job`, qErr);
             }
-        });
+        }
         return notification;
     }
     async sendToUsers(userIds, title, message, type, metaData) {

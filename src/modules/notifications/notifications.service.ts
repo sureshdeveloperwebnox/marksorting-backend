@@ -134,10 +134,12 @@ export class NotificationsService {
       metaData,
     };
 
-    // Execute direct push immediately with zero delay
-    this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
+    // 1. Direct Firebase FCM push execution (Immediate direct delivery)
+    try {
+      await this.notificationProcessor.sendPush(pushPayload);
+    } catch (pushErr: any) {
       this.logger.warn(
-        `Immediate FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`,
+        `Direct FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`,
       );
       try {
         await this.notificationsQueue.add('send-push', pushPayload, {
@@ -150,7 +152,7 @@ export class NotificationsService {
       } catch (qErr) {
         this.logger.error(`Failed to enqueue push notification job`, qErr);
       }
-    });
+    }
 
     return notification;
   }
