@@ -109,7 +109,7 @@ const NUMERIC_FIELDS: Array<keyof PreviewRow> = [
 @Injectable()
 export class ExcelParserService {
   /**
-   * Generates a .xlsx buffer with 18 header columns + 1 example data row.
+   * Generates a .xlsx buffer with 20 header columns + 1 example data row.
    * Returns Promise<Buffer> because exceljs writeBuffer is async.
    */
   async generateTemplate(): Promise<Buffer> {
@@ -154,7 +154,6 @@ export class ExcelParserService {
   async parseAndValidate(buffer: Buffer): Promise<PreviewRow[]> {
     const workbook = new ExcelJS.Workbook();
     // Cast needed for exceljs compatibility with TypeScript 5.9 typed Buffer
-
     await workbook.xlsx.load(buffer as any);
 
     const worksheet = workbook.worksheets[0];
@@ -167,9 +166,9 @@ export class ExcelParserService {
       if (rowNumber > 1) dataRowCount++;
     });
 
-    if (dataRowCount > 5000) {
+    if (dataRowCount > 25000) {
       throw new BadRequestException(
-        'We cannot handle more than 5000 rows, so kindly separate and upload.',
+        'We cannot handle more than 25,000 rows in a single file. Kindly split and upload.',
       );
     }
 
@@ -228,48 +227,60 @@ export class ExcelParserService {
         return; // skip this empty or stray row
       }
 
-      // Build a complete PreviewRow with empty strings for missing fields
+      const cleanInvoiceNo = this.cleanGenericString(rawData.invoice_no);
+      const cleanRefNo = this.cleanGenericString(rawData.ref_no);
+      const cleanMillName = this.cleanGenericString(rawData.mill_name);
+      let cleanPlace = this.cleanGenericString(rawData.place);
+      const cleanAddress = this.cleanGenericString(rawData.address);
+
+      // If place is empty, fallback to address or "Unknown"
+      if (!cleanPlace && cleanAddress) {
+        cleanPlace = cleanAddress.split(/[\r\n,-]/)[0]?.trim() || cleanAddress;
+      }
+      if (!cleanPlace) {
+        cleanPlace = 'Unknown';
+      }
+
+      // Build a complete PreviewRow with sanitized strings
       const previewRow: PreviewRow = {
-        invoice_no: rawData.invoice_no ?? '',
-        invoice_date: rawData.invoice_date ?? '',
-        ref_no: rawData.ref_no ?? '',
-        frame_no: rawData.frame_no ?? '',
-        mfg_date: rawData.mfg_date ?? '',
-        mc_model: rawData.mc_model ?? '',
-        mill_name: rawData.mill_name ?? '',
-        customer_name: rawData.customer_name ?? '',
-        place: rawData.place ?? '',
-        state: rawData.state ?? '',
-        phone_no: rawData.phone_no ?? '',
-        address: rawData.address ?? '',
-        installation_date: rawData.installation_date ?? '',
-        warranty_start_date: rawData.warranty_start_date ?? '',
-        warranty_years: rawData.warranty_years ?? '',
-        warranty_months: rawData.warranty_months ?? '',
-        amc_starting_date: rawData.amc_starting_date ?? '',
-        amc_closing_date: rawData.amc_closing_date ?? '',
-        amc_period: rawData.amc_period ?? '',
-        amc_amount: rawData.amc_amount ?? '',
-        amc_particulars: rawData.amc_particulars ?? '',
+        invoice_no: cleanInvoiceNo || '',
+        invoice_date: this.cleanDateString(rawData.invoice_date),
+        ref_no: cleanRefNo || '',
+        frame_no: this.cleanGenericString(rawData.frame_no),
+        mfg_date: this.cleanDateString(rawData.mfg_date),
+        mc_model: this.cleanGenericString(rawData.mc_model),
+        mill_name: cleanMillName || '',
+        customer_name: this.cleanGenericString(rawData.customer_name),
+        place: cleanPlace,
+        state: this.cleanGenericString(rawData.state),
+        phone_no: this.cleanGenericString(rawData.phone_no),
+        address: cleanAddress,
+        installation_date: this.cleanDateString(rawData.installation_date),
+        warranty_start_date: this.cleanDateString(rawData.warranty_start_date),
+        warranty_years: this.cleanNumericString(rawData.warranty_years),
+        warranty_months: this.cleanNumericString(rawData.warranty_months),
+        amc_starting_date: this.cleanDateString(rawData.amc_starting_date),
+        amc_closing_date: this.cleanDateString(rawData.amc_closing_date),
+        amc_period: this.cleanNumericString(rawData.amc_period),
+        amc_amount: this.cleanNumericString(rawData.amc_amount),
+        amc_particulars: this.cleanGenericString(rawData.amc_particulars),
         errors: {},
         isValid: true,
         rowIndex: dataRowIndex,
       };
 
       // Validate required fields — must be present and non-empty
-      const FIELD_LABELS: Record<string, string> = {
-        invoice_no: 'Invoice No',
-        ref_no: 'Ref No',
-        mill_name: 'Mill Name',
-        place: 'Place',
-      };
-
-      for (const field of REQUIRED_FIELDS) {
-        const value = previewRow[field] as string;
-        if (!value || value.trim() === '') {
-          const label = FIELD_LABELS[field as string] || field;
-          previewRow.errors[field as string] = `${label} is required`;
-        }
+      if (!previewRow.ref_no) {
+        previewRow.errors.ref_no = 'Ref No is required';
+      }
+      if (!previewRow.mill_name) {
+        previewRow.errors.mill_name = 'Mill Name is required';
+      }
+      if (!previewRow.invoice_no) {
+        // If invoice number is missing, fallback to generated standard format
+        previewRow.invoice_no = previewRow.ref_no
+          ? `INV-${previewRow.ref_no}`
+          : `INV-${dataRowIndex + 1}`;
       }
 
       // Validate date fields — must be parseable when present
@@ -294,7 +305,6 @@ export class ExcelParserService {
         }
       }
 
-
       // Set isValid based on whether there are any errors
       previewRow.isValid = Object.keys(previewRow.errors).length === 0;
 
@@ -303,6 +313,73 @@ export class ExcelParserService {
     });
 
     return results;
+  }
+
+  /**
+   * Sanitizes generic string cells, filtering out common formula error strings or placeholders.
+   */
+  private cleanGenericString(val: any): string {
+    if (val === null || val === undefined) return '';
+    const str = String(val).trim();
+    if (
+      [
+        '#num!',
+        '#value!',
+        '#ref!',
+        '#n/a',
+        'n/a',
+        'na',
+        'null',
+        'undefined',
+        'invalid date',
+        '-',
+        '--',
+        '.',
+      ].includes(str.toLowerCase())
+    ) {
+      return '';
+    }
+    return str;
+  }
+
+  /**
+   * Cleans and normalizes date strings from Excel (filtering out Excel zero dates like 00-01-1900, 00:00:00, etc.).
+   */
+  private cleanDateString(val: any): string {
+    const str = this.cleanGenericString(val);
+    if (!str) return '';
+    if (
+      [
+        '00-01-1900',
+        '00/00/0000',
+        '00:00:00',
+        '0/0/00',
+        '01-01-1970',
+        '01/01/1970',
+        '1900-01-00',
+        '1900-01-01',
+      ].includes(str)
+    ) {
+      return '';
+    }
+    // If it's a non-date text like "IGS AMC -5 Visit Free", don't treat as date
+    if (/[a-zA-Z]{4,}/.test(str)) {
+      return '';
+    }
+    return str;
+  }
+
+  /**
+   * Cleans numeric strings, extracting the leading number from values like "17700(T)", "Rs. 15,000", "12000/-".
+   */
+  private cleanNumericString(val: any): string {
+    const str = this.cleanGenericString(val);
+    if (!str) return '';
+    const cleaned = str.replace(/,/g, '').replace(/[^\d.-]/g, '');
+    if (cleaned && !isNaN(Number(cleaned))) {
+      return cleaned;
+    }
+    return '';
   }
 
   /**
@@ -316,7 +393,9 @@ export class ExcelParserService {
     }
 
     if (value instanceof Date) {
-      // Format date as DD/MM/YYYY to preserve original display format
+      if (isNaN(value.getTime()) || value.getFullYear() <= 1900) {
+        return '';
+      }
       const day = String(value.getDate()).padStart(2, '0');
       const month = String(value.getMonth() + 1).padStart(2, '0');
       const year = value.getFullYear();
@@ -324,18 +403,24 @@ export class ExcelParserService {
     }
 
     if (typeof value === 'object' && 'richText' in value) {
-      // Rich text
       return value.richText.map((rt) => rt.text).join('');
     }
 
     if (typeof value === 'object' && 'result' in value) {
-      // Formula — use the cached result
-      const formulaValue = value as ExcelJS.CellFormulaValue;
-      return String(formulaValue.result ?? '');
+      const formulaResult = (value as ExcelJS.CellFormulaValue).result;
+      if (formulaResult instanceof Date) {
+        if (isNaN(formulaResult.getTime()) || formulaResult.getFullYear() <= 1900) {
+          return '';
+        }
+        const day = String(formulaResult.getDate()).padStart(2, '0');
+        const month = String(formulaResult.getMonth() + 1).padStart(2, '0');
+        const year = formulaResult.getFullYear();
+        return `${day}/${month}/${year}`;
+      }
+      return String(formulaResult ?? '');
     }
 
     if (typeof value === 'object' && 'text' in value) {
-      // Hyperlink
       return String(value.text ?? '');
     }
 
@@ -348,10 +433,10 @@ export class ExcelParserService {
    */
   private isValidDate(value: string): boolean {
     const trimmed = value.trim();
-    if (!trimmed) return false;
+    if (!trimmed) return true;
 
-    // Try DD/MM/YYYY format first (most common in Indian locale)
-    const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+    // Try DD/MM/YYYY or DD-MM-YYYY format first (most common in Indian locale)
+    const ddmmyyyy = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
     const ddmmMatch = trimmed.match(ddmmyyyy);
     if (ddmmMatch) {
       const [, day, month, year] = ddmmMatch;
@@ -359,6 +444,7 @@ export class ExcelParserService {
       const m = Number(month);
       const y = Number(year);
       if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+      if (y < 1950 || y > 2100) return false;
       const parsed = new Date(y, m - 1, d);
       return (
         !isNaN(parsed.getTime()) &&
@@ -370,7 +456,7 @@ export class ExcelParserService {
 
     // Try native Date parsing (handles ISO, MM/DD/YYYY, etc.)
     const date = new Date(trimmed);
-    return !isNaN(date.getTime());
+    return !isNaN(date.getTime()) && date.getFullYear() >= 1950;
   }
 
   /**
@@ -382,3 +468,4 @@ export class ExcelParserService {
     return !isNaN(Number(trimmed));
   }
 }
+

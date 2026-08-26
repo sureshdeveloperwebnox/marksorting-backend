@@ -754,7 +754,10 @@ export class MasterMillsService implements OnModuleInit {
     return buildDeduplicatedList(mappedMM, mappedSR, mappedIR).slice(0, 10);
   }
 
-  async quickRegister(dto: QuickRegisterDto, options?: { skipDuplicateCheck?: boolean }) {
+  async quickRegister(
+    dto: QuickRegisterDto,
+    options?: { skipDuplicateCheck?: boolean; skipCacheInvalidation?: boolean },
+  ) {
     const customerIdInput = dto.customer_id?.trim();
     const customerNameInput = dto.customer_name?.trim();
 
@@ -1052,12 +1055,14 @@ export class MasterMillsService implements OnModuleInit {
       });
     });
 
-    // Invalidate all related redis caches
-    await this.invalidateAllRelatedCaches(
-      result?.mill?.customer_id ?? undefined,
-      result?.mill_id ?? undefined,
-      result?.id ?? undefined,
-    );
+    // Invalidate all related redis caches unless skipped during bulk batch processing
+    if (!options?.skipCacheInvalidation) {
+      await this.invalidateAllRelatedCaches(
+        result?.mill?.customer_id ?? undefined,
+        result?.mill_id ?? undefined,
+        result?.id ?? undefined,
+      );
+    }
 
     return {
       ...result,

@@ -964,7 +964,9 @@ let MasterMillsService = class MasterMillsService {
                 },
             });
         });
-        await this.invalidateAllRelatedCaches(result?.mill?.customer_id ?? undefined, result?.mill_id ?? undefined, result?.id ?? undefined);
+        if (!options?.skipCacheInvalidation) {
+            await this.invalidateAllRelatedCaches(result?.mill?.customer_id ?? undefined, result?.mill_id ?? undefined, result?.id ?? undefined);
+        }
         return {
             ...result,
             _isUpdate: isUpdate,

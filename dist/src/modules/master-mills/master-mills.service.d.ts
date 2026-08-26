@@ -170,6 +170,7 @@ export declare class MasterMillsService implements OnModuleInit {
     }>;
     quickRegister(dto: QuickRegisterDto, options?: {
         skipDuplicateCheck?: boolean;
+        skipCacheInvalidation?: boolean;
     }): Promise<{
         _isUpdate: boolean;
         mill?: ({

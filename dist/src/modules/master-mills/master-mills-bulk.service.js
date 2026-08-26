@@ -33,17 +33,50 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         const trimmed = value.trim();
         if (!trimmed)
             return undefined;
-        const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+        if ([
+            '00-01-1900',
+            '00/00/0000',
+            '00:00:00',
+            '0/0/00',
+            '01-01-1970',
+            '01/01/1970',
+            '#num!',
+            '#value!',
+            '#ref!',
+            '#n/a',
+            'n/a',
+            'na',
+            'null',
+            'undefined',
+            '-',
+            '.',
+        ].includes(trimmed.toLowerCase())) {
+            return undefined;
+        }
+        const ddmmyyyy = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
         const match = trimmed.match(ddmmyyyy);
         if (match) {
             const [, day, month, year] = match;
             const d = String(day).padStart(2, '0');
             const m = String(month).padStart(2, '0');
             const y = year;
-            return `${y}-${m}-${d}`;
+            if (Number(m) >= 1 && Number(m) <= 12 && Number(d) >= 1 && Number(d) <= 31 && Number(y) >= 1950) {
+                return `${y}-${m}-${d}`;
+            }
+        }
+        const yyyymmdd = /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/;
+        const matchIso = trimmed.match(yyyymmdd);
+        if (matchIso) {
+            const [, year, month, day] = matchIso;
+            const d = String(day).padStart(2, '0');
+            const m = String(month).padStart(2, '0');
+            const y = year;
+            if (Number(m) >= 1 && Number(m) <= 12 && Number(d) >= 1 && Number(d) <= 31 && Number(y) >= 1950) {
+                return `${y}-${m}-${d}`;
+            }
         }
         const parsed = new Date(trimmed);
-        if (!isNaN(parsed.getTime())) {
+        if (!isNaN(parsed.getTime()) && parsed.getFullYear() >= 1950) {
             return parsed.toISOString().split('T')[0];
         }
         return undefined;
@@ -52,7 +85,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         if (!phone)
             return undefined;
         let cleaned = phone.trim().replace(/[-\s()]/g, '');
-        if (cleaned === '')
+        if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned.toLowerCase() === 'null')
             return undefined;
         if (cleaned.startsWith('+')) {
             return cleaned;
@@ -66,7 +99,7 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         if (cleaned.length === 12 && cleaned.startsWith('91') && /^\d+$/.test(cleaned)) {
             return `+${cleaned}`;
         }
-        if (/^\d+$/.test(cleaned)) {
+        if (/^\d{7,15}$/.test(cleaned)) {
             return `+91${cleaned}`;
         }
         return cleaned;
@@ -180,22 +213,22 @@ let MasterMillsBulkService = class MasterMillsBulkService {
         try {
             const validRows = rows.filter((r) => r.isValid);
             await this.redis.setJson(statusKey, status, 7200);
-            const batchSize = 50;
+            const batchSize = 25;
             for (let i = 0; i < validRows.length; i += batchSize) {
                 const batch = validRows.slice(i, i + batchSize);
-                for (const row of batch) {
+                const results = await Promise.all(batch.map(async (row) => {
                     try {
                         const dto = {
-                            customer_name: row.customer_name,
+                            customer_name: row.customer_name || undefined,
                             mill_name: row.mill_name,
                             ref_no: row.ref_no,
                             frame_no: row.frame_no || undefined,
                             mc_model: row.mc_model || undefined,
                             address: row.address || undefined,
-                            place: row.place,
+                            place: row.place || 'Unknown',
                             state: row.state || undefined,
                             phone: row.phone_no || undefined,
-                            mfg_date: this.parseExcelDate(row.mfg_date) || undefined,
+                            mfg_date: this.parseExcelDate(row.mfg_date),
                             invoice_no: row.invoice_no || undefined,
                             invoice_date: this.parseExcelDate(row.invoice_date),
                             installation_date: this.parseExcelDate(row.installation_date),
@@ -208,16 +241,27 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                             amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
                             amc_particulars: row.amc_particulars || undefined,
                         };
-                        const result = await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: false });
-                        if (result?._isUpdate) {
+                        const res = await this.masterMillsService.quickRegister(dto, {
+                            skipDuplicateCheck: false,
+                            skipCacheInvalidation: true,
+                        });
+                        return { success: true, isUpdate: res?._isUpdate };
+                    }
+                    catch (err) {
+                        console.error('Master mill row import error:', err?.message || err);
+                        return { success: false, error: err };
+                    }
+                }));
+                for (const res of results) {
+                    if (res.success) {
+                        if (res.isUpdate) {
                             status.updatedCount++;
                         }
                         else {
                             status.createdCount++;
                         }
                     }
-                    catch (err) {
-                        console.error('Master mill row import error:', err?.message || err);
+                    else {
                         status.errorCount++;
                     }
                 }
@@ -225,6 +269,11 @@ let MasterMillsBulkService = class MasterMillsBulkService {
                 status.percentage = Math.round((status.processedRows / validRows.length) * 100);
                 await this.redis.setJson(statusKey, status, 7200);
             }
+            await Promise.all([
+                this.redis.delByPrefix('customers:list:'),
+                this.redis.delByPrefix('mills:list:'),
+                this.redis.delByPrefix('master_mills:list:'),
+            ]).catch(() => { });
             status.state = 'completed';
             status.percentage = 100;
             await this.redis.setJson(statusKey, status, 7200);

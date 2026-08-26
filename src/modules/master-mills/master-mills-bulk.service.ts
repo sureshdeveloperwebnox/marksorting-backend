@@ -38,20 +38,59 @@ export class MasterMillsBulkService {
     const trimmed = value.trim();
     if (!trimmed) return undefined;
 
-    // Check DD/MM/YYYY format (common in spreadsheet software)
-    const ddmmyyyy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+    // Filter out known empty tokens
+    if (
+      [
+        '00-01-1900',
+        '00/00/0000',
+        '00:00:00',
+        '0/0/00',
+        '01-01-1970',
+        '01/01/1970',
+        '#num!',
+        '#value!',
+        '#ref!',
+        '#n/a',
+        'n/a',
+        'na',
+        'null',
+        'undefined',
+        '-',
+        '.',
+      ].includes(trimmed.toLowerCase())
+    ) {
+      return undefined;
+    }
+
+    // Check DD/MM/YYYY or DD-MM-YYYY format
+    const ddmmyyyy = /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/;
     const match = trimmed.match(ddmmyyyy);
     if (match) {
       const [, day, month, year] = match;
       const d = String(day).padStart(2, '0');
       const m = String(month).padStart(2, '0');
       const y = year;
-      return `${y}-${m}-${d}`;
+      if (Number(m) >= 1 && Number(m) <= 12 && Number(d) >= 1 && Number(d) <= 31 && Number(y) >= 1950) {
+        return `${y}-${m}-${d}`;
+      }
+    }
+
+    // Check YYYY-MM-DD format
+    const yyyymmdd = /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/;
+    const matchIso = trimmed.match(yyyymmdd);
+    if (matchIso) {
+      const [, year, month, day] = matchIso;
+      const d = String(day).padStart(2, '0');
+      const m = String(month).padStart(2, '0');
+      const y = year;
+      if (Number(m) >= 1 && Number(m) <= 12 && Number(d) >= 1 && Number(d) <= 31 && Number(y) >= 1950) {
+        return `${y}-${m}-${d}`;
+      }
     }
 
     // Fallback to native parsing if it's already ISO or other standard
     const parsed = new Date(trimmed);
-    if (!isNaN(parsed.getTime())) {
+    if (!isNaN(parsed.getTime()) && parsed.getFullYear() >= 1950) {
       return parsed.toISOString().split('T')[0];
     }
     return undefined;
@@ -60,7 +99,7 @@ export class MasterMillsBulkService {
   private formatPhoneNumber(phone: string | undefined): string | undefined {
     if (!phone) return undefined;
     let cleaned = phone.trim().replace(/[-\s()]/g, '');
-    if (cleaned === '') return undefined;
+    if (cleaned === '' || cleaned === '-' || cleaned === '.' || cleaned.toLowerCase() === 'null') return undefined;
 
     if (cleaned.startsWith('+')) {
       return cleaned;
@@ -78,7 +117,7 @@ export class MasterMillsBulkService {
       return `+${cleaned}`;
     }
 
-    if (/^\d+$/.test(cleaned)) {
+    if (/^\d{7,15}$/.test(cleaned)) {
       return `+91${cleaned}`;
     }
 
@@ -236,8 +275,8 @@ export class MasterMillsBulkService {
   }
 
   /**
-   * Background processing method. Processes valid rows in batches of 50,
-   * updating Redis status after each batch. Never rejects — all errors are captured into ImportStatus.
+   * Background processing method. Processes valid rows in high-throughput chunks,
+   * updating Redis status smoothly after each batch. Never rejects — all errors are captured into ImportStatus.
    */
   private async processImport(
     importId: string,
@@ -260,45 +299,58 @@ export class MasterMillsBulkService {
       // Write initial status
       await this.redis.setJson(statusKey, status, 7200);
 
-      const batchSize = 50;
+      const batchSize = 25; // 25 rows per concurrent chunk
 
       for (let i = 0; i < validRows.length; i += batchSize) {
         const batch = validRows.slice(i, i + batchSize);
 
-        for (const row of batch) {
-          try {
-            const dto: QuickRegisterDto = {
-              customer_name: row.customer_name,
-              mill_name: row.mill_name,
-              ref_no: row.ref_no,
-              frame_no: row.frame_no || undefined,
-              mc_model: row.mc_model || undefined,
-              address: row.address || undefined,
-              place: row.place,
-              state: row.state || undefined,
-              phone: row.phone_no || undefined,
-              mfg_date: this.parseExcelDate(row.mfg_date) || undefined,
-              invoice_no: row.invoice_no || undefined,
-              invoice_date: this.parseExcelDate(row.invoice_date),
-              installation_date: this.parseExcelDate(row.installation_date),
-              warranty_start_date: this.parseExcelDate(row.warranty_start_date),
-              warranty_years: row.warranty_years ? Number(row.warranty_years) : undefined,
-              warranty_months: row.warranty_months ? Number(row.warranty_months) : undefined,
-              amc_starting_date: this.parseExcelDate(row.amc_starting_date),
-              amc_closing_date: row.amc_starting_date ? this.parseExcelDate(row.amc_closing_date) : undefined,
-              amc_period: row.amc_period ? Number(row.amc_period) : undefined,
-              amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
-              amc_particulars: row.amc_particulars || undefined,
-            };
+        const results = await Promise.all(
+          batch.map(async (row) => {
+            try {
+              const dto: QuickRegisterDto = {
+                customer_name: row.customer_name || undefined,
+                mill_name: row.mill_name,
+                ref_no: row.ref_no,
+                frame_no: row.frame_no || undefined,
+                mc_model: row.mc_model || undefined,
+                address: row.address || undefined,
+                place: row.place || 'Unknown',
+                state: row.state || undefined,
+                phone: row.phone_no || undefined,
+                mfg_date: this.parseExcelDate(row.mfg_date),
+                invoice_no: row.invoice_no || undefined,
+                invoice_date: this.parseExcelDate(row.invoice_date),
+                installation_date: this.parseExcelDate(row.installation_date),
+                warranty_start_date: this.parseExcelDate(row.warranty_start_date),
+                warranty_years: row.warranty_years ? Number(row.warranty_years) : undefined,
+                warranty_months: row.warranty_months ? Number(row.warranty_months) : undefined,
+                amc_starting_date: this.parseExcelDate(row.amc_starting_date),
+                amc_closing_date: row.amc_starting_date ? this.parseExcelDate(row.amc_closing_date) : undefined,
+                amc_period: row.amc_period ? Number(row.amc_period) : undefined,
+                amc_amount: row.amc_amount ? Number(row.amc_amount) : undefined,
+                amc_particulars: row.amc_particulars || undefined,
+              };
 
-            const result = await this.masterMillsService.quickRegister(dto, { skipDuplicateCheck: false });
-            if (result?._isUpdate) {
+              const res = await this.masterMillsService.quickRegister(dto, {
+                skipDuplicateCheck: false,
+                skipCacheInvalidation: true,
+              });
+              return { success: true, isUpdate: res?._isUpdate };
+            } catch (err: any) {
+              console.error('Master mill row import error:', err?.message || err);
+              return { success: false, error: err };
+            }
+          }),
+        );
+
+        for (const res of results) {
+          if (res.success) {
+            if (res.isUpdate) {
               status.updatedCount++;
             } else {
               status.createdCount++;
             }
-          } catch (err: any) {
-            console.error('Master mill row import error:', err?.message || err);
+          } else {
             status.errorCount++;
           }
         }
@@ -310,6 +362,13 @@ export class MasterMillsBulkService {
 
         await this.redis.setJson(statusKey, status, 7200);
       }
+
+      // Invalidate caches once for the entire import
+      await Promise.all([
+        this.redis.delByPrefix('customers:list:'),
+        this.redis.delByPrefix('mills:list:'),
+        this.redis.delByPrefix('master_mills:list:'),
+      ]).catch(() => {});
 
       // All batches done — mark as completed
       status.state = 'completed';
@@ -325,3 +384,4 @@ export class MasterMillsBulkService {
     }
   }
 }
+
