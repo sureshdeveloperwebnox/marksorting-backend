@@ -209,6 +209,7 @@ export class NotificationProcessor extends WorkerHost {
         },
         android: {
           priority: 'high',
+          restrictedPackageName: 'com.mark_sorting.app',
           ttl: 86400 * 1000,
           notification: {
             channelId: 'high_importance_channel',
