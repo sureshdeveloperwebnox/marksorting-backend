@@ -28,7 +28,7 @@ let StoresController = class StoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, stockType, stockTypeCamel, dateFrom, dateTo) {
+    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, stockType, stockTypeCamel, dateFrom, dateTo, startDate, endDate, startDateSnake, endDateSnake) {
         const where = {};
         const engId = serviceEngineerId || serviceEngineerIdCamel;
         const custId = customerId || customerIdCamel;
@@ -94,17 +94,27 @@ let StoresController = class StoresController {
                 },
             };
         }
-        if (dateFrom || dateTo) {
+        const fromStr = dateFrom || startDate || startDateSnake;
+        const toStr = dateTo || endDate || endDateSnake;
+        if (fromStr || toStr) {
             where.created_at = {};
-            if (dateFrom) {
-                const [fy, fm, fd] = dateFrom.split('-').map(Number);
-                const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-                where.created_at.gte = from;
+            if (fromStr) {
+                if (fromStr.includes('T')) {
+                    where.created_at.gte = new Date(fromStr);
+                }
+                else {
+                    const [fy, fm, fd] = fromStr.split('-').map(Number);
+                    where.created_at.gte = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+                }
             }
-            if (dateTo) {
-                const [ty, tm, td] = dateTo.split('-').map(Number);
-                const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-                where.created_at.lte = to;
+            if (toStr) {
+                if (toStr.includes('T')) {
+                    where.created_at.lte = new Date(toStr);
+                }
+                else {
+                    const [ty, tm, td] = toStr.split('-').map(Number);
+                    where.created_at.lte = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+                }
             }
         }
         return this.storesService.findAll({
@@ -267,6 +277,18 @@ __decorate([
         type: String,
         description: 'Filter to created date (YYYY-MM-DD)',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'startDate',
+        required: false,
+        type: String,
+        description: 'Alias for dateFrom',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'endDate',
+        required: false,
+        type: String,
+        description: 'Alias for dateTo',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
@@ -286,8 +308,12 @@ __decorate([
     __param(16, (0, common_1.Query)('stockType')),
     __param(17, (0, common_1.Query)('dateFrom')),
     __param(18, (0, common_1.Query)('dateTo')),
+    __param(19, (0, common_1.Query)('startDate')),
+    __param(20, (0, common_1.Query)('endDate')),
+    __param(21, (0, common_1.Query)('start_date')),
+    __param(22, (0, common_1.Query)('end_date')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], StoresController.prototype, "findAll", null);
 __decorate([

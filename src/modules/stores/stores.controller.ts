@@ -119,6 +119,18 @@ export class StoresController {
     type: String,
     description: 'Filter to created date (YYYY-MM-DD)',
   })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Alias for dateFrom',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Alias for dateTo',
+  })
   findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
@@ -139,6 +151,10 @@ export class StoresController {
     @Query('stockType') stockTypeCamel?: string,
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+    @Query('start_date') startDateSnake?: string,
+    @Query('end_date') endDateSnake?: string,
   ) {
     const where: Prisma.StoreWhereInput = {};
 
@@ -211,20 +227,26 @@ export class StoresController {
       };
     }
 
-    if (dateFrom || dateTo) {
+    const fromStr = dateFrom || startDate || startDateSnake;
+    const toStr = dateTo || endDate || endDateSnake;
+
+    if (fromStr || toStr) {
       where.created_at = {};
-      if (dateFrom) {
-        // Use multi-arg constructor so the date is interpreted in the server's
-        // local timezone (matching how stored timestamps are represented),
-        // instead of new Date("yyyy-MM-dd") which parses as UTC midnight.
-        const [fy, fm, fd] = dateFrom.split('-').map(Number);
-        const from = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
-        (where.created_at as any).gte = from;
+      if (fromStr) {
+        if (fromStr.includes('T')) {
+          (where.created_at as any).gte = new Date(fromStr);
+        } else {
+          const [fy, fm, fd] = fromStr.split('-').map(Number);
+          (where.created_at as any).gte = new Date(fy, fm - 1, fd, 0, 0, 0, 0);
+        }
       }
-      if (dateTo) {
-        const [ty, tm, td] = dateTo.split('-').map(Number);
-        const to = new Date(ty, tm - 1, td, 23, 59, 59, 999);
-        (where.created_at as any).lte = to;
+      if (toStr) {
+        if (toStr.includes('T')) {
+          (where.created_at as any).lte = new Date(toStr);
+        } else {
+          const [ty, tm, td] = toStr.split('-').map(Number);
+          (where.created_at as any).lte = new Date(ty, tm - 1, td, 23, 59, 59, 999);
+        }
       }
     }
 

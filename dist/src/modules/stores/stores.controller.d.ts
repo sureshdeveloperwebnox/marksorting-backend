@@ -5,7 +5,7 @@ import { UpdateStoreReturnDto } from './dto/update-store-return.dto';
 export declare class StoresController {
     private readonly storesService;
     constructor(storesService: StoresService);
-    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, serviceEngineerIdCamel?: string, customerId?: string, customerIdCamel?: string, materialId?: string, materialIdCamel?: string, warrantyStatus?: string, warrantyStatusCamel?: string, returnStatus?: string, returnStatusCamel?: string, inflowStatus?: string, inflowStatusCamel?: string, stockType?: string, stockTypeCamel?: string, dateFrom?: string, dateTo?: string): Promise<any>;
+    findAll(skip?: string, take?: string, search?: string, serviceEngineerId?: string, serviceEngineerIdCamel?: string, customerId?: string, customerIdCamel?: string, materialId?: string, materialIdCamel?: string, warrantyStatus?: string, warrantyStatusCamel?: string, returnStatus?: string, returnStatusCamel?: string, inflowStatus?: string, inflowStatusCamel?: string, stockType?: string, stockTypeCamel?: string, dateFrom?: string, dateTo?: string, startDate?: string, endDate?: string, startDateSnake?: string, endDateSnake?: string): Promise<any>;
     findReturns(req: any, skip?: string, take?: string, page?: string, limit?: string, search?: string, status?: string, returnStatus?: string): Promise<{
         stores: any[];
         total: number;
