@@ -15,12 +15,12 @@ export declare class NotificationsService {
     resolveUserIds(ids: string[]): Promise<string[]>;
     createNotification(userIdOrTechId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
         id: string;
+        title: string;
+        message: string;
+        type: string;
         user_id: string | null;
         created_at: Date;
         status: string;
-        type: string;
-        title: string;
-        message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     } | null>;
     sendToUsers(userIds: string[], title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<void>;
@@ -36,12 +36,12 @@ export declare class NotificationsService {
     }): Promise<{
         notifications: {
             id: string;
+            title: string;
+            message: string;
+            type: string;
             user_id: string | null;
             created_at: Date;
             status: string;
-            type: string;
-            title: string;
-            message: string;
             meta_data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
         total: number;
@@ -49,12 +49,12 @@ export declare class NotificationsService {
     }>;
     markAsRead(userId: string, notificationId: string): Promise<{
         id: string;
+        title: string;
+        message: string;
+        type: string;
         user_id: string | null;
         created_at: Date;
         status: string;
-        type: string;
-        title: string;
-        message: string;
         meta_data: import("@prisma/client/runtime/client").JsonValue | null;
     }>;
     markAllAsRead(userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
@@ -62,10 +62,10 @@ export declare class NotificationsService {
     registerPushToken(userId: string, token: string, deviceType: DeviceType): Promise<{
         id: string;
         user_id: string;
-        created_at: Date;
-        updated_at: Date;
         token: string;
         device_type: string;
+        created_at: Date;
+        updated_at: Date;
     } | null>;
     removePushToken(userId: string, token: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
 }
