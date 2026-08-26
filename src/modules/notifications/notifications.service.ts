@@ -19,29 +19,93 @@ export class NotificationsService {
     private notificationProcessor: NotificationProcessor,
   ) {}
 
+  /**
+   * Resolves an ID (which could be a User ID or a Technician ID) to a valid User ID.
+   * If the ID directly matches an active User, returns it.
+   * If not, attempts to find a matching Technician record and resolve to the User
+   * via matching ID, email, or phone number.
+   */
+  async resolveToUserId(idOrTechId: string): Promise<string | null> {
+    if (!idOrTechId) return null;
+
+    // 1. Direct check in User table
+    const directUser = await this.prisma.user.findFirst({
+      where: {
+        id: idOrTechId,
+        account_status: 'ACTIVE',
+        deleted_at: null,
+      },
+      select: { id: true },
+    });
+    if (directUser) {
+      return directUser.id;
+    }
+
+    // 2. Lookup Technician table
+    const technician = await this.prisma.technician.findFirst({
+      where: {
+        id: idOrTechId,
+        deleted_at: null,
+      },
+      select: { id: true, email: true, phone: true },
+    });
+
+    if (technician) {
+      // Find matching user by email or phone
+      const matchedUser = await this.prisma.user.findFirst({
+        where: {
+          account_status: 'ACTIVE',
+          deleted_at: null,
+          OR: [
+            { id: technician.id },
+            ...(technician.email ? [{ email: technician.email }] : []),
+            ...(technician.phone ? [{ phone_number: technician.phone }] : []),
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (matchedUser) {
+        return matchedUser.id;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Batch resolves an array of IDs (user IDs or technician IDs) to unique, active User IDs.
+   */
+  async resolveUserIds(ids: string[]): Promise<string[]> {
+    const rawIds = Array.from(new Set((ids || []).filter(Boolean)));
+    if (!rawIds.length) return [];
+
+    const resolved = await Promise.all(
+      rawIds.map((id) => this.resolveToUserId(id)),
+    );
+    return Array.from(new Set(resolved.filter((id): id is string => Boolean(id))));
+  }
+
   async createNotification(
-    userId: string,
+    userIdOrTechId: string,
     title: string,
     message: string,
     type: NotificationType,
     metaData?: Record<string, any>,
   ) {
-    if (!userId) return null;
+    if (!userIdOrTechId) return null;
 
-    const userExists = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { id: true },
-    });
-    if (!userExists) {
+    const resolvedUserId = await this.resolveToUserId(userIdOrTechId);
+    if (!resolvedUserId) {
       this.logger.warn(
-        `Cannot create notification: User ${userId} does not exist in the database.`,
+        `Cannot create notification: Target ID ${userIdOrTechId} could not be resolved to an active user.`,
       );
       return null;
     }
 
     const notification = await this.prisma.notification.create({
       data: {
-        user_id: userId,
+        user_id: resolvedUserId,
         title,
         message,
         type,
@@ -50,7 +114,7 @@ export class NotificationsService {
       },
     });
 
-    this.gateway.emitToUser(userId, 'notification', notification);
+    this.gateway.emitToUser(resolvedUserId, 'notification', notification);
 
     const recordId =
       metaData?.storeId ||
@@ -63,7 +127,7 @@ export class NotificationsService {
     const pushPayload = {
       id: notification.id,
       recordId,
-      userId,
+      userId: resolvedUserId,
       title,
       message,
       type,
@@ -73,11 +137,11 @@ export class NotificationsService {
     // Execute direct push immediately with zero delay
     this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
       this.logger.warn(
-        `Immediate FCM push error for user ${userId}, queuing to BullMQ: ${pushErr?.message}`,
+        `Immediate FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`,
       );
       try {
         await this.notificationsQueue.add('send-push', pushPayload, {
-          jobId: `push_${notification.id}_${userId}`,
+          jobId: `push_${notification.id}_${resolvedUserId}`,
           removeOnComplete: true,
           removeOnFail: false,
           attempts: 2,
@@ -98,9 +162,9 @@ export class NotificationsService {
     type: NotificationType,
     metaData?: Record<string, any>,
   ) {
-    const uniqueUserIds = Array.from(new Set((userIds || []).filter(Boolean)));
+    const validUserIds = await this.resolveUserIds(userIds);
     await Promise.all(
-      uniqueUserIds.map((uid) =>
+      validUserIds.map((uid) =>
         this.createNotification(uid, title, message, type, metaData),
       ),
     );
@@ -146,7 +210,12 @@ export class NotificationsService {
       where: {
         account_status: 'ACTIVE',
         deleted_at: null,
-        role: { name: { in: roleNames } },
+        role: {
+          name: {
+            in: roleNames,
+            mode: 'insensitive',
+          },
+        },
       },
       select: { id: true },
     });
@@ -164,7 +233,20 @@ export class NotificationsService {
       where: {
         account_status: 'ACTIVE',
         deleted_at: null,
-        role: { name: { in: ['SUPER_ADMIN', 'Admin', 'Super Admin'] } },
+        role: {
+          name: {
+            in: [
+              'SUPER_ADMIN',
+              'Super Admin',
+              'super admin',
+              'Admin',
+              'admin',
+              'Manager',
+              'manager',
+            ],
+            mode: 'insensitive',
+          },
+        },
       },
       select: { id: true },
     });
@@ -250,14 +332,18 @@ export class NotificationsService {
     metaData?: Record<string, any>,
   ) {
     const adminIds = await this.getAdminUserIds();
-    const validTechIds = (technicianUserIds || []).filter(Boolean);
-    const recipientIds = new Set([...adminIds, ...validTechIds]);
-    if (creatorUserId) {
-      recipientIds.delete(creatorUserId);
+    const resolvedTechUserIds = await this.resolveUserIds(technicianUserIds || []);
+    const resolvedCreatorId = creatorUserId
+      ? await this.resolveToUserId(creatorUserId)
+      : undefined;
+
+    const recipientIds = new Set([...adminIds, ...resolvedTechUserIds]);
+    if (resolvedCreatorId) {
+      recipientIds.delete(resolvedCreatorId);
     }
     // If only the creator was the recipient, keep creator so an action notification is logged
-    if (recipientIds.size === 0 && creatorUserId) {
-      recipientIds.add(creatorUserId);
+    if (recipientIds.size === 0 && resolvedCreatorId) {
+      recipientIds.add(resolvedCreatorId);
     }
     await this.sendToUsers(
       Array.from(recipientIds),

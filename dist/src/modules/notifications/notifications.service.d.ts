@@ -11,7 +11,9 @@ export declare class NotificationsService {
     private notificationProcessor;
     private readonly logger;
     constructor(prisma: PrismaService, notificationsQueue: Queue, gateway: NotificationsGateway, notificationProcessor: NotificationProcessor);
-    createNotification(userId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
+    resolveToUserId(idOrTechId: string): Promise<string | null>;
+    resolveUserIds(ids: string[]): Promise<string[]>;
+    createNotification(userIdOrTechId: string, title: string, message: string, type: NotificationType, metaData?: Record<string, any>): Promise<{
         id: string;
         user_id: string | null;
         created_at: Date;

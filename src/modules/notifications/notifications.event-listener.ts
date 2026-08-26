@@ -34,7 +34,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.SERVICE_REPORT,
-        { reportId, reportNumber, millName },
+        {
+          reportId,
+          entityId: reportId,
+          reportNumber,
+          millName,
+          route: `/service-reports/${reportId || ''}`,
+          screen: 'ServiceReportDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling service-report.created event', err);
@@ -66,7 +73,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.INSTALLATION,
-        { reportId, reportNumber, millName },
+        {
+          reportId,
+          entityId: reportId,
+          reportNumber,
+          millName,
+          route: `/installation-reports/${reportId || ''}`,
+          screen: 'InstallationReportDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error(
@@ -101,7 +115,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.EXPENSE,
-        { expenseId, expenseNumber, amount },
+        {
+          expenseId,
+          entityId: expenseId,
+          expenseNumber,
+          amount,
+          route: `/expenses/${expenseId || ''}`,
+          screen: 'ExpenseDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling expense.created event', err);
@@ -131,7 +152,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.EXPENSE,
-        { expenseId, expenseNumber, status },
+        {
+          expenseId,
+          entityId: expenseId,
+          expenseNumber,
+          status,
+          route: `/expenses/${expenseId || ''}`,
+          screen: 'ExpenseDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling expense.status_updated event', err);
@@ -163,7 +191,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.TICKET,
-        { ticketId, ticketNumber, subject },
+        {
+          ticketId,
+          entityId: ticketId,
+          ticketNumber,
+          subject,
+          route: `/tickets/${ticketId || ''}`,
+          screen: 'TicketDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling ticket.created event', err);
@@ -192,7 +227,14 @@ export class NotificationsEventListener {
         title,
         message,
         NotificationType.TICKET,
-        { ticketId, ticketNumber, subject },
+        {
+          ticketId,
+          entityId: ticketId,
+          ticketNumber,
+          subject,
+          route: `/tickets/${ticketId || ''}`,
+          screen: 'TicketDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling ticket.assigned event', err);
@@ -231,7 +273,15 @@ export class NotificationsEventListener {
           'New Store Record Assigned',
           `A new store record (${statusLabel}) for ${label} has been assigned to you.`,
           NotificationType.STORE,
-          { storeId, storeNumber, frameNumber, inflowStatus },
+          {
+            storeId,
+            entityId: storeId,
+            storeNumber,
+            frameNumber,
+            inflowStatus,
+            route: `/stores/${storeId || ''}`,
+            screen: 'StoreDetailScreen',
+          },
         );
       }
 
@@ -240,12 +290,21 @@ export class NotificationsEventListener {
         serviceEngineerName ? ` (Assigned to ${serviceEngineerName})` : ''
       }.`;
       await this.notificationsService.notifyStakeholders(
-        [],
+        technicianUserId ? [technicianUserId] : [],
         creatorUserId || undefined,
         'New Store Record Created',
         adminMessage,
         NotificationType.STORE,
-        { storeId, storeNumber, frameNumber, inflowStatus, technicianUserId },
+        {
+          storeId,
+          entityId: storeId,
+          storeNumber,
+          frameNumber,
+          inflowStatus,
+          technicianUserId,
+          route: `/stores/${storeId || ''}`,
+          screen: 'StoreDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling store.created event', err);
@@ -280,19 +339,35 @@ export class NotificationsEventListener {
           'Store Return Updated',
           `Store return details for ${label} have been updated (Status: ${returnStatus}).`,
           NotificationType.STORE,
-          { storeId, storeNumber, returnStatus, frameNumber },
+          {
+            storeId,
+            entityId: storeId,
+            storeNumber,
+            returnStatus,
+            frameNumber,
+            route: `/stores/${storeId || ''}`,
+            screen: 'StoreDetailScreen',
+          },
         );
       }
 
       // 2. Notification to Admins / Stakeholders
       const adminMessage = `Store return for ${label} has been updated to "${returnStatus}".`;
       await this.notificationsService.notifyStakeholders(
-        [],
+        technicianUserId ? [technicianUserId] : [],
         creatorUserId || undefined,
         'Store Return Status Updated',
         adminMessage,
         NotificationType.STORE,
-        { storeId, storeNumber, returnStatus, frameNumber },
+        {
+          storeId,
+          entityId: storeId,
+          storeNumber,
+          returnStatus,
+          frameNumber,
+          route: `/stores/${storeId || ''}`,
+          screen: 'StoreDetailScreen',
+        },
       );
     } catch (err) {
       this.logger.error('Error handling store.return_updated event', err);

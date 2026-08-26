@@ -33,20 +33,64 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         this.gateway = gateway;
         this.notificationProcessor = notificationProcessor;
     }
-    async createNotification(userId, title, message, type, metaData) {
-        if (!userId)
+    async resolveToUserId(idOrTechId) {
+        if (!idOrTechId)
             return null;
-        const userExists = await this.prisma.user.findUnique({
-            where: { id: userId },
+        const directUser = await this.prisma.user.findFirst({
+            where: {
+                id: idOrTechId,
+                account_status: 'ACTIVE',
+                deleted_at: null,
+            },
             select: { id: true },
         });
-        if (!userExists) {
-            this.logger.warn(`Cannot create notification: User ${userId} does not exist in the database.`);
+        if (directUser) {
+            return directUser.id;
+        }
+        const technician = await this.prisma.technician.findFirst({
+            where: {
+                id: idOrTechId,
+                deleted_at: null,
+            },
+            select: { id: true, email: true, phone: true },
+        });
+        if (technician) {
+            const matchedUser = await this.prisma.user.findFirst({
+                where: {
+                    account_status: 'ACTIVE',
+                    deleted_at: null,
+                    OR: [
+                        { id: technician.id },
+                        ...(technician.email ? [{ email: technician.email }] : []),
+                        ...(technician.phone ? [{ phone_number: technician.phone }] : []),
+                    ],
+                },
+                select: { id: true },
+            });
+            if (matchedUser) {
+                return matchedUser.id;
+            }
+        }
+        return null;
+    }
+    async resolveUserIds(ids) {
+        const rawIds = Array.from(new Set((ids || []).filter(Boolean)));
+        if (!rawIds.length)
+            return [];
+        const resolved = await Promise.all(rawIds.map((id) => this.resolveToUserId(id)));
+        return Array.from(new Set(resolved.filter((id) => Boolean(id))));
+    }
+    async createNotification(userIdOrTechId, title, message, type, metaData) {
+        if (!userIdOrTechId)
+            return null;
+        const resolvedUserId = await this.resolveToUserId(userIdOrTechId);
+        if (!resolvedUserId) {
+            this.logger.warn(`Cannot create notification: Target ID ${userIdOrTechId} could not be resolved to an active user.`);
             return null;
         }
         const notification = await this.prisma.notification.create({
             data: {
-                user_id: userId,
+                user_id: resolvedUserId,
                 title,
                 message,
                 type,
@@ -54,7 +98,7 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
                 meta_data: metaData ?? undefined,
             },
         });
-        this.gateway.emitToUser(userId, 'notification', notification);
+        this.gateway.emitToUser(resolvedUserId, 'notification', notification);
         const recordId = metaData?.storeId ||
             metaData?.reportId ||
             metaData?.expenseId ||
@@ -64,17 +108,17 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         const pushPayload = {
             id: notification.id,
             recordId,
-            userId,
+            userId: resolvedUserId,
             title,
             message,
             type,
             metaData,
         };
         this.notificationProcessor.sendPush(pushPayload).catch(async (pushErr) => {
-            this.logger.warn(`Immediate FCM push error for user ${userId}, queuing to BullMQ: ${pushErr?.message}`);
+            this.logger.warn(`Immediate FCM push error for user ${resolvedUserId}, queuing to BullMQ: ${pushErr?.message}`);
             try {
                 await this.notificationsQueue.add('send-push', pushPayload, {
-                    jobId: `push_${notification.id}_${userId}`,
+                    jobId: `push_${notification.id}_${resolvedUserId}`,
                     removeOnComplete: true,
                     removeOnFail: false,
                     attempts: 2,
@@ -88,8 +132,8 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
         return notification;
     }
     async sendToUsers(userIds, title, message, type, metaData) {
-        const uniqueUserIds = Array.from(new Set((userIds || []).filter(Boolean)));
-        await Promise.all(uniqueUserIds.map((uid) => this.createNotification(uid, title, message, type, metaData)));
+        const validUserIds = await this.resolveUserIds(userIds);
+        await Promise.all(validUserIds.map((uid) => this.createNotification(uid, title, message, type, metaData)));
     }
     async broadcast(title, message, type, metaData) {
         const users = await this.prisma.user.findMany({
@@ -106,7 +150,12 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             where: {
                 account_status: 'ACTIVE',
                 deleted_at: null,
-                role: { name: { in: roleNames } },
+                role: {
+                    name: {
+                        in: roleNames,
+                        mode: 'insensitive',
+                    },
+                },
             },
             select: { id: true },
         });
@@ -117,7 +166,20 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
             where: {
                 account_status: 'ACTIVE',
                 deleted_at: null,
-                role: { name: { in: ['SUPER_ADMIN', 'Admin', 'Super Admin'] } },
+                role: {
+                    name: {
+                        in: [
+                            'SUPER_ADMIN',
+                            'Super Admin',
+                            'super admin',
+                            'Admin',
+                            'admin',
+                            'Manager',
+                            'manager',
+                        ],
+                        mode: 'insensitive',
+                    },
+                },
             },
             select: { id: true },
         });
@@ -180,13 +242,16 @@ let NotificationsService = NotificationsService_1 = class NotificationsService {
     }
     async notifyStakeholders(technicianUserIds, creatorUserId, title, message, type, metaData) {
         const adminIds = await this.getAdminUserIds();
-        const validTechIds = (technicianUserIds || []).filter(Boolean);
-        const recipientIds = new Set([...adminIds, ...validTechIds]);
-        if (creatorUserId) {
-            recipientIds.delete(creatorUserId);
+        const resolvedTechUserIds = await this.resolveUserIds(technicianUserIds || []);
+        const resolvedCreatorId = creatorUserId
+            ? await this.resolveToUserId(creatorUserId)
+            : undefined;
+        const recipientIds = new Set([...adminIds, ...resolvedTechUserIds]);
+        if (resolvedCreatorId) {
+            recipientIds.delete(resolvedCreatorId);
         }
-        if (recipientIds.size === 0 && creatorUserId) {
-            recipientIds.add(creatorUserId);
+        if (recipientIds.size === 0 && resolvedCreatorId) {
+            recipientIds.add(resolvedCreatorId);
         }
         await this.sendToUsers(Array.from(recipientIds), title, message, type, metaData);
     }

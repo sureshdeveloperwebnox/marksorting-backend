@@ -26,7 +26,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { reportId, reportNumber, millName, technicianUserIds, creatorUserId, } = payload;
             const title = 'New Service Report Created';
             const message = `Service Report ${reportNumber} has been created for mill "${millName}".`;
-            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.SERVICE_REPORT, { reportId, reportNumber, millName });
+            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.SERVICE_REPORT, {
+                reportId,
+                entityId: reportId,
+                reportNumber,
+                millName,
+                route: `/service-reports/${reportId || ''}`,
+                screen: 'ServiceReportDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling service-report.created event', err);
@@ -37,7 +44,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { reportId, reportNumber, millName, technicianUserIds, creatorUserId, } = payload;
             const title = 'New Installation Report Created';
             const message = `Installation Report ${reportNumber} has been created for mill "${millName}".`;
-            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.INSTALLATION, { reportId, reportNumber, millName });
+            await this.notificationsService.notifyStakeholders(technicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.INSTALLATION, {
+                reportId,
+                entityId: reportId,
+                reportNumber,
+                millName,
+                route: `/installation-reports/${reportId || ''}`,
+                screen: 'InstallationReportDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling installation-report.created event', err);
@@ -48,7 +62,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { expenseId, expenseNumber, amount, creatorUserId, technicianUserIds, } = payload;
             const title = 'New Expense Submitted';
             const message = `Expense ${expenseNumber} of ₹${amount} has been submitted for approval.`;
-            await this.notificationsService.notifyStakeholders(technicianUserIds || [], creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, { expenseId, expenseNumber, amount });
+            await this.notificationsService.notifyStakeholders(technicianUserIds || [], creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, {
+                expenseId,
+                entityId: expenseId,
+                expenseNumber,
+                amount,
+                route: `/expenses/${expenseId || ''}`,
+                screen: 'ExpenseDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling expense.created event', err);
@@ -64,7 +85,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
                     : status.toLowerCase();
             const title = 'Expense Status Updated';
             const message = `Your expense ${expenseNumber} has been ${statusLabel}.`;
-            await this.notificationsService.sendToUsers(technicianUserIds, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, { expenseId, expenseNumber, status });
+            await this.notificationsService.sendToUsers(technicianUserIds, title, message, broadcast_notification_dto_1.NotificationType.EXPENSE, {
+                expenseId,
+                entityId: expenseId,
+                expenseNumber,
+                status,
+                route: `/expenses/${expenseId || ''}`,
+                screen: 'ExpenseDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling expense.status_updated event', err);
@@ -75,7 +103,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { ticketId, ticketNumber, subject, assignedTechnicianUserIds, creatorUserId, } = payload;
             const title = 'New Support Ticket Created';
             const message = `Ticket ${ticketNumber}: "${subject}" has been created.`;
-            await this.notificationsService.notifyStakeholders(assignedTechnicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.TICKET, { ticketId, ticketNumber, subject });
+            await this.notificationsService.notifyStakeholders(assignedTechnicianUserIds, creatorUserId, title, message, broadcast_notification_dto_1.NotificationType.TICKET, {
+                ticketId,
+                entityId: ticketId,
+                ticketNumber,
+                subject,
+                route: `/tickets/${ticketId || ''}`,
+                screen: 'TicketDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling ticket.created event', err);
@@ -86,7 +121,14 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { ticketId, ticketNumber, subject, assignedTechnicianUserIds, } = payload;
             const title = 'Ticket Assigned to You';
             const message = `You have been assigned to Ticket ${ticketNumber}: "${subject}".`;
-            await this.notificationsService.sendToUsers(assignedTechnicianUserIds, title, message, broadcast_notification_dto_1.NotificationType.TICKET, { ticketId, ticketNumber, subject });
+            await this.notificationsService.sendToUsers(assignedTechnicianUserIds, title, message, broadcast_notification_dto_1.NotificationType.TICKET, {
+                ticketId,
+                entityId: ticketId,
+                ticketNumber,
+                subject,
+                route: `/tickets/${ticketId || ''}`,
+                screen: 'TicketDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling ticket.assigned event', err);
@@ -98,10 +140,27 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const label = frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Record');
             const statusLabel = inflowStatus || 'Inflow';
             if (technicianUserId) {
-                await this.notificationsService.createNotification(technicianUserId, 'New Store Record Assigned', `A new store record (${statusLabel}) for ${label} has been assigned to you.`, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, frameNumber, inflowStatus });
+                await this.notificationsService.createNotification(technicianUserId, 'New Store Record Assigned', `A new store record (${statusLabel}) for ${label} has been assigned to you.`, broadcast_notification_dto_1.NotificationType.STORE, {
+                    storeId,
+                    entityId: storeId,
+                    storeNumber,
+                    frameNumber,
+                    inflowStatus,
+                    route: `/stores/${storeId || ''}`,
+                    screen: 'StoreDetailScreen',
+                });
             }
             const adminMessage = `A new store record (${statusLabel}) for ${label} has been created${serviceEngineerName ? ` (Assigned to ${serviceEngineerName})` : ''}.`;
-            await this.notificationsService.notifyStakeholders([], creatorUserId || undefined, 'New Store Record Created', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, frameNumber, inflowStatus, technicianUserId });
+            await this.notificationsService.notifyStakeholders(technicianUserId ? [technicianUserId] : [], creatorUserId || undefined, 'New Store Record Created', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, {
+                storeId,
+                entityId: storeId,
+                storeNumber,
+                frameNumber,
+                inflowStatus,
+                technicianUserId,
+                route: `/stores/${storeId || ''}`,
+                screen: 'StoreDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling store.created event', err);
@@ -112,10 +171,26 @@ let NotificationsEventListener = NotificationsEventListener_1 = class Notificati
             const { storeId, storeNumber, frameNumber, returnStatus, technicianUserId, creatorUserId, } = payload;
             const label = frameNumber ? `Frame ${frameNumber}` : (storeNumber || 'Store Return');
             if (technicianUserId && technicianUserId !== creatorUserId) {
-                await this.notificationsService.createNotification(technicianUserId, 'Store Return Updated', `Store return details for ${label} have been updated (Status: ${returnStatus}).`, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, returnStatus, frameNumber });
+                await this.notificationsService.createNotification(technicianUserId, 'Store Return Updated', `Store return details for ${label} have been updated (Status: ${returnStatus}).`, broadcast_notification_dto_1.NotificationType.STORE, {
+                    storeId,
+                    entityId: storeId,
+                    storeNumber,
+                    returnStatus,
+                    frameNumber,
+                    route: `/stores/${storeId || ''}`,
+                    screen: 'StoreDetailScreen',
+                });
             }
             const adminMessage = `Store return for ${label} has been updated to "${returnStatus}".`;
-            await this.notificationsService.notifyStakeholders([], creatorUserId || undefined, 'Store Return Status Updated', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, { storeId, storeNumber, returnStatus, frameNumber });
+            await this.notificationsService.notifyStakeholders(technicianUserId ? [technicianUserId] : [], creatorUserId || undefined, 'Store Return Status Updated', adminMessage, broadcast_notification_dto_1.NotificationType.STORE, {
+                storeId,
+                entityId: storeId,
+                storeNumber,
+                returnStatus,
+                frameNumber,
+                route: `/stores/${storeId || ''}`,
+                screen: 'StoreDetailScreen',
+            });
         }
         catch (err) {
             this.logger.error('Error handling store.return_updated event', err);

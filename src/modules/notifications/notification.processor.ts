@@ -124,6 +124,34 @@ export class NotificationProcessor extends WorkerHost {
 
     if (!tokens.length) return;
 
+    const targetRoute =
+      data.metaData?.route ||
+      (mappedType === 'ticket'
+        ? `/tickets/${targetRecordId}`
+        : mappedType === 'service_report'
+          ? `/service-reports/${targetRecordId}`
+          : mappedType === 'installation_report'
+            ? `/installation-reports/${targetRecordId}`
+            : mappedType === 'expense'
+              ? `/expenses/${targetRecordId}`
+              : mappedType === 'store_return' || mappedType === 'store'
+                ? `/stores/${targetRecordId}`
+                : '/notifications');
+
+    const targetScreen =
+      data.metaData?.screen ||
+      (mappedType === 'ticket'
+        ? 'TicketDetailScreen'
+        : mappedType === 'service_report'
+          ? 'ServiceReportDetailScreen'
+          : mappedType === 'installation_report'
+            ? 'InstallationReportDetailScreen'
+            : mappedType === 'expense'
+              ? 'ExpenseDetailScreen'
+              : mappedType === 'store_return' || mappedType === 'store'
+                ? 'StoreDetailScreen'
+                : 'NotificationsScreen');
+
     try {
       const response = await this.firebaseApp.messaging().sendEachForMulticast({
         tokens,
@@ -133,15 +161,23 @@ export class NotificationProcessor extends WorkerHost {
         },
         data: {
           id: String(targetRecordId || ''),
+          recordId: String(targetRecordId || ''),
+          notificationId: String(id || ''),
           type: mappedType,
+          notificationType: String(type || ''),
           title: String(title || ''),
           body: String(message || ''),
+          message: String(message || ''),
+          route: String(targetRoute),
+          screen: String(targetScreen),
           click_action: 'FLUTTER_NOTIFICATION_CLICK',
           ...(data.metaData
             ? Object.fromEntries(
                 Object.entries(data.metaData).map(([k, v]) => [
                   k,
-                  String(v ?? ''),
+                  typeof v === 'object' && v !== null
+                    ? JSON.stringify(v)
+                    : String(v ?? ''),
                 ]),
               )
             : {}),
@@ -157,11 +193,14 @@ export class NotificationProcessor extends WorkerHost {
             defaultVibrateTimings: true,
             priority: 'max',
             visibility: 'public',
+            clickAction: 'FLUTTER_NOTIFICATION_CLICK',
+            tag: String(targetRecordId || mappedType),
           },
         },
         apns: {
           headers: {
             'apns-priority': '10',
+            'apns-push-type': 'alert',
           },
           payload: {
             aps: {
@@ -172,6 +211,7 @@ export class NotificationProcessor extends WorkerHost {
               sound: 'default',
               badge: 1,
               contentAvailable: true,
+              category: 'FLUTTER_NOTIFICATION_CLICK',
             },
           },
         },
@@ -184,10 +224,11 @@ export class NotificationProcessor extends WorkerHost {
       const failed = response.responses
         .map((r: any, i: number) => {
           if (!r.success) {
-            const errCode = r.error?.code;
+            const errCode = r.error?.code || '';
             if (
-              errCode === 'messaging/invalid-registration-token' ||
-              errCode === 'messaging/registration-token-not-registered' ||
+              errCode.includes('invalid-registration-token') ||
+              errCode.includes('registration-token-not-registered') ||
+              errCode.includes('invalid-argument') ||
               !errCode
             ) {
               return tokens[i];
