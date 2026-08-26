@@ -212,7 +212,6 @@ export class NotificationProcessor extends WorkerHost {
           ttl: 86400 * 1000,
           notification: {
             channelId: 'high_importance_channel',
-            icon: '@mipmap/launcher_icon',
             sound: 'default',
             defaultSound: true,
             defaultVibrateTimings: true,
