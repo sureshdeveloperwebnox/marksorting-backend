@@ -211,10 +211,11 @@ export class NotificationProcessor extends WorkerHost {
           priority: 'high',
           ttl: 86400 * 1000,
           notification: {
+            channelId: 'high_importance_channel',
             sound: 'default',
             defaultSound: true,
             defaultVibrateTimings: true,
-            priority: 'high',
+            priority: 'max',
             visibility: 'public',
             tag: String(targetRecordId || mappedType),
           },
