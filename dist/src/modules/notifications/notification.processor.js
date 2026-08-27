@@ -192,6 +192,7 @@ let NotificationProcessor = NotificationProcessor_1 = class NotificationProcesso
                         defaultVibrateTimings: true,
                         priority: 'max',
                         visibility: 'public',
+                        clickAction: 'FLUTTER_NOTIFICATION_CLICK',
                         tag: String(targetRecordId || mappedType),
                     },
                 },

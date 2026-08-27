@@ -7,21 +7,30 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
+async function check() {
   const users = await prisma.user.findMany({
-    where: { deleted_at: null },
     select: {
       id: true,
       email: true,
       full_name: true,
       account_status: true,
-      role: { select: { name: true } }
-    },
-    take: 10,
-    orderBy: { created_at: 'asc' }
+      deleted_at: true,
+      role: { select: { id: true, name: true } },
+      push_tokens: { select: { id: true, token: true, updated_at: true } }
+    }
   });
-  console.log('Admin users:');
-  console.table(users);
+
+  console.log('--- ALL USERS WITH ROLES & PUSH TOKENS ---');
+  for (const u of users) {
+    console.log(`User: ${u.full_name} (${u.email}) | Role: '${u.role?.name}' | Status: ${u.account_status} | Deleted: ${u.deleted_at} | Tokens: ${u.push_tokens.length}`);
+    for (const pt of u.push_tokens) {
+      console.log(`   - Token ID: ${pt.id}, Updated: ${pt.updated_at}, Token: ${pt.token.substring(0, 25)}...`);
+    }
+  }
+
+  console.log('\n--- ALL ROLES IN DB ---');
+  const roles = await prisma.role.findMany();
+  console.log(roles.map(r => `Role ID: ${r.id}, Name: "${r.name}"`));
 }
 
-main().catch(console.error).finally(() => prisma.$disconnect());
+check().catch(console.error).finally(() => prisma.$disconnect());

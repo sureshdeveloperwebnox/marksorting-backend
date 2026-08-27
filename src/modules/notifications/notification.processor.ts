@@ -212,12 +212,13 @@ export class NotificationProcessor extends WorkerHost {
           ttl: 86400 * 1000,
           notification: {
             channelId: 'high_importance_channel',
+            icon: '@mipmap/launcher_icon',
             sound: 'default',
             defaultSound: true,
             defaultVibrateTimings: true,
             priority: 'max',
             visibility: 'public',
-            tag: String(targetRecordId || mappedType),
+            clickAction: 'FLUTTER_NOTIFICATION_CLICK',
           },
         },
         apns: {
