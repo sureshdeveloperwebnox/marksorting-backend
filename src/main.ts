@@ -29,6 +29,14 @@ async function bootstrap() {
   app.useWebSocketAdapter(new IoAdapter(app));
 
   // Enable CORS
+  const extraOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGIN,
+    process.env.ALLOWED_ORIGINS,
+  ]
+    .filter(Boolean)
+    .flatMap((url) => (url as string).split(',').map((u) => u.trim()));
+
   app.enableCors({
     origin: (
       origin: string | undefined,
@@ -36,20 +44,46 @@ async function bootstrap() {
     ) => {
       // Allow requests with no origin (mobile apps, curl, Swagger)
       if (!origin) return callback(null, true);
-      // Allow any localhost or LAN IP on port 3000 or 4000, ngrok tunnels, and production domain
-      const allowed =
-        /^http:\/\/localhost(:\d+)?$/.test(origin) ||
-        /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-        /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
-        /^http:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(
+
+      // Check if origin matches allowed patterns
+      const isLocalOrLan =
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+        /^https?:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+        /^https?:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(origin) ||
+        /^https?:\/\/172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}(:\d+)?$/.test(
           origin,
-        ) ||
-        /^https:\/\/.*\.ngrok(-free)?\.(app|dev|io)$/.test(origin) ||
-        origin === 'https://adminmarksorter.webnoxdigital.com' ||
-        origin === 'https://apimarksorter.webnoxdigital.com';
-      callback(allowed ? null : new Error('Not allowed by CORS'), allowed);
+        );
+
+      const isTunnel = /^https:\/\/.*\.ngrok(-free)?\.(app|dev|io)$/.test(origin);
+
+      const isAllowedDomain =
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*markcolorsorter\.in(:\d+)?$/.test(origin) ||
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*webnoxdigital\.com(:\d+)?$/.test(origin) ||
+        /^https?:\/\/([a-zA-Z0-9-]+\.)*marksorting\.com(:\d+)?$/.test(origin);
+
+      const isExplicitEnvAllowed = extraOrigins.some(
+        (allowedOrigin) =>
+          allowedOrigin === origin ||
+          allowedOrigin === origin.replace(/\/$/, ''),
+      );
+
+      const allowed =
+        isLocalOrLan || isTunnel || isAllowedDomain || isExplicitEnvAllowed;
+
+      callback(null, allowed);
     },
     credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Authorization',
+      'X-Requested-With',
+      'Origin',
+      'Access-Control-Request-Method',
+      'Access-Control-Request-Headers',
+    ],
+    exposedHeaders: ['Content-Range', 'X-Content-Range', 'Content-Disposition'],
   });
 
   // Global prefix

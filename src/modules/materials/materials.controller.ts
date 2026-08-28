@@ -62,11 +62,15 @@ export class MaterialsController {
     const where: Prisma.MaterialWhereInput = {};
 
     if (search) {
-      where.name = { contains: search, mode: 'insensitive' };
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { uom: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
-    if (status) {
-      where.status = status;
+    if (status && status.toUpperCase() !== 'ALL') {
+      where.status = { equals: status, mode: 'insensitive' };
     }
 
     return this.materialsService.findAll({
