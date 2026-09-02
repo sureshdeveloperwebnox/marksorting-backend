@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateMillDto = void 0;
 const class_validator_1 = require("class-validator");
+const class_transformer_1 = require("class-transformer");
 const swagger_1 = require("@nestjs/swagger");
 class CreateMillDto {
     customer_id;
@@ -46,6 +47,7 @@ __decorate([
 ], CreateMillDto.prototype, "ref_no", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'contact@goldenvalley.com', required: false }),
+    (0, class_transformer_1.Transform)(({ value }) => value === '' ? undefined : value),
     (0, class_validator_1.IsEmail)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

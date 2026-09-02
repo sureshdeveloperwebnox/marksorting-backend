@@ -64,6 +64,6 @@ export declare class MobileMasterMillsController {
         amc_period?: number | null | undefined;
         amc_particular?: string | null | undefined;
         amc_closing_date?: Date | null | undefined;
-        amc_amount?: import("@prisma/client/runtime/client").Decimal | null | undefined;
+        amc_amount?: import("@prisma/client-runtime-utils").Decimal | null | undefined;
     }>;
 }

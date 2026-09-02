@@ -154,6 +154,13 @@ export class ExpensesService {
         {
           expenseCategory: { name: { contains: search, mode: 'insensitive' } },
         },
+        {
+          technicians: {
+            some: {
+              technician: { full_name: { contains: search, mode: 'insensitive' } },
+            },
+          },
+        },
       ];
     }
 

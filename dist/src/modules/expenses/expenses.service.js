@@ -112,6 +112,13 @@ let ExpensesService = ExpensesService_1 = class ExpensesService {
                 {
                     expenseCategory: { name: { contains: search, mode: 'insensitive' } },
                 },
+                {
+                    technicians: {
+                        some: {
+                            technician: { full_name: { contains: search, mode: 'insensitive' } },
+                        },
+                    },
+                },
             ];
         }
         if (status) {

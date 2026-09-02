@@ -5,6 +5,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMillDto {
@@ -24,6 +25,7 @@ export class CreateMillDto {
   ref_no?: string;
 
   @ApiProperty({ example: 'contact@goldenvalley.com', required: false })
+  @Transform(({ value }) => value === '' ? undefined : value)
   @IsEmail()
   @IsOptional()
   email?: string;
