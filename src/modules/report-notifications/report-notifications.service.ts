@@ -28,17 +28,17 @@ export class ReportNotificationsService {
   ) {}
 
   /**
-   * Send Service Report via both Email and WhatsApp to assigned engineers
-   * - WhatsApp: Sends PDF only (no text)
-   * - Email: "Please find attachment." + PDF attachment
+   * Send Service Report via both Email and WhatsApp to the customer
+   * - WhatsApp: Sends PDF only (no text) to Mill WhatsApp and Authorized Person
+   * - Email: "Please find attachment." + PDF attachment to Mill Email
    * - Subject: {mill_name} Service Report
    */
   async sendServiceReport(
     reportId: string,
     millName: string,
-    _millEmail: string | null | undefined,
-    _millWhatsappNumber: string,
-    _authorizedPersonPhone?: string,
+    millEmail?: string | null,
+    millWhatsappNumber?: string | null,
+    authorizedPersonPhone?: string | null,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -50,11 +50,6 @@ export class ReportNotificationsService {
         where: { id: reportId },
         include: {
           mill: { select: { name: true } },
-          technicians: {
-            include: {
-              technician: true,
-            },
-          },
         },
       });
 
@@ -63,30 +58,40 @@ export class ReportNotificationsService {
       }
 
       const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+      const targetMillWhatsapp = (
+        report.mill_whatsapp_number ||
+        millWhatsappNumber ||
+        ''
+      ).trim();
+      const targetMillEmail = (report.mill_email || millEmail || '').trim();
+      const targetAuthPhone = (
+        report.authorized_person_phone ||
+        authorizedPersonPhone ||
+        ''
+      ).trim();
+
       this.logger.debug(
-        `Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`,
+        `Service Report ${reportId} customer details: email=${targetMillEmail || 'none'}, whatsapp=${targetMillWhatsapp || 'none'}, authPhone=${targetAuthPhone || 'none'}`,
       );
+
+      // If no customer contacts exist, return early
+      if (!targetMillWhatsapp && !targetMillEmail && !targetAuthPhone) {
+        this.logger.warn(
+          `No customer contact information found for Service Report ${reportId}`,
+        );
+        return result;
+      }
 
       // Generate PDF
       this.logger.log(`Generating PDF for Service Report ${reportId}...`);
       const { buffer: pdfBuffer, fileName } =
         await this.serviceReportsService.generatePdf(reportId);
 
-      const assignedTechnicians = report.technicians
-        .map((t) => t.technician)
-        .filter(Boolean);
-
-      if (assignedTechnicians.length === 0) {
-        this.logger.warn(
-          `No assigned technicians for Service Report ${reportId}`,
-        );
-        return result;
-      }
-
       const formattedDate = report.visit_date
         ? new Date(report.visit_date).toLocaleDateString('en-GB')
         : '—';
-      const caption = `*Service Report Created*\n\n` +
+      const caption =
+        `*Service Report Created*\n\n` +
         `*Report No:* ${report.report_number || '—'}\n` +
         `*Mill Name:* ${activeMillName}\n` +
         `*Place:* ${report.place || '—'}\n` +
@@ -96,20 +101,53 @@ export class ReportNotificationsService {
         `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
         `Please find the attached Service Report PDF.`;
 
-      // Loop and send to each assigned technician
-      for (const technician of assignedTechnicians) {
-        const techEmail = technician.email;
-        const techPhone = technician.phone;
+      // 1. Send WhatsApp to Mill WhatsApp number
+      if (targetMillWhatsapp) {
+        try {
+          this.logger.log(
+            `Sending Service Report ${reportId} WhatsApp to customer mill (${targetMillWhatsapp})`,
+          );
+          const sent = await this.whatsAppService.sendReportPdf(
+            targetMillWhatsapp,
+            pdfBuffer,
+            fileName,
+            reportId,
+            'SERVICE',
+            activeMillName,
+            caption,
+          );
+          if (sent) result.whatsappSent = true;
+          this.logger.log(
+            `WhatsApp queued for Service Report ${reportId} to customer mill (${targetMillWhatsapp})`,
+          );
+        } catch (error) {
+          result.whatsappError =
+            error instanceof Error ? error.message : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Service Report ${reportId} to customer mill (${targetMillWhatsapp})`,
+            error,
+          );
+        }
+      }
 
-        this.logger.log(
-          `Sending Service Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
-        );
+      // 2. Send WhatsApp to Authorized Person (if distinct from mill WhatsApp number)
+      if (targetAuthPhone) {
+        const isDuplicate =
+          targetMillWhatsapp &&
+          this.normalizePhone(targetAuthPhone) ===
+            this.normalizePhone(targetMillWhatsapp);
 
-        // Send WhatsApp
-        if (techPhone) {
+        if (isDuplicate) {
+          this.logger.log(
+            `Skipping Service Report ${reportId} authorized person WhatsApp (${targetAuthPhone}) — same as mill WhatsApp number.`,
+          );
+        } else {
           try {
+            this.logger.log(
+              `Sending Service Report ${reportId} WhatsApp to authorized person (${targetAuthPhone})`,
+            );
             const sent = await this.whatsAppService.sendReportPdf(
-              techPhone,
+              targetAuthPhone,
               pdfBuffer,
               fileName,
               reportId,
@@ -119,7 +157,7 @@ export class ReportNotificationsService {
             );
             if (sent) result.whatsappSent = true;
             this.logger.log(
-              `WhatsApp queued for Service Report ${reportId} to technician ${technician.full_name} (${techPhone})`,
+              `WhatsApp queued for Service Report ${reportId} to authorized person (${targetAuthPhone})`,
             );
           } catch (error) {
             result.whatsappError =
@@ -127,83 +165,41 @@ export class ReportNotificationsService {
                 ? error.message
                 : 'WhatsApp sending failed';
             this.logger.error(
-              `WhatsApp failed for Service Report ${reportId} to technician ${technician.full_name}`,
-              error,
-            );
-          }
-        }
-
-        // Send Email with attachment
-        if (techEmail) {
-          try {
-            const subject = `${activeMillName} Service Report`;
-            const html = this.getServiceReportEmailTemplate(activeMillName);
-
-            const sent = await this.sendEmailWithAttachment(
-              techEmail,
-              subject,
-              html,
-              fileName,
-              pdfBuffer,
-            );
-            if (sent) result.emailSent = true;
-
-            this.logger.log(
-              `Email queued for Service Report ${reportId} to technician ${technician.full_name} (${techEmail})`,
-            );
-          } catch (error) {
-            result.emailError =
-              error instanceof Error ? error.message : 'Email sending failed';
-            this.logger.error(
-              `Email failed for Service Report ${reportId} to technician ${technician.full_name}`,
+              `WhatsApp failed for Service Report ${reportId} to authorized person (${targetAuthPhone})`,
               error,
             );
           }
         }
       }
 
-      // Send WhatsApp to authorized person if phone number is provided,
-      // but only if they haven't already been notified as a technician
-      if (_authorizedPersonPhone) {
-        const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
-        const alreadySentPhones = assignedTechnicians
-          .map((t) => t.phone)
-          .filter(Boolean)
-          .map((p) => this.normalizePhone(p!));
-        const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
-
-        if (alreadyNotified) {
+      // 3. Send Email with attachment to Customer Mill Email
+      if (targetMillEmail) {
+        try {
           this.logger.log(
-            `Skipping Service Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`,
+            `Sending Service Report ${reportId} Email to customer mill (${targetMillEmail})`,
           );
-        } else {
-          try {
-            this.logger.log(
-              `Sending Service Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
-            );
-            const sent = await this.whatsAppService.sendReportPdf(
-              _authorizedPersonPhone,
-              pdfBuffer,
-              fileName,
-              reportId,
-              'SERVICE',
-              activeMillName,
-              caption,
-            );
-            if (sent) result.whatsappSent = true;
-            this.logger.log(
-              `WhatsApp queued for Service Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
-            );
-          } catch (error) {
-            result.whatsappError =
-              error instanceof Error
-                ? error.message
-                : 'WhatsApp sending failed';
-            this.logger.error(
-              `WhatsApp failed for Service Report ${reportId} to authorized person`,
-              error,
-            );
-          }
+          const subject = `${activeMillName} Service Report`;
+          const html = this.getServiceReportEmailTemplate(activeMillName);
+
+          const sent = await this.sendEmailWithAttachment(
+            targetMillEmail,
+            subject,
+            html,
+            fileName,
+            pdfBuffer,
+          );
+          if (sent) result.emailSent = true;
+
+          this.logger.log(
+            `Email queued for Service Report ${reportId} to customer mill (${targetMillEmail})`,
+          );
+        } catch (error) {
+          result.emailError =
+            error instanceof Error ? error.message : 'Email sending failed';
+          this.logger.error(
+            `Email failed for Service Report ${reportId} to customer mill (${targetMillEmail})`,
+            error,
+          );
         }
       }
 
@@ -221,17 +217,17 @@ export class ReportNotificationsService {
   }
 
   /**
-   * Send Installation Report via both Email and WhatsApp to assigned engineers
-   * - WhatsApp: Sends PDF only (no text)
-   * - Email: "Please find attachment." + PDF attachment
+   * Send Installation Report via both Email and WhatsApp to the customer
+   * - WhatsApp: Sends PDF only (no text) to Mill WhatsApp and Authorized Person
+   * - Email: "Please find attachment." + PDF attachment to Mill Email
    * - Subject: {mill_name} Installation Report
    */
   async sendInstallationReport(
     reportId: string,
     millName: string,
-    _millEmail: string | null | undefined,
-    _millWhatsappNumber: string,
-    _authorizedPersonPhone?: string,
+    millEmail?: string | null,
+    millWhatsappNumber?: string | null,
+    authorizedPersonPhone?: string | null,
   ): Promise<ReportDeliveryResult> {
     const result: ReportDeliveryResult = {
       emailSent: false,
@@ -243,11 +239,6 @@ export class ReportNotificationsService {
         where: { id: reportId },
         include: {
           mill: { select: { name: true } },
-          technicians: {
-            include: {
-              technician: true,
-            },
-          },
         },
       });
 
@@ -256,30 +247,40 @@ export class ReportNotificationsService {
       }
 
       const activeMillName = report.mill?.name || millName || 'Unknown Mill';
+      const targetMillWhatsapp = (
+        report.mill_whatsapp_number ||
+        millWhatsappNumber ||
+        ''
+      ).trim();
+      const targetMillEmail = (report.mill_email || millEmail || '').trim();
+      const targetAuthPhone = (
+        report.authorized_person_phone ||
+        authorizedPersonPhone ||
+        ''
+      ).trim();
+
       this.logger.debug(
-        `Original mill details: email=${_millEmail || 'none'}, whatsapp=${_millWhatsappNumber || 'none'}`,
+        `Installation Report ${reportId} customer details: email=${targetMillEmail || 'none'}, whatsapp=${targetMillWhatsapp || 'none'}, authPhone=${targetAuthPhone || 'none'}`,
       );
+
+      // If no customer contacts exist, return early
+      if (!targetMillWhatsapp && !targetMillEmail && !targetAuthPhone) {
+        this.logger.warn(
+          `No customer contact information found for Installation Report ${reportId}`,
+        );
+        return result;
+      }
 
       // Generate PDF
       this.logger.log(`Generating PDF for Installation Report ${reportId}...`);
       const { buffer: pdfBuffer, fileName } =
         await this.installationReportsService.generatePdf(reportId);
 
-      const assignedTechnicians = report.technicians
-        .map((t) => t.technician)
-        .filter(Boolean);
-
-      if (assignedTechnicians.length === 0) {
-        this.logger.warn(
-          `No assigned technicians for Installation Report ${reportId}`,
-        );
-        return result;
-      }
-
       const formattedDate = report.visit_date
         ? new Date(report.visit_date).toLocaleDateString('en-GB')
         : '—';
-      const caption = `*Installation Report Created*\n\n` +
+      const caption =
+        `*Installation Report Created*\n\n` +
         `*Report No:* ${report.report_number || '—'}\n` +
         `*Mill Name:* ${activeMillName}\n` +
         `*Place:* ${report.place || '—'}\n` +
@@ -289,20 +290,53 @@ export class ReportNotificationsService {
         `*Authorized Person:* ${report.authorized_person || '—'}\n\n` +
         `Please find the attached Installation Report PDF.`;
 
-      // Loop and send to each assigned technician
-      for (const technician of assignedTechnicians) {
-        const techEmail = technician.email;
-        const techPhone = technician.phone;
+      // 1. Send WhatsApp to Mill WhatsApp number
+      if (targetMillWhatsapp) {
+        try {
+          this.logger.log(
+            `Sending Installation Report ${reportId} WhatsApp to customer mill (${targetMillWhatsapp})`,
+          );
+          const sent = await this.whatsAppService.sendReportPdf(
+            targetMillWhatsapp,
+            pdfBuffer,
+            fileName,
+            reportId,
+            'INSTALLATION',
+            activeMillName,
+            caption,
+          );
+          if (sent) result.whatsappSent = true;
+          this.logger.log(
+            `WhatsApp queued for Installation Report ${reportId} to customer mill (${targetMillWhatsapp})`,
+          );
+        } catch (error) {
+          result.whatsappError =
+            error instanceof Error ? error.message : 'WhatsApp sending failed';
+          this.logger.error(
+            `WhatsApp failed for Installation Report ${reportId} to customer mill (${targetMillWhatsapp})`,
+            error,
+          );
+        }
+      }
 
-        this.logger.log(
-          `Sending Installation Report ${reportId} notification to engineer ${technician.full_name} (Email: ${techEmail}, Phone: ${techPhone})`,
-        );
+      // 2. Send WhatsApp to Authorized Person (if distinct from mill WhatsApp number)
+      if (targetAuthPhone) {
+        const isDuplicate =
+          targetMillWhatsapp &&
+          this.normalizePhone(targetAuthPhone) ===
+            this.normalizePhone(targetMillWhatsapp);
 
-        // Send WhatsApp
-        if (techPhone) {
+        if (isDuplicate) {
+          this.logger.log(
+            `Skipping Installation Report ${reportId} authorized person WhatsApp (${targetAuthPhone}) — same as mill WhatsApp number.`,
+          );
+        } else {
           try {
+            this.logger.log(
+              `Sending Installation Report ${reportId} WhatsApp to authorized person (${targetAuthPhone})`,
+            );
             const sent = await this.whatsAppService.sendReportPdf(
-              techPhone,
+              targetAuthPhone,
               pdfBuffer,
               fileName,
               reportId,
@@ -312,7 +346,7 @@ export class ReportNotificationsService {
             );
             if (sent) result.whatsappSent = true;
             this.logger.log(
-              `WhatsApp queued for Installation Report ${reportId} to technician ${technician.full_name} (${techPhone})`,
+              `WhatsApp queued for Installation Report ${reportId} to authorized person (${targetAuthPhone})`,
             );
           } catch (error) {
             result.whatsappError =
@@ -320,84 +354,42 @@ export class ReportNotificationsService {
                 ? error.message
                 : 'WhatsApp sending failed';
             this.logger.error(
-              `WhatsApp failed for Installation Report ${reportId} to technician ${technician.full_name}`,
-              error,
-            );
-          }
-        }
-
-        // Send Email with attachment
-        if (techEmail) {
-          try {
-            const subject = `${activeMillName} Installation Report`;
-            const html =
-              this.getInstallationReportEmailTemplate(activeMillName);
-
-            const sent = await this.sendEmailWithAttachment(
-              techEmail,
-              subject,
-              html,
-              fileName,
-              pdfBuffer,
-            );
-            if (sent) result.emailSent = true;
-
-            this.logger.log(
-              `Email queued for Installation Report ${reportId} to technician ${technician.full_name} (${techEmail})`,
-            );
-          } catch (error) {
-            result.emailError =
-              error instanceof Error ? error.message : 'Email sending failed';
-            this.logger.error(
-              `Email failed for Installation Report ${reportId} to technician ${technician.full_name}`,
+              `WhatsApp failed for Installation Report ${reportId} to authorized person (${targetAuthPhone})`,
               error,
             );
           }
         }
       }
 
-      // Send WhatsApp to authorized person if phone number is provided,
-      // but only if they haven't already been notified as a technician
-      if (_authorizedPersonPhone) {
-        const normalizedAuthPhone = this.normalizePhone(_authorizedPersonPhone);
-        const alreadySentPhones = assignedTechnicians
-          .map((t) => t.phone)
-          .filter(Boolean)
-          .map((p) => this.normalizePhone(p!));
-        const alreadyNotified = alreadySentPhones.includes(normalizedAuthPhone);
-
-        if (alreadyNotified) {
+      // 3. Send Email with attachment to Customer Mill Email
+      if (targetMillEmail) {
+        try {
           this.logger.log(
-            `Skipping Installation Report ${reportId} authorized person WhatsApp (${_authorizedPersonPhone}) — already sent to this number as a technician.`,
+            `Sending Installation Report ${reportId} Email to customer mill (${targetMillEmail})`,
           );
-        } else {
-          try {
-            this.logger.log(
-              `Sending Installation Report ${reportId} WhatsApp to authorized person (${_authorizedPersonPhone})`,
-            );
-            const sent = await this.whatsAppService.sendReportPdf(
-              _authorizedPersonPhone,
-              pdfBuffer,
-              fileName,
-              reportId,
-              'INSTALLATION',
-              activeMillName,
-              caption,
-            );
-            if (sent) result.whatsappSent = true;
-            this.logger.log(
-              `WhatsApp queued for Installation Report ${reportId} to authorized person (${_authorizedPersonPhone})`,
-            );
-          } catch (error) {
-            result.whatsappError =
-              error instanceof Error
-                ? error.message
-                : 'WhatsApp sending failed';
-            this.logger.error(
-              `WhatsApp failed for Installation Report ${reportId} to authorized person`,
-              error,
-            );
-          }
+          const subject = `${activeMillName} Installation Report`;
+          const html =
+            this.getInstallationReportEmailTemplate(activeMillName);
+
+          const sent = await this.sendEmailWithAttachment(
+            targetMillEmail,
+            subject,
+            html,
+            fileName,
+            pdfBuffer,
+          );
+          if (sent) result.emailSent = true;
+
+          this.logger.log(
+            `Email queued for Installation Report ${reportId} to customer mill (${targetMillEmail})`,
+          );
+        } catch (error) {
+          result.emailError =
+            error instanceof Error ? error.message : 'Email sending failed';
+          this.logger.error(
+            `Email failed for Installation Report ${reportId} to customer mill (${targetMillEmail})`,
+            error,
+          );
         }
       }
 
