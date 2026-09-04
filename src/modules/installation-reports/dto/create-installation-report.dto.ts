@@ -188,22 +188,21 @@ export class CreateInstallationReportDto {
   @IsOptional()
   ground_earth_provided?: boolean;
 
-  @ApiProperty({ example: 5, required: false })
+  @ApiProperty({ example: 5, required: false, description: 'Running Channel count or index (1-12)' })
   @Transform(emptyToUndefined)
   @IsInt()
-  @Min(1)
+  @Min(0)
   @Max(12)
   @IsOptional()
   running_channel_combination?: number;
 
   @ApiProperty({
-    example: 'PRIMARY',
-    enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
+    example: '[{"channel":1,"value":"PRIMARY"},{"channel":7,"value":"SECONDARY"}]',
     required: false,
-    description: 'Running Channel Combination Value',
+    description: 'Running Channel Combination Value (JSON string array or legacy single value: PRIMARY | SECONDARY | REJECTION_1 | REJECTION_2 | SPLIT)',
   })
   @Transform(emptyToUndefined)
-  @IsIn(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'])
+  @IsString()
   @IsOptional()
   running_channel_combination_value?: string;
 

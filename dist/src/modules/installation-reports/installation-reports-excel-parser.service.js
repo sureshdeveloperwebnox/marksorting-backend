@@ -376,14 +376,25 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
                 }
             }
             if (previewRow.running_channel_combination_value.trim() !== '') {
-                const upper = previewRow.running_channel_combination_value
-                    .trim()
-                    .toUpperCase();
-                if (!VALID_CHANNEL_VALUES.includes(upper)) {
-                    previewRow.errors['running_channel_combination_value'] =
-                        `Running channel combination value must be one of: ${VALID_CHANNEL_VALUES.join(', ')}`;
+                const rawVal = previewRow.running_channel_combination_value.trim();
+                const upper = rawVal.toUpperCase();
+                let isValid = VALID_CHANNEL_VALUES.includes(upper);
+                if (!isValid) {
+                    try {
+                        const parsed = JSON.parse(rawVal);
+                        if (Array.isArray(parsed))
+                            isValid = true;
+                    }
+                    catch {
+                        if (rawVal.includes(':'))
+                            isValid = true;
+                    }
                 }
-                else {
+                if (!isValid) {
+                    previewRow.errors['running_channel_combination_value'] =
+                        `Running channel combination value must be one of: ${VALID_CHANNEL_VALUES.join(', ')} or structured JSON`;
+                }
+                else if (VALID_CHANNEL_VALUES.includes(upper)) {
                     previewRow.running_channel_combination_value = upper;
                 }
             }

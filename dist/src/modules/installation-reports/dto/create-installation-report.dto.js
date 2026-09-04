@@ -263,23 +263,22 @@ __decorate([
     __metadata("design:type", Boolean)
 ], CreateInstallationReportDto.prototype, "ground_earth_provided", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 5, required: false }),
+    (0, swagger_1.ApiProperty)({ example: 5, required: false, description: 'Running Channel count or index (1-12)' }),
     (0, class_transformer_1.Transform)(emptyToUndefined),
     (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Min)(0),
     (0, class_validator_1.Max)(12),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], CreateInstallationReportDto.prototype, "running_channel_combination", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        example: 'PRIMARY',
-        enum: ['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT'],
+        example: '[{"channel":1,"value":"PRIMARY"},{"channel":7,"value":"SECONDARY"}]',
         required: false,
-        description: 'Running Channel Combination Value',
+        description: 'Running Channel Combination Value (JSON string array or legacy single value: PRIMARY | SECONDARY | REJECTION_1 | REJECTION_2 | SPLIT)',
     }),
     (0, class_transformer_1.Transform)(emptyToUndefined),
-    (0, class_validator_1.IsIn)(['PRIMARY', 'SECONDARY', 'REJECTION_1', 'REJECTION_2', 'SPLIT']),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstallationReportDto.prototype, "running_channel_combination_value", void 0);

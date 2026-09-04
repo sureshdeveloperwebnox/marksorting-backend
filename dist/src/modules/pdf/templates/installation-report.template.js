@@ -97,9 +97,9 @@ function renderInstallationReportTemplate(data, template) {
         ?.map((entry) => entry.technician?.full_name)
         .filter(Boolean)
         .join(', ');
-    const formatRunningChannelCombinationValue = (val) => {
+    const formatRunningChannelCombinationValue = (val, countOrIndex) => {
         if (!val)
-            return '-';
+            return countOrIndex !== undefined && countOrIndex !== null ? String(countOrIndex) : '-';
         const mapping = {
             PRIMARY: 'Primary',
             SECONDARY: 'Secondary',
@@ -107,6 +107,32 @@ function renderInstallationReportTemplate(data, template) {
             REJECTION_2: 'Rejection 2',
             SPLIT: 'Split',
         };
+        try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed
+                    .map((item) => {
+                    const ch = item.channel ?? item.key ?? '';
+                    const v = mapping[item.value] || item.value || '';
+                    return ch ? `Ch ${ch}: ${v}` : v;
+                })
+                    .filter(Boolean)
+                    .join(', ');
+            }
+        }
+        catch {
+        }
+        if (val.includes(':') || val.includes(',')) {
+            return val
+                .split(',')
+                .map((part) => {
+                const [ch, v] = part.split(':').map((s) => s.trim());
+                if (ch && v)
+                    return `Ch ${ch}: ${mapping[v] || v}`;
+                return mapping[part.trim()] || part.trim();
+            })
+                .join(', ');
+        }
         return mapping[val] || val;
     };
     return `<!doctype html>

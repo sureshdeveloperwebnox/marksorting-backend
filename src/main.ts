@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 
 async function bootstrap() {
+  // Multi-channel combination support enabled
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   app.use(cookieParser());

@@ -141,8 +141,8 @@ export function renderInstallationReportTemplate(
     .join(', ');
 
   // Normalizer for Running Channel Combination Value option label
-  const formatRunningChannelCombinationValue = (val: string) => {
-    if (!val) return '-';
+  const formatRunningChannelCombinationValue = (val: string | null | undefined, countOrIndex?: number | null) => {
+    if (!val) return countOrIndex !== undefined && countOrIndex !== null ? String(countOrIndex) : '-';
     const mapping: Record<string, string> = {
       PRIMARY: 'Primary',
       SECONDARY: 'Secondary',
@@ -150,6 +150,35 @@ export function renderInstallationReportTemplate(
       REJECTION_2: 'Rejection 2',
       SPLIT: 'Split',
     };
+
+    // Try parsing as JSON array
+    try {
+      const parsed = JSON.parse(val);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+          .map((item: any) => {
+            const ch = item.channel ?? item.key ?? '';
+            const v = mapping[item.value] || item.value || '';
+            return ch ? `Ch ${ch}: ${v}` : v;
+          })
+          .filter(Boolean)
+          .join(', ');
+      }
+    } catch {
+      // Not JSON, continue to string/comma-split parsing
+    }
+
+    if (val.includes(':') || val.includes(',')) {
+      return val
+        .split(',')
+        .map((part) => {
+          const [ch, v] = part.split(':').map((s) => s.trim());
+          if (ch && v) return `Ch ${ch}: ${mapping[v] || v}`;
+          return mapping[part.trim()] || part.trim();
+        })
+        .join(', ');
+    }
+
     return mapping[val] || val;
   };
 
