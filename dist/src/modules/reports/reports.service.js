@@ -448,6 +448,126 @@ let ReportsService = class ReportsService {
         await this.redis.setJson(cacheKey, result, 300);
         return result;
     }
+    formatChannelData(val, count) {
+        const roleMapping = {
+            PRIMARY: 'Primary',
+            SECONDARY: 'Secondary',
+            REJECTION_1: 'Rejection 1',
+            REJECTION_2: 'Rejection 2',
+            SPLIT: 'Split',
+        };
+        const channelMap = {};
+        for (let i = 1; i <= 12; i++) {
+            channelMap[i] = '-';
+        }
+        if (!val || !val.trim()) {
+            const fallbackCount = count && count > 0 ? count : null;
+            return {
+                summary: fallbackCount
+                    ? `${fallbackCount} Channel${fallbackCount > 1 ? 's' : ''}`
+                    : '-',
+                channels: channelMap,
+            };
+        }
+        const trimmed = val.trim();
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                const summaryParts = [];
+                for (const item of parsed) {
+                    const chNum = Number(item.channel ?? item.key);
+                    const rawRole = String(item.value ?? item.role ?? '')
+                        .toUpperCase()
+                        .trim();
+                    const roleKey = rawRole.replace(/\s+/g, '_');
+                    const roleLabel = roleMapping[roleKey] ||
+                        (item.value ? String(item.value).replace(/_/g, ' ') : rawRole);
+                    if (chNum >= 1 && chNum <= 12) {
+                        channelMap[chNum] = roleLabel;
+                        summaryParts.push(`Channel ${chNum} (${roleLabel})`);
+                    }
+                    else if (roleLabel) {
+                        summaryParts.push(roleLabel);
+                    }
+                }
+                return {
+                    summary: summaryParts.join(', ') || '-',
+                    channels: channelMap,
+                };
+            }
+        }
+        catch {
+        }
+        if (trimmed.includes(':') || trimmed.includes(',') || trimmed.includes('(')) {
+            const parts = trimmed.split(',');
+            const summaryParts = [];
+            let foundIndividual = false;
+            for (const part of parts) {
+                const cleanPart = part.trim();
+                if (!cleanPart)
+                    continue;
+                const match = cleanPart.match(/(?:channel|ch)?\s*(\d+)\s*[:(]\s*([^)]+)\)?/i);
+                if (match) {
+                    foundIndividual = true;
+                    const chNum = Number(match[1]);
+                    const rawRole = match[2].trim().toUpperCase().replace(/\s+/g, '_');
+                    const roleLabel = roleMapping[rawRole] || match[2].trim().replace(/_/g, ' ');
+                    if (chNum >= 1 && chNum <= 12) {
+                        channelMap[chNum] = roleLabel;
+                        summaryParts.push(`Channel ${chNum} (${roleLabel})`);
+                    }
+                    else {
+                        summaryParts.push(roleLabel);
+                    }
+                }
+                else {
+                    const presetMatch = cleanPart.match(/^([A-Za-z0-9_\s]+?)(?:\s*\(\s*(\d+)\s*channels?\s*\))?$/i);
+                    if (presetMatch) {
+                        const rawRole = presetMatch[1].trim().toUpperCase().replace(/\s+/g, '_');
+                        const roleLabel = roleMapping[rawRole] || presetMatch[1].trim();
+                        const chCount = presetMatch[2]
+                            ? Number(presetMatch[2])
+                            : count || 0;
+                        if (chCount > 0) {
+                            for (let i = 1; i <= Math.min(chCount, 12); i++) {
+                                channelMap[i] = roleLabel;
+                            }
+                            summaryParts.push(`${roleLabel} (${chCount} Channels)`);
+                        }
+                        else {
+                            summaryParts.push(roleLabel);
+                        }
+                    }
+                    else {
+                        const upper = cleanPart.toUpperCase().replace(/\s+/g, '_');
+                        summaryParts.push(roleMapping[upper] || cleanPart);
+                    }
+                }
+            }
+            if (foundIndividual || summaryParts.length > 0) {
+                return {
+                    summary: summaryParts.join(', ') || '-',
+                    channels: channelMap,
+                };
+            }
+        }
+        const upper = trimmed.toUpperCase().replace(/\s+/g, '_');
+        const fallbackLabel = roleMapping[upper] || trimmed;
+        const effectiveCount = count && count > 0 ? count : 0;
+        if (effectiveCount > 0) {
+            for (let i = 1; i <= Math.min(effectiveCount, 12); i++) {
+                channelMap[i] = fallbackLabel;
+            }
+            return {
+                summary: `${fallbackLabel} (${effectiveCount} Channel${effectiveCount > 1 ? 's' : ''})`,
+                channels: channelMap,
+            };
+        }
+        return {
+            summary: fallbackLabel,
+            channels: channelMap,
+        };
+    }
     async exportInstallations(params, user, formatType) {
         const where = this.getInstallationsWhereClause(params, user);
         const reports = await this.prisma.installationReport.findMany({
@@ -460,31 +580,137 @@ let ReportsService = class ReportsService {
             },
             orderBy: { visit_date: 'desc' },
         });
+        const formatDateStr = (date) => {
+            if (!date)
+                return '-';
+            const d = new Date(date);
+            if (isNaN(d.getTime()))
+                return '-';
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        };
+        const formatWarrantyDuration = (years, months) => {
+            const totalMonths = (months ?? 0) + (years ?? 0) * 12;
+            if (totalMonths <= 0)
+                return '-';
+            return `${totalMonths} Month${totalMonths > 1 ? 's' : ''}`;
+        };
         const headers = [
-            'Report No',
+            'Report Number',
+            'Status',
+            'Created Date',
             'Mill Name',
             'Place',
+            'Mill WhatsApp Number',
+            'Mill Email',
+            'Authorized Person',
+            'Authorized Person Phone',
             'Visit Date',
+            'Visit Time',
+            'Call Registered Date',
+            'Service Engineers / Technicians',
             'Machine Model',
-            'Serial/Frame No',
-            'Technicians',
-            'Status',
+            'Serial / Frame No',
+            'Machine Mfg Date',
+            'Invoice Number',
+            'Invoice Date',
+            'Warranty Start Date',
+            'Warranty Duration',
+            'Warranty End Date',
+            'Commodity',
+            'Contamination',
+            'Output Capacity / Hour',
+            'Rejection Ratio',
+            'Purity',
+            'No of Programs Set',
+            'AC Provided',
+            'Compressor Details',
+            'Air Drier Details',
+            'Ground Earth Provided',
+            'Running Channel Combination',
+            'Running Channel Combination Value',
+            'Channel 1',
+            'Channel 2',
+            'Channel 3',
+            'Channel 4',
+            'Channel 5',
+            'Channel 6',
+            'Channel 7',
+            'Channel 8',
+            'Channel 9',
+            'Channel 10',
+            'Channel 11',
+            'Channel 12',
+            'No of Filters Installed',
+            'Oil Filter Condition',
+            'Line Filter Condition',
+            'Auto Drain Valve Working',
+            'Engineer Remarks',
+            'Customer Remarks',
         ];
-        const data = reports.map((r) => [
-            r.report_number,
-            r.mill?.name || '-',
-            r.place || '-',
-            r.visit_date ? r.visit_date.toISOString().slice(0, 10) : '-',
-            r.machine_model || '-',
-            r.serial_or_frame_no || '-',
-            r.technicians
-                .map((t) => t.technician?.full_name)
-                .filter(Boolean)
-                .join(', ') || '-',
-            r.status,
-        ]);
+        const dataRows = reports.map((r) => {
+            const channelInfo = this.formatChannelData(r.running_channel_combination_value, r.running_channel_combination);
+            return [
+                r.report_number,
+                r.status,
+                formatDateStr(r.created_at),
+                r.mill?.name || '-',
+                r.place || '-',
+                r.mill_whatsapp_number || '-',
+                r.mill_email || '-',
+                r.authorized_person || '-',
+                r.authorized_person_phone || '-',
+                formatDateStr(r.visit_date),
+                r.visit_time || '-',
+                formatDateStr(r.call_registered_date),
+                r.technicians
+                    .map((t) => t.technician?.full_name)
+                    .filter(Boolean)
+                    .join(', ') || '-',
+                r.machine_model || '-',
+                r.serial_or_frame_no || '-',
+                formatDateStr(r.machine_mfg_date),
+                r.invoice_number || '-',
+                formatDateStr(r.invoice_date),
+                formatDateStr(r.warranty_start_date),
+                formatWarrantyDuration(r.warranty_years, r.warranty_months),
+                formatDateStr(r.warranty_end_date),
+                r.commodity || '-',
+                r.contamination || '-',
+                r.output_capacity_per_hour || '-',
+                r.rejection_ratio || '-',
+                r.purity || '-',
+                r.no_of_programs_set ?? '-',
+                r.ac_provided ? 'Yes' : 'No',
+                r.compressor_details || '-',
+                r.air_drier_details || '-',
+                r.ground_earth_provided ? 'Yes' : 'No',
+                r.running_channel_combination ?? '-',
+                channelInfo.summary,
+                channelInfo.channels[1],
+                channelInfo.channels[2],
+                channelInfo.channels[3],
+                channelInfo.channels[4],
+                channelInfo.channels[5],
+                channelInfo.channels[6],
+                channelInfo.channels[7],
+                channelInfo.channels[8],
+                channelInfo.channels[9],
+                channelInfo.channels[10],
+                channelInfo.channels[11],
+                channelInfo.channels[12],
+                r.no_of_filters_installed ?? '-',
+                r.oil_filter_condition || '-',
+                r.line_filter_condition || '-',
+                r.auto_drain_valve_working ? 'Yes' : 'No',
+                r.engineer_remarks || '-',
+                r.customer_remarks || '-',
+            ];
+        });
         if (formatType === 'csv') {
-            const buffer = this.generateCsv(headers, data);
+            const buffer = this.generateCsv(headers, dataRows);
             return {
                 buffer,
                 fileName: `installation_reports_${Date.now()}.csv`,
@@ -492,7 +718,47 @@ let ReportsService = class ReportsService {
             };
         }
         if (formatType === 'excel') {
-            const buffer = this.generateExcel('Installations', headers, data);
+            const workbook = new ExcelJS.Workbook();
+            let sheetName = 'Installation Reports';
+            if (params.dateFrom && params.dateTo) {
+                const fromStr = params.dateFrom.replace(/[-/]/g, '');
+                const toStr = params.dateTo.replace(/[-/]/g, '');
+                sheetName = `Installations ${fromStr.slice(-4)} to ${toStr.slice(-4)}`;
+            }
+            sheetName = sheetName.replace(/[\\/?*:[\]]/g, '-').slice(0, 31);
+            const worksheet = workbook.addWorksheet(sheetName);
+            worksheet.columns = headers.map((header) => ({
+                header,
+                key: header,
+                width: Math.max(header.length + 4, 16),
+            }));
+            if (dataRows.length > 0) {
+                worksheet.addRows(dataRows);
+            }
+            worksheet.eachRow((row, rowNumber) => {
+                row.eachCell({ includeEmpty: true }, (cell) => {
+                    if (rowNumber === 1) {
+                        cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+                        cell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FFE56B00' },
+                        };
+                        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+                    }
+                    else {
+                        cell.alignment = { vertical: 'middle' };
+                    }
+                    cell.border = {
+                        top: { style: 'thin' },
+                        left: { style: 'thin' },
+                        bottom: { style: 'thin' },
+                        right: { style: 'thin' },
+                    };
+                });
+            });
+            const arrayBuffer = await workbook.xlsx.writeBuffer();
+            const buffer = Buffer.from(arrayBuffer);
             return {
                 buffer,
                 fileName: `installation_reports_${Date.now()}.xlsx`,
@@ -503,6 +769,16 @@ let ReportsService = class ReportsService {
             const pending = reports.filter((r) => r.status === 'PENDING').length;
             const inProgress = reports.filter((r) => r.status === 'IN_PROGRESS').length;
             const completed = reports.filter((r) => r.status === 'COMPLETED').length;
+            const pdfHeaders = [
+                'Report No',
+                'Mill Name',
+                'Place',
+                'Visit Date',
+                'Machine Model',
+                'Serial/Frame No',
+                'Technicians',
+                'Status',
+            ];
             const pdfData = {
                 title: 'Installation Reports Log',
                 filters: this.getFiltersSummary(params),
@@ -528,7 +804,7 @@ let ReportsService = class ReportsService {
                         colorClass: 'text-warning',
                     },
                 ],
-                headers,
+                headers: pdfHeaders,
                 rows: reports.map((r) => [
                     `<span class="font-semibold">${this.documentTemplateService.escape(r.report_number)}</span>`,
                     this.documentTemplateService.escape(r.mill?.name),

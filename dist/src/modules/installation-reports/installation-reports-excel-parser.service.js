@@ -110,8 +110,8 @@ const EXAMPLE_ROW = [
     'Atlas Copco GA11',
     'Refrigerated type',
     'Yes',
-    '3',
-    'PRIMARY',
+    '2',
+    'Channel 1: Secondary, Channel 2: Primary',
     '2',
     'Good',
     'Clean',
@@ -236,9 +236,9 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
         info.getCell(`A${baseRow + 2}`).value =
             'Yes/No fields (AC Provided, Ground Earth Provided, Auto Drain Valve): Yes or No';
         info.getCell(`A${baseRow + 3}`).value =
-            'Running Channel Combination Value: PRIMARY, SECONDARY, REJECTION_1, REJECTION_2, SPLIT';
+            'Running Channel Combination Value: e.g. "Channel 1: Secondary, Channel 2: Primary" or single role (PRIMARY, SECONDARY, REJECTION_1, REJECTION_2, SPLIT)';
         info.getCell(`A${baseRow + 4}`).value =
-            'Running Channel Combination: integer 1-12';
+            'Running Channel Combination: integer 1-12 (auto-detected if blank and combination value specified)';
         info.getCell(`A${baseRow + 5}`).value =
             'Technician Names: comma-separated, must match existing technician names exactly';
         const arrayBuffer = await workbook.xlsx.writeBuffer();
@@ -378,24 +378,63 @@ let InstallationReportsExcelParserService = class InstallationReportsExcelParser
             if (previewRow.running_channel_combination_value.trim() !== '') {
                 const rawVal = previewRow.running_channel_combination_value.trim();
                 const upper = rawVal.toUpperCase();
-                let isValid = VALID_CHANNEL_VALUES.includes(upper);
-                if (!isValid) {
+                let normalizedVal = null;
+                if (VALID_CHANNEL_VALUES.includes(upper)) {
+                    normalizedVal = upper;
+                }
+                else {
                     try {
                         const parsed = JSON.parse(rawVal);
-                        if (Array.isArray(parsed))
-                            isValid = true;
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            const entries = parsed
+                                .map((item) => ({
+                                channel: Number(item.channel ?? item.key),
+                                value: String(item.value ?? item.role ?? '').toUpperCase(),
+                            }))
+                                .filter((e) => e.channel >= 1 &&
+                                e.channel <= 12 &&
+                                VALID_CHANNEL_VALUES.includes(e.value));
+                            if (entries.length > 0) {
+                                normalizedVal = JSON.stringify(entries);
+                                if (!previewRow.running_channel_combination.trim()) {
+                                    previewRow.running_channel_combination = String(entries.length);
+                                }
+                            }
+                        }
                     }
                     catch {
-                        if (rawVal.includes(':'))
-                            isValid = true;
+                    }
+                    if (!normalizedVal &&
+                        (rawVal.includes(':') || rawVal.includes(','))) {
+                        const parts = rawVal.split(',');
+                        const entries = [];
+                        for (const part of parts) {
+                            if (part.includes(':')) {
+                                const [chStr, roleStr] = part.split(':').map((s) => s.trim());
+                                const match = chStr.match(/\d+/);
+                                const chNum = match ? Number(match[0]) : NaN;
+                                const roleUpper = roleStr.toUpperCase().replace(/\s+/g, '_');
+                                if (chNum >= 1 &&
+                                    chNum <= 12 &&
+                                    VALID_CHANNEL_VALUES.includes(roleUpper)) {
+                                    entries.push({ channel: chNum, value: roleUpper });
+                                }
+                            }
+                        }
+                        if (entries.length > 0) {
+                            normalizedVal = JSON.stringify(entries);
+                            if (!previewRow.running_channel_combination.trim()) {
+                                previewRow.running_channel_combination = String(entries.length);
+                            }
+                        }
                     }
                 }
-                if (!isValid) {
+                if (!normalizedVal) {
                     previewRow.errors['running_channel_combination_value'] =
-                        `Running channel combination value must be one of: ${VALID_CHANNEL_VALUES.join(', ')} or structured JSON`;
+                        `Running channel combination value must be: e.g. "Channel 1: Secondary, Channel 2: Primary", or single role (${VALID_CHANNEL_VALUES.join(', ')})`;
                 }
-                else if (VALID_CHANNEL_VALUES.includes(upper)) {
-                    previewRow.running_channel_combination_value = upper;
+                else {
+                    previewRow.running_channel_combination_value = normalizedVal;
                 }
             }
             const intFields = [

@@ -171,12 +171,25 @@ let InstallationReportsBulkService = class InstallationReportsBulkService {
                 const n = parseInt(trimmed, 10);
                 return isNaN(n) ? undefined : n;
             };
-            const channelValRaw = row.running_channel_combination_value
-                .trim()
-                .toUpperCase();
-            const channelVal = VALID_CHANNEL_VALUES.includes(channelValRaw)
-                ? channelValRaw
-                : undefined;
+            const channelValRaw = row.running_channel_combination_value.trim();
+            let channelVal = undefined;
+            if (channelValRaw) {
+                const upper = channelValRaw.toUpperCase();
+                if (VALID_CHANNEL_VALUES.includes(upper)) {
+                    channelVal = upper;
+                }
+                else {
+                    try {
+                        const parsed = JSON.parse(channelValRaw);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            channelVal = JSON.stringify(parsed);
+                        }
+                    }
+                    catch {
+                        channelVal = channelValRaw;
+                    }
+                }
+            }
             const created = await tx.installationReport.create({
                 data: {
                     report_number,

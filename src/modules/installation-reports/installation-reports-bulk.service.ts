@@ -230,15 +230,24 @@ export class InstallationReportsBulkService {
         return isNaN(n) ? undefined : n;
       };
 
-      // Validate channel combination value
-      const channelValRaw = row.running_channel_combination_value
-        .trim()
-        .toUpperCase();
-      const channelVal = VALID_CHANNEL_VALUES.includes(
-        channelValRaw as ChannelValue,
-      )
-        ? (channelValRaw as ChannelValue)
-        : undefined;
+      // Validate channel combination value (supports JSON array string, formatted string, or single enum)
+      const channelValRaw = row.running_channel_combination_value.trim();
+      let channelVal: string | undefined = undefined;
+      if (channelValRaw) {
+        const upper = channelValRaw.toUpperCase();
+        if (VALID_CHANNEL_VALUES.includes(upper as ChannelValue)) {
+          channelVal = upper;
+        } else {
+          try {
+            const parsed = JSON.parse(channelValRaw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              channelVal = JSON.stringify(parsed);
+            }
+          } catch {
+            channelVal = channelValRaw;
+          }
+        }
+      }
 
       // ── Create the InstallationReport ────────────────────────────────────
       const created = await tx.installationReport.create({

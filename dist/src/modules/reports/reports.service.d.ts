@@ -50,6 +50,7 @@ export declare class ReportsService {
     }>;
     private getInstallationsWhereClause;
     getInstallations(params: ReportParams, user: UserSessionPayload): Promise<any>;
+    private formatChannelData;
     exportInstallations(params: ReportParams, user: UserSessionPayload, formatType: 'pdf' | 'csv' | 'excel'): Promise<{
         buffer: Buffer<ArrayBufferLike>;
         fileName: string;
