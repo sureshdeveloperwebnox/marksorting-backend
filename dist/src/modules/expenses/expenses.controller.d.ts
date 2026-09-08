@@ -14,6 +14,10 @@ export declare class ExpensesController {
             place: string;
             visit_date: Date;
             mill_name: string;
+            technicians: {
+                id: string;
+                full_name: string;
+            }[];
         }[];
         installationReports: {
             id: string;
@@ -22,6 +26,10 @@ export declare class ExpensesController {
             place: string;
             visit_date: Date;
             mill_name: string;
+            technicians: {
+                id: string;
+                full_name: string;
+            }[];
         }[];
     }>;
     findOne(id: string): Promise<any>;

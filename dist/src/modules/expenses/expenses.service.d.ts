@@ -200,6 +200,10 @@ export declare class ExpensesService {
             place: string;
             visit_date: Date;
             mill_name: string;
+            technicians: {
+                id: string;
+                full_name: string;
+            }[];
         }[];
         installationReports: {
             id: string;
@@ -208,6 +212,10 @@ export declare class ExpensesService {
             place: string;
             visit_date: Date;
             mill_name: string;
+            technicians: {
+                id: string;
+                full_name: string;
+            }[];
         }[];
     }>;
     private invalidateCache;

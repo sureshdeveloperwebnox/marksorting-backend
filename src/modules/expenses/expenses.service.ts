@@ -403,17 +403,33 @@ export class ExpensesService {
       }
     }
 
-    // Verify report duplicate linkage (no two active expenses for the same report)
+    // Verify report duplicate linkage (no duplicate active expense for the same report by the same technician(s))
     if (expenseData.service_report_id) {
       const duplicateExpense = await this.prisma.expense.findFirst({
         where: {
           service_report_id: expenseData.service_report_id,
           deleted_at: null,
+          technicians: {
+            some: {
+              technician_id: { in: finalTechnicianIds },
+            },
+          },
+        },
+        include: {
+          technicians: {
+            include: {
+              technician: true,
+            },
+          },
         },
       });
       if (duplicateExpense) {
+        const conflictingTechNames = duplicateExpense.technicians
+          .filter((t) => finalTechnicianIds.includes(t.technician_id))
+          .map((t) => t.technician?.full_name || t.technician_id)
+          .join(', ');
         throw new BadRequestException(
-          'An active expense has already been created for this service report',
+          `An active expense has already been created for this service report for engineer(s): ${conflictingTechNames}`,
         );
       }
     }
@@ -422,11 +438,27 @@ export class ExpensesService {
         where: {
           installation_report_id: expenseData.installation_report_id,
           deleted_at: null,
+          technicians: {
+            some: {
+              technician_id: { in: finalTechnicianIds },
+            },
+          },
+        },
+        include: {
+          technicians: {
+            include: {
+              technician: true,
+            },
+          },
         },
       });
       if (duplicateExpense) {
+        const conflictingTechNames = duplicateExpense.technicians
+          .filter((t) => finalTechnicianIds.includes(t.technician_id))
+          .map((t) => t.technician?.full_name || t.technician_id)
+          .join(', ');
         throw new BadRequestException(
-          'An active expense has already been created for this installation report',
+          `An active expense has already been created for this installation report for engineer(s): ${conflictingTechNames}`,
         );
       }
     }
@@ -743,41 +775,6 @@ export class ExpensesService {
       }
     }
 
-    // Verify report duplicate linkage (no two active expenses for the same report)
-    if (
-      expenseData.service_report_id &&
-      typeof expenseData.service_report_id === 'string'
-    ) {
-      const duplicateExpense = await this.prisma.expense.findFirst({
-        where: {
-          service_report_id: expenseData.service_report_id,
-          deleted_at: null,
-          NOT: { id },
-        },
-      });
-      if (duplicateExpense) {
-        throw new BadRequestException(
-          'An active expense has already been created for this service report',
-        );
-      }
-    }
-    if (
-      expenseData.installation_report_id &&
-      typeof expenseData.installation_report_id === 'string'
-    ) {
-      const duplicateExpense = await this.prisma.expense.findFirst({
-        where: {
-          installation_report_id: expenseData.installation_report_id,
-          deleted_at: null,
-          NOT: { id },
-        },
-      });
-      if (duplicateExpense) {
-        throw new BadRequestException(
-          'An active expense has already been created for this installation report',
-        );
-      }
-    }
     if (technician_ids === undefined) {
       delete rawDto.technician_id;
     }
@@ -794,6 +791,79 @@ export class ExpensesService {
         }
       } else {
         finalTechnicianIds = rawDto.technician_id ? [rawDto.technician_id] : [];
+      }
+    }
+
+    const checkTechIds =
+      finalTechnicianIds !== undefined
+        ? finalTechnicianIds
+        : existingExpense.technicians.map((t: any) => t.technician_id);
+
+    // Verify report duplicate linkage (no duplicate active expense for the same report by the same technician(s))
+    if (
+      expenseData.service_report_id &&
+      typeof expenseData.service_report_id === 'string'
+    ) {
+      const duplicateExpense = await this.prisma.expense.findFirst({
+        where: {
+          service_report_id: expenseData.service_report_id,
+          deleted_at: null,
+          NOT: { id },
+          technicians: {
+            some: {
+              technician_id: { in: checkTechIds },
+            },
+          },
+        },
+        include: {
+          technicians: {
+            include: {
+              technician: true,
+            },
+          },
+        },
+      });
+      if (duplicateExpense) {
+        const conflictingTechNames = duplicateExpense.technicians
+          .filter((t) => checkTechIds.includes(t.technician_id))
+          .map((t) => t.technician?.full_name || t.technician_id)
+          .join(', ');
+        throw new BadRequestException(
+          `An active expense has already been created for this service report for engineer(s): ${conflictingTechNames}`,
+        );
+      }
+    }
+    if (
+      expenseData.installation_report_id &&
+      typeof expenseData.installation_report_id === 'string'
+    ) {
+      const duplicateExpense = await this.prisma.expense.findFirst({
+        where: {
+          installation_report_id: expenseData.installation_report_id,
+          deleted_at: null,
+          NOT: { id },
+          technicians: {
+            some: {
+              technician_id: { in: checkTechIds },
+            },
+          },
+        },
+        include: {
+          technicians: {
+            include: {
+              technician: true,
+            },
+          },
+        },
+      });
+      if (duplicateExpense) {
+        const conflictingTechNames = duplicateExpense.technicians
+          .filter((t) => checkTechIds.includes(t.technician_id))
+          .map((t) => t.technician?.full_name || t.technician_id)
+          .join(', ');
+        throw new BadRequestException(
+          `An active expense has already been created for this installation report for engineer(s): ${conflictingTechNames}`,
+        );
       }
     }
 
@@ -1200,84 +1270,107 @@ export class ExpensesService {
     const isServiceEngineer = user.role === 'Service Engineer';
     const targetUserId = isServiceEngineer ? user.userId : technicianId;
 
-    if (!targetUserId) {
-      return {
-        eligible: !isServiceEngineer,
-        serviceReports: [],
-        installationReports: [],
-      };
-    }
+    const baseWhereServiceReport: any = {
+      deleted_at: null,
+    };
+    const baseWhereInstallReport: any = {
+      deleted_at: null,
+    };
 
-    const serviceReports = await this.prisma.serviceReport.findMany({
-      where: {
-        deleted_at: null,
-        technicians: {
-          some: {
-            technician_id: targetUserId,
+    if (targetUserId) {
+      baseWhereServiceReport.technicians = {
+        some: {
+          technician_id: targetUserId,
+        },
+      };
+      baseWhereInstallReport.technicians = {
+        some: {
+          technician_id: targetUserId,
+        },
+      };
+
+      // Only exclude reports where THIS target technician already has an active expense
+      baseWhereServiceReport.expenses = {
+        none: {
+          deleted_at: null,
+          ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+          technicians: {
+            some: {
+              technician_id: targetUserId,
+            },
           },
         },
-        OR: [
-          { expense_id: null },
-          ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
-        ],
-        expenses: {
+      };
+      baseWhereInstallReport.expenses = {
+        none: {
+          deleted_at: null,
+          ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+          technicians: {
+            some: {
+              technician_id: targetUserId,
+            },
+          },
+        },
+      };
+    } else {
+      // If admin/manager and no technician specified, show reports available
+      if (excludeExpenseId) {
+        baseWhereServiceReport.expenses = {
           none: {
             deleted_at: null,
-            ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
+            NOT: { id: excludeExpenseId },
+          },
+        };
+        baseWhereInstallReport.expenses = {
+          none: {
+            deleted_at: null,
+            NOT: { id: excludeExpenseId },
+          },
+        };
+      }
+    }
+
+    const selectShape = {
+      id: true,
+      report_number: true,
+      mill_id: true,
+      place: true,
+      visit_date: true,
+      technicians: {
+        select: {
+          technician: {
+            select: {
+              id: true,
+              full_name: true,
+            },
           },
         },
       },
-      select: {
-        id: true,
-        report_number: true,
-        mill_id: true,
-        place: true,
-        visit_date: true,
-        mill: {
-          select: {
-            name: true,
-          },
+      mill: {
+        select: {
+          name: true,
         },
       },
+    };
+
+    const serviceReports = await this.prisma.serviceReport.findMany({
+      where: baseWhereServiceReport,
+      select: selectShape,
       orderBy: { created_at: 'desc' },
+      take: 200,
     });
 
     const installationReports = await this.prisma.installationReport.findMany({
-      where: {
-        deleted_at: null,
-        technicians: {
-          some: {
-            technician_id: targetUserId,
-          },
-        },
-        OR: [
-          { expense_id: null },
-          ...(excludeExpenseId ? [{ expense_id: excludeExpenseId }] : []),
-        ],
-        expenses: {
-          none: {
-            deleted_at: null,
-            ...(excludeExpenseId ? { NOT: { id: excludeExpenseId } } : {}),
-          },
-        },
-      },
-      select: {
-        id: true,
-        report_number: true,
-        mill_id: true,
-        place: true,
-        visit_date: true,
-        mill: {
-          select: {
-            name: true,
-          },
-        },
-      },
+      where: baseWhereInstallReport,
+      select: selectShape,
       orderBy: { created_at: 'desc' },
+      take: 200,
     });
 
     return {
-      eligible: true,
+      eligible: isServiceEngineer
+        ? serviceReports.length > 0 || installationReports.length > 0
+        : true,
       serviceReports: serviceReports.map((r) => ({
         id: r.id,
         report_number: r.report_number,
@@ -1285,6 +1378,10 @@ export class ExpensesService {
         place: r.place,
         visit_date: r.visit_date,
         mill_name: r.mill?.name || 'Unknown Mill',
+        technicians: r.technicians.map((t) => ({
+          id: t.technician.id,
+          full_name: t.technician.full_name,
+        })),
       })),
       installationReports: installationReports.map((r) => ({
         id: r.id,
@@ -1293,6 +1390,10 @@ export class ExpensesService {
         place: r.place,
         visit_date: r.visit_date,
         mill_name: r.mill?.name || 'Unknown Mill',
+        technicians: r.technicians.map((t) => ({
+          id: t.technician.id,
+          full_name: t.technician.full_name,
+        })),
       })),
     };
   }

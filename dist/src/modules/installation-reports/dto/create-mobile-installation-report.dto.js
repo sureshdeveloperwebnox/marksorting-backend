@@ -17,6 +17,7 @@ const swagger_2 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 class CreateMobileInstallationReportDto extends (0, swagger_1.OmitType)(create_installation_report_dto_1.CreateInstallationReportDto, ['technician_ids', 'visit_date', 'visit_time']) {
     technician_id;
+    technician_ids;
 }
 exports.CreateMobileInstallationReportDto = CreateMobileInstallationReportDto;
 __decorate([
@@ -30,4 +31,16 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMobileInstallationReportDto.prototype, "technician_id", void 0);
+__decorate([
+    (0, swagger_2.ApiProperty)({
+        example: ['xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'],
+        required: false,
+        type: [String],
+        description: 'Multiple technician UUIDs assigned to this installation report (optional).',
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsUUID)('all', { each: true }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Array)
+], CreateMobileInstallationReportDto.prototype, "technician_ids", void 0);
 //# sourceMappingURL=create-mobile-installation-report.dto.js.map
