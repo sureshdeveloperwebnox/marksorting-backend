@@ -19,10 +19,6 @@ export declare class StoresController {
     update(id: string, dto: UpdateStoreDto, req: any): Promise<any>;
     remove(id: string): Promise<{
         id: string;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
-        invoice_number: string | null;
         store_number: string | null;
         service_engineer_id: string;
         customer_id: string | null;
@@ -34,6 +30,10 @@ export declare class StoresController {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
+        invoice_number: string | null;
         remarks: string | null;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
     }>;
 }

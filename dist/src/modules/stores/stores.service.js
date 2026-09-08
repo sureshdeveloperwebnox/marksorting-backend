@@ -257,6 +257,7 @@ let StoresService = class StoresService {
                 data: {
                     ...data,
                     store_number,
+                    stock_type: data.stock_type || 'From Store',
                     service_engineer: { connect: { id: service_engineer_id } },
                     ...(resolvedCustomerId ? { customer: { connect: { id: resolvedCustomerId } } } : {}),
                     materials: {
@@ -265,7 +266,7 @@ let StoresService = class StoresService {
                             return {
                                 material: { connect: { id } },
                                 quantity: qtyObj ? qtyObj.quantity : 1,
-                                stock_type: qtyObj?.stock_type || 'Inflow',
+                                stock_type: qtyObj?.stock_type || data.stock_type || 'From Store',
                             };
                         }),
                     },
@@ -374,7 +375,7 @@ let StoresService = class StoresService {
                             return {
                                 material: { connect: { id: matId } },
                                 quantity: qtyObj ? qtyObj.quantity : 1,
-                                stock_type: qtyObj?.stock_type || 'Inflow',
+                                stock_type: qtyObj?.stock_type || data.stock_type || 'From Store',
                             };
                         }),
                     }
