@@ -182,6 +182,57 @@ export class MasterMillsService implements OnModuleInit {
     if (data.amc_closing_date)
       data.amc_closing_date = new Date(data.amc_closing_date);
 
+    // If ref_no is provided, check if an active MasterMill already exists with the same ref_no
+    if (data.ref_no) {
+      const cleanRef = String(data.ref_no).trim();
+      if (cleanRef) {
+        const existing = await this.prisma.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            ref_no: { equals: cleanRef, mode: 'insensitive' },
+          },
+          orderBy: { created_at: 'desc' },
+        });
+
+        if (existing) {
+          // Retain existing invoice_no if none was provided
+          if (!data.invoice_no) {
+            delete data.invoice_no;
+          }
+          await this.prisma.masterMill.update({
+            where: { id: existing.id },
+            data: {
+              ...data,
+              updated_at: new Date(),
+            },
+          });
+          await this.invalidateCache(existing.id);
+
+          return this.prisma.masterMill.findUnique({
+            where: { id: existing.id },
+            include: {
+              mill: {
+                select: {
+                  id: true,
+                  name: true,
+                  ref_no: true,
+                  place: true,
+                  phone: true,
+                  customer_id: true,
+                  customer: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          });
+        }
+      }
+    }
+
     await this.prisma.masterMill.create({ data });
     await this.invalidateCache();
 
@@ -928,25 +979,15 @@ export class MasterMillsService implements OnModuleInit {
       const resolvedMillId = mill.id;
 
       // 3. Resolve & Update Master Mill
-      // Match by mill_id AND ref_no AND frame_no:
-      // - Same ref_no with SAME frame_no updates existing record
-      // - Same ref_no with DIFFERENT frame_no creates a new record
+      // If Ref No is the same, update the existing record (do not create new one with same Ref No)
       let masterMill = null;
-      if (!options?.skipDuplicateCheck) {
+      if (!options?.skipDuplicateCheck && cleanRefNo) {
         masterMill = await tx.masterMill.findFirst({
           where: {
             deleted_at: null,
-            mill_id: resolvedMillId,
             ref_no: { equals: cleanRefNo, mode: 'insensitive' },
-            ...(cleanFrameNo
-              ? { frame_no: { equals: cleanFrameNo, mode: 'insensitive' } }
-              : {
-                  OR: [
-                    { frame_no: null },
-                    { frame_no: '' },
-                  ],
-                }),
           },
+          orderBy: { created_at: 'desc' },
         });
       }
 
@@ -1114,13 +1155,35 @@ export class MasterMillsService implements OnModuleInit {
 
       if (!mill) return;
 
-      // Find an existing master-mill record for this mill
-      const existing = await this.prisma.masterMill.findFirst({
-        where: {
-          deleted_at: null,
-          mill_id: millId,
-        },
-      });
+      // Find an existing master-mill record for this mill (prioritize ref_no)
+      let existing: any = null;
+      if (mill.ref_no && mill.ref_no.trim()) {
+        existing = await this.prisma.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            ref_no: { equals: mill.ref_no.trim(), mode: 'insensitive' },
+          },
+          orderBy: { created_at: 'desc' },
+        });
+      }
+      if (!existing && frameNo && frameNo.trim()) {
+        existing = await this.prisma.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            frame_no: frameNo.trim(),
+          },
+          orderBy: { created_at: 'desc' },
+        });
+      }
+      if (!existing) {
+        existing = await this.prisma.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            mill_id: millId,
+          },
+          orderBy: { created_at: 'desc' },
+        });
+      }
 
       if (existing) {
         // Update fields that are empty or differ
@@ -1219,14 +1282,24 @@ export class MasterMillsService implements OnModuleInit {
 
       if (!mill) return;
 
-      // Find an existing master-mill record matching by frame_no, invoice_no, or mill_id
+      // Find an existing master-mill record matching by ref_no, frame_no, invoice_no, or mill_id
       let existing: any = null;
-      if (frameNo && frameNo.trim()) {
+      if (mill.ref_no && mill.ref_no.trim()) {
+        existing = await this.prisma.masterMill.findFirst({
+          where: {
+            deleted_at: null,
+            ref_no: { equals: mill.ref_no.trim(), mode: 'insensitive' },
+          },
+          orderBy: { created_at: 'desc' },
+        });
+      }
+      if (!existing && frameNo && frameNo.trim()) {
         existing = await this.prisma.masterMill.findFirst({
           where: {
             deleted_at: null,
             frame_no: frameNo.trim(),
           },
+          orderBy: { created_at: 'desc' },
         });
       }
       if (!existing && invoiceNo && invoiceNo.trim()) {
@@ -1235,6 +1308,7 @@ export class MasterMillsService implements OnModuleInit {
             deleted_at: null,
             invoice_no: invoiceNo.trim(),
           },
+          orderBy: { created_at: 'desc' },
         });
       }
       if (!existing) {

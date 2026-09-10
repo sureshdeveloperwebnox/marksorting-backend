@@ -177,6 +177,52 @@ let MasterMillsService = class MasterMillsService {
             data.amc_starting_date = new Date(data.amc_starting_date);
         if (data.amc_closing_date)
             data.amc_closing_date = new Date(data.amc_closing_date);
+        if (data.ref_no) {
+            const cleanRef = String(data.ref_no).trim();
+            if (cleanRef) {
+                const existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        ref_no: { equals: cleanRef, mode: 'insensitive' },
+                    },
+                    orderBy: { created_at: 'desc' },
+                });
+                if (existing) {
+                    if (!data.invoice_no) {
+                        delete data.invoice_no;
+                    }
+                    await this.prisma.masterMill.update({
+                        where: { id: existing.id },
+                        data: {
+                            ...data,
+                            updated_at: new Date(),
+                        },
+                    });
+                    await this.invalidateCache(existing.id);
+                    return this.prisma.masterMill.findUnique({
+                        where: { id: existing.id },
+                        include: {
+                            mill: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    ref_no: true,
+                                    place: true,
+                                    phone: true,
+                                    customer_id: true,
+                                    customer: {
+                                        select: {
+                                            id: true,
+                                            name: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    });
+                }
+            }
+        }
         await this.prisma.masterMill.create({ data });
         await this.invalidateCache();
         const created = await this.prisma.masterMill.findFirst({
@@ -852,21 +898,13 @@ let MasterMillsService = class MasterMillsService {
             }
             const resolvedMillId = mill.id;
             let masterMill = null;
-            if (!options?.skipDuplicateCheck) {
+            if (!options?.skipDuplicateCheck && cleanRefNo) {
                 masterMill = await tx.masterMill.findFirst({
                     where: {
                         deleted_at: null,
-                        mill_id: resolvedMillId,
                         ref_no: { equals: cleanRefNo, mode: 'insensitive' },
-                        ...(cleanFrameNo
-                            ? { frame_no: { equals: cleanFrameNo, mode: 'insensitive' } }
-                            : {
-                                OR: [
-                                    { frame_no: null },
-                                    { frame_no: '' },
-                                ],
-                            }),
                     },
+                    orderBy: { created_at: 'desc' },
                 });
             }
             if (masterMill) {
@@ -995,12 +1033,34 @@ let MasterMillsService = class MasterMillsService {
             });
             if (!mill)
                 return;
-            const existing = await this.prisma.masterMill.findFirst({
-                where: {
-                    deleted_at: null,
-                    mill_id: millId,
-                },
-            });
+            let existing = null;
+            if (mill.ref_no && mill.ref_no.trim()) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        ref_no: { equals: mill.ref_no.trim(), mode: 'insensitive' },
+                    },
+                    orderBy: { created_at: 'desc' },
+                });
+            }
+            if (!existing && frameNo && frameNo.trim()) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        frame_no: frameNo.trim(),
+                    },
+                    orderBy: { created_at: 'desc' },
+                });
+            }
+            if (!existing) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        mill_id: millId,
+                    },
+                    orderBy: { created_at: 'desc' },
+                });
+            }
             if (existing) {
                 const updates = {};
                 if (frameNo && frameNo.trim() && existing.frame_no !== frameNo.trim())
@@ -1053,12 +1113,22 @@ let MasterMillsService = class MasterMillsService {
             if (!mill)
                 return;
             let existing = null;
-            if (frameNo && frameNo.trim()) {
+            if (mill.ref_no && mill.ref_no.trim()) {
+                existing = await this.prisma.masterMill.findFirst({
+                    where: {
+                        deleted_at: null,
+                        ref_no: { equals: mill.ref_no.trim(), mode: 'insensitive' },
+                    },
+                    orderBy: { created_at: 'desc' },
+                });
+            }
+            if (!existing && frameNo && frameNo.trim()) {
                 existing = await this.prisma.masterMill.findFirst({
                     where: {
                         deleted_at: null,
                         frame_no: frameNo.trim(),
                     },
+                    orderBy: { created_at: 'desc' },
                 });
             }
             if (!existing && invoiceNo && invoiceNo.trim()) {
@@ -1067,6 +1137,7 @@ let MasterMillsService = class MasterMillsService {
                         deleted_at: null,
                         invoice_no: invoiceNo.trim(),
                     },
+                    orderBy: { created_at: 'desc' },
                 });
             }
             if (!existing) {

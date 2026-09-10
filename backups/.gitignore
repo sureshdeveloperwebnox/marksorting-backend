@@ -1,0 +1,8 @@
+# Ignore all backup dumps and compressed archives
+*.sql
+*.sql.gz
+*.dump
+*.tar
+
+# Keep gitignore and manifest references if desired
+!.gitignore

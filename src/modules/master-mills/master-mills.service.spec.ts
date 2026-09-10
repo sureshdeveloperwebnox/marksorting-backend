@@ -209,44 +209,85 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(prisma.masterMill.update).not.toHaveBeenCalled();
     });
 
-    it('creates a new MasterMill when the existing record in the database has a different type', async () => {
+    it('updates an existing MasterMill when ref_no matches even if frame_no was null or different', async () => {
       const dto = {
         customer_name: 'Ravi Kumar',
         mill_name: 'Golden Valley Mill',
         ref_no: 'REF-001',
-        frame_no: 'FRM-123',
+        frame_no: 'FRM-NEW-999',
         place: 'Chennai',
-        invoice_no: 'INV-SERVICE-01',
+        invoice_no: 'INV-UPDATED',
         mfg_date: '2024-01-10',
-        type: 'Service',
       };
 
       const existingRecord = {
         id: 'mm-789',
-        invoice_no: 'INV-INSTALL-01',
+        invoice_no: 'INV-OLD-01',
         ref_no: 'REF-001',
+        frame_no: null,
         mill_id: 'mill-456',
-        type: 'Installation',
       };
-      const newRecord = { id: 'mm-999', invoice_no: 'INV-SERVICE-01', mill_id: 'mill-456', type: 'Service' };
 
-      prisma.masterMill.findFirst.mockResolvedValue(null);
-      prisma.masterMill.create.mockResolvedValue(newRecord);
-      prisma.masterMill.findUnique.mockResolvedValue(newRecord);
+      prisma.masterMill.findFirst.mockResolvedValue(existingRecord);
+      prisma.masterMill.update.mockResolvedValue({ ...existingRecord, frame_no: 'FRM-NEW-999' });
+      prisma.masterMill.findUnique.mockResolvedValue({ ...existingRecord, frame_no: 'FRM-NEW-999' });
 
       const result = await masterMillsService.quickRegister(dto);
 
       expect(prisma.masterMill.findFirst).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({
+          where: {
             deleted_at: null,
-            mill_id: 'mill-456',
+            ref_no: { equals: 'REF-001', mode: 'insensitive' },
+          },
+        }),
+      );
+      expect(prisma.masterMill.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'mm-789' },
+          data: expect.objectContaining({
+            frame_no: 'FRM-NEW-999',
           }),
         }),
       );
-      expect(prisma.masterMill.create).toHaveBeenCalled();
-      expect(prisma.masterMill.update).not.toHaveBeenCalled();
-      expect(result).toEqual({ ...newRecord, _isUpdate: false });
+      expect(prisma.masterMill.create).not.toHaveBeenCalled();
+      expect(result._isUpdate).toBe(true);
+    });
+
+    it('updates an existing MasterMill on create() when ref_no already exists', async () => {
+      const createDto: any = {
+        invoice_no: 'INV-2002',
+        ref_no: 'REF-001',
+        frame_no: 'FRM-456',
+        place: 'Chennai',
+        mill_id: 'mill-456',
+      };
+
+      const existingRecord = {
+        id: 'mm-789',
+        invoice_no: 'INV-1001',
+        ref_no: 'REF-001',
+        frame_no: null,
+        mill_id: 'mill-456',
+      };
+
+      prisma.masterMill.findFirst.mockResolvedValue(existingRecord);
+      prisma.masterMill.update.mockResolvedValue({ ...existingRecord, frame_no: 'FRM-456' });
+      prisma.masterMill.findUnique.mockResolvedValue({ ...existingRecord, frame_no: 'FRM-456' });
+
+      const result = await masterMillsService.create(createDto);
+
+      expect(prisma.masterMill.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'mm-789' },
+          data: expect.objectContaining({
+            ref_no: 'REF-001',
+            frame_no: 'FRM-456',
+          }),
+        }),
+      );
+      expect(prisma.masterMill.create).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ id: 'mm-789', frame_no: 'FRM-456' }));
     });
   });
 

@@ -32,6 +32,10 @@ export declare class StoresService implements OnModuleInit {
     }): Promise<{
         before: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            invoice_number: string | null;
             store_number: string | null;
             service_engineer_id: string;
             customer_id: string | null;
@@ -43,16 +47,16 @@ export declare class StoresService implements OnModuleInit {
             stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
             remarks: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: any;
     }>;
     remove(id: string): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         store_number: string | null;
         service_engineer_id: string;
         customer_id: string | null;
@@ -64,11 +68,7 @@ export declare class StoresService implements OnModuleInit {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
         remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     findByTechnician(technicianId: string, params: {
         skip?: number;
@@ -93,6 +93,10 @@ export declare class StoresService implements OnModuleInit {
     submitReturnDetails(storeId: string, technicianId?: string, dto?: UpdateStoreReturnDto, isUserAdmin?: boolean): Promise<{
         before: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            invoice_number: string | null;
             store_number: string | null;
             service_engineer_id: string;
             customer_id: string | null;
@@ -104,11 +108,7 @@ export declare class StoresService implements OnModuleInit {
             stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
             remarks: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: any;
         quantity_summary: any;
@@ -117,6 +117,10 @@ export declare class StoresService implements OnModuleInit {
     updateByTechnician(id: string, technicianId: string, dto: UpdateStoreDto): Promise<{
         before: {
             id: string;
+            created_at: Date;
+            updated_at: Date;
+            deleted_at: Date | null;
+            invoice_number: string | null;
             store_number: string | null;
             service_engineer_id: string;
             customer_id: string | null;
@@ -128,16 +132,16 @@ export declare class StoresService implements OnModuleInit {
             stock_type: string | null;
             barcode: string | null;
             provider_name: string | null;
-            invoice_number: string | null;
             remarks: string | null;
-            created_at: Date;
-            updated_at: Date;
-            deleted_at: Date | null;
         };
         after: any;
     }>;
     removeByTechnician(id: string, technicianId: string): Promise<{
         id: string;
+        created_at: Date;
+        updated_at: Date;
+        deleted_at: Date | null;
+        invoice_number: string | null;
         store_number: string | null;
         service_engineer_id: string;
         customer_id: string | null;
@@ -149,11 +153,7 @@ export declare class StoresService implements OnModuleInit {
         stock_type: string | null;
         barcode: string | null;
         provider_name: string | null;
-        invoice_number: string | null;
         remarks: string | null;
-        created_at: Date;
-        updated_at: Date;
-        deleted_at: Date | null;
     }>;
     private extractCleanRemarks;
     private parseServiceTypeFromRemarks;

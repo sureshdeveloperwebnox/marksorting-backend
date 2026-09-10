@@ -17,7 +17,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:backup:master": "node scripts/backup-master-data.js",
+    "db:backup:full": "node scripts/backup-full-db.js",
+    "db:backup:all": "node scripts/backup-full-db.js && node scripts/backup-master-data.js",
+    "db:backup:cloud": "node scripts/backup-full-db.js --upload-s3",
+    "db:restore": "node scripts/restore-backup.js",
+    "db:dedup:master-mills": "node scripts/deduplicate-master-mills.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1047.0",
