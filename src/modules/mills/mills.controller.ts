@@ -161,6 +161,17 @@ export class MillsController {
     });
   }
 
+  @Get('check-ref-no')
+  @ApiOperation({ summary: 'Check if a mill reference number is available' })
+  @ApiQuery({ name: 'ref_no', required: true, type: String })
+  @ApiQuery({ name: 'exclude_id', required: false, type: String })
+  async checkRefNo(
+    @Query('ref_no') refNo: string,
+    @Query('exclude_id') excludeId?: string,
+  ) {
+    return this.millsService.checkRefNoAvailability(refNo, excludeId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get mill by ID' })
   findOne(@Param('id') id: string) {

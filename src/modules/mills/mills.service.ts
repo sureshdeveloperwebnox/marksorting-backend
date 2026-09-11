@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
 import { Prisma } from '@prisma/client';
@@ -14,6 +18,55 @@ export class MillsService {
     private prisma: PrismaService,
     private redis: RedisService,
   ) {}
+
+  async checkRefNoAvailability(
+    refNo: string,
+    excludeMillId?: string,
+  ): Promise<{ available: boolean; existingMillName?: string }> {
+    const cleanRef = refNo?.trim();
+    if (!cleanRef) {
+      return { available: true };
+    }
+
+    // Check in mills table
+    const existingMill = await this.prisma.mill.findFirst({
+      where: {
+        ref_no: { equals: cleanRef, mode: 'insensitive' },
+        deleted_at: null,
+        ...(excludeMillId ? { id: { not: excludeMillId } } : {}),
+      },
+      select: { id: true, name: true },
+    });
+
+    if (existingMill) {
+      return {
+        available: false,
+        existingMillName: existingMill.name,
+      };
+    }
+
+    // Also check master mills if linked to a different mill
+    const existingMasterMill = await this.prisma.masterMill.findFirst({
+      where: {
+        ref_no: { equals: cleanRef, mode: 'insensitive' },
+        deleted_at: null,
+        ...(excludeMillId ? { mill_id: { not: excludeMillId } } : {}),
+      },
+      select: {
+        id: true,
+        mill: { select: { name: true } },
+      },
+    });
+
+    if (existingMasterMill) {
+      return {
+        available: false,
+        existingMillName: existingMasterMill.mill?.name || 'Master Mill Record',
+      };
+    }
+
+    return { available: true };
+  }
 
   async findAll(params: {
     skip?: number;
@@ -96,8 +149,21 @@ export class MillsService {
   }
 
   async create(dto: CreateMillDto) {
+    const cleanRef = dto.ref_no?.trim();
+    if (cleanRef) {
+      const check = await this.checkRefNoAvailability(cleanRef);
+      if (!check.available) {
+        throw new BadRequestException(
+          `Reference Number "${cleanRef}" is already assigned to mill "${check.existingMillName}".`,
+        );
+      }
+    }
+
     const mill = await this.prisma.mill.create({
-      data: dto,
+      data: {
+        ...dto,
+        ref_no: cleanRef || null,
+      },
     });
 
     await this.invalidateCache();
@@ -112,9 +178,29 @@ export class MillsService {
       throw new NotFoundException('Mill not found');
     }
 
+    const cleanRef =
+      dto.ref_no !== undefined ? dto.ref_no?.trim() || null : undefined;
+
+    // Validate if ref_no is being changed to a non-empty string that differs from current
+    if (
+      cleanRef &&
+      (!existing.ref_no ||
+        existing.ref_no.trim().toLowerCase() !== cleanRef.toLowerCase())
+    ) {
+      const check = await this.checkRefNoAvailability(cleanRef, id);
+      if (!check.available) {
+        throw new BadRequestException(
+          `Reference Number "${cleanRef}" is already assigned to mill "${check.existingMillName}".`,
+        );
+      }
+    }
+
     const mill = await this.prisma.mill.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        ...(cleanRef !== undefined ? { ref_no: cleanRef } : {}),
+      },
     });
 
     await this.invalidateCache(id);

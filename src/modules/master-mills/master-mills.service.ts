@@ -940,6 +940,15 @@ export class MasterMillsService implements OnModuleInit {
         },
       });
 
+      if (!mill && cleanRefNo) {
+        mill = await tx.mill.findFirst({
+          where: {
+            ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+            deleted_at: null,
+          },
+        });
+      }
+
       if (mill) {
         // Checklist 2: Update mill fields if provided and empty/different
         const millUpdates: any = {};
