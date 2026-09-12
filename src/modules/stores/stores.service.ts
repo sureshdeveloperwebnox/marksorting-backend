@@ -202,6 +202,103 @@ export class StoresService implements OnModuleInit {
     });
   }
 
+  async resolveStoreFilterConditions(
+    search?: string,
+    millId?: string,
+  ): Promise<Prisma.StoreWhereInput[]> {
+    const conditions: Prisma.StoreWhereInput[] = [];
+
+    const resolvedMillId = millId?.trim();
+    if (resolvedMillId) {
+      const [millMasterMills, mill] = await Promise.all([
+        this.prisma.masterMill.findMany({
+          where: { mill_id: resolvedMillId, deleted_at: null, frame_no: { not: null } },
+          select: { frame_no: true },
+        }),
+        this.prisma.mill.findUnique({
+          where: { id: resolvedMillId },
+          select: { customer_id: true },
+        }),
+      ]);
+      const frameNos = millMasterMills
+        .map((m) => m.frame_no?.trim())
+        .filter((f): f is string => Boolean(f));
+
+      const millOrConditions: Prisma.StoreWhereInput[] = [];
+      if (frameNos.length > 0) {
+        millOrConditions.push({ frame_number: { in: frameNos } });
+      }
+      if (mill?.customer_id) {
+        millOrConditions.push({ customer_id: mill.customer_id });
+      }
+      millOrConditions.push({
+        customer: {
+          mills: {
+            some: { id: resolvedMillId, deleted_at: null },
+          },
+        },
+      });
+
+      if (millOrConditions.length > 0) {
+        conditions.push({ OR: millOrConditions });
+      }
+    }
+
+    const cleanSearch = search?.trim();
+    if (cleanSearch) {
+      // Find frame numbers of master mills that match the search by mill name or ref_no
+      const matchingMasterMills = await this.prisma.masterMill.findMany({
+        where: {
+          deleted_at: null,
+          frame_no: { not: null },
+          OR: [
+            { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
+            { mill: { ref_no: { contains: cleanSearch, mode: 'insensitive' } } },
+            { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+          ],
+        },
+        select: { frame_no: true },
+      });
+      const matchingFrameNos = matchingMasterMills
+        .map((m) => m.frame_no?.trim())
+        .filter((f): f is string => Boolean(f));
+
+      const searchOr: Prisma.StoreWhereInput[] = [
+        { store_number: { contains: cleanSearch, mode: 'insensitive' } },
+        { frame_number: { contains: cleanSearch, mode: 'insensitive' } },
+        { barcode: { contains: cleanSearch, mode: 'insensitive' } },
+        {
+          service_engineer: {
+            full_name: { contains: cleanSearch, mode: 'insensitive' },
+          },
+        },
+        {
+          customer: {
+            name: { contains: cleanSearch, mode: 'insensitive' },
+          },
+        },
+        {
+          customer: {
+            mills: {
+              some: {
+                name: { contains: cleanSearch, mode: 'insensitive' },
+                deleted_at: null,
+              },
+            },
+          },
+        },
+      ];
+
+      if (matchingFrameNos.length > 0) {
+        searchOr.push({ frame_number: { in: matchingFrameNos } });
+      }
+
+      conditions.push({ OR: searchOr });
+    }
+
+    return conditions;
+  }
+
   async findById(id: string) {
     const cacheKey = `${this.CACHE_PREFIX}id:${id}`;
     const cached = await this.redis.getJson<any>(cacheKey);
@@ -562,15 +659,13 @@ export class StoresService implements OnModuleInit {
     }
 
     if (search) {
-      where.OR = [
-        { frame_number: { contains: search, mode: 'insensitive' } },
-        { barcode: { contains: search, mode: 'insensitive' } },
-        {
-          customer: {
-            name: { contains: search, mode: 'insensitive' },
-          },
-        },
-      ];
+      const searchConditions = await this.resolveStoreFilterConditions(search);
+      if (searchConditions.length > 0) {
+        where.AND = [
+          ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+          ...searchConditions,
+        ];
+      }
     }
 
     const [stores, total] = await Promise.all([
@@ -615,15 +710,13 @@ export class StoresService implements OnModuleInit {
     }
 
     if (search) {
-      where.OR = [
-        { frame_number: { contains: search, mode: 'insensitive' } },
-        { barcode: { contains: search, mode: 'insensitive' } },
-        {
-          customer: {
-            name: { contains: search, mode: 'insensitive' },
-          },
-        },
-      ];
+      const searchConditions = await this.resolveStoreFilterConditions(search);
+      if (searchConditions.length > 0) {
+        where.AND = [
+          ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+          ...searchConditions,
+        ];
+      }
     }
 
     const [stores, total] = await Promise.all([

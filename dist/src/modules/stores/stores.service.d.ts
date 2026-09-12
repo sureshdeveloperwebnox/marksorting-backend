@@ -21,6 +21,7 @@ export declare class StoresService implements OnModuleInit {
         orderBy?: Prisma.StoreOrderByWithRelationInput;
     }): Promise<any>;
     private enrichStoresWithCustomer;
+    resolveStoreFilterConditions(search?: string, millId?: string): Promise<Prisma.StoreWhereInput[]>;
     findById(id: string): Promise<any>;
     create(dto: CreateStoreDto, user?: {
         userId: string;

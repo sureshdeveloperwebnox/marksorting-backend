@@ -9,6 +9,10 @@ export declare class MillsService {
     private readonly CACHE_PREFIX;
     private readonly LIST_CACHE_KEY;
     constructor(prisma: PrismaService, redis: RedisService);
+    checkRefNoAvailability(refNo: string, excludeMillId?: string): Promise<{
+        available: boolean;
+        existingMillName?: string;
+    }>;
     findAll(params: {
         skip?: number;
         take?: number;

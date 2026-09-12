@@ -863,6 +863,14 @@ let MasterMillsService = class MasterMillsService {
                     deleted_at: null,
                 },
             });
+            if (!mill && cleanRefNo) {
+                mill = await tx.mill.findFirst({
+                    where: {
+                        ref_no: { equals: cleanRefNo, mode: 'insensitive' },
+                        deleted_at: null,
+                    },
+                });
+            }
             if (mill) {
                 const millUpdates = {};
                 if (cleanAddress && mill.address !== cleanAddress)

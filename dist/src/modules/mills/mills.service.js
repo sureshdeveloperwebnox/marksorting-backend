@@ -22,6 +22,44 @@ let MillsService = class MillsService {
         this.prisma = prisma;
         this.redis = redis;
     }
+    async checkRefNoAvailability(refNo, excludeMillId) {
+        const cleanRef = refNo?.trim();
+        if (!cleanRef) {
+            return { available: true };
+        }
+        const existingMill = await this.prisma.mill.findFirst({
+            where: {
+                ref_no: { equals: cleanRef, mode: 'insensitive' },
+                deleted_at: null,
+                ...(excludeMillId ? { id: { not: excludeMillId } } : {}),
+            },
+            select: { id: true, name: true },
+        });
+        if (existingMill) {
+            return {
+                available: false,
+                existingMillName: existingMill.name,
+            };
+        }
+        const existingMasterMill = await this.prisma.masterMill.findFirst({
+            where: {
+                ref_no: { equals: cleanRef, mode: 'insensitive' },
+                deleted_at: null,
+                ...(excludeMillId ? { mill_id: { not: excludeMillId } } : {}),
+            },
+            select: {
+                id: true,
+                mill: { select: { name: true } },
+            },
+        });
+        if (existingMasterMill) {
+            return {
+                available: false,
+                existingMillName: existingMasterMill.mill?.name || 'Master Mill Record',
+            };
+        }
+        return { available: true };
+    }
     async findAll(params) {
         const { skip, take, where, orderBy } = params;
         const cacheKey = `${this.LIST_CACHE_KEY}${JSON.stringify(params)}`;
@@ -90,8 +128,18 @@ let MillsService = class MillsService {
         return null;
     }
     async create(dto) {
+        const cleanRef = dto.ref_no?.trim();
+        if (cleanRef) {
+            const check = await this.checkRefNoAvailability(cleanRef);
+            if (!check.available) {
+                throw new common_1.BadRequestException(`Reference Number "${cleanRef}" is already assigned to mill "${check.existingMillName}".`);
+            }
+        }
         const mill = await this.prisma.mill.create({
-            data: dto,
+            data: {
+                ...dto,
+                ref_no: cleanRef || null,
+            },
         });
         await this.invalidateCache();
         return mill;
@@ -103,9 +151,21 @@ let MillsService = class MillsService {
         if (!existing) {
             throw new common_1.NotFoundException('Mill not found');
         }
+        const cleanRef = dto.ref_no !== undefined ? dto.ref_no?.trim() || null : undefined;
+        if (cleanRef &&
+            (!existing.ref_no ||
+                existing.ref_no.trim().toLowerCase() !== cleanRef.toLowerCase())) {
+            const check = await this.checkRefNoAvailability(cleanRef, id);
+            if (!check.available) {
+                throw new common_1.BadRequestException(`Reference Number "${cleanRef}" is already assigned to mill "${check.existingMillName}".`);
+            }
+        }
         const mill = await this.prisma.mill.update({
             where: { id },
-            data: dto,
+            data: {
+                ...dto,
+                ...(cleanRef !== undefined ? { ref_no: cleanRef } : {}),
+            },
         });
         await this.invalidateCache(id);
         return { before: existing, after: mill };

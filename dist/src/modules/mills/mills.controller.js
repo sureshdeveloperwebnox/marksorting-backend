@@ -92,6 +92,9 @@ let MillsController = class MillsController {
             orderBy: { created_at: 'desc' },
         });
     }
+    async checkRefNo(refNo, excludeId) {
+        return this.millsService.checkRefNoAvailability(refNo, excludeId);
+    }
     findOne(id) {
         return this.millsService.findById(id);
     }
@@ -163,6 +166,17 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String, String, String, String]),
     __metadata("design:returntype", void 0)
 ], MillsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('check-ref-no'),
+    (0, swagger_1.ApiOperation)({ summary: 'Check if a mill reference number is available' }),
+    (0, swagger_1.ApiQuery)({ name: 'ref_no', required: true, type: String }),
+    (0, swagger_1.ApiQuery)({ name: 'exclude_id', required: false, type: String }),
+    __param(0, (0, common_1.Query)('ref_no')),
+    __param(1, (0, common_1.Query)('exclude_id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], MillsController.prototype, "checkRefNo", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get mill by ID' }),

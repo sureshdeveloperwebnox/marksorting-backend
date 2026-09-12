@@ -28,31 +28,24 @@ let StoresController = class StoresController {
     constructor(storesService) {
         this.storesService = storesService;
     }
-    findAll(skip, take, search, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, stockType, stockTypeCamel, dateFrom, dateTo, startDate, endDate, startDateSnake, endDateSnake) {
+    async findAll(skip, take, search, millId, millIdCamel, serviceEngineerId, serviceEngineerIdCamel, customerId, customerIdCamel, materialId, materialIdCamel, warrantyStatus, warrantyStatusCamel, returnStatus, returnStatusCamel, inflowStatus, inflowStatusCamel, stockType, stockTypeCamel, dateFrom, dateTo, startDate, endDate, startDateSnake, endDateSnake) {
         const where = {};
         const engId = serviceEngineerId || serviceEngineerIdCamel;
         const custId = customerId || customerIdCamel;
+        const resolvedMillId = millId || millIdCamel;
         const matId = materialId || materialIdCamel;
         const warStatus = warrantyStatus || warrantyStatusCamel;
         const retStatus = returnStatus || returnStatusCamel;
         const infStatus = inflowStatus || inflowStatusCamel;
         const stkType = stockType || stockTypeCamel;
-        if (search) {
-            where.OR = [
-                { store_number: { contains: search, mode: 'insensitive' } },
-                { frame_number: { contains: search, mode: 'insensitive' } },
-                { barcode: { contains: search, mode: 'insensitive' } },
-                {
-                    service_engineer: {
-                        full_name: { contains: search, mode: 'insensitive' },
-                    },
-                },
-                {
-                    customer: {
-                        name: { contains: search, mode: 'insensitive' },
-                    },
-                },
-            ];
+        if (search || resolvedMillId) {
+            const filterConditions = await this.storesService.resolveStoreFilterConditions(search, resolvedMillId);
+            if (filterConditions.length > 0) {
+                where.AND = [
+                    ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+                    ...filterConditions,
+                ];
+            }
         }
         if (engId) {
             where.service_engineer_id = engId;
@@ -289,32 +282,46 @@ __decorate([
         type: String,
         description: 'Alias for dateTo',
     }),
+    (0, swagger_1.ApiQuery)({
+        name: 'mill_id',
+        required: false,
+        type: String,
+        description: 'Filter by Mill ID',
+    }),
+    (0, swagger_1.ApiQuery)({
+        name: 'millId',
+        required: false,
+        type: String,
+        description: 'Alias for mill_id',
+    }),
     __param(0, (0, common_1.Query)('skip')),
     __param(1, (0, common_1.Query)('take')),
     __param(2, (0, common_1.Query)('search')),
-    __param(3, (0, common_1.Query)('service_engineer_id')),
-    __param(4, (0, common_1.Query)('serviceEngineerId')),
-    __param(5, (0, common_1.Query)('customer_id')),
-    __param(6, (0, common_1.Query)('customerId')),
-    __param(7, (0, common_1.Query)('material_id')),
-    __param(8, (0, common_1.Query)('materialId')),
-    __param(9, (0, common_1.Query)('warranty_status')),
-    __param(10, (0, common_1.Query)('warrantyStatus')),
-    __param(11, (0, common_1.Query)('return_status')),
-    __param(12, (0, common_1.Query)('returnStatus')),
-    __param(13, (0, common_1.Query)('inflow_status')),
-    __param(14, (0, common_1.Query)('inflowStatus')),
-    __param(15, (0, common_1.Query)('stock_type')),
-    __param(16, (0, common_1.Query)('stockType')),
-    __param(17, (0, common_1.Query)('dateFrom')),
-    __param(18, (0, common_1.Query)('dateTo')),
-    __param(19, (0, common_1.Query)('startDate')),
-    __param(20, (0, common_1.Query)('endDate')),
-    __param(21, (0, common_1.Query)('start_date')),
-    __param(22, (0, common_1.Query)('end_date')),
+    __param(3, (0, common_1.Query)('mill_id')),
+    __param(4, (0, common_1.Query)('millId')),
+    __param(5, (0, common_1.Query)('service_engineer_id')),
+    __param(6, (0, common_1.Query)('serviceEngineerId')),
+    __param(7, (0, common_1.Query)('customer_id')),
+    __param(8, (0, common_1.Query)('customerId')),
+    __param(9, (0, common_1.Query)('material_id')),
+    __param(10, (0, common_1.Query)('materialId')),
+    __param(11, (0, common_1.Query)('warranty_status')),
+    __param(12, (0, common_1.Query)('warrantyStatus')),
+    __param(13, (0, common_1.Query)('return_status')),
+    __param(14, (0, common_1.Query)('returnStatus')),
+    __param(15, (0, common_1.Query)('inflow_status')),
+    __param(16, (0, common_1.Query)('inflowStatus')),
+    __param(17, (0, common_1.Query)('stock_type')),
+    __param(18, (0, common_1.Query)('stockType')),
+    __param(19, (0, common_1.Query)('dateFrom')),
+    __param(20, (0, common_1.Query)('dateTo')),
+    __param(21, (0, common_1.Query)('startDate')),
+    __param(22, (0, common_1.Query)('endDate')),
+    __param(23, (0, common_1.Query)('start_date')),
+    __param(24, (0, common_1.Query)('end_date')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String, String]),
+    __metadata("design:returntype", Promise)
 ], StoresController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)('return'),

@@ -131,10 +131,24 @@ export class StoresController {
     type: String,
     description: 'Alias for dateTo',
   })
-  findAll(
+  @ApiQuery({
+    name: 'mill_id',
+    required: false,
+    type: String,
+    description: 'Filter by Mill ID',
+  })
+  @ApiQuery({
+    name: 'millId',
+    required: false,
+    type: String,
+    description: 'Alias for mill_id',
+  })
+  async findAll(
     @Query('skip') skip?: string,
     @Query('take') take?: string,
     @Query('search') search?: string,
+    @Query('mill_id') millId?: string,
+    @Query('millId') millIdCamel?: string,
     @Query('service_engineer_id') serviceEngineerId?: string,
     @Query('serviceEngineerId') serviceEngineerIdCamel?: string,
     @Query('customer_id') customerId?: string,
@@ -160,28 +174,24 @@ export class StoresController {
 
     const engId = serviceEngineerId || serviceEngineerIdCamel;
     const custId = customerId || customerIdCamel;
+    const resolvedMillId = millId || millIdCamel;
     const matId = materialId || materialIdCamel;
     const warStatus = warrantyStatus || warrantyStatusCamel;
     const retStatus = returnStatus || returnStatusCamel;
     const infStatus = inflowStatus || inflowStatusCamel;
     const stkType = stockType || stockTypeCamel;
 
-    if (search) {
-      where.OR = [
-        { store_number: { contains: search, mode: 'insensitive' } },
-        { frame_number: { contains: search, mode: 'insensitive' } },
-        { barcode: { contains: search, mode: 'insensitive' } },
-        {
-          service_engineer: {
-            full_name: { contains: search, mode: 'insensitive' },
-          },
-        },
-        {
-          customer: {
-            name: { contains: search, mode: 'insensitive' },
-          },
-        },
-      ];
+    if (search || resolvedMillId) {
+      const filterConditions = await this.storesService.resolveStoreFilterConditions(
+        search,
+        resolvedMillId,
+      );
+      if (filterConditions.length > 0) {
+        where.AND = [
+          ...(Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : []),
+          ...filterConditions,
+        ];
+      }
     }
 
     if (engId) {

@@ -5,6 +5,10 @@ export declare class MillsController {
     private readonly millsService;
     constructor(millsService: MillsService);
     findAll(skip?: string, take?: string, search?: string, refNo?: string, frameNo?: string, status?: string, customerId?: string): Promise<any>;
+    checkRefNo(refNo: string, excludeId?: string): Promise<{
+        available: boolean;
+        existingMillName?: string;
+    }>;
     findOne(id: string): Promise<any>;
     create(dto: CreateMillDto): Promise<{
         id: string;
