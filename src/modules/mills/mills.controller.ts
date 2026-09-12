@@ -82,29 +82,40 @@ export class MillsController {
   ) {
     const where: Prisma.MillWhereInput = {};
 
-    if (search) {
+    const cleanSearch = search?.trim();
+    if (cleanSearch) {
       const orConditions: Prisma.MillWhereInput[] = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { ref_no: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
-        { address: { contains: search, mode: 'insensitive' } },
-        { place: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
-        { customer: { name: { contains: search, mode: 'insensitive' } } },
+        { name: { contains: cleanSearch, mode: 'insensitive' } },
+        { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
+        { email: { contains: cleanSearch, mode: 'insensitive' } },
+        { address: { contains: cleanSearch, mode: 'insensitive' } },
+        { place: { contains: cleanSearch, mode: 'insensitive' } },
+        { city: { contains: cleanSearch, mode: 'insensitive' } },
+        { customer: { name: { contains: cleanSearch, mode: 'insensitive' } } },
         {
           masterMills: {
-            some: { ref_no: { contains: search, mode: 'insensitive' } },
+            some: { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
           },
         },
         {
           masterMills: {
-            some: { frame_no: { contains: search, mode: 'insensitive' } },
+            some: { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
           },
         },
       ];
 
+      // Multi-word token support: if multiple words provided (e.g. "Mahajan Rice Mill" or "Mahajan Mill")
+      const words = cleanSearch.split(/\s+/).filter((w) => w.length > 1);
+      if (words.length > 1) {
+        orConditions.push({
+          AND: words.map((word) => ({
+            name: { contains: word, mode: 'insensitive' },
+          })),
+        });
+      }
+
       // Smart phone number normalization: strip spaces and formatting characters (non-digits and non-plus)
-      const cleanedPhoneSearch = search.replace(/[^\d+]/g, '');
+      const cleanedPhoneSearch = cleanSearch.replace(/[^\d+]/g, '');
       if (
         cleanedPhoneSearch &&
         cleanedPhoneSearch !== '+' &&
