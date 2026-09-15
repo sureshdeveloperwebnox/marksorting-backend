@@ -348,6 +348,27 @@ describe('MasterMillsService & MasterMillsBulkService', () => {
       expect(result[2].id).toEqual('ir-1');
     });
 
+    it('tokenizes composite search strings and includes tokens in query', async () => {
+      prisma.masterMill.findMany.mockResolvedValue([]);
+      prisma.serviceReport.findMany.mockResolvedValue([]);
+      prisma.installationReport.findMany.mockResolvedValue([]);
+
+      await masterMillsService.findForPrefill('SJ 280 - NDB-264 / SH-112019');
+
+      expect(prisma.masterMill.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { ref_no: { contains: 'SJ 280 - NDB-264 / SH-112019', mode: 'insensitive' } },
+              { ref_no: { contains: 'NDB-264', mode: 'insensitive' } },
+              { frame_no: { contains: 'SH-112019', mode: 'insensitive' } },
+              { mc_model: { contains: 'SJ 280', mode: 'insensitive' } },
+            ]),
+          }),
+        }),
+      );
+    });
+
     it('returns only service-based results when service_report context is provided', async () => {
       const mockMasterMills = [
         {

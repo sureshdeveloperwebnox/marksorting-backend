@@ -444,23 +444,35 @@ let MasterMillsService = class MasterMillsService {
         const cleanSearch = search ? search.trim() : '';
         const cleanRefNo = refNo ? refNo.trim() : '';
         const cleanFrameNo = frameNo ? frameNo.trim() : '';
+        const searchTerms = [];
+        if (cleanSearch) {
+            searchTerms.push(cleanSearch);
+            const segments = cleanSearch
+                .split(/\s*[\/|,]\s*|\s+-\s+/)
+                .map((s) => s.trim())
+                .filter((s) => s.length >= 2);
+            for (const segment of segments) {
+                if (!searchTerms.includes(segment)) {
+                    searchTerms.push(segment);
+                }
+            }
+        }
         let masterMills = [];
         {
             const mmWhere = {
                 deleted_at: null,
                 status: 'ACTIVE',
             };
-            if (cleanSearch) {
-                mmWhere.OR = [
-                    { ref_no: { contains: cleanSearch, mode: 'insensitive' } },
-                    { frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                    {
+            if (searchTerms.length > 0) {
+                const orConditions = [];
+                for (const term of searchTerms) {
+                    orConditions.push({ ref_no: { contains: term, mode: 'insensitive' } }, { frame_no: { contains: term, mode: 'insensitive' } }, { mc_model: { contains: term, mode: 'insensitive' } }, { invoice_no: { contains: term, mode: 'insensitive' } }, { mill: { name: { contains: term, mode: 'insensitive' } } }, {
                         mill: {
-                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                            customer: { name: { contains: term, mode: 'insensitive' } },
                         },
-                    },
-                ];
+                    });
+                }
+                mmWhere.OR = orConditions;
             }
             else {
                 const orConditions = [];
@@ -502,17 +514,16 @@ let MasterMillsService = class MasterMillsService {
             const srWhere = {
                 deleted_at: null,
             };
-            if (cleanSearch) {
-                srWhere.OR = [
-                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                    {
+            if (searchTerms.length > 0) {
+                const orConditions = [];
+                for (const term of searchTerms) {
+                    orConditions.push({ serial_or_frame_no: { contains: term, mode: 'insensitive' } }, { machine_model: { contains: term, mode: 'insensitive' } }, { report_number: { contains: term, mode: 'insensitive' } }, { mill: { name: { contains: term, mode: 'insensitive' } } }, {
                         mill: {
-                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                            customer: { name: { contains: term, mode: 'insensitive' } },
                         },
-                    },
-                ];
+                    });
+                }
+                srWhere.OR = orConditions;
             }
             else {
                 const orConditions = [];
@@ -549,17 +560,16 @@ let MasterMillsService = class MasterMillsService {
             const irWhere = {
                 deleted_at: null,
             };
-            if (cleanSearch) {
-                irWhere.OR = [
-                    { serial_or_frame_no: { contains: cleanSearch, mode: 'insensitive' } },
-                    { machine_model: { contains: cleanSearch, mode: 'insensitive' } },
-                    { mill: { name: { contains: cleanSearch, mode: 'insensitive' } } },
-                    {
+            if (searchTerms.length > 0) {
+                const orConditions = [];
+                for (const term of searchTerms) {
+                    orConditions.push({ serial_or_frame_no: { contains: term, mode: 'insensitive' } }, { machine_model: { contains: term, mode: 'insensitive' } }, { report_number: { contains: term, mode: 'insensitive' } }, { mill: { name: { contains: term, mode: 'insensitive' } } }, {
                         mill: {
-                            customer: { name: { contains: cleanSearch, mode: 'insensitive' } },
+                            customer: { name: { contains: term, mode: 'insensitive' } },
                         },
-                    },
-                ];
+                    });
+                }
+                irWhere.OR = orConditions;
             }
             else {
                 const orConditions = [];
@@ -597,10 +607,10 @@ let MasterMillsService = class MasterMillsService {
             invoice_date: record.invoice_date,
             ref_no: record.ref_no,
             mill_id: record.mill_id,
-            address: record.address,
-            place: record.place,
-            state: record.state,
-            phone_no: record.phone_no,
+            address: record.address || record.mill?.address || null,
+            place: record.place || record.mill?.place || null,
+            state: record.state || record.mill?.state || null,
+            phone_no: record.phone_no || record.mill?.phone || null,
             mc_model: record.mc_model,
             frame_no: record.frame_no,
             warranty_years: record.warranty_years,
@@ -619,7 +629,7 @@ let MasterMillsService = class MasterMillsService {
             mill: record.mill ? {
                 id: record.mill.id,
                 name: record.mill.name,
-                place: record.mill.place,
+                place: record.place || record.mill.place,
                 phone: record.mill.phone,
                 email: record.mill.email,
                 customer_id: record.mill.customer_id,
